@@ -1,5 +1,6 @@
 import { User } from "./User";
 import { Component, BaseSelectMenu, ActionButton } from "./Message";
+import { Duration } from "../utils/Duration";
 
 export interface InteractionEvent {
     customId: string;
@@ -25,14 +26,15 @@ export interface InteractionEvent {
     guildId: string;
 }
 
-export interface ButtonHandler {
+export interface Handler {
     id: string;
     userId?: string;
+    timeout?: Duration;
     handler: (interaction: InteractionEvent) => Promise<void>;
 }
 
-export interface SelectMenuHandler {
-    id: string;
-    userId?: string;
-    handler: (interaction: InteractionEvent) => Promise<void>;
+export interface ButtonHandler extends Handler {
+}
+
+export interface SelectMenuHandler extends Handler {
 }
