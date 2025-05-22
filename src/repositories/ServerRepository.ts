@@ -1,18 +1,14 @@
 import { BaseRepository } from "./util/BaseRepository";
 import { Server } from "../interfaces/domain/Server";
 import { Language } from "../interfaces/application/Language";
+import { ServerEntity } from "../interfaces/entities/ServerEntity";
 
-export class ServerRepository extends BaseRepository<Server> {
+export class ServerRepository extends BaseRepository<Server, ServerEntity> {
     constructor() {
         super("server", "serverId");
     }
-    
-    async getLanguageAsync(serverId: string): Promise<Language> {
-        const server = await this.getByExternalIDAsync(serverId);
-        return server.language;
-    }
-    
-    protected mapEntityToModel(entity: any): Server {
+     
+    protected mapToModel(entity: ServerEntity): Server {
         return {
             id: entity.id,
             serverId: entity.serverId,
@@ -23,11 +19,14 @@ export class ServerRepository extends BaseRepository<Server> {
         };
     }
     
-    protected mapModelToEntity(model: Server): any {
+    protected mapToEntity(model: Server): any {
         return {
+            id: model.id,
             serverId: model.serverId,
             name: model.name,
-            language: model.language
+            language: model.language,
+            createdAt: model.createdAt,
+            updatedAt: model.updatedAt
         };
     }
 } 

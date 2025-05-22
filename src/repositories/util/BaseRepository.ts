@@ -3,7 +3,7 @@ import { Repository } from '../../interfaces/database/Repository';
 import { getPrismaInstance } from './prisma';
 import { IEntity } from '../../interfaces/database/IEntity';
 
-export class BaseRepository<T extends IEntity> implements Repository<T> {
+export class BaseRepository<T extends IEntity, E extends IEntity> implements Repository<T> {
     protected prisma: PrismaClient;
     protected modelName: string;
     protected externalIdField: string;
@@ -82,13 +82,11 @@ export class BaseRepository<T extends IEntity> implements Repository<T> {
         });
     }
 
-    // Dit moet worden geïmplementeerd door subklassen
-    protected mapEntityToModel(entity: any): T {
+    protected mapEntityToModel(entity: E): T {
         throw new Error('mapEntityToModel must be implemented by subclass');
     }
 
-    // Dit moet worden geïmplementeerd door subklassen
-    protected mapModelToEntity(model: T): any {
+    protected mapModelToEntity(model: T): E {
         throw new Error('mapModelToEntity must be implemented by subclass');
     }
 } 
