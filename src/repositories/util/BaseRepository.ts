@@ -3,19 +3,24 @@ import { Repository } from '../../interfaces/database/Repository';
 import { getPrismaInstance } from './prisma';
 import { IEntity } from '../../interfaces/database/IEntity';
 
+// Type definitie om dynamisch toegang te krijgen tot Prisma modellen
+type PrismaModelClient = PrismaClient & {
+    [key: string]: any;
+};
+
 export class BaseRepository<T extends IEntity, E extends IEntity> implements Repository<T> {
-    protected prisma: PrismaClient;
+    protected prisma: PrismaModelClient;
     protected modelName: string;
     protected externalIdField: string;
     
     constructor(modelName: string, externalIdField: string) {
-        this.prisma = getPrismaInstance();
+        this.prisma = getPrismaInstance() as PrismaModelClient;
         this.modelName = modelName;
         this.externalIdField = externalIdField;
     }
 
     async getByIDAsync(id: number): Promise<T> {
-        const result = await (this.prisma[this.modelName] as any).findUnique({
+        const result = await this.prisma[this.modelName].findUnique({
             where: { id }
         });
         
@@ -30,7 +35,7 @@ export class BaseRepository<T extends IEntity, E extends IEntity> implements Rep
         const where: any = {};
         where[this.externalIdField] = externalId;
         
-        const result = await (this.prisma[this.modelName] as any).findUnique({
+        const result = await this.prisma[this.modelName].findUnique({
             where
         });
         
@@ -42,7 +47,7 @@ export class BaseRepository<T extends IEntity, E extends IEntity> implements Rep
     }
 
     async getAllAsync(): Promise<T[]> {
-        const results = await (this.prisma[this.modelName] as any).findMany();
+        const results = await this.prisma[this.modelName].findMany();
         
         return results.map((result: any) => this.mapEntityToModel(result));
     }
@@ -53,13 +58,13 @@ export class BaseRepository<T extends IEntity, E extends IEntity> implements Rep
         
         if (entity.id) {
             // Update
-            result = await (this.prisma[this.modelName] as any).update({
+            result = await this.prisma[this.modelName].update({
                 where: { id: entity.id },
                 data
             });
         } else {
             // Create
-            result = await (this.prisma[this.modelName] as any).create({
+            result = await this.prisma[this.modelName].create({
                 data
             });
         }
@@ -68,7 +73,7 @@ export class BaseRepository<T extends IEntity, E extends IEntity> implements Rep
     }
 
     async purgeAsync(id: number): Promise<void> {
-        await (this.prisma[this.modelName] as any).delete({
+        await this.prisma[this.modelName].delete({
             where: { id }
         });
     }
@@ -77,7 +82,7 @@ export class BaseRepository<T extends IEntity, E extends IEntity> implements Rep
         const where: any = {};
         where[this.externalIdField] = externalId;
         
-        await (this.prisma[this.modelName] as any).delete({
+        await this.prisma[this.modelName].delete({
             where
         });
     }
@@ -86,7 +91,7 @@ export class BaseRepository<T extends IEntity, E extends IEntity> implements Rep
         throw new Error('mapEntityToModel must be implemented by subclass');
     }
 
-    protected mapModelToEntity(model: T): E {
+    protected mapModelToEntity(model: T): Partial<E> {
         throw new Error('mapModelToEntity must be implemented by subclass');
     }
 } 

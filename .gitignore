@@ -136,4 +136,3 @@ enterLargeJsons.js
 generated/
 examples/
 migrations/
-schema.prisma

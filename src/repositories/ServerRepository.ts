@@ -19,14 +19,15 @@ export class ServerRepository extends BaseRepository<Server, ServerEntity> {
         };
     }
     
-    protected mapToEntity(model: Server): any {
+    protected mapToEntity(model: Server): Partial<ServerEntity> {
         return {
             id: model.id,
             serverId: model.serverId,
             name: model.name,
             language: model.language,
             createdAt: model.createdAt,
-            updatedAt: model.updatedAt
+            updatedAt: model.updatedAt,
+            games: []
         };
     }
 } 

@@ -28,3 +28,15 @@ model GameEntity {
   server ServerEntity @relation(fields: [serverId], references: [id])
 }
 
+model GameDataEntity {
+  id Int @id
+  gameId Int
+  serverId String
+  channelId String @unique
+  messageId String
+  lastUserId String
+  answer String
+  createdAt DateTime
+  updatedAt DateTime
+}
+
