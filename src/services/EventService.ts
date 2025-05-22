@@ -18,7 +18,7 @@ export class EventService {
       if (handler.userId && handler.userId !== interaction.user.id) {
         return;
       }
-      await handler.handler(interaction);
+      await handler.handle(interaction);
     } else {
       console.log(`No handler found for button: ${interaction.customId}`);
     }
@@ -30,7 +30,7 @@ export class EventService {
       if (handler.userId && handler.userId !== interaction.user.id) {
         return;
       }
-      await handler.handler(interaction);
+      await handler.handle(interaction);
     } else {
       console.log(`No handler found for select menu: ${interaction.customId}`);
     }

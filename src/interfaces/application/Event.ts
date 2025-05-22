@@ -30,7 +30,7 @@ export interface Handler {
     id: string;
     userId?: string;
     timeout?: Duration;
-    handler: (interaction: InteractionEvent) => Promise<void>;
+    handle: (interaction: InteractionEvent) => Promise<void>;
 }
 
 export interface ButtonHandler extends Handler {

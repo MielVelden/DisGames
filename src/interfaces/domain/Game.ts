@@ -20,6 +20,7 @@ export interface GameConfig {
     name: string;
     description: string;
     points: number;
+    expectedType: "string" | "number" | "boolean";
     options: {
         [key in GameOptionEnum]: boolean;
     };
@@ -40,6 +41,7 @@ export interface GameModule {
     config: GameConfig;
     functions: GameFunctions;
 }
+
 export enum GameOptionEnum {
     IS_ACTIVE = "is_active",
     REACT = "react",
@@ -50,7 +52,7 @@ export enum GameOptionEnum {
 export interface GameAction {
     enum: GameActionEnum;
     priority: GameActionPriorityEnum;
-    component: Component;
+    component: Component | Component[] | string;
 }
 
 export enum GameActionEnum {
@@ -68,9 +70,14 @@ export enum GameActionPriorityEnum {
 
 export interface GameEvent {
     gameId: number;
+    gameConfig: GameConfig;
+
     user: User;
     server: Server;
+    
     answer?: string | number | boolean;
     gameData: GameData;
+    
     actions: GameAction[];
+    addAction(action: GameAction): void;
 }

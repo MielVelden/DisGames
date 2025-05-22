@@ -1,17 +1,18 @@
+import { ComponentType } from "../../interfaces/application/Message";
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum, GameType } from "../../interfaces/domain/Game";
-
-const MAX_NUMBER = 100;
 
 export default {
     config: {
-        id: GameType.NUMBER_GUESS,
-        name: "NumberGuess",
-        description: "Raad het juiste getal tussen 1 en 100",
+        id: GameType.COUNTING,
+        name: "Counting",
+        description: "Start counting with each other",
         points: 1,
         expectedType: "number",
         options: {
             [GameOptionEnum.IS_ACTIVE]: true,
-            [GameOptionEnum.ALLOW_MESSAGE_CHANGE]: false
+            [GameOptionEnum.ALLOW_MESSAGE_CHANGE]: false,
+            [GameOptionEnum.REACT]: true,
+            [GameOptionEnum.SAME_USER_ALLOWED]: false,
         }
     },
 
@@ -29,7 +30,7 @@ export default {
         },
 
         getNextAnswer(event: GameEvent): void {
-            event.gameData.answer = Math.floor(Math.random() * MAX_NUMBER) + 1;
+            event.gameData.answer = (event.gameData.answer as number) + 1;
         }
     }
 } as GameModule;
