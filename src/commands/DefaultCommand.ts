@@ -1,7 +1,7 @@
-import { Command, CommandOption, CommandOptionType } from "../interfaces/Command";
-import { InteractionEvent } from "../interfaces/Event";
-import { ActionRow, Component, ComponentType, StringSelect, ButtonStyle, SelectOption, ActionButton } from "../interfaces/Message";
-import { Permission } from "../interfaces/Permission";
+import { Command, CommandOption, CommandOptionType } from "../interfaces/application/Command";
+import { InteractionEvent } from "../interfaces/application/Event";
+import { ActionRow, Component, ComponentType, StringSelect, ButtonStyle, SelectOption, ActionButton } from "../interfaces/application/Message";
+import { Permission } from "../interfaces/application/Permission";
 
 export enum ActionEnum {
     INFO = "info",

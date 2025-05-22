@@ -1,6 +1,6 @@
-import { User } from "./User";
+import { User } from "../domain/User";
 import { Component, BaseSelectMenu, ActionButton } from "./Message";
-import { Duration } from "../utils/Duration";
+import { Duration } from "../../utils/Duration";
 
 export interface InteractionEvent {
     customId: string;

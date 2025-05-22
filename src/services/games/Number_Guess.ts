@@ -1,4 +1,4 @@
-import { GameEvent, GameModule, GameOptionEnum, GameType } from "../interfaces/Game";
+import { GameEvent, GameModule, GameOptionEnum, GameType } from "../../interfaces/domain/Game";
 
 export default {
     config: {

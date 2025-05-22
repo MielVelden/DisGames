@@ -1,4 +1,4 @@
-import { ButtonHandler, SelectMenuHandler, InteractionEvent } from '../interfaces/Event';
+import { ButtonHandler, SelectMenuHandler, InteractionEvent } from '../interfaces/application/Event';
 
 export class EventService {
   private static buttonHandlers: Map<string, ButtonHandler> = new Map();

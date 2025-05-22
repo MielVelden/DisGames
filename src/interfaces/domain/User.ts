@@ -1,4 +1,4 @@
-import { Permission } from "./Permission";
+import { Permission } from "../application/Permission";
 
 export interface User {
     id: string;

@@ -1,4 +1,4 @@
-import { Component } from "./Message";
+import { Component } from "../application/Message";
 import { User } from "./User";
 import { Server } from "./Server";
 import { GameData } from "./GameData";
@@ -74,4 +74,3 @@ export interface GameEvent {
     gameData: GameData;
     actions: GameAction[];
 }
-
