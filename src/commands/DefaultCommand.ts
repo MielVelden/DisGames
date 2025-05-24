@@ -1,6 +1,5 @@
 import { Command, CommandOption, CommandOptionType } from "../interfaces/application/Command";
-import { InteractionEvent } from "../interfaces/application/Event";
-import { ActionRow, Component, ComponentType, StringSelect, ButtonStyle, SelectOption, ActionButton } from "../interfaces/application/Message";
+import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { Permission } from "../interfaces/application/Permission";
 
 export enum ActionEnum {
@@ -28,9 +27,9 @@ export class DefaultCommand implements Command {
             ]
         }
     ];
-    async executeAsync(interactionEvent: InteractionEvent): Promise<void> {
-        // Haal de gekozen actie op
-        const actie = interactionEvent.getOption("actie") as string;
+
+    async executeAsync(interactionEvent: SlashCommandInteractionEvent): Promise<void> {
+         const actie = interactionEvent.getOption("actie") as string;
 
         if (!actie) {
             await interactionEvent.replyAsync("Je moet een actie selecteren.");
@@ -39,4 +38,6 @@ export class DefaultCommand implements Command {
 
         console.log(actie)
     }
-} 
+}
+
+export default new DefaultCommand(); 

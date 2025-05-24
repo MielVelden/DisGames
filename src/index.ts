@@ -1,5 +1,8 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { GatewayIntentBits } from 'discord.js';
 import { TOKEN } from './config';
+import { DiscordClient } from './interfaces/application/DiscordClient';
+import { loadEvents } from './utils/Events';
+import { loadCommands } from './utils/Commands';
 
 const token = TOKEN;
 if (!token) {
@@ -7,7 +10,7 @@ if (!token) {
   process.exit(1);
 }
 
-const client = new Client({
+const client = new DiscordClient({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -21,3 +24,6 @@ client.once('ready', async () => {
 });
 
 client.login(token);
+
+loadCommands(client);
+loadEvents(client);

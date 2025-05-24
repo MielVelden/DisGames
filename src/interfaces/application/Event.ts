@@ -1,6 +1,7 @@
 import { User } from "../domain/User";
 import { Component, BaseSelectMenu, ActionButton } from "./Message";
 import { Duration } from "../../utils/Duration";
+import { Server } from "../domain/Server";
 
 export interface InteractionEvent {
     customId: string;
@@ -17,14 +18,19 @@ export interface InteractionEvent {
     getUserInputBySelectMenuAsync?(selectMenu: BaseSelectMenu): Promise<InteractionEvent>;
     getUserInputByButtonsAsync?(question: string, buttons: ActionButton[]): Promise<InteractionEvent>;
 
-    getOption(name: string): string | number | boolean | undefined;
-    getOption<T>(name: string): T | undefined;
-
     user: User;
+    server: Server;
 
     messageId: string;
     channelId: string;
     guildId: string;
+}
+
+export interface SlashCommandInteractionEvent extends InteractionEvent {
+    commandName: string;
+
+    getOption(name: string): string | number | boolean | undefined;
+    getOption<T>(name: string): T | undefined;
 }
 
 export interface Handler {

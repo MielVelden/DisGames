@@ -2,34 +2,25 @@ import {
     Interaction,
     Client,
     Collection,
-    ButtonInteraction,
-    StringSelectMenuInteraction,
     Events,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    TextInputStyle,
-    ChatInputCommandInteraction,
-    MessageContextMenuCommandInteraction,
-    UserContextMenuCommandInteraction,
-    AnySelectMenuInteraction,
-    AutocompleteInteraction,
-    ModalSubmitInteraction
 } from 'discord.js';
-import { EventService } from '../services/EventService';
-import { InteractionEvent } from '../interfaces/application/Event';
 import DiscordService from '../services/DiscordService';
+import { DiscordClient } from '../interfaces/application/DiscordClient';
+import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
 
 
 export default {
     name: Events.InteractionCreate,
 
-    async execute(interaction: Interaction, client: Client, commands: Collection<string, any>): Promise<void> {
+    async execute(interaction: Interaction, client: DiscordClient): Promise<void> {
         try {
+            console.log(interaction);
             // Map the interaction to the InteractionEvent interface
-            const interactionEvent = await DiscordService.mapInteractionToInteractionEventAsync(interaction);
-
-
+            const interactionEvent = await DiscordService.mapInteractionToInteractionEventAsync(interaction) as SlashCommandInteractionEvent;
+            const command = client.commands.get(interactionEvent.commandName);
+            if (!command) return;
+            await command.executeAsync(interactionEvent);
+            console.log("interactionEvent", interactionEvent);
         }
         catch (error) {
             console.error(`Error handling interaction: ${error}`);

@@ -15,21 +15,26 @@ import {
     ButtonBuilder as DiscordButtonBuilder,
     ButtonStyle as DiscordButtonStyle,
     ActionRowBuilder as DiscordActionRowBuilder,
-    Component as DiscordComponent
+    Component as DiscordComponent,
+    Guild as DiscordServer
 } from 'discord.js';
-import { ButtonHandler, SelectMenuHandler, InteractionEvent } from '../interfaces/application/Event';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { InteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { User } from '../interfaces/domain/User';
 import { Permission } from '../interfaces/application/Permission';
 import { ActionButton, ButtonStyle, ComponentType } from '../interfaces/application/Message';
-import { 
-    BaseSelectMenu, 
-    StringSelect, 
-    UserSelect, 
-    RoleSelect, 
-    MentionableSelect, 
+import {
+    StringSelect,
+    UserSelect,
+    RoleSelect,
+    MentionableSelect,
     ChannelSelect,
     Component
 } from '../interfaces/application/Message';
+import { Server } from '../interfaces/domain/Server';
+import { Language } from '../interfaces/application/Language';
+import { Command, CommandOptionType } from '../interfaces/application/Command';
+import { DiscordClient } from '../interfaces/application/DiscordClient';
 
 type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 type SelectMenu = StringSelect | UserSelect | RoleSelect | MentionableSelect | ChannelSelect;
@@ -37,18 +42,148 @@ type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSele
 type DiscordComponentBuilder = DiscordButtonBuilder | DiscordSelectMenuBuilder;
 
 class DiscordService {
+    // #region Command Mapping
+    public mapCommandToSlashCommandBuilder(command: Command): SlashCommandBuilder {
+        const builder = new SlashCommandBuilder()
+            .setName(command.name)
+            .setDescription(command.description);
+
+        if (command.options) {
+            for (const option of command.options) {
+                switch (option.type) {
+                    case CommandOptionType.STRING:
+                        builder.addStringOption(stringOption => {
+                            stringOption
+                                .setName(option.name)
+                                .setDescription(option.description)
+                                .setRequired(option.required || false);
+
+                            if (option.choices && option.choices.length > 0) {
+                                stringOption.addChoices(...option.choices);
+                            }
+
+                            return stringOption;
+                        });
+                        break;
+                    case CommandOptionType.INTEGER:
+                        builder.addIntegerOption(intOption => {
+                            intOption
+                                .setName(option.name)
+                                .setDescription(option.description)
+                                .setRequired(option.required || false);
+
+                            if (option.choices && option.choices.length > 0) {
+                                intOption.addChoices(...option.choices.map(choice => ({
+                                    name: choice.name,
+                                    value: parseInt(choice.value)
+                                })));
+                            }
+
+                            return intOption;
+                        });
+                        break;
+                    case CommandOptionType.SUB_COMMAND:
+                        builder.addSubcommand(subCommand => {
+                            subCommand
+                                .setName(option.name)
+                                .setDescription(option.description);
+
+                            if (option.options) {
+                                for (const subOption of option.options) {
+                                    // Recursively handle sub-options
+                                    this.addOptionToBuilder(subCommand, subOption);
+                                }
+                            }
+
+                            return subCommand;
+                        });
+                        break;
+                    case CommandOptionType.SUB_COMMAND_GROUP:
+                        builder.addSubcommandGroup(subGroup => {
+                            subGroup
+                                .setName(option.name)
+                                .setDescription(option.description);
+
+                            if (option.options) {
+                                for (const subOption of option.options) {
+                                    if (subOption.type === CommandOptionType.SUB_COMMAND) {
+                                        subGroup.addSubcommand(subCommand => {
+                                            subCommand
+                                                .setName(subOption.name)
+                                                .setDescription(subOption.description);
+
+                                            if (subOption.options) {
+                                                for (const subSubOption of subOption.options) {
+                                                    this.addOptionToBuilder(subCommand, subSubOption);
+                                                }
+                                            }
+
+                                            return subCommand;
+                                        });
+                                    }
+                                }
+                            }
+
+                            return subGroup;
+                        });
+                        break;
+                }
+            }
+        }
+
+        return builder;
+    }
+
+    private addOptionToBuilder(builder: any, option: any): void {
+        switch (option.type) {
+            case CommandOptionType.STRING:
+                builder.addStringOption((stringOption: any) => {
+                    stringOption
+                        .setName(option.name)
+                        .setDescription(option.description)
+                        .setRequired(option.required || false);
+
+                    if (option.choices && option.choices.length > 0) {
+                        stringOption.addChoices(...option.choices);
+                    }
+
+                    return stringOption;
+                });
+                break;
+            case CommandOptionType.INTEGER:
+                builder.addIntegerOption((intOption: any) => {
+                    intOption
+                        .setName(option.name)
+                        .setDescription(option.description)
+                        .setRequired(option.required || false);
+
+                    if (option.choices && option.choices.length > 0) {
+                        intOption.addChoices(...option.choices.map((choice: any) => ({
+                            name: choice.name,
+                            value: parseInt(choice.value)
+                        })));
+                    }
+
+                    return intOption;
+                });
+                break;
+        }
+    }
+
+    // #endregion
+
     // #region Mappers
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
         const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember);
-
+        const server = await this.mapDiscordServerToServer(interaction.guild as DiscordServer);
         if (interaction.isChatInputCommand()) {
-
             return {
                 customId: interaction.id,
                 user: user,
                 channelId: interaction.channelId!,
                 guildId: interaction.guildId!,
                 messageId: interaction.id,
+                server: server,
 
                 addComponentAsync: async (component: Component) => { throw new Error("Not implemented yet"); },
                 addComponentsAsync: async (components: Component[]) => { throw new Error("Not implemented yet"); },
@@ -58,15 +193,15 @@ class DiscordService {
                 reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
                 getOption: (name: string) => this.getOption(interaction, name),
 
-                //getUserInputBySelectMenuAsync: async (selectMenu: SelectMenu) => await this.getUserInputBySelectMenuAsync(interaction, selectMenu),
-                //getUserInputByButtonsAsync: async (question: string, buttons: ActionButton[]) => await this.getUserInputByButtonsAsync(interaction, question, buttons),
-            } as InteractionEvent;
+                commandName: interaction.commandName,
+            } as SlashCommandInteractionEvent;
         } else if (interaction.isButton()) {
 
         }
         return {
             customId: interaction.id,
             user: user,
+            server: server,
             channelId: interaction.channelId!,
             guildId: interaction.guildId!,
             messageId: interaction.id,
@@ -76,7 +211,6 @@ class DiscordService {
             deleteAsync: async () => { throw new Error("Not implemented yet"); },
             editAsync: async (content?: string) => { throw new Error("Not implemented yet"); },
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
-            getOption: (name: string) => undefined,
             getUserInputBySelectMenuAsync: (() => { throw new Error("Not implemented yet"); }) as any,
         };
     }
@@ -91,6 +225,14 @@ class DiscordService {
             hasPermissions: (permissions: Permission[]) => this.checkUserHasPermissions(member, permissions),
             sendMessageAsync: async (message: string) => await this.sendMessageAsync(user, message),
         } as User;
+    }
+
+    private async mapDiscordServerToServer(server: DiscordServer): Promise<Server> {
+        return {
+            serverId: server.id,
+            name: server.name,
+            language: Language.NL,
+        } as Server;
     }
 
     private async mapSelectMenuToDiscordSelectMenuAsync(selectMenu: SelectMenu): Promise<DiscordSelectMenuBuilder> {
@@ -108,7 +250,7 @@ class DiscordService {
                         discordSelectMenu.addOptions(option);
                     });
                 }
-                
+
                 return discordSelectMenu;
             }
             case ComponentType.USER_SELECT: {
@@ -122,7 +264,7 @@ class DiscordService {
                 if (userSelect.default_values) {
                     discordSelectMenu.setDefaultUsers(userSelect.default_values.map(dv => dv.id));
                 }
-                
+
                 return discordSelectMenu;
             }
             case ComponentType.ROLE_SELECT: {
@@ -136,7 +278,7 @@ class DiscordService {
                 if (roleSelect.default_values) {
                     discordSelectMenu.setDefaultRoles(roleSelect.default_values.map(dv => dv.id));
                 }
-                
+
                 return discordSelectMenu;
             }
             case ComponentType.MENTIONABLE_SELECT: {
@@ -146,7 +288,7 @@ class DiscordService {
                     .setPlaceholder(mentionableSelect.placeholder || "Select a mentionable")
                     .setMinValues(mentionableSelect.min_values || 1)
                     .setMaxValues(mentionableSelect.max_values || 1);
-                
+
                 return discordSelectMenu;
             }
             case ComponentType.CHANNEL_SELECT: {
@@ -164,7 +306,7 @@ class DiscordService {
                 if (channelSelect.default_values) {
                     discordSelectMenu.setDefaultChannels(channelSelect.default_values.map(dv => dv.id));
                 }
-                
+
                 return discordSelectMenu;
             }
             default:
@@ -305,7 +447,7 @@ class DiscordService {
         return permissions.every(permission => this.checkUserHasPermission(user, permission));
     }
 
-    
+
     // #endregion
 }
 
