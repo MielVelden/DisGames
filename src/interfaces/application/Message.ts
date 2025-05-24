@@ -53,7 +53,7 @@ export interface BaseButton extends Component {
         name?: string;
         id?: string;
         animated?: boolean;
-    };
+    } | string;
     disabled?: boolean;
 }
 

@@ -1,8 +1,10 @@
 import { Command, CommandOption, CommandOptionType } from "../interfaces/application/Command";
-import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
+import { InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
+import { ActionButton, ButtonStyle, ComponentType } from "../interfaces/application/Message";
 import { Permission } from "../interfaces/application/Permission";
+import ComponentService from "../services/ComponentService";
 
-export enum ActionEnum {
+enum ActionEnum {
     INFO = "info",
     HELP = "help",
     VOORBEELD = "voorbeeld"
@@ -28,15 +30,41 @@ export class DefaultCommand implements Command {
         }
     ];
 
-    async executeAsync(interactionEvent: SlashCommandInteractionEvent): Promise<void> {
-         const actie = interactionEvent.getOption("actie") as string;
+    async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {
+         const actie = event.getOption<ActionEnum>("actie");
 
         if (!actie) {
-            await interactionEvent.replyAsync("Je moet een actie selecteren.");
+            await event.replyAsync("Je moet een actie selecteren.");
             return;
         }
 
-        console.log(actie)
+
+
+        switch (actie) {
+            case ActionEnum.INFO: {
+                const button = ComponentService.createButton({
+                    custom_id: "info",
+                    type: ComponentType.BUTTON,
+                    label: "Info",
+                    style: ButtonStyle.SECONDARY,
+                    emoji: "✅"
+                } as ActionButton, {
+                    handle: async (event: InteractionEvent) => {
+                        const e = event as MessageInteractionEvent;
+                        await e.replyAsync("Info");
+                    }
+                });
+                await event.addComponentAsync(button);
+                await event.replyAsync("Info");
+                break;
+            }
+            case ActionEnum.HELP:
+                await event.replyAsync("Help");
+                break;
+            case ActionEnum.VOORBEELD:
+                await event.replyAsync("Voorbeeld");
+                break;
+        }
     }
 }
 

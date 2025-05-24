@@ -7,10 +7,4 @@ export async function exampleCommand(interaction: InteractionEvent): Promise<voi
     const saveText = i18n.commands.save;
     const successMessage = i18n.messages.success;
     const errorMessage = i18n.errors.general;
-    
-    try {
-        await interaction.replyAsync(`${saveText}: ${successMessage}`);
-    } catch (error) {
-        await interaction.replyAsync(errorMessage);
-    }
 } 

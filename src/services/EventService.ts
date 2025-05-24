@@ -1,4 +1,4 @@
-import { ButtonHandler, SelectMenuHandler, InteractionEvent } from '../interfaces/application/Event';
+import { ButtonHandler, SelectMenuHandler, InteractionEvent, SlashCommandInteractionEvent, EventType } from '../interfaces/application/Event';
 
 export class EventService {
   private static buttonHandlers: Map<string, ButtonHandler> = new Map();
@@ -33,6 +33,17 @@ export class EventService {
       await handler.handle(interaction);
     } else {
       console.log(`No handler found for select menu: ${interaction.customId}`);
+    }
+  }
+
+  public static handleEventAsync(event: InteractionEvent) {
+    switch (event.type) {
+      case EventType.BUTTON:
+        return this.handleButtonInteraction(event);
+      case EventType.SELECT_MENU:
+        return this.handleSelectMenuInteraction(event);
+      case EventType.SLASH_COMMAND:
+        throw new Error("Slash command not implemented");
     }
   }
 } 

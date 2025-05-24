@@ -5,6 +5,9 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { Command } from "../interfaces/application/Command";
 import discordService from "../services/DiscordService";
+import { InteractionEvent } from "../interfaces/application/Event";
+
+const commands: Command[] = [];
 
 export async function loadCommands(client: DiscordClient): Promise<void> {
     const commandsPath = path.join(__dirname, '..', 'commands');
@@ -13,7 +16,7 @@ export async function loadCommands(client: DiscordClient): Promise<void> {
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file);
         const command = require(filePath).default;
-
+        commands.push(command);
         if (command && command.name && command.description && command.executeAsync) {
             client.commands.set(command.name, command);
             console.log(`[INFO] Command loaded: ${command.name}`);
@@ -21,6 +24,16 @@ export async function loadCommands(client: DiscordClient): Promise<void> {
             console.warn(`[WARNING] Command in ${filePath} is not a valid Command object!`);
         }
     }
+}
+
+export async function handleCommand(commandName: string, event: InteractionEvent): Promise<void> {
+    const command = commands.find(c => c.name === commandName);
+    if (!command) {
+        console.error(`[ERROR] Command ${commandName} not found!`);
+        return;
+    }
+
+    await command.executeAsync(event);
 }
 
 export async function deployCommands(): Promise<void> {

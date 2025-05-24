@@ -13,6 +13,9 @@ export default {
 
     async execute(message: Message, client: Client): Promise<void> {
         try {
+            if (message.author.bot)
+                return;
+
             console.log(message);
             // Map the interaction to the InteractionEvent interface
             // const interactionEvent = await DiscordService.mapInteractionToInteractionEventAsync(message);

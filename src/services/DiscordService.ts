@@ -16,10 +16,12 @@ import {
     ButtonStyle as DiscordButtonStyle,
     ActionRowBuilder as DiscordActionRowBuilder,
     Component as DiscordComponent,
-    Guild as DiscordServer
+    Guild as DiscordServer,
+    InteractionReplyOptions as DiscordInteractionReplyOptions,
+    InteractionType as DiscordInteractionType
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { InteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
+import { EventType, InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { User } from '../interfaces/domain/User';
 import { Permission } from '../interfaces/application/Permission';
 import { ActionButton, ButtonStyle, ComponentType } from '../interfaces/application/Message';
@@ -176,43 +178,60 @@ class DiscordService {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
         const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember);
         const server = await this.mapDiscordServerToServer(interaction.guild as DiscordServer);
-        if (interaction.isChatInputCommand()) {
-            return {
-                customId: interaction.id,
-                user: user,
-                channelId: interaction.channelId!,
-                guildId: interaction.guildId!,
-                messageId: interaction.id,
-                server: server,
 
-                addComponentAsync: async (component: Component) => { throw new Error("Not implemented yet"); },
-                addComponentsAsync: async (components: Component[]) => { throw new Error("Not implemented yet"); },
-                replyAsync: async (content?: string) => await this.replyAsync(interaction, content || ""),
-                deleteAsync: async () => await this.deleteAsync(interaction),
-                editAsync: async (content?: string) => await this.editAsync(interaction, content || ""),
-                reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
-                getOption: (name: string) => this.getOption(interaction, name),
+        console.log("interaction.isMessageComponent()", interaction.isMessageComponent());
+        console.log("interaction.isAutocomplete()", interaction.isAutocomplete());
+        console.log("interaction.isButton()", interaction.isButton());
+        console.log("interaction.isStringSelectMenu()", interaction.isStringSelectMenu());
+        console.log("interaction.isUserSelectMenu()", interaction.isUserSelectMenu());
+        console.log("interaction.isRoleSelectMenu()", interaction.isRoleSelectMenu());
+        console.log("interaction.isMentionableSelectMenu()", interaction.isMentionableSelectMenu());
+        console.log("interaction.isChannelSelectMenu()", interaction.isChannelSelectMenu());
+        console.log("interaction.isModalSubmit()", interaction.isModalSubmit());
+        console.log("interaction.isMessageContextMenuCommand()", interaction.isMessageContextMenuCommand());
 
-                commandName: interaction.commandName,
-            } as SlashCommandInteractionEvent;
-        } else if (interaction.isButton()) {
+        if (interaction.isMessageContextMenuCommand())
+            throw new Error("Not implemented yet");
 
-        }
-        return {
+        // Create a base interaction event
+        const event: InteractionEvent = {
+            type: this.mapInteractionTypeToEventType(interaction),
             customId: interaction.id,
+            currentInteraction: interaction,
             user: user,
-            server: server,
             channelId: interaction.channelId!,
             guildId: interaction.guildId!,
             messageId: interaction.id,
-            addComponentAsync: async (component: Component) => { throw new Error("Not implemented yet"); },
-            addComponentsAsync: async (components: Component[]) => { throw new Error("Not implemented yet"); },
-            replyAsync: async (content?: string) => { throw new Error("Not implemented yet"); },
-            deleteAsync: async () => { throw new Error("Not implemented yet"); },
-            editAsync: async (content?: string) => { throw new Error("Not implemented yet"); },
+            server: server,
+
+            components: [],
+            addComponentAsync: async (component: Component) => await this.addComponentAsync(event, component),
+            addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
+            editAsync: async (content?: string) => await this.editAsync(interaction, content || ""),
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
-            getUserInputBySelectMenuAsync: (() => { throw new Error("Not implemented yet"); }) as any,
-        };
+        } as InteractionEvent;
+
+        if (interaction.isChatInputCommand()) {
+            return {
+                ...event,
+                replyAsync: async (content?: string) => await this.replyAsync(event, content || ""),
+                deleteAsync: async () => await this.deleteAsync(interaction),
+                getOption: (name: string) => this.getOption(interaction, name),
+                commandName: interaction.commandName,
+            } as SlashCommandInteractionEvent;
+        } else if (interaction.isButton()) {
+            return {
+                ...event,
+                customId: interaction.customId,
+                reactAsync: async (emoji: string) => await this.reactAsync(interaction, emoji),
+                deleteAsync: async () => await this.deleteAsync(interaction),
+            } as MessageInteractionEvent;
+        } else {
+            console.log("Unknown interaction type", interaction);
+            throw new Error("Unknown interaction type");
+        }
+
+        return event;
     }
 
     private async mapDiscordUserToUser(user: DiscordUser, member: DiscordGuildMember): Promise<User> {
@@ -320,13 +339,16 @@ class DiscordService {
             .setLabel(button.label || "Button")
             .setStyle(this.mapButtonStyleToDiscordButtonStyle(button.style));
 
-        if (button.emoji)
-            discordButton.setEmoji({
-                name: button.emoji.name,
-                id: button.emoji.id,
-                animated: button.emoji.animated
-            });
-
+        if (button.emoji) {
+            if (typeof button.emoji === "string")
+                discordButton.setEmoji(button.emoji);
+            else
+                discordButton.setEmoji({
+                    name: button.emoji.name,
+                    id: button.emoji.id,
+                    animated: button.emoji.animated
+                });
+        }
 
         if (button.disabled)
             discordButton.setDisabled(true);
@@ -352,6 +374,11 @@ class DiscordService {
     private createActionRowWithComponents(components: DiscordComponentBuilder | DiscordComponentBuilder[]): DiscordActionRowBuilder<any> {
         const componentArray = Array.isArray(components) ? components : [components];
         return new DiscordActionRowBuilder<any>().addComponents(componentArray);
+    }
+
+    private async mapActionRowComponents(interaction: InteractionEvent): Promise<DiscordActionRowBuilder<any>> {
+        const components = await Promise.all(interaction.components.map(component => this.mapComponentToDiscordComponent(component)));
+        return this.createActionRowWithComponents(components);
     }
     // #endregion
 
@@ -387,6 +414,17 @@ class DiscordService {
 
         return buttonStyleValue;
     }
+
+    private mapInteractionTypeToEventType(interaction: DiscordInteraction): EventType {
+        if (interaction.isChatInputCommand())
+            return EventType.SLASH_COMMAND;
+        else if (interaction.isButton())
+            return EventType.BUTTON;
+        else if (interaction.isModalSubmit())
+            return EventType.MODAL_SUBMIT;
+        else
+            throw new Error(`Unhandled interaction type: ${interaction.type}`);
+    }
     // #endregion
 
     private getOption(interaction: DiscordChatInputCommandInteraction, name: string): string | number | boolean | undefined {
@@ -399,8 +437,17 @@ class DiscordService {
         await user.send(message);
     }
 
-    private async replyAsync(interaction: DiscordChatInputCommandInteraction, message: string): Promise<void> {
-        await interaction.reply(message);
+    private async replyAsync(event: InteractionEvent, message: string): Promise<void> {
+        const interactionHasReply = event.currentInteraction.isChatInputCommand() || event.currentInteraction.isMessageComponent() || event.currentInteraction.isButton();
+        const components = await this.mapActionRowComponents(event);
+        const content = {
+            content: message,
+            components: [components]
+        };
+
+        if (event.currentInteraction.isChatInputCommand() || event.currentInteraction.isMessageComponent() || event.currentInteraction.isButton()) {
+            await event.currentInteraction.reply(content);
+        }
     }
 
     private async editAsync(interaction: DiscordInteraction, message: string): Promise<void> {
@@ -411,7 +458,7 @@ class DiscordService {
         }
     }
 
-    private async deleteAsync(interaction: DiscordChatInputCommandInteraction): Promise<void> {
+    private async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction): Promise<void> {
         await interaction.deleteReply();
     }
 
@@ -446,8 +493,16 @@ class DiscordService {
     private checkUserHasPermissions(user: DiscordGuildMember, permissions: Permission[]): boolean {
         return permissions.every(permission => this.checkUserHasPermission(user, permission));
     }
+    // #endregion
 
+    // #region Component handling
+    private async addComponentAsync(event: InteractionEvent, component: Component): Promise<void> {
+        event.components.push(component);
+    }
 
+    private async addComponentsAsync(event: InteractionEvent, components: Component[]): Promise<void> {
+        components.forEach(component => this.addComponentAsync(event, component));
+    }
     // #endregion
 }
 
