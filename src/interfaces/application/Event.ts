@@ -14,10 +14,11 @@ export interface InteractionEvent {
     editAsync(): Promise<void>;
     deleteAsync(): Promise<void>;
 
-    getUserInputAsync(selectMenu: BaseSelectMenu): Promise<InteractionEvent>;
-    getUserInputAsync(question: string, buttons: ActionButton[]): Promise<InteractionEvent>;
+    getUserInputBySelectMenuAsync?(selectMenu: BaseSelectMenu): Promise<InteractionEvent>;
+    getUserInputByButtonsAsync?(question: string, buttons: ActionButton[]): Promise<InteractionEvent>;
 
     getOption(name: string): string | number | boolean | undefined;
+    getOption<T>(name: string): T | undefined;
 
     user: User;
 

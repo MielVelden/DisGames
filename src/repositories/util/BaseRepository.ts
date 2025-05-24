@@ -3,7 +3,6 @@ import { Repository } from '../../interfaces/database/Repository';
 import { getPrismaInstance } from './prisma';
 import { IEntity } from '../../interfaces/database/IEntity';
 
-// Type definitie om dynamisch toegang te krijgen tot Prisma modellen
 type PrismaModelClient = PrismaClient & {
     [key: string]: any;
 };
