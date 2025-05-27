@@ -1,5 +1,5 @@
 import { ButtonHandler, HandlerConfig } from "../interfaces/application/Event";
-import { ActionButton } from "../interfaces/application/Message";
+import { ActionButton, ComponentType, TextDisplay } from "../interfaces/application/Message";
 import { EventService } from "./EventService";
 
 class ComponentService {
@@ -19,6 +19,12 @@ class ComponentService {
         };
     }
 
+    public createContent(content: string): TextDisplay {
+        return {
+            type: ComponentType.TEXT_DISPLAY,
+            content: content
+        };
+    }
 }
 
 export default new ComponentService();

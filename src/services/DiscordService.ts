@@ -20,11 +20,11 @@ import {
     InteractionReplyOptions as DiscordInteractionReplyOptions,
     InteractionType as DiscordInteractionType
 } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder } from '@discordjs/builders';
 import { EventType, InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { User } from '../interfaces/domain/User';
 import { Permission } from '../interfaces/application/Permission';
-import { ActionButton, ButtonStyle, ComponentType } from '../interfaces/application/Message';
+import { ActionButton, ButtonStyle, ComponentType, TextDisplay } from '../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -37,6 +37,8 @@ import { Server } from '../interfaces/domain/Server';
 import { Language } from '../interfaces/application/Language';
 import { Command, CommandOptionType } from '../interfaces/application/Command';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
+import ComponentService from './ComponentService';
+import { calculateDuration, DurationEnum } from '../utils/Duration';
 
 type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 type SelectMenu = StringSelect | UserSelect | RoleSelect | MentionableSelect | ChannelSelect;
@@ -207,8 +209,12 @@ class DiscordService {
             components: [],
             addComponentAsync: async (component: Component) => await this.addComponentAsync(event, component),
             addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
-            editAsync: async (content?: string) => await this.editAsync(interaction, content || ""),
+            clearComponentsAsync: async () => await this.clearComponentsAsync(event),
+            editAsync: async (content?: string) => await this.editAsync(event, content || ""),
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
+
+            getUserInputByButtonsAsync: async (question: string, buttons: string[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
+            getUserInputBySelectMenuAsync: async (selectMenu: any) => { throw new Error("Not implemented yet"); },
         } as InteractionEvent;
 
         if (interaction.isChatInputCommand()) {
@@ -356,10 +362,20 @@ class DiscordService {
         return discordButton;
     }
 
+    private async mapTextDisplayToDiscordTextDisplayAsync(textDisplay: TextDisplay): Promise<DiscordButtonBuilder> {
+        return new DiscordButtonBuilder()
+            .setCustomId('text_display_' + Date.now())
+            .setLabel(textDisplay.content || "Empty Text Display")
+            .setStyle(DiscordButtonStyle.Secondary)
+            .setDisabled(true);
+    }  
+
     private async mapComponentToDiscordComponent(component: Component): Promise<DiscordComponentBuilder> {
         switch (component.type) {
             case ComponentType.BUTTON:
                 return await this.mapButtonToDiscordButtonAsync(component as ActionButton);
+            case ComponentType.TEXT_DISPLAY:
+                return await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
             case ComponentType.STRING_SELECT:
             case ComponentType.USER_SELECT:
             case ComponentType.ROLE_SELECT:
@@ -438,7 +454,6 @@ class DiscordService {
     }
 
     private async replyAsync(event: InteractionEvent, message: string): Promise<void> {
-        const interactionHasReply = event.currentInteraction.isChatInputCommand() || event.currentInteraction.isMessageComponent() || event.currentInteraction.isButton();
         const components = await this.mapActionRowComponents(event);
         const content = {
             content: message,
@@ -450,11 +465,17 @@ class DiscordService {
         }
     }
 
-    private async editAsync(interaction: DiscordInteraction, message: string): Promise<void> {
-        if (interaction.isChatInputCommand()) {
-            await interaction.editReply(message);
-        } else if (interaction.isMessageComponent() || interaction.isButton()) {
-            await interaction.update(message);
+    private async editAsync(event: InteractionEvent, message: string): Promise<void> {
+        const components = await this.mapActionRowComponents(event);
+        const content = {
+            content: message,
+            components: [components]
+        };
+
+        if (event.currentInteraction.isChatInputCommand()) {
+            await event.currentInteraction.editReply(content);
+        } else if (event.currentInteraction.isMessageComponent() || event.currentInteraction.isButton()) {
+            await event.currentInteraction.update(content);
         }
     }
 
@@ -475,13 +496,34 @@ class DiscordService {
         return this.mapInteractionToInteractionEventAsync(interactionReply.interaction);
     }
 
-    private async getUserInputByButtonsAsync(interaction: DiscordMessageInteraction, question: string, buttons: ActionButton[]): Promise<InteractionEvent> {
-        const discordButtons = await Promise.all(buttons.map(button => this.mapButtonToDiscordButtonAsync(button)));
-        const interactionReply = await interaction.reply({
-            content: question,
-            components: [this.createActionRowWithComponents(discordButtons)]
+    private async getUserInputByButtonsAsync(event: InteractionEvent, question: string, buttons: string[]): Promise<string| null> {
+        return new Promise(async (resolve) => {
+            const discordButtons = await Promise.all(buttons.map(button => {
+                const btn  = ComponentService.createButton({
+                    type: ComponentType.BUTTON,
+                    label: button,
+                    style: ButtonStyle.PRIMARY
+                } as ActionButton, {
+                    userId: event.user.id,
+                    onTimeout: async () => {
+                        resolve(null);
+                    },
+                    handle: async (event: InteractionEvent) => {
+                        resolve(btn.label ?? null);
+                    }
+                })
+                return this.mapButtonToDiscordButtonAsync(btn);
+            }));
+
+            if (event.currentInteraction.isChatInputCommand()) {
+                await event.currentInteraction.reply({
+                    content: question,
+                    components: [this.createActionRowWithComponents(discordButtons)]
+                });
+            } else {
+                throw new Error("Not implemented yet");
+            }
         });
-        return this.mapInteractionToInteractionEventAsync(interactionReply.interaction);
     }
     // #endregion
 
@@ -502,6 +544,10 @@ class DiscordService {
 
     private async addComponentsAsync(event: InteractionEvent, components: Component[]): Promise<void> {
         components.forEach(component => this.addComponentAsync(event, component));
+    }
+
+    private async clearComponentsAsync(event: InteractionEvent): Promise<void> {
+        event.components = [];
     }
     // #endregion
 }

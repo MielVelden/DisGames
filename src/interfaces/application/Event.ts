@@ -20,11 +20,12 @@ export interface InteractionEvent {
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;
     addComponentsAsync(components: Component[]): Promise<void>;
-
+    clearComponentsAsync(): Promise<void>;
+    
     editAsync(): Promise<void>;
 
-    getUserInputBySelectMenuAsync?(selectMenu: BaseSelectMenu): Promise<InteractionEvent>;
-    getUserInputByButtonsAsync?(question: string, buttons: ActionButton[]): Promise<InteractionEvent>;
+    getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<string>;
+    getUserInputByButtonsAsync(question: string, buttons: string[]): Promise<string | null>;
 
     user: User;
     server: Server;
@@ -53,8 +54,9 @@ export interface MessageInteractionEvent extends InteractionEvent, ReplyInteract
 export interface Handler {
     id: string;
     userId?: string;
-    timeout?: Duration;
     handle: (interaction: InteractionEvent) => Promise<void>;
+    timeout?: Duration;
+    onTimeout?: () => Promise<void>;
 }
 
 export interface HandlerConfig extends Omit<Handler, "id"> {

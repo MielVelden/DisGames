@@ -59,7 +59,10 @@ export class DefaultCommand implements Command {
                 break;
             }
             case ActionEnum.HELP:
-                await event.replyAsync("Help");
+                const input = await event.getUserInputByButtonsAsync("Wat is je leeftijd", ["10", "20", "30"]);
+                await event.clearComponentsAsync();
+                await event.addComponentAsync(ComponentService.createContent(input === null ? "Geen input" : input));
+                await event.editAsync();
                 break;
             case ActionEnum.VOORBEELD:
                 await event.replyAsync("Voorbeeld");
