@@ -1,8 +1,8 @@
-import { Language } from "../application/Language";
+import { LanguageEnum } from "../enums/database/LanguageEnum";
 
 export interface ServerModel {
     id: number;
     serverId: string;
     name: string;
-    language: Language;
+    language: LanguageEnum;
 }

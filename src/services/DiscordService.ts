@@ -34,7 +34,7 @@ import {
     Component
 } from '../interfaces/application/Message';
 import { ServerModel } from '../interfaces/domain/Server';
-import { Language } from '../interfaces/application/Language';
+import { LanguageEnum } from '../interfaces/enums/database/LanguageEnum';
 import { Command, CommandOptionType } from '../interfaces/application/Command';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
 import ComponentService from './ComponentService';
@@ -256,7 +256,7 @@ class DiscordService {
         return {
             serverId: server.id,
             name: server.name,
-            language: Language.NL,
+            language: LanguageEnum.NL,
         } as ServerModel;
     }
 

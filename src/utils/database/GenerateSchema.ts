@@ -103,7 +103,7 @@ function mapMySQLTypeToTypescript(columnName: string, mysqlType: string, enumMap
     const lowercaseName = columnName.toLowerCase();
 
     if (enumMapping[lowercaseName])
-        return enumMapping[lowercaseName]; // Gebruik de juiste Enum-naam
+        return enumMapping[lowercaseName];
 
     switch (mysqlType.toLowerCase()) {
         case 'int':
@@ -141,16 +141,15 @@ function mapMySQLTypeToTypescript(columnName: string, mysqlType: string, enumMap
 function getExportedEnums(): string[] {
     const filePath = path.resolve(enumFileLocation, enumFile);
     const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const regex = /export\s*\*\s*from\s*["'](.*?Enum\.js)["']/g;
+    const regex = /export\s*\*\s*from\s*["'](.*?Enum)["']/g;
     const matches = [...fileContent.matchAll(regex)];
-    const enumPaths = matches.map(match => match[1]);
+    const enumPaths = matches.map(match => `${match[1]}.ts`);
     return enumPaths;
 }
 
 async function importEnum(enumPath: string): Promise<Record<string, any>> {
     const resolvedPath = path.resolve(enumFileLocation, enumPath);
-    const fileUrl = pathToFileURL(resolvedPath).href;
-    const module = await import(fileUrl);
+    const module = require(resolvedPath);
     return module;
 }
 

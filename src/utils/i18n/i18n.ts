@@ -1,4 +1,4 @@
-import { Language } from "../../interfaces/application/Language";
+import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 
 export interface I18nTranslations {
     commands: {
@@ -21,13 +21,13 @@ export interface I18nTranslations {
 }
 
 export class I18n {
-    private static translations: Map<Language, I18nTranslations> = new Map();
+    private static translations: Map<LanguageEnum, I18nTranslations> = new Map();
 
-    static registerTranslations(language: Language, translations: I18nTranslations): void {
+    static registerTranslations(language: LanguageEnum, translations: I18nTranslations): void {
         this.translations.set(language, translations);
     }
 
-    static get(language: Language): I18nTranslations {
+    static get(language: LanguageEnum): I18nTranslations {
         const translations = this.translations.get(language);
         if (!translations) {
             throw new Error(`Translations for language ${language} not found`);
@@ -35,7 +35,7 @@ export class I18n {
         return translations;
     }
 
-    static getText(language: Language, key: keyof I18nTranslations, subKey?: string): string {
+    static getText(language: LanguageEnum, key: keyof I18nTranslations, subKey?: string): string {
         const translations = this.get(language);
         const section = translations[key];
         
