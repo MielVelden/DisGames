@@ -5,4 +5,4 @@ export interface Repository<T> {
     saveAsync(savable: T): Promise<T>;
     purgeAsync(id: number): Promise<void>;
     purgeByExternalIDAsync(externalId: string): Promise<void>;
-} 
+}

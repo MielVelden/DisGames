@@ -9,11 +9,6 @@
     "dev": "tsc && node dist/index.js",
     "watch": "tsc -w",
     "deploy": "npm run build && node dist/deploy-commands.js",
-    "db:migrate": "prisma migrate dev",
-    "db:update": "npm run schema:generate && npm run db:migrate",
-    "db:generate": "prisma generate",
-    "db:reset": "prisma migrate reset --force",
-    "db:studio": "prisma studio",
     "schema:generate": "ts-node src/utils/database/GenerateSchema.ts"
   },
   "dependencies": {
@@ -25,8 +20,8 @@
     "discord-api-types": "^0.37.70",
     "discord.js": "^14.19.3",
     "dotenv": "^16.3.1",
+    "mysql2": "^3.14.1",
     "node-schedule": "^2.1.1",
-    "prisma": "^6.8.2",
     "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {

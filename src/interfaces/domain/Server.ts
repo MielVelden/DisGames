@@ -1,8 +1,8 @@
 import { Language } from "../application/Language";
-import { IEntity } from "../database/IEntity";
 
-export interface Server extends IEntity {
+export interface ServerModel {
+    id: number;
     serverId: string;
     name: string;
     language: Language;
-} 
+}

@@ -1,7 +1,7 @@
 import { User } from "../domain/User";
 import { Component, BaseSelectMenu, ActionButton } from "./Message";
 import { Duration } from "../../utils/Duration";
-import { Server } from "../domain/Server";
+import { ServerModel } from "../domain/Server";
 import { Interaction as DiscordInteraction } from "discord.js";
 
 export enum EventType {
@@ -28,7 +28,7 @@ export interface InteractionEvent {
     getUserInputByButtonsAsync(question: string, buttons: string[]): Promise<string | null>;
 
     user: User;
-    server: Server;
+    server: ServerModel;
 
     messageId: string;
     channelId: string;

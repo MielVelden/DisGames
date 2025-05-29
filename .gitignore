@@ -133,6 +133,4 @@ config.json
 package-lock.json
 enterLargeJsons.js
 
-generated/
-examples/
-migrations/
+TableInterfaces.ts

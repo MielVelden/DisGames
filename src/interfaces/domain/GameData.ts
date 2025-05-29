@@ -1,6 +1,4 @@
-import { IEntity } from "../database/IEntity";
-
-export interface GameData extends IEntity {
+export interface GameData {
     gameId: number;
     serverId: string;
     channelId: string;

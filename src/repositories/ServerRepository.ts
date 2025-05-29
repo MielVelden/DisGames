@@ -1,33 +1,29 @@
-import { BaseRepository } from "./util/BaseRepository";
-import { Server } from "../interfaces/domain/Server";
-import { Language } from "../interfaces/application/Language";
-import { ServerEntity } from "../interfaces/entities/ServerEntity";
+import { ServersModel, ServersSaveModel } from "../interfaces/database";
+import BaseRepository from "./BaseRepository.js";
+import { TableEnum } from "../interfaces/enums/index.js";
 
-export class ServerRepository extends BaseRepository<Server, ServerEntity> {
+class ServerRepository {
+    private baseRepository: BaseRepository<ServersModel, ServersSaveModel>;
+
     constructor() {
-        super("server", "serverId");
+        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel>(TableEnum.SERVERS);
     }
-     
-    protected mapToModel(entity: ServerEntity): Server {
-        return {
-            id: entity.id,
-            serverId: entity.serverId,
-            name: entity.name,
-            language: entity.language as Language,
-            createdAt: entity.createdAt,
-            updatedAt: entity.updatedAt
-        };
+
+    async getAllServersAsync(): Promise<ServersModel[]> {
+        return this.baseRepository.Select().Execute();
     }
-    
-    protected mapToEntity(model: Server): Partial<ServerEntity> {
-        return {
-            id: model.id,
-            serverId: model.serverId,
-            name: model.name,
-            language: model.language,
-            createdAt: model.createdAt,
-            updatedAt: model.updatedAt,
-            games: []
-        };
+
+    async getServerByIdAsync(id: number) {
+        console.log(id);
+        const model = await this.baseRepository.Select().Where({ Id: id }).Limit(1).Execute();
+        return model[0];
     }
-} 
+
+    async save(model: ServersSaveModel): Promise<ServersModel> {
+        // TODO: Check if values are valid
+
+        return this.baseRepository.Save(model);
+    }
+}
+
+export default new ServerRepository();

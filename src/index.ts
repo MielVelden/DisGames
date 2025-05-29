@@ -3,6 +3,7 @@ import { TOKEN } from './config';
 import { DiscordClient } from './interfaces/application/DiscordClient';
 import { loadEvents } from './utils/Events';
 import { loadCommands } from './utils/Commands';
+import { createConnectionAsync } from './repositories/util/ConnectionHandler';
 
 const token = TOKEN;
 if (!token) {
@@ -21,9 +22,9 @@ const client = new DiscordClient({
 
 client.once('ready', async () => {
   console.log(`[INFO] Logged in as ${client.user?.tag}`);
+  await createConnectionAsync();
+  await loadCommands(client);
+  await loadEvents(client);
 });
 
 client.login(token);
-
-loadCommands(client);
-loadEvents(client);

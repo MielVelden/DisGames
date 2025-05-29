@@ -1,6 +1,6 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
-import { Server } from "./Server";
+import { ServerModel } from "./Server";
 import { GameData } from "./GameData";
 
 export enum GameType {
@@ -73,7 +73,7 @@ export interface GameEvent {
     gameConfig: GameConfig;
 
     user: User;
-    server: Server;
+    server: ServerModel;
     
     answer?: string | number | boolean;
     gameData: GameData;

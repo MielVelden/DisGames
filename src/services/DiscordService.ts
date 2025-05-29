@@ -33,7 +33,7 @@ import {
     ChannelSelect,
     Component
 } from '../interfaces/application/Message';
-import { Server } from '../interfaces/domain/Server';
+import { ServerModel } from '../interfaces/domain/Server';
 import { Language } from '../interfaces/application/Language';
 import { Command, CommandOptionType } from '../interfaces/application/Command';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
@@ -252,12 +252,12 @@ class DiscordService {
         } as User;
     }
 
-    private async mapDiscordServerToServer(server: DiscordServer): Promise<Server> {
+    private async mapDiscordServerToServer(server: DiscordServer): Promise<ServerModel> {
         return {
             serverId: server.id,
             name: server.name,
             language: Language.NL,
-        } as Server;
+        } as ServerModel;
     }
 
     private async mapSelectMenuToDiscordSelectMenuAsync(selectMenu: SelectMenu): Promise<DiscordSelectMenuBuilder> {
