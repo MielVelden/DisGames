@@ -38,8 +38,6 @@ export class DefaultCommand implements Command {
             return;
         }
 
-
-
         switch (actie) {
             case ActionEnum.INFO: {
                 const button = ComponentService.createButton({

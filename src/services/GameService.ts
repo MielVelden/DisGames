@@ -6,6 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { GameTypeEnum } from "../interfaces/enums";
 import { Component, ComponentType, TextDisplay } from "../interfaces/application/Message";
+import PointService from "./PointService";
 
 class GameService {
 
@@ -57,16 +58,22 @@ class GameService {
         const gameEvent = await this.createGameEvent(event);
 
         if (gameEvent.validateAnswer(gameEvent)) {
+            // Answer is correct
             gameEvent.processAnswer(gameEvent);
             gameEvent.getNextAnswer(gameEvent);
+
+            // Add points to the user
+            await PointService.addPoints(gameEvent.user.id, gameEvent.server.ServerId, gameEvent.gameConfig.points);
 
             // Save the model
             await GameRepository.save(gameEvent.gameData);
 
+            // Loop through all actions and handle them
             gameEvent.actions.forEach(async (action) => {
                 await this.handleGameAction(action, event);
             });
 
+            // Reply to the game channel
             await event.replyAsync();
         }
     }
@@ -96,12 +103,26 @@ class GameService {
         if (!gameModule)
             throw new Error(`Game module not found for game type ${game.GameTypeEnum}`);
 
+        const expectedType = gameModule.config.expectedType;
+        
+        var answer: string | number | boolean;
+        if (expectedType === "number") {
+            answer = Number(event.content);
+            if (isNaN(answer)) {
+                throw new Error(`Invalid number: ${event.content}`);
+            }
+        } else if (expectedType === "boolean") {
+            answer = event.content.toLowerCase() === "true";
+        } else {
+            answer = event.content;
+        }
+
         const gameEvent: GameEvent = {
             gameId: game.Id,
             gameConfig: gameModule.config,
             user: event.user,
             server: event.server,
-            answer: event.content,
+            answer: answer,
             addAction: (action: GameAction) => {
                 gameEvent.actions.push(action);
             },

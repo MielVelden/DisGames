@@ -75,6 +75,7 @@ export interface PremiumButton extends BaseButton {
 // #endregion
 
 // #region Select Menus
+export type SelectMenu = StringSelect | UserSelect | RoleSelect | MentionableSelect | ChannelSelect;
 
 export interface BaseSelectMenu extends Component {
     custom_id: string;

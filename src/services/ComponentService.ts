@@ -1,22 +1,14 @@
-import { ButtonHandler, HandlerConfig } from "../interfaces/application/Event";
-import { ActionButton, ComponentType, TextDisplay } from "../interfaces/application/Message";
+import { ButtonHandler, EventType, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
+import { ActionButton, Component, ComponentType, SelectMenu, StringSelect, TextDisplay } from "../interfaces/application/Message";
 import { EventService } from "./EventService";
 
 class ComponentService {
     public createButton(config: ActionButton, handlerConfig?: HandlerConfig): ActionButton {
-        if (!handlerConfig)
-            return config;
+        return this.createComponent(config, EventType.BUTTON, handlerConfig);
+    }
 
-        const handler: ButtonHandler = {
-            ...handlerConfig,
-            id: crypto.randomUUID()
-        };
-        EventService.registerButtonHandler(handler);
-
-        return {
-            ...config,
-            custom_id: `${handler.id}`
-        };
+    public createSelectMenu(config: SelectMenu, handlerConfig?: HandlerConfig): SelectMenu {
+        return this.createComponent(config, EventType.SELECT_MENU, handlerConfig);
     }
 
     public createContent(content: string): TextDisplay {
@@ -25,6 +17,23 @@ class ComponentService {
             content: content
         };
     }
+  
+    private createComponent<T extends Component>(config: T, type: EventType, handlerConfig?: HandlerConfig): T {
+        if (!handlerConfig)
+            return config;
+
+        const handler: ButtonHandler | SelectMenuHandler = {
+            ...handlerConfig,
+            id: crypto.randomUUID()
+        };
+        console.log(`[INFO] Registering component (type: ${type}) with id: ${handler.id}`);
+        EventService.registerHandler(type, handler);
+
+        return {
+            ...config,
+            custom_id: `${handler.id}`
+        };
+    }    
 }
 
 export default new ComponentService();

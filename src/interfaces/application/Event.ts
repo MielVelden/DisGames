@@ -25,7 +25,7 @@ export interface InteractionEvent {
     
     editAsync(): Promise<void>;
 
-    getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<string>;
+    getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: string, buttons: string[]): Promise<string | null>;
 
     user: User;
@@ -51,6 +51,10 @@ export interface MessageInteractionEvent extends InteractionEvent, ReplyInteract
     reactAsync(emoji: string): Promise<void>;
     deleteAsync(): Promise<void>;
     content: string;
+}
+
+export interface SelectMenuInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    selected: string;
 }
 
 export interface Handler {

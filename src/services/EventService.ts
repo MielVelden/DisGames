@@ -18,6 +18,24 @@ export class EventService {
     EventService.setupTimeout(handler);
   }
 
+  public static registerHandler(type: EventType, handler: ButtonHandler | SelectMenuHandler): void {
+    switch (type) {
+      case EventType.BUTTON:
+        EventService.registerButtonHandler(handler);
+        break;
+      case EventType.SELECT_MENU:
+        EventService.registerSelectMenuHandler(handler);
+        break;
+      case EventType.MESSAGE:
+      case EventType.SLASH_COMMAND:
+      case EventType.MODAL_SUBMIT:
+        throw new Error("Event type not implemented");
+      default:
+          const exhaustiveCheck: never = type;
+          throw new Error(`Unhandled event type: ${exhaustiveCheck}`);
+    }
+  }
+
   private static setupTimeout(handler: ButtonHandler | SelectMenuHandler): void {
     if (handler.onTimeout) {
       const timeoutId = setTimeout(async () => {
@@ -58,6 +76,7 @@ export class EventService {
 
   public static async handleSelectMenuInteraction(interaction: InteractionEvent): Promise<void> {
     const handler = EventService.selectMenuHandlers.get(interaction.customId);
+    console.log(`[INFO] Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.id) {
         return;
@@ -79,7 +98,7 @@ export class EventService {
       case EventType.MESSAGE:
       case EventType.SLASH_COMMAND:
       case EventType.MODAL_SUBMIT:
-        throw new Error("Slash command not implemented");
+        throw new Error("Event type not implemented");
       default:
           const exhaustiveCheck: never = event.type;
           throw new Error(`Unhandled event type: ${exhaustiveCheck}`);

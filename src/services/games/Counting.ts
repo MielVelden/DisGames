@@ -20,7 +20,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === event.gameData.Answer;
+            return event.answer === Number(event.gameData.Answer);
         },
 
         processAnswer(event: GameEvent): void {

@@ -3,7 +3,6 @@ import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
 import ServerRepository from "../repositories/ServerRepository";
 
 class ServerService {
-
     public async getServer(serverId: string, createIfNotExists: boolean = false): Promise<ServersModel> {
         const server = ServerRepository.getByServerIdAsync(serverId);
         if (!server && createIfNotExists) {
@@ -16,7 +15,6 @@ class ServerService {
 
         return server;
     }
-
 }
 
 export default new ServerService();

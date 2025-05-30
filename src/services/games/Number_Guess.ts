@@ -18,7 +18,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return Number(event.answer) === Number(event.gameData.Answer);
+            return event.answer === Number(event.gameData.Answer);
         },
 
         processAnswer(event: GameEvent): void {

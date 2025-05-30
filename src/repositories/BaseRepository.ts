@@ -39,6 +39,11 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return this;
   }
 
+  OrderByRandom(): BaseRepository<Model, SaveModel> {
+    this.query += ` ORDER BY RAND()`;
+    return this;
+  }
+
   Limit(count: number): BaseRepository<Model, SaveModel> {
     this.query += ` LIMIT ?`;
     this.params.push(count);
