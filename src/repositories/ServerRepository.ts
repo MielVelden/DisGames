@@ -13,8 +13,12 @@ class ServerRepository {
         return this.baseRepository.Select().Execute();
     }
 
+    async getByServerIdAsync(serverId: string): Promise<ServersModel> {
+        const model = await this.baseRepository.Select().Where({ ServerId: serverId }).Limit(1).Execute();
+        return model[0];
+    }
+
     async getServerByIdAsync(id: number) {
-        console.log(id);
         const model = await this.baseRepository.Select().Where({ Id: id }).Limit(1).Execute();
         return model[0];
     }

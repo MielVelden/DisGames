@@ -1,21 +1,22 @@
 import { User } from "../domain/User";
 import { Component, BaseSelectMenu, ActionButton } from "./Message";
 import { Duration } from "../../utils/Duration";
-import { ServerModel } from "../domain/Server";
-import { Interaction as DiscordInteraction } from "discord.js";
+import { ServersModel } from "../database/TableInterfaces";
+import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 
 export enum EventType {
     SLASH_COMMAND = "SLASH_COMMAND",
     BUTTON = "BUTTON",
     SELECT_MENU = "SELECT_MENU",
     MODAL_SUBMIT = "MODAL_SUBMIT",
+    MESSAGE = "MESSAGE",
 }
 
 export interface InteractionEvent {
     type: EventType;
     customId: string;
 
-    currentInteraction: DiscordInteraction;
+    currentInteraction: DiscordInteraction | DiscordMessage;
 
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;
@@ -28,7 +29,7 @@ export interface InteractionEvent {
     getUserInputByButtonsAsync(question: string, buttons: string[]): Promise<string | null>;
 
     user: User;
-    server: ServerModel;
+    server: ServersModel;
 
     messageId: string;
     channelId: string;
@@ -49,6 +50,7 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
     reactAsync(emoji: string): Promise<void>;
     deleteAsync(): Promise<void>;
+    content: string;
 }
 
 export interface Handler {

@@ -22,9 +22,14 @@ const client = new DiscordClient({
 
 client.once('ready', async () => {
   console.log(`[INFO] Logged in as ${client.user?.tag}`);
-  await createConnectionAsync();
-  await loadCommands(client);
-  await loadEvents(client);
+  await createConnectionAsync().then(async (success) => {
+    if (success) {
+      await loadCommands(client);
+      await loadEvents(client);
+    } else {
+      console.error(`[ERROR] Failed to connect to database`);
+    }
+  });
 });
 
 client.login(token);

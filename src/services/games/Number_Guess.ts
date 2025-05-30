@@ -1,10 +1,11 @@
-import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum, GameType } from "../../interfaces/domain/Game";
+import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameTypeEnum } from "../../interfaces/enums";
 
 const MAX_NUMBER = 100;
 
 export default {
     config: {
-        id: GameType.NUMBER_GUESS,
+        id: GameTypeEnum.NUMBER_GUESS,
         name: "NumberGuess",
         description: "Raad het juiste getal tussen 1 en 100",
         points: 1,
@@ -17,7 +18,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === event.gameData.answer;
+            return Number(event.answer) === Number(event.gameData.Answer);
         },
 
         processAnswer(event: GameEvent): void {
@@ -29,7 +30,7 @@ export default {
         },
 
         getNextAnswer(event: GameEvent): void {
-            event.gameData.answer = Math.floor(Math.random() * MAX_NUMBER) + 1;
+            event.gameData.Answer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
         }
     }
 } as GameModule;

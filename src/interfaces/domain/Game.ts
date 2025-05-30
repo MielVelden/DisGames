@@ -1,18 +1,6 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
-import { ServerModel } from "./Server";
-import { GameData } from "./GameData";
-
-export enum GameType {
-    COUNTING = 1,
-    WORD_SNAKE = 2,
-    ANAGRAM = 3,
-    NUMBER_GUESS = 4,
-    TRIVIA_QUIZ = 5,
-    GUESS_THE_PRICE = 6,
-    MATH_QUIZ = 7,
-    GUESS_THE_FLAG = 8,
-}
+import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
 
 // Game configuration interface
 export interface GameConfig {
@@ -56,8 +44,7 @@ export interface GameAction {
 }
 
 export enum GameActionEnum {
-    SEND_MESSAGE = "send_message",
-    REPLY_MESSAGE = "reply_message",
+    COMPONENT = "component",
     REACTION = "reaction",
 }
 
@@ -68,15 +55,15 @@ export enum GameActionPriorityEnum {
     CRITICAL = 3,
 }
 
-export interface GameEvent {
+export interface GameEvent extends GameFunctions {
     gameId: number;
     gameConfig: GameConfig;
 
     user: User;
-    server: ServerModel;
+    server: ServersModel;
     
     answer?: string | number | boolean;
-    gameData: GameData;
+    gameData: GamesModel;
     
     actions: GameAction[];
     addAction(action: GameAction): void;

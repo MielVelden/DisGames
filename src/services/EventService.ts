@@ -76,8 +76,13 @@ export class EventService {
         return this.handleButtonInteraction(event);
       case EventType.SELECT_MENU:
         return this.handleSelectMenuInteraction(event);
+      case EventType.MESSAGE:
       case EventType.SLASH_COMMAND:
+      case EventType.MODAL_SUBMIT:
         throw new Error("Slash command not implemented");
+      default:
+          const exhaustiveCheck: never = event.type;
+          throw new Error(`Unhandled event type: ${exhaustiveCheck}`);
     }
   }
 } 

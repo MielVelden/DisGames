@@ -1,9 +1,11 @@
 import { ComponentType } from "../../interfaces/application/Message";
-import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum, GameType } from "../../interfaces/domain/Game";
+import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameTypeEnum } from "../../interfaces/enums";
+import ComponentService from "../ComponentService";
 
 export default {
     config: {
-        id: GameType.COUNTING,
+        id: GameTypeEnum.COUNTING,
         name: "Counting",
         description: "Start counting with each other",
         points: 1,
@@ -18,7 +20,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === event.gameData.answer;
+            return event.answer === event.gameData.Answer;
         },
 
         processAnswer(event: GameEvent): void {
@@ -30,7 +32,13 @@ export default {
         },
 
         getNextAnswer(event: GameEvent): void {
-            event.gameData.answer = (event.gameData.answer as number) + 1;
+            event.gameData.Answer = (Number(event.gameData.Answer) + 1).toString();
+
+            event.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.HIGH,
+                component: ComponentService.createContent("Next number is " + event.gameData.Answer)
+            })
         }
     }
 } as GameModule;

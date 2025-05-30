@@ -24,9 +24,8 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   }
 
   Where<K extends keyof Model>(condition: Partial<Record<K, Model[K]>>): this {
-    let counter = this.params.length;
     const conditions = Object.entries(condition)
-      .map(([key, value]) => `${key} = $${++counter}`)
+      .map(([key]) => `${key} = ?`)
       .join(' AND ');
 
     this.query += ` WHERE ${conditions}`;
@@ -41,15 +40,13 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   }
 
   Limit(count: number): BaseRepository<Model, SaveModel> {
-    let counter = this.params.length;
-    this.query += ` LIMIT $${++counter}`;
+    this.query += ` LIMIT ?`;
     this.params.push(count);
     return this;
   }
 
   Offset(count: number): BaseRepository<Model, SaveModel> {
-    let counter = this.params.length;
-    this.query += ` OFFSET $${++counter}`;
+    this.query += ` OFFSET ?`;
     this.params.push(count);
     return this;
   }
@@ -65,10 +62,10 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       // UPDATE
       const setClause = Object.keys(entity)
         .filter(key => key !== 'Id')
-        .map((key, index) => `${key} = $${index + 1}`)
+        .map(key => `${key} = ?`)
         .join(', ');
 
-      const query = `UPDATE ${this.table} SET ${setClause} WHERE id = $${Object.keys(entity).length}`;
+      const query = `UPDATE ${this.table} SET ${setClause} WHERE id = ?`;
       const params = [...Object.values(entity).filter((_, index) => Object.keys(entity)[index] !== 'Id'), entity.Id];
 
       // Run the update
@@ -82,7 +79,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       // INSERT
       const keys = Object.keys(entity).join(', ');
       const values = Object.values(entity)
-        .map((_, index) => `$${index + 1}`)
+        .map(() => '?')
         .join(', ');
 
       const query = `INSERT INTO ${this.table} (${keys}) VALUES (${values}) RETURNING *`;

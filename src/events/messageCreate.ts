@@ -6,7 +6,8 @@ import {
     Message,
 } from 'discord.js';
 import DiscordService from '../services/DiscordService';
-
+import { MessageInteractionEvent } from '../interfaces/application/Event';
+import GameService from '../services/GameService';
 
 export default {
     name: Events.MessageCreate,
@@ -16,10 +17,8 @@ export default {
             if (message.author.bot)
                 return;
 
-            console.log(message);
-            // Map the interaction to the InteractionEvent interface
-            // const interactionEvent = await DiscordService.mapInteractionToInteractionEventAsync(message);
-            // console.log("interactionEvent", interactionEvent);
+            const event = await DiscordService.mapMessageToInteractionEventAsync(message) as MessageInteractionEvent;
+            await GameService.handleGameAsync(event);
         }
         catch (error) {
             console.error(`Error handling interaction: ${error}`);

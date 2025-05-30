@@ -7,7 +7,6 @@ import {
     ButtonInteraction as DiscordButtonInteraction,
     MessageComponentInteraction as DiscordMessageComponentInteraction,
     StringSelectMenuBuilder as DiscordStringSelectMenuBuilder,
-    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
     UserSelectMenuBuilder as DiscordUserSelectMenuBuilder,
     RoleSelectMenuBuilder as DiscordRoleSelectMenuBuilder,
     MentionableSelectMenuBuilder as DiscordMentionableSelectMenuBuilder,
@@ -15,12 +14,10 @@ import {
     ButtonBuilder as DiscordButtonBuilder,
     ButtonStyle as DiscordButtonStyle,
     ActionRowBuilder as DiscordActionRowBuilder,
-    Component as DiscordComponent,
     Guild as DiscordServer,
-    InteractionReplyOptions as DiscordInteractionReplyOptions,
-    InteractionType as DiscordInteractionType
+    Message as DiscordMessage
 } from 'discord.js';
-import { SlashCommandBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { EventType, InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { User } from '../interfaces/domain/User';
 import { Permission } from '../interfaces/application/Permission';
@@ -33,12 +30,10 @@ import {
     ChannelSelect,
     Component
 } from '../interfaces/application/Message';
-import { ServerModel } from '../interfaces/domain/Server';
-import { LanguageEnum } from '../interfaces/enums/database/LanguageEnum';
 import { Command, CommandOptionType } from '../interfaces/application/Command';
-import { DiscordClient } from '../interfaces/application/DiscordClient';
 import ComponentService from './ComponentService';
-import { calculateDuration, DurationEnum } from '../utils/Duration';
+import { ServersModel } from '../interfaces/database/TableInterfaces';
+import ServerService from './ServerService';
 
 type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 type SelectMenu = StringSelect | UserSelect | RoleSelect | MentionableSelect | ChannelSelect;
@@ -240,6 +235,38 @@ class DiscordService {
         return event;
     }
 
+    public async mapMessageToInteractionEventAsync(interaction: DiscordMessage): Promise<InteractionEvent> {
+        const user = await this.mapDiscordUserToUser(interaction.author, interaction.member as DiscordGuildMember);
+        const server = await this.mapDiscordServerToServer(interaction.guild as DiscordServer);
+
+        // Create a base interaction event
+        const event: InteractionEvent = {
+            type: EventType.MESSAGE,
+            customId: interaction.id,
+            currentInteraction: interaction,
+            user: user,
+            channelId: interaction.channelId!,
+            guildId: interaction.guildId!,
+            messageId: interaction.id,
+            server: server,
+            content: interaction.content,
+
+            components: [],
+            addComponentAsync: async (component: Component) => await this.addComponentAsync(event, component),
+            addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
+            clearComponentsAsync: async () => await this.clearComponentsAsync(event),
+            editAsync: async (content?: string) => await this.editAsync(event, content || ""),
+            replyAsync: async (content?: string) => await this.replyAsync(event, content || ""),
+            deleteAsync: async () => await this.deleteAsync(interaction),
+            reactAsync: async (emoji: string) => await this.reactAsync(interaction, emoji),
+
+            getUserInputByButtonsAsync: async (question: string, buttons: string[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
+            getUserInputBySelectMenuAsync: async (selectMenu: any) => { throw new Error("Not implemented yet"); },
+        } as InteractionEvent;
+
+        return event;
+    }
+
     private async mapDiscordUserToUser(user: DiscordUser, member: DiscordGuildMember): Promise<User> {
         return {
             id: user.id,
@@ -252,12 +279,8 @@ class DiscordService {
         } as User;
     }
 
-    private async mapDiscordServerToServer(server: DiscordServer): Promise<ServerModel> {
-        return {
-            serverId: server.id,
-            name: server.name,
-            language: LanguageEnum.NL,
-        } as ServerModel;
+    private async mapDiscordServerToServer(server: DiscordServer): Promise<ServersModel> {
+        return ServerService.getServer(server.id, true);
     }
 
     private async mapSelectMenuToDiscordSelectMenuAsync(selectMenu: SelectMenu): Promise<DiscordSelectMenuBuilder> {
@@ -460,8 +483,12 @@ class DiscordService {
             components: [components]
         };
 
-        if (event.currentInteraction.isChatInputCommand() || event.currentInteraction.isMessageComponent() || event.currentInteraction.isButton()) {
+        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
             await event.currentInteraction.reply(content);
+        } else if (event.currentInteraction instanceof DiscordMessage) {
+            await event.currentInteraction.reply(content);
+        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
+            await event.currentInteraction.update(content);
         }
     }
 
@@ -472,19 +499,27 @@ class DiscordService {
             components: [components]
         };
 
-        if (event.currentInteraction.isChatInputCommand()) {
+        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
             await event.currentInteraction.editReply(content);
-        } else if (event.currentInteraction.isMessageComponent() || event.currentInteraction.isButton()) {
+        } else if (event.currentInteraction instanceof DiscordMessage) {
+            await event.currentInteraction.edit(content);
+        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
             await event.currentInteraction.update(content);
         }
     }
 
-    private async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction): Promise<void> {
-        await interaction.deleteReply();
+    private async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction | DiscordMessage): Promise<void> {
+        if(interaction instanceof DiscordMessage)
+            await interaction.delete();
+        else
+            await interaction.deleteReply();
     }
 
-    private async reactAsync(interaction: DiscordMessageInteraction, emoji: string): Promise<void> {
-        await interaction.message.react(emoji);
+    private async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {
+        if(interaction instanceof DiscordMessage)
+            await interaction.react(emoji);
+        else
+            await interaction.message.react(emoji);
     }
 
     private async getUserInputBySelectMenuAsync(interaction: DiscordMessageInteraction, selectMenu: SelectMenu): Promise<InteractionEvent> {
@@ -515,7 +550,12 @@ class DiscordService {
                 return this.mapButtonToDiscordButtonAsync(btn);
             }));
 
-            if (event.currentInteraction.isChatInputCommand()) {
+            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
+                await event.currentInteraction.reply({
+                    content: question,
+                    components: [this.createActionRowWithComponents(discordButtons)]
+                });
+            } else if (event.currentInteraction instanceof DiscordMessage) {
                 await event.currentInteraction.reply({
                     content: question,
                     components: [this.createActionRowWithComponents(discordButtons)]
