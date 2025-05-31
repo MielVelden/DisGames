@@ -1,4 +1,4 @@
-import { Command, CommandOption, CommandOptionType } from "../interfaces/application/Command";
+import { Command, CommandOptionType } from "../interfaces/application/Command";
 import { InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { ActionButton, ButtonStyle, ComponentType } from "../interfaces/application/Message";
 import { Permission } from "../interfaces/application/Permission";

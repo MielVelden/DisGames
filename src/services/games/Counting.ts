@@ -1,4 +1,3 @@
-import { ComponentType } from "../../interfaces/application/Message";
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
 import ComponentService from "../ComponentService";
@@ -10,6 +9,7 @@ export default {
         description: "Start counting with each other",
         points: 1,
         expectedType: "number",
+        firstAnswer: "1",
         options: {
             [GameOptionEnum.IS_ACTIVE]: true,
             [GameOptionEnum.ALLOW_MESSAGE_CHANGE]: false,

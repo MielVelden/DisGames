@@ -10,6 +10,7 @@ export default {
         description: "Raad het juiste getal tussen 1 en 100",
         points: 1,
         expectedType: "number",
+        firstAnswer: "1",
         options: {
             [GameOptionEnum.IS_ACTIVE]: true,
             [GameOptionEnum.ALLOW_MESSAGE_CHANGE]: false
@@ -18,7 +19,30 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === Number(event.gameData.Answer);
+            const answer = Number(event.gameData.Answer);
+            const userAnswer = Number(event.answer);
+
+            if(userAnswer === answer) {
+                return true;
+            }
+
+            // If the user answer is lower than the answer, add higher icon
+            if(userAnswer < answer)
+                event.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: "🔼"
+                });
+
+            // If the user answer is higher than the answer, add lower icon
+            if(userAnswer > answer)
+                event.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: "🔽"
+                });
+
+            return false;
         },
 
         processAnswer(event: GameEvent): void {

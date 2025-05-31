@@ -1,7 +1,5 @@
 import {
-    Interaction,
     Client,
-    Collection,
     Events,
     Message,
 } from 'discord.js';

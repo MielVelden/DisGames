@@ -1,7 +1,7 @@
 import { PointsModel } from "../interfaces/database/TableInterfaces";
 import PointRepository from "../repositories/PointRepository";
 
-class ServerService {
+class PointService {
     public async addPoints(userId: string, serverId: string, points: number): Promise<PointsModel> {
         const user = await PointRepository.getPointsByUserIdAsync(userId,serverId);
 
@@ -18,4 +18,4 @@ class ServerService {
     }
 }
 
-export default new ServerService();
+export default new PointService();

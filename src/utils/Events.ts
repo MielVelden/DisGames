@@ -3,7 +3,7 @@ import fs from "fs";
 import { DiscordClient } from "../interfaces/application/DiscordClient";
 
 const eventsPath = path.join(__dirname, '..', 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js') || file.endsWith('.ts'));
 
 export async function loadEvents(client: DiscordClient): Promise<void> {
     for (const file of eventFiles) {

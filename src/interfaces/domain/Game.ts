@@ -9,6 +9,7 @@ export interface GameConfig {
     description: string;
     points: number;
     expectedType: "string" | "number" | "boolean";
+    firstAnswer: string;
     options: {
         [key in GameOptionEnum]: boolean;
     };

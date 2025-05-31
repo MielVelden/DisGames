@@ -55,6 +55,7 @@ export interface MessageInteractionEvent extends InteractionEvent, ReplyInteract
 
 export interface SelectMenuInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
     selected: string;
+    deferReplyAsync(): Promise<void>;
 }
 
 export interface Handler {

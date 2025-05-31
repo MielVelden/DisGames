@@ -233,6 +233,7 @@ class DiscordService {
                 customId: interaction.customId,
                 replyAsync: async (content?: string) => await this.replyAsync(event, content || ""),
                 selected: interaction.values[0],
+                deferReplyAsync: async () => await this.deferUpdateAsync(interaction),
             } as SelectMenuInteractionEvent;
         } else {
             console.log("Unknown interaction type", interaction);
@@ -296,6 +297,7 @@ class DiscordService {
                 const stringSelect = selectMenu as StringSelect;
                 const discordSelectMenu = new DiscordStringSelectMenuBuilder()
                     .setCustomId(stringSelect.custom_id)
+                    .setDisabled(stringSelect.disabled || false)
                     .setPlaceholder(stringSelect.placeholder || "Select an option")
                     .setMinValues(stringSelect.min_values || 1)
                     .setMaxValues(stringSelect.max_values || 1);
@@ -312,6 +314,7 @@ class DiscordService {
                 const userSelect = selectMenu as UserSelect;
                 const discordSelectMenu = new DiscordUserSelectMenuBuilder()
                     .setCustomId(userSelect.custom_id)
+                    .setDisabled(userSelect.disabled || false)
                     .setPlaceholder(userSelect.placeholder || "Select a user")
                     .setMinValues(userSelect.min_values || 1)
                     .setMaxValues(userSelect.max_values || 1);
@@ -326,6 +329,7 @@ class DiscordService {
                 const roleSelect = selectMenu as RoleSelect;
                 const discordSelectMenu = new DiscordRoleSelectMenuBuilder()
                     .setCustomId(roleSelect.custom_id)
+                    .setDisabled(roleSelect.disabled || false)
                     .setPlaceholder(roleSelect.placeholder || "Select a role")
                     .setMinValues(roleSelect.min_values || 1)
                     .setMaxValues(roleSelect.max_values || 1);
@@ -340,6 +344,7 @@ class DiscordService {
                 const mentionableSelect = selectMenu as MentionableSelect;
                 const discordSelectMenu = new DiscordMentionableSelectMenuBuilder()
                     .setCustomId(mentionableSelect.custom_id)
+                    .setDisabled(mentionableSelect.disabled || false)
                     .setPlaceholder(mentionableSelect.placeholder || "Select a mentionable")
                     .setMinValues(mentionableSelect.min_values || 1)
                     .setMaxValues(mentionableSelect.max_values || 1);
@@ -350,6 +355,7 @@ class DiscordService {
                 const channelSelect = selectMenu as ChannelSelect;
                 const discordSelectMenu = new DiscordChannelSelectMenuBuilder()
                     .setCustomId(channelSelect.custom_id)
+                    .setDisabled(channelSelect.disabled || false)
                     .setPlaceholder(channelSelect.placeholder || "Select a channel")
                     .setMinValues(channelSelect.min_values || 1)
                     .setMaxValues(channelSelect.max_values || 1);
@@ -487,10 +493,18 @@ class DiscordService {
 
     private async replyAsync(event: InteractionEvent, message: string): Promise<void> {
         const components = await this.mapActionRowComponents(event);
-        const content = {
-            content: message,
-            components: [components]
-        };
+        let content;
+        if(components.components.length > 0) {
+            content = {
+                content: message,
+                components: [components]
+            };
+        } else if(message) {
+            content = {
+                content: message,
+            };
+        } else
+            return;
 
         if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
             if (event.currentInteraction.replied)
@@ -525,7 +539,10 @@ class DiscordService {
         } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
             await event.currentInteraction.update(content);
         } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
-            await event.currentInteraction.update(content);
+            if(event.currentInteraction.deferred) 
+                await event.currentInteraction.editReply(content);
+            else
+                await event.currentInteraction.update(content);
         } else {
             throw new Error("Not implemented yet");
         }
@@ -545,31 +562,46 @@ class DiscordService {
             await interaction.message.react(emoji);
     }
 
+    private async deferUpdateAsync(interaction: DiscordStringSelectMenuInteraction): Promise<void> {
+        await interaction.deferUpdate();
+    }
+
+    private async handleSelectMenuTimeout(event: InteractionEvent, selectMenu: SelectMenu, resolve: (value: InteractionEvent | null) => void): Promise<void> {
+        // Disable the select menu
+        selectMenu.disabled = true;
+
+        // Clear the components and add the select menu back to the components
+        await event.clearComponentsAsync();
+        await event.addComponentAsync(selectMenu);
+
+        // Edit the message to show the timeout
+        await this.editAsync(event, "Select menu timed out");
+        resolve(null);
+    }
+
     private async getUserInputBySelectMenuAsync(event: InteractionEvent, selectMenu: SelectMenu): Promise<InteractionEvent | null> {
         return new Promise(async (resolve) => {
+            // Create select menu with handlers
             const selectMenuHandler = ComponentService.createSelectMenu(selectMenu, {
                 userId: event.user.id,
                 onTimeout: async () => {
-                    resolve(null);
+                    await this.handleSelectMenuTimeout(event, selectMenuHandler, resolve);
                 },
-                handle: async (e: InteractionEvent) => {
-                    resolve(e);
-                }
+                handle: async (e: InteractionEvent) => resolve(e)
             });
+
+            // Map and send select menu
             const discordSelectMenu = await this.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
-            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-                await event.currentInteraction.reply({
-                    content: "test",
-                    components: [this.createActionRowWithComponents(discordSelectMenu)]
-                });
-            } else if (event.currentInteraction instanceof DiscordMessage) {
-                await event.currentInteraction.reply({
-                    content: "test",
-                    components: [this.createActionRowWithComponents(discordSelectMenu)]
-                });
-            } else {
+            const replyOptions = {
+                content: "test",
+                components: [this.createActionRowWithComponents(discordSelectMenu)]
+            };
+
+            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction ||
+                event.currentInteraction instanceof DiscordMessage) {
+                await event.currentInteraction.reply(replyOptions);
+            } else
                 throw new Error("Not implemented yet");
-            }
         });
     }
 

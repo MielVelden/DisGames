@@ -1,15 +1,20 @@
-import { MessageInteractionEvent } from "../interfaces/application/Event";
-import { GamesModel } from "../interfaces/database/TableInterfaces";
+import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
+import { GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameEvent, GameModule } from "../interfaces/domain/Game";
 import GameRepository from "../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
 import { GameTypeEnum } from "../interfaces/enums";
-import { Component, ComponentType, TextDisplay } from "../interfaces/application/Message";
+import { Component } from "../interfaces/application/Message";
 import PointService from "./PointService";
+import { isValidEnumValue } from "../utils/Enum";
+import GameDataRepository from "../repositories/GameDataRepository";
+import { ErrorHelper } from "../utils/ErrorHelper";
+import ComponentService from "./ComponentService";
+import { User } from "../interfaces/domain/User";
+import { createCancelButton, createMoveButton } from "../utils/Button";
 
 class GameService {
-
     private games: GameModule[] = [];
 
     constructor() {
@@ -54,6 +59,70 @@ class GameService {
         return game;
     }
 
+    public async saveAsync(savable: GamesSaveModel, user: User): Promise<GamesModel> {
+        // Check if the savable is valid
+        if (savable.Id)
+            throw ErrorHelper.throwError("Game already exists");
+
+        if (!savable.ChannelId || !savable.ServerId)
+            throw ErrorHelper.throwError("Channel or server not found");
+
+        if (savable.Answer)
+            throw ErrorHelper.throwError("Answer already exists");
+
+        if (!isValidEnumValue(GameTypeEnum, savable.GameTypeEnum as GameTypeEnum))
+            throw ErrorHelper.throwError("Invalid game type");
+
+        // Check if game exists in channel or server
+        const [activeChannelGame, activeServerGame] = await Promise.all([
+            GameRepository.getByChannelIdAsync(savable.ChannelId),
+            GameRepository.getByServerIdAsync(savable.ServerId, savable.GameTypeEnum as GameTypeEnum)
+        ]);
+
+        const handleReplace = async (existingGame: GamesModel, event: InteractionEvent) => {
+            await GameRepository.deleteAsync(existingGame.Id);
+            await this.saveAsync(savable, user);
+            await event.clearComponentsAsync();
+            await event.addComponentAsync(ComponentService.createContent("Minigame replaced"));
+            await event.editAsync();
+        };
+
+        // Check if any game exists in the channel
+        if (activeChannelGame) {
+            throw ErrorHelper.throwErrorWithComponents(
+                "Replace?",
+                [createMoveButton(user.id, (event) => handleReplace(activeChannelGame, event)),
+                createCancelButton(user.id)]
+            );
+        }
+
+        // Check if the game exists in the server
+        if (activeServerGame) {
+            throw ErrorHelper.throwErrorWithComponents(
+                "Replace?",
+                [createMoveButton(user.id, (event) => handleReplace(activeServerGame, event)),
+                createCancelButton(user.id)]
+            );
+        }
+
+        // Get the game module
+        const gameModule = this.getGameById(savable.GameTypeEnum as GameTypeEnum);
+        if (!gameModule)
+            throw ErrorHelper.throwError("Game module not found");
+
+        // Set the answer
+        if (gameModule.config.firstAnswer)
+            savable.Answer = gameModule.config.firstAnswer;
+        else {
+            // Set the answer to a random game data
+            const gameData = await GameDataRepository.getGameDataByGameIdAsync(savable.GameTypeEnum as GameTypeEnum);
+            savable.Answer = gameData.Response;
+        }
+
+        // Save the game
+        return await GameRepository.save(savable);
+    }
+
     public async handleGameAsync(event: MessageInteractionEvent): Promise<void> {
         const gameEvent = await this.createGameEvent(event);
 
@@ -67,15 +136,15 @@ class GameService {
 
             // Save the model
             await GameRepository.save(gameEvent.gameData);
-
-            // Loop through all actions and handle them
-            gameEvent.actions.forEach(async (action) => {
-                await this.handleGameAction(action, event);
-            });
-
-            // Reply to the game channel
-            await event.replyAsync();
         }
+        
+        // Loop through all actions and handle them
+        gameEvent.actions.forEach(async (action) => {
+            await this.handleGameAction(action, event);
+        });
+
+        // Reply to the game channel
+        await event.replyAsync();
     }
 
     private async handleGameAction(action: GameAction, event: MessageInteractionEvent): Promise<void> {
@@ -104,7 +173,7 @@ class GameService {
             throw new Error(`Game module not found for game type ${game.GameTypeEnum}`);
 
         const expectedType = gameModule.config.expectedType;
-        
+
         var answer: string | number | boolean;
         if (expectedType === "number") {
             answer = Number(event.content);

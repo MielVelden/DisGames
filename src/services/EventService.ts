@@ -1,7 +1,7 @@
-import { ButtonHandler, SelectMenuHandler, InteractionEvent, SlashCommandInteractionEvent, EventType } from '../interfaces/application/Event';
+import { ButtonHandler, SelectMenuHandler, InteractionEvent, EventType, SelectMenuInteractionEvent } from '../interfaces/application/Event';
 import { calculateDuration, DurationEnum, durationToMilliseconds } from '../utils/Duration';
 
-export const DEFAULT_TIMEOUT = calculateDuration(1, DurationEnum.MINUTE);
+export const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
 
 export class EventService {
   private static buttonHandlers: Map<string, ButtonHandler> = new Map();
@@ -74,13 +74,14 @@ export class EventService {
     }
   }
 
-  public static async handleSelectMenuInteraction(interaction: InteractionEvent): Promise<void> {
+  public static async handleSelectMenuInteraction(interaction: SelectMenuInteractionEvent): Promise<void> {
     const handler = EventService.selectMenuHandlers.get(interaction.customId);
     console.log(`[INFO] Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.id) {
         return;
       }
+      await interaction.deferReplyAsync();
       
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
@@ -94,7 +95,7 @@ export class EventService {
       case EventType.BUTTON:
         return this.handleButtonInteraction(event);
       case EventType.SELECT_MENU:
-        return this.handleSelectMenuInteraction(event);
+        return this.handleSelectMenuInteraction(event as SelectMenuInteractionEvent);
       case EventType.MESSAGE:
       case EventType.SLASH_COMMAND:
       case EventType.MODAL_SUBMIT:

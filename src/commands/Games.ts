@@ -1,10 +1,9 @@
-import { Command, CommandOption, CommandOptionType } from "../interfaces/application/Command";
-import { InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
-import { ActionButton, ButtonStyle, ComponentType } from "../interfaces/application/Message";
+import { Command, CommandOptionType } from "../interfaces/application/Command";
+import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { Permission } from "../interfaces/application/Permission";
 import ComponentService from "../services/ComponentService";
-import DiscordService from "../services/DiscordService";
 import GameService from "../services/GameService";
+import { createGamesSelectMenu } from "../utils/SelectMenu";
 
 enum ActionEnum {
     MANAGE = "manage",
@@ -12,7 +11,7 @@ enum ActionEnum {
     SETUP = "setup"
 }
 
-export class DefaultCommand implements Command {
+export class GamesCommand implements Command {
     name = "games";
     description = "Games beheren";
     isSlashCommand = true;
@@ -45,25 +44,23 @@ export class DefaultCommand implements Command {
             case ActionEnum.HELP:
                 break;
             case ActionEnum.SETUP:
-                const gameModules = GameService.getGames();
-                const selectMenu = ComponentService.createSelectMenu({
-                    custom_id: "game",
-                    type: ComponentType.STRING_SELECT,
-                    options: gameModules.map(game => ({
-                        label: game.config.name,
-                        value: game.config.id.toString()
-                    }))
-                });
-
+                const selectMenu = createGamesSelectMenu(GameService.getGames());
                 const gameEvent = await event.getUserInputBySelectMenuAsync(selectMenu);
+
                 if (gameEvent) {
+                    const game = await GameService.saveAsync({
+                        GameTypeEnum: Number(gameEvent.selected),
+                        ChannelId: event.channelId,
+                        ServerId: event.guildId
+                    }, event.user);
+
                     await gameEvent.clearComponentsAsync();
-                    await gameEvent.addComponentAsync(ComponentService.createContent("Result: " + gameEvent.selected));
-                    await gameEvent.editAsync();   
+                    await gameEvent.addComponentAsync(ComponentService.createContent("First answer: " + game.Answer));
+                    await gameEvent.editAsync();
                 }
                 break;
         }
     }
 }
 
-export default new DefaultCommand(); 
+export default new GamesCommand(); 

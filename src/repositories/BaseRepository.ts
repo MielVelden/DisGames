@@ -1,5 +1,5 @@
-import { TableEnum } from "../interfaces/enums/index.js";
-import { getTableName, runQueryAsync } from "./util/ConnectionHandler.js";
+import { TableEnum } from "../interfaces/enums/index";
+import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 
 type Condition<T> = (x: T) => any;
 type QueryCondition = string | { [key: string]: any };
@@ -87,14 +87,22 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
         .map(() => '?')
         .join(', ');
 
-      const query = `INSERT INTO ${this.table} (${keys}) VALUES (${values}) RETURNING *`;
+      const query = `INSERT INTO ${this.table} (${keys}) VALUES (${values})`;
       const params = Object.values(entity);
 
-      const result = await runQueryAsync(query, params);
+      await runQueryAsync(query, params);
+      
+      const result = await this.Select().OrderBy('Id', 'DESC').Limit(1).Execute();
       if (result?.length === 0)
-        throw new Error('Record not found'); // TODO: better error message
+        throw new Error('Record not found');
       return result?.[0] as Model;
     }
+  }
+
+  async Delete(id: number): Promise<void> {
+    const query = `DELETE FROM ${this.table} WHERE id = ?`;
+    const params = [id];
+    await runQueryAsync(query, params);
   }
 }
 

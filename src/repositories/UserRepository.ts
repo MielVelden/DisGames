@@ -1,6 +1,6 @@
 import { UsersModel, UsersSaveModel } from "../interfaces/database";
-import BaseRepository from "./BaseRepository.js";
-import { TableEnum } from "../interfaces/enums/index.js";
+import BaseRepository from "./BaseRepository";
+import { TableEnum } from "../interfaces/enums/index";
 
 class UserRepository {
     private baseRepository: BaseRepository<UsersModel, UsersSaveModel>;

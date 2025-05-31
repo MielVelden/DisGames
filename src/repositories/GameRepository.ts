@@ -1,6 +1,6 @@
 import { GamesModel, GamesSaveModel } from "../interfaces/database";
-import BaseRepository from "./BaseRepository.js";
-import { TableEnum } from "../interfaces/enums/index.js";
+import BaseRepository from "./BaseRepository";
+import { GameTypeEnum, TableEnum } from "../interfaces/enums/index";
 
 class GameRepository {
     private baseRepository: BaseRepository<GamesModel, GamesSaveModel>;
@@ -23,10 +23,19 @@ class GameRepository {
         return model[0];
     }
 
+    async getByServerIdAsync(serverId: string, gameType: GameTypeEnum): Promise<GamesModel> {
+        const model = await this.baseRepository.Select().Where({ ServerId: serverId, GameTypeEnum: gameType }).Limit(1).Execute();
+        return model[0];
+    }
+
     async save(model: GamesSaveModel): Promise<GamesModel> {
         // TODO: Check if values are valid
 
         return this.baseRepository.Save(model);
+    }
+
+    async deleteAsync(id: number): Promise<void> {
+        await this.baseRepository.Delete(id);
     }
 }
 

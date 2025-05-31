@@ -1,6 +1,6 @@
 import { PointsModel, PointsSaveModel } from "../interfaces/database";
-import BaseRepository from "./BaseRepository.js";
-import { TableEnum } from "../interfaces/enums/index.js";
+import BaseRepository from "./BaseRepository";
+import { TableEnum } from "../interfaces/enums/index";
 
 class PointRepository {
     private baseRepository: BaseRepository<PointsModel, PointsSaveModel>;

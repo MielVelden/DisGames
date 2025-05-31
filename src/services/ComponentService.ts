@@ -1,10 +1,14 @@
 import { ButtonHandler, EventType, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
-import { ActionButton, Component, ComponentType, SelectMenu, StringSelect, TextDisplay } from "../interfaces/application/Message";
+import { ActionButton, Component, ComponentType, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { EventService } from "./EventService";
 
 class ComponentService {
-    public createButton(config: ActionButton, handlerConfig?: HandlerConfig): ActionButton {
-        return this.createComponent(config, EventType.BUTTON, handlerConfig);
+    public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
+        return this.createComponent({
+            type: ComponentType.BUTTON,
+            custom_id: crypto.randomUUID(),
+            ...config,
+        }, EventType.BUTTON, handlerConfig);
     }
 
     public createSelectMenu(config: SelectMenu, handlerConfig?: HandlerConfig): SelectMenu {
@@ -17,7 +21,7 @@ class ComponentService {
             content: content
         };
     }
-  
+
     private createComponent<T extends Component>(config: T, type: EventType, handlerConfig?: HandlerConfig): T {
         if (!handlerConfig)
             return config;
@@ -33,7 +37,7 @@ class ComponentService {
             ...config,
             custom_id: `${handler.id}`
         };
-    }    
+    }
 }
 
 export default new ComponentService();
