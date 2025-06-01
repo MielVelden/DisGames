@@ -1,9 +1,10 @@
+import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { InteractionEvent } from "./Event";
 import { Permission } from "./Permission";
 
 export interface Command {
     name: string;
-    description: string;
+    description: MultiLingualString;
     
     isSlashCommand: boolean;
     isMessageCommand: boolean;
@@ -18,7 +19,7 @@ export interface Command {
 
 export interface CommandOption {
     name: string;
-    description: string;
+    description: MultiLingualString;
     type: CommandOptionType;
     required?: boolean;
     choices?: CommandOptionChoice[];
@@ -26,7 +27,7 @@ export interface CommandOption {
 }
 
 export interface CommandOptionChoice {
-    name: string;
+    name: MultiLingualString;
     value: string;
 }
 

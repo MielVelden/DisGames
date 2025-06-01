@@ -8,7 +8,9 @@ import { EventType, SlashCommandInteractionEvent } from '../interfaces/applicati
 import { handleCommand } from '../utils/Commands';
 import { EventService } from '../services/EventService';
 import ComponentService from '../services/ComponentService';
-import { ComponentError } from '../interfaces/application/Error';
+import { ComponentError } from '../utils/ErrorHelper';
+import { MultiLingualString } from '../utils/i18n/MultiLangualString';
+import { i18n } from '../utils/i18n/i18n';
 
 
 export default {
@@ -17,7 +19,7 @@ export default {
     async execute(interaction: Interaction, client: DiscordClient): Promise<void> {
         // Map the interaction to the InteractionEvent interface
         const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction) as SlashCommandInteractionEvent;
-        
+
         try {
             if (event.type === EventType.SLASH_COMMAND)
                 await handleCommand(event.commandName, event);
@@ -26,13 +28,17 @@ export default {
         }
         catch (error) {
             if (error instanceof ComponentError && error.hasComponents()) {
-                event.clearComponentsAsync();
-                event.addComponentAsync(ComponentService.createContent(`> ${error?.toString()}`));
-                error.components!.forEach(async (component) => {
-                    await event.addComponentAsync(component);
-                });
-            } else {
-                await event.addComponentAsync(ComponentService.createContent(`> ${error?.toString()}`));
+                const errorKey = error.errorKey;
+                const errorMessage = new MultiLingualString(i18n.exceptions[errorKey]);
+                if (error.hasComponents()) {
+                    event.clearComponentsAsync();
+                    event.addComponentAsync(ComponentService.createContent(errorMessage));
+                    error.components!.forEach(async (component) => {
+                        await event.addComponentAsync(component);
+                    });
+                } else {
+                    await event.addComponentAsync(ComponentService.createContent(errorMessage));
+                }
             }
 
             await event.replyAsync();

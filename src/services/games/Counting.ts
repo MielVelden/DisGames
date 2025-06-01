@@ -1,6 +1,7 @@
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
 import ComponentService from "../ComponentService";
+import { i18n } from "../../utils/i18n/i18n";
 
 export default {
     config: {
@@ -33,11 +34,11 @@ export default {
 
         getNextAnswer(event: GameEvent): void {
             event.gameData.Answer = (Number(event.gameData.Answer) + 1).toString();
-
+            
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContent("Next number is " + event.gameData.Answer)
+                component: ComponentService.createContent(i18n.commands.games.setup.nextNumber(event.gameData.Answer))
             })
         }
     }

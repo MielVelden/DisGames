@@ -1,49 +1,42 @@
 import { Command, CommandOptionType } from "../interfaces/application/Command";
 import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { Permission } from "../interfaces/application/Permission";
+import { GamesCommandActionEnum } from "../interfaces/enums/commands/Games";
 import ComponentService from "../services/ComponentService";
 import GameService from "../services/GameService";
+import { i18n } from "../utils/i18n/i18n";
+import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createGamesSelectMenu } from "../utils/SelectMenu";
-
-enum ActionEnum {
-    MANAGE = "manage",
-    HELP = "help",
-    SETUP = "setup"
-}
 
 export class GamesCommand implements Command {
     name = "games";
-    description = "Games beheren";
+    description = new MultiLingualString(i18n.commands.games.description);
     isSlashCommand = true;
     isMessageCommand = false;
     permissions? = [Permission.ADMINISTRATOR];
     options? = [
         {
             name: "action",
-            description: "De actie om uit te voeren",
+            description: new MultiLingualString(i18n.commands.games.option.action),
             type: CommandOptionType.STRING,
             required: true,
-            choices: [
-                { name: ActionEnum.MANAGE, value: ActionEnum.MANAGE },
-                { name: ActionEnum.HELP, value: ActionEnum.HELP },
-                { name: ActionEnum.SETUP, value: ActionEnum.SETUP }
-            ]
+            choices: ComponentService.createCommandOptionChoices(i18n.commands.games.option.choices)
         }
     ];
 
     async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {
-        const action = event.getOption<ActionEnum>("action");
+        const action = event.getOption<GamesCommandActionEnum>("action");
 
         if (!action) {
-            await event.replyAsync("Je moet een actie selecteren.");
+            await event.replyAsync(new MultiLingualString(i18n.commands.games.option.noAction));
             return;
         }
 
         switch (action) {
-            case ActionEnum.MANAGE:
-            case ActionEnum.HELP:
+            case GamesCommandActionEnum.MANAGE:
+            case GamesCommandActionEnum.HELP:
                 break;
-            case ActionEnum.SETUP:
+            case GamesCommandActionEnum.SETUP:
                 const selectMenu = createGamesSelectMenu(GameService.getGames());
                 const gameEvent = await event.getUserInputBySelectMenuAsync(selectMenu);
 
@@ -55,7 +48,7 @@ export class GamesCommand implements Command {
                     }, event.user);
 
                     await gameEvent.clearComponentsAsync();
-                    await gameEvent.addComponentAsync(ComponentService.createContent("First answer: " + game.Answer));
+                    await gameEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.setup.success)));
                     await gameEvent.editAsync();
                 }
                 break;

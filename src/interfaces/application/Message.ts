@@ -1,3 +1,5 @@
+import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+
 export interface MessageContainer {
     components: Component[];
 }
@@ -161,7 +163,7 @@ export interface Section extends Component {
 
 export interface TextDisplay extends Component {
     type: ComponentType.TEXT_DISPLAY;
-    content: string;
+    content: MultiLingualString;
 }
 
 // #endregion

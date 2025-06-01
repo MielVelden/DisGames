@@ -3,6 +3,7 @@ import { Component, BaseSelectMenu, ActionButton } from "./Message";
 import { Duration } from "../../utils/Duration";
 import { ServersModel } from "../database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
+import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 
 export enum EventType {
     SLASH_COMMAND = "SLASH_COMMAND",
@@ -26,7 +27,7 @@ export interface InteractionEvent {
     editAsync(): Promise<void>;
 
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
-    getUserInputByButtonsAsync(question: string, buttons: string[]): Promise<string | null>;
+    getUserInputByButtonsAsync(question: MultiLingualString, buttons: string[]): Promise<string | null>;
 
     user: User;
     server: ServersModel;
@@ -37,7 +38,7 @@ export interface InteractionEvent {
 }
 
 export interface ReplyInteractionEvent extends InteractionEvent {
-    replyAsync(content?: string): Promise<void>;
+    replyAsync(content?: MultiLingualString): Promise<void>;
 }
 
 export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInteractionEvent {

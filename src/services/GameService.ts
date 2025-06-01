@@ -13,6 +13,9 @@ import { ErrorHelper } from "../utils/ErrorHelper";
 import ComponentService from "./ComponentService";
 import { User } from "../interfaces/domain/User";
 import { createCancelButton, createMoveButton } from "../utils/Button";
+import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
+import { i18n } from "../utils/i18n/i18n";
+import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 
 class GameService {
     private games: GameModule[] = [];
@@ -62,16 +65,16 @@ class GameService {
     public async saveAsync(savable: GamesSaveModel, user: User): Promise<GamesModel> {
         // Check if the savable is valid
         if (savable.Id)
-            throw ErrorHelper.throwError("Game already exists");
+            throw ErrorHelper.throwError(ExceptionEnum.GAME_ALREADY_EXISTS);
 
         if (!savable.ChannelId || !savable.ServerId)
-            throw ErrorHelper.throwError("Channel or server not found");
+            throw ErrorHelper.throwError(ExceptionEnum.CHANNEL_OR_SERVER_NOT_FOUND);
 
         if (savable.Answer)
-            throw ErrorHelper.throwError("Answer already exists");
+            throw ErrorHelper.throwError(ExceptionEnum.ANSWER_ALREADY_EXISTS);
 
         if (!isValidEnumValue(GameTypeEnum, savable.GameTypeEnum as GameTypeEnum))
-            throw ErrorHelper.throwError("Invalid game type");
+            throw ErrorHelper.throwError(ExceptionEnum.INVALID_GAME_TYPE);
 
         // Check if game exists in channel or server
         const [activeChannelGame, activeServerGame] = await Promise.all([
@@ -83,14 +86,14 @@ class GameService {
             await GameRepository.deleteAsync(existingGame.Id);
             await this.saveAsync(savable, user);
             await event.clearComponentsAsync();
-            await event.addComponentAsync(ComponentService.createContent("Minigame replaced"));
+            await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.setup.success)));
             await event.editAsync();
         };
 
         // Check if any game exists in the channel
         if (activeChannelGame) {
             throw ErrorHelper.throwErrorWithComponents(
-                "Replace?",
+                ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
                 [createMoveButton(user.id, (event) => handleReplace(activeChannelGame, event)),
                 createCancelButton(user.id)]
             );
@@ -99,7 +102,7 @@ class GameService {
         // Check if the game exists in the server
         if (activeServerGame) {
             throw ErrorHelper.throwErrorWithComponents(
-                "Replace?",
+                ExceptionEnum.WANT_TO_REPLACE_GAME,
                 [createMoveButton(user.id, (event) => handleReplace(activeServerGame, event)),
                 createCancelButton(user.id)]
             );
@@ -108,7 +111,7 @@ class GameService {
         // Get the game module
         const gameModule = this.getGameById(savable.GameTypeEnum as GameTypeEnum);
         if (!gameModule)
-            throw ErrorHelper.throwError("Game module not found");
+            throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
         // Set the answer
         if (gameModule.config.firstAnswer)

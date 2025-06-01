@@ -35,6 +35,7 @@ import { Command, CommandOptionType } from '../interfaces/application/Command';
 import ComponentService from './ComponentService';
 import { ServersModel } from '../interfaces/database/TableInterfaces';
 import ServerService from './ServerService';
+import { MultiLingualString } from '../utils/i18n/MultiLangualString';
 
 type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
@@ -45,7 +46,7 @@ class DiscordService {
     public mapCommandToSlashCommandBuilder(command: Command): SlashCommandBuilder {
         const builder = new SlashCommandBuilder()
             .setName(command.name)
-            .setDescription(command.description);
+            .setDescription(command.description.getMessage());
 
         if (command.options) {
             for (const option of command.options) {
@@ -54,11 +55,14 @@ class DiscordService {
                         builder.addStringOption(stringOption => {
                             stringOption
                                 .setName(option.name)
-                                .setDescription(option.description)
+                                .setDescription(option.description.getMessage())
                                 .setRequired(option.required || false);
 
                             if (option.choices && option.choices.length > 0) {
-                                stringOption.addChoices(...option.choices);
+                                stringOption.addChoices(...option.choices.map(choice => ({
+                                    name: choice.name.getMessage(),
+                                    value: choice.value
+                                })));
                             }
 
                             return stringOption;
@@ -68,12 +72,12 @@ class DiscordService {
                         builder.addIntegerOption(intOption => {
                             intOption
                                 .setName(option.name)
-                                .setDescription(option.description)
+                                .setDescription(option.description.getMessage())
                                 .setRequired(option.required || false);
 
                             if (option.choices && option.choices.length > 0) {
                                 intOption.addChoices(...option.choices.map(choice => ({
-                                    name: choice.name,
+                                    name: choice.name.getMessage(),
                                     value: parseInt(choice.value)
                                 })));
                             }
@@ -85,7 +89,7 @@ class DiscordService {
                         builder.addSubcommand(subCommand => {
                             subCommand
                                 .setName(option.name)
-                                .setDescription(option.description);
+                                .setDescription(option.description.getMessage());
 
                             if (option.options) {
                                 for (const subOption of option.options) {
@@ -101,7 +105,7 @@ class DiscordService {
                         builder.addSubcommandGroup(subGroup => {
                             subGroup
                                 .setName(option.name)
-                                .setDescription(option.description);
+                                .setDescription(option.description.getMessage());
 
                             if (option.options) {
                                 for (const subOption of option.options) {
@@ -109,7 +113,7 @@ class DiscordService {
                                         subGroup.addSubcommand(subCommand => {
                                             subCommand
                                                 .setName(subOption.name)
-                                                .setDescription(subOption.description);
+                                                .setDescription(subOption.description.getMessage());
 
                                             if (subOption.options) {
                                                 for (const subSubOption of subOption.options) {
@@ -208,14 +212,14 @@ class DiscordService {
             editAsync: async (content?: string) => await this.editAsync(event, content || ""),
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
 
-            getUserInputByButtonsAsync: async (question: string, buttons: string[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
+            getUserInputByButtonsAsync: async (question: MultiLingualString, buttons: string[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
             getUserInputBySelectMenuAsync: async (selectMenu: SelectMenu) => { return this.getUserInputBySelectMenuAsync(event, selectMenu) },
         } as InteractionEvent;
 
         if (interaction.isChatInputCommand()) {
             return {
                 ...event,
-                replyAsync: async (content?: string) => await this.replyAsync(event, content || ""),
+                replyAsync: async (content?: MultiLingualString) => await this.replyAsync(event, content),
                 deleteAsync: async () => await this.deleteAsync(interaction),
                 getOption: (name: string) => this.getOption(interaction, name),
                 commandName: interaction.commandName,
@@ -231,7 +235,7 @@ class DiscordService {
             return {
                 ...event,
                 customId: interaction.customId,
-                replyAsync: async (content?: string) => await this.replyAsync(event, content || ""),
+                replyAsync: async (content?: MultiLingualString) => await this.replyAsync(event, content),
                 selected: interaction.values[0],
                 deferReplyAsync: async () => await this.deferUpdateAsync(interaction),
             } as SelectMenuInteractionEvent;
@@ -264,11 +268,11 @@ class DiscordService {
             addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await this.clearComponentsAsync(event),
             editAsync: async (content?: string) => await this.editAsync(event, content || ""),
-            replyAsync: async (content?: string) => await this.replyAsync(event, content || ""),
+            replyAsync: async (content?: MultiLingualString) => await this.replyAsync(event, content),
             deleteAsync: async () => await this.deleteAsync(interaction),
             reactAsync: async (emoji: string) => await this.reactAsync(interaction, emoji),
 
-            getUserInputByButtonsAsync: async (question: string, buttons: string[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
+            getUserInputByButtonsAsync: async (question: MultiLingualString, buttons: string[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
             getUserInputBySelectMenuAsync: async (selectMenu: any) => { throw new Error("Not implemented yet"); },
         } as InteractionEvent;
 
@@ -398,20 +402,12 @@ class DiscordService {
         return discordButton;
     }
 
-    private async mapTextDisplayToDiscordTextDisplayAsync(textDisplay: TextDisplay): Promise<DiscordButtonBuilder> {
-        return new DiscordButtonBuilder()
-            .setCustomId('text_display_' + Date.now())
-            .setLabel(textDisplay.content || "Empty Text Display")
-            .setStyle(DiscordButtonStyle.Secondary)
-            .setDisabled(true);
-    }
-
     private async mapComponentToDiscordComponent(component: Component): Promise<DiscordComponentBuilder> {
         switch (component.type) {
             case ComponentType.BUTTON:
                 return await this.mapButtonToDiscordButtonAsync(component as ActionButton);
             case ComponentType.TEXT_DISPLAY:
-                return await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
+                throw new Error('TextDisplay components should not be mapped to Discord components');
             case ComponentType.STRING_SELECT:
             case ComponentType.USER_SELECT:
             case ComponentType.ROLE_SELECT:
@@ -429,8 +425,14 @@ class DiscordService {
     }
 
     private async mapActionRowComponents(interaction: InteractionEvent): Promise<DiscordActionRowBuilder<any>> {
-        const components = await Promise.all(interaction.components.map(component => this.mapComponentToDiscordComponent(component)));
+        const nonTextDisplayComponents = interaction.components.filter(component => component.type !== ComponentType.TEXT_DISPLAY);
+        const components = await Promise.all(nonTextDisplayComponents.map(component => this.mapComponentToDiscordComponent(component)));
         return this.createActionRowWithComponents(components);
+    }
+
+    private extractTextDisplayContent(interaction: InteractionEvent): string {
+        const textDisplayComponents = interaction.components.filter(component => component.type === ComponentType.TEXT_DISPLAY) as TextDisplay[];
+        return textDisplayComponents.map(component => component.content.getMessage()).join('\n');
     }
     // #endregion
 
@@ -491,17 +493,24 @@ class DiscordService {
         await user.send(message);
     }
 
-    private async replyAsync(event: InteractionEvent, message: string): Promise<void> {
+    private async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
         const components = await this.mapActionRowComponents(event);
+        const textDisplayContent = this.extractTextDisplayContent(event);
+        
         let content;
-        if(components.components.length > 0) {
+        const messageContent = message ? message.getMessage() : '';
+        const finalContent = textDisplayContent ? 
+            (messageContent ? `${messageContent}\n${textDisplayContent}` : textDisplayContent) : 
+            messageContent;
+
+        if(components.components.length > 0 && finalContent) {
             content = {
-                content: message,
+                content: finalContent,
                 components: [components]
             };
-        } else if(message) {
+        } else if(finalContent) {
             content = {
-                content: message,
+                content: finalContent,
             };
         } else
             return;
@@ -527,9 +536,15 @@ class DiscordService {
 
     private async editAsync(event: InteractionEvent, message: string): Promise<void> {
         const components = await this.mapActionRowComponents(event);
+        const textDisplayContent = this.extractTextDisplayContent(event);
+        
+        const finalContent = textDisplayContent ? 
+            (message ? `${message}\n${textDisplayContent}` : textDisplayContent) : 
+            message;
+
         const content = {
-            content: message,
-            components: [components]
+            content: finalContent,
+            components: components.components.length > 0 ? [components] : []
         };
 
         if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
@@ -605,7 +620,7 @@ class DiscordService {
         });
     }
 
-    private async getUserInputByButtonsAsync(event: InteractionEvent, question: string, buttons: string[]): Promise<string | null> {
+    private async getUserInputByButtonsAsync(event: InteractionEvent, question: MultiLingualString, buttons: string[]): Promise<string | null> {
         return new Promise(async (resolve) => {
             const discordButtons = await Promise.all(buttons.map(button => {
                 const btn = ComponentService.createButton({
@@ -626,12 +641,12 @@ class DiscordService {
 
             if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
                 await event.currentInteraction.reply({
-                    content: question,
+                    content: question.getMessage(),
                     components: [this.createActionRowWithComponents(discordButtons)]
                 });
             } else if (event.currentInteraction instanceof DiscordMessage) {
                 await event.currentInteraction.reply({
-                    content: question,
+                    content: question.getMessage(),
                     components: [this.createActionRowWithComponents(discordButtons)]
                 });
             } else {
