@@ -1,3 +1,4 @@
+import { GameTypeEnum } from "../../interfaces/enums";
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
@@ -27,19 +28,30 @@ export type LanguageEnumTranslations<T extends string | number> = {
     }
 };
 
+export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
+    [K in T]: {
+        name: LanguageTranslations;
+        description: LanguageTranslations;
+    }
+}
+
 export interface I18nTranslations {
     common: {
         success: LanguageTranslations;
         cancel: LanguageTranslations;
+        timedOut: LanguageTranslations;
     }
     commands: {
         games: {
             description: LanguageTranslations;
             option: LanguageCommandOptionTranslations<GamesCommandActionEnum>;
-            setup: {
+            labels: {
                 success: LanguageTranslations;
                 nextNumber: (number: string) => MultiLingualString;
+                nextWord: (word: string) => MultiLingualString;
+                selectGame: LanguageTranslations;
             },
+            types: LanguageGameTypeTranslations<GameTypeEnum>;
             event: {
                 messageChanged: (user: string, message: string) => MultiLingualString;
             }
@@ -57,6 +69,10 @@ export const i18n: I18nTranslations = {
         cancel: {
             [LanguageEnum.EN]: "Cancel",
             [LanguageEnum.NL]: "Annuleren",
+        },
+        timedOut: {
+            [LanguageEnum.EN]: "Interaction timed out",
+            [LanguageEnum.NL]: "Interactie is verlopen",
         }
     },
     commands: {
@@ -89,7 +105,7 @@ export const i18n: I18nTranslations = {
                     }
                 }
             },
-            setup: {
+            labels: {
                 success: {
                     [LanguageEnum.EN]: "Game setup successfully",
                     [LanguageEnum.NL]: "Spel instellingen succesvol opgeslagen",
@@ -98,6 +114,96 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Next number is {number}",
                     [LanguageEnum.NL]: "Volgend nummer is {number}",
                 }, { number }),
+                nextWord: (word: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Next word is {word}",
+                    [LanguageEnum.NL]: "Volgend woord is {word}",
+                }, { word }),
+                selectGame: {
+                    [LanguageEnum.EN]: "Select a game",
+                    [LanguageEnum.NL]: "Selecteer een spel",
+                }
+            },
+            types: {
+                [GameTypeEnum.COUNTING]: {
+                    name: {
+                        [LanguageEnum.EN]: "Counting",
+                        [LanguageEnum.NL]: "Telling",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Count the numbers in the message",
+                        [LanguageEnum.NL]: "Tel de nummers in het bericht",
+                    }
+                },
+                [GameTypeEnum.WORD_SNAKE]: {
+                    name: {
+                        [LanguageEnum.EN]: "Word Snake",
+                        [LanguageEnum.NL]: "Woord slang",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Make a word snake",
+                        [LanguageEnum.NL]: "Maak een woord slang",
+                    }
+                },
+                [GameTypeEnum.ANAGRAM]: {
+                    name: {
+                        [LanguageEnum.EN]: "Anagram",
+                        [LanguageEnum.NL]: "Anagram",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Guess the anagram of the word",
+                        [LanguageEnum.NL]: "Gok het anagram van het woord",
+                    }
+                },
+                [GameTypeEnum.NUMBER_GUESS]: {
+                    name: {
+                        [LanguageEnum.EN]: "Number Guess",
+                        [LanguageEnum.NL]: "Getal raden",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Guess the number",
+                        [LanguageEnum.NL]: "Gok het nummer",
+                    }
+                },
+                [GameTypeEnum.TRIVIA_QUIZ]: {
+                    name: {
+                        [LanguageEnum.EN]: "Trivia Quiz",
+                        [LanguageEnum.NL]: "Trivia quiz",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Answer the trivia questions",
+                        [LanguageEnum.NL]: "Beantwoord de trivia vragen",
+                    }
+                },
+                [GameTypeEnum.GUESS_THE_PRICE]: {
+                    name: {
+                        [LanguageEnum.EN]: "Guess the price",
+                        [LanguageEnum.NL]: "Gok de prijs",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Guess the price of the item",
+                        [LanguageEnum.NL]: "Gok de prijs van het item",
+                    }
+                },
+                [GameTypeEnum.MATH_QUIZ]: {
+                    name: {
+                        [LanguageEnum.EN]: "Math Quiz",
+                        [LanguageEnum.NL]: "Wiskunde quiz",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Solve the math problem",
+                        [LanguageEnum.NL]: "Los de wiskunde opgave op",
+                    }
+                },
+                [GameTypeEnum.GUESS_THE_FLAG]: {
+                    name: {
+                        [LanguageEnum.EN]: "Guess the flag",
+                        [LanguageEnum.NL]: "Gok het vlag",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Guess the flag of the country",
+                        [LanguageEnum.NL]: "Gok de vlag van het land",
+                    }
+                }
             },
             event: {
                 messageChanged: (user: string, message: string) => new MultiLingualString({

@@ -86,7 +86,7 @@ class GameService {
             await GameRepository.deleteAsync(existingGame.Id);
             await this.saveAsync(savable, user);
             await event.clearComponentsAsync();
-            await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.setup.success)));
+            await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.success)));
             await event.editAsync();
         };
 
@@ -129,41 +129,45 @@ class GameService {
     public async handleGameAsync(event: MessageInteractionEvent): Promise<void> {
         const gameEvent = await this.createGameEvent(event);
 
-        await this.handleGameOptions(gameEvent, event);
+        await this.handleGameOptionsAsync(gameEvent, event);
 
         if (gameEvent.validateAnswer(gameEvent)) {
             // Answer is correct
-            gameEvent.processAnswer(gameEvent);
-            gameEvent.getNextAnswer(gameEvent);
-
-            // Add points to the user
-            await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
-
-            // Save the model
-            await GameRepository.save(gameEvent.gameData);
+            await this.handleValidAnswerAsync(gameEvent);
         }
 
         // Loop through all actions and handle them
-        await this.handleGameActions(gameEvent, event);
+        await this.handleGameActionsAsync(gameEvent, event);
 
         // Reply to the game channel
         await event.replyAsync();
     }
 
-    private async handleGameActions(gameEvent: GameEvent, event: MessageInteractionEvent) {
+    private async handleValidAnswerAsync(gameEvent: GameEvent) {
+        gameEvent.processAnswer(gameEvent);
+        await gameEvent.getNextAnswerAsync(gameEvent);
+
+        // Add points to the user
+        await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
+
+        // Save the model
+        await GameRepository.save(gameEvent.gameData);
+    }
+
+    private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {
         gameEvent.actions.forEach(async (action) => {
             await this.handleGameAction(action, event);
         });
     }
 
-    private async handleGameOptions(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
+    private async handleGameOptionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
         const options = Object.entries(gameEvent.gameConfig.options)
             .filter(([_, value]) => value === true)
             .map(([key]) => Number(key))
             .sort((a, b) => a - b);
 
-        options.forEach(option => {
-            switch (option) {
+        options.forEach(async (option) => {
+            switch (option as GameOptionEnum) {
                 case GameOptionEnum.SAME_USER_DISABLED:
                     // Check if the user has already answered
                     if (gameEvent.gameData.LastUser === gameEvent.user.id) {
@@ -193,7 +197,7 @@ class GameService {
                             component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.answer as string))
                         });
                         // Handle the actions
-                        this.handleGameActions(gameEvent, event);
+                        this.handleGameActionsAsync(gameEvent, event);
                         // Send the message
                         event.sendAsync();
                         throw ErrorHelper.throwError(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
@@ -201,6 +205,13 @@ class GameService {
                     break;
                 case GameOptionEnum.IS_INACTIVE:
                     throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
+                case GameOptionEnum.ALLOW_SKIPPING:
+                    if(gameEvent.answer === "?") {
+                        await this.handleValidAnswerAsync(gameEvent);
+                        await this.handleGameActionsAsync(gameEvent, event);
+                        await event.sendAsync();
+                    }
+                    break;
                 default:
                     throw new Error(`Unhandled game option: ${option}`);
             }
@@ -261,7 +272,7 @@ class GameService {
             actions: [],
             validateAnswer: gameModule.functions.validateAnswer,
             processAnswer: gameModule.functions.processAnswer,
-            getNextAnswer: gameModule.functions.getNextAnswer,
+            getNextAnswerAsync: gameModule.functions.getNextAnswerAsync,
             deleteMessage: async () => {
                 await event.deleteAsync();
             }

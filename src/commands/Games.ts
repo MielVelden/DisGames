@@ -48,7 +48,7 @@ export class GamesCommand implements Command {
                     }, event.user);
 
                     await gameEvent.clearComponentsAsync();
-                    await gameEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.setup.success)));
+                    await gameEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.success)));
                     await gameEvent.editAsync();
                 }
                 break;

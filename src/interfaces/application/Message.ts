@@ -81,16 +81,16 @@ export type SelectMenu = StringSelect | UserSelect | RoleSelect | MentionableSel
 
 export interface BaseSelectMenu extends Component {
     custom_id: string;
-    placeholder?: string;
+    placeholder?: MultiLingualString;
     min_values?: number;
     max_values?: number;
     disabled?: boolean;
 }
 
 export interface SelectOption {
-    label: string;
+    label: MultiLingualString;
     value: string;
-    description?: string;
+    description?: MultiLingualString;
     emoji?: {
         name?: string;
         id?: string;

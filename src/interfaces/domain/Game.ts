@@ -2,12 +2,13 @@ import { Component } from "../application/Message";
 import { User } from "./User";
 import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
 import { EventTypeEnum } from "../application/Event";
+import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 
 // Game configuration interface
 export interface GameConfig {
     id: number;
-    name: string;
-    description: string;
+    name: MultiLingualString;
+    description: MultiLingualString;
     points: number;
     expectedType: "string" | "number" | "boolean";
     firstAnswer: string;
@@ -24,7 +25,7 @@ export interface GameFunctions {
     processAnswer(event: GameEvent): void;
     
     // Get the next answer/prompt
-    getNextAnswer(event: GameEvent): string | number | boolean;
+    getNextAnswerAsync(event: GameEvent): Promise<void>;
 }
 
 export interface GameModule {
@@ -40,6 +41,7 @@ export enum GameOptionEnum {
     DISABLE_MESSAGE_CHANGE = 2,
     REMOVE_ON_WRONG_ANSWER = 5,
     SAME_USER_DISABLED = 10,
+    ALLOW_SKIPPING,
 }
 
 export interface GameAction {

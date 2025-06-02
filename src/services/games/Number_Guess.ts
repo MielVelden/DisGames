@@ -1,13 +1,15 @@
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
+import { i18n } from "../../utils/i18n/i18n";
+import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 
 const MAX_NUMBER = 100;
 
 export default {
     config: {
         id: GameTypeEnum.NUMBER_GUESS,
-        name: "NumberGuess",
-        description: "Raad het juiste getal tussen 1 en 100",
+        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].name),
+        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].description),
         points: 1,
         expectedType: "number",
         firstAnswer: "1",
@@ -54,7 +56,7 @@ export default {
             })
         },
 
-        getNextAnswer(event: GameEvent): void {
+        getNextAnswerAsync(event: GameEvent): void {
             event.gameData.Answer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
         }
     }

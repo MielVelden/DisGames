@@ -19,11 +19,11 @@ import {
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
     MessageType as DiscordMessageType
 } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import { EventTypeEnum, InteractionEvent, MessageInteractionEvent, SelectMenuInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { User } from '../interfaces/domain/User';
 import { Permission } from '../interfaces/application/Permission';
-import { ActionButton, ButtonStyle, ComponentType, SelectMenu, TextDisplay } from '../interfaces/application/Message';
+import { ActionButton, ButtonStyle, ComponentType, SelectMenu, SelectOption, TextDisplay } from '../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -38,6 +38,7 @@ import { ServersModel } from '../interfaces/database/TableInterfaces';
 import ServerService from './ServerService';
 import { MultiLingualString } from '../utils/i18n/MultiLangualString';
 import { EventService } from './EventService';
+import { i18n } from '../utils/i18n/i18n';
 
 type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
@@ -299,6 +300,13 @@ class DiscordService {
         return ServerService.getServer(server.id, true);
     }
 
+    private mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
+        return new DiscordSelectMenuOptionBuilder()
+            .setLabel(option.label.getMessage())
+            .setDescription(option.description?.getMessage() || "")
+            .setValue(option.value);
+    }
+
     private async mapSelectMenuToDiscordSelectMenuAsync(selectMenu: SelectMenu): Promise<DiscordSelectMenuBuilder> {
         switch (selectMenu.type) {
             case ComponentType.STRING_SELECT: {
@@ -306,13 +314,13 @@ class DiscordService {
                 const discordSelectMenu = new DiscordStringSelectMenuBuilder()
                     .setCustomId(stringSelect.custom_id)
                     .setDisabled(stringSelect.disabled || false)
-                    .setPlaceholder(stringSelect.placeholder || "Select an option")
+                    .setPlaceholder(stringSelect.placeholder?.getMessage() || "Select an option")
                     .setMinValues(stringSelect.min_values || 1)
                     .setMaxValues(stringSelect.max_values || 1);
 
                 if (stringSelect.options) {
                     stringSelect.options.forEach(option => {
-                        discordSelectMenu.addOptions(option);
+                        discordSelectMenu.addOptions(this.mapSelectMenuOptionToDiscordSelectMenuOption(option));
                     });
                 }
 
@@ -323,7 +331,7 @@ class DiscordService {
                 const discordSelectMenu = new DiscordUserSelectMenuBuilder()
                     .setCustomId(userSelect.custom_id)
                     .setDisabled(userSelect.disabled || false)
-                    .setPlaceholder(userSelect.placeholder || "Select a user")
+                    .setPlaceholder(userSelect.placeholder?.getMessage() || "Select a user")
                     .setMinValues(userSelect.min_values || 1)
                     .setMaxValues(userSelect.max_values || 1);
 
@@ -338,7 +346,7 @@ class DiscordService {
                 const discordSelectMenu = new DiscordRoleSelectMenuBuilder()
                     .setCustomId(roleSelect.custom_id)
                     .setDisabled(roleSelect.disabled || false)
-                    .setPlaceholder(roleSelect.placeholder || "Select a role")
+                    .setPlaceholder(roleSelect.placeholder?.getMessage() || "Select a role")
                     .setMinValues(roleSelect.min_values || 1)
                     .setMaxValues(roleSelect.max_values || 1);
 
@@ -353,7 +361,7 @@ class DiscordService {
                 const discordSelectMenu = new DiscordMentionableSelectMenuBuilder()
                     .setCustomId(mentionableSelect.custom_id)
                     .setDisabled(mentionableSelect.disabled || false)
-                    .setPlaceholder(mentionableSelect.placeholder || "Select a mentionable")
+                    .setPlaceholder(mentionableSelect.placeholder?.getMessage() || "Select a mentionable")
                     .setMinValues(mentionableSelect.min_values || 1)
                     .setMaxValues(mentionableSelect.max_values || 1);
 
@@ -364,7 +372,7 @@ class DiscordService {
                 const discordSelectMenu = new DiscordChannelSelectMenuBuilder()
                     .setCustomId(channelSelect.custom_id)
                     .setDisabled(channelSelect.disabled || false)
-                    .setPlaceholder(channelSelect.placeholder || "Select a channel")
+                    .setPlaceholder(channelSelect.placeholder?.getMessage() || "Select a channel")
                     .setMinValues(channelSelect.min_values || 1)
                     .setMaxValues(channelSelect.max_values || 1);
 
@@ -500,7 +508,7 @@ class DiscordService {
     private async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
         const content = await this.buildMessageContent(event, message);
         if (!content) return;
-        
+
         await this.handleInteractionReply(event, content);
     }
 
@@ -521,10 +529,18 @@ class DiscordService {
         await channel.send(content);
     }
 
-    private async editAsync(event: InteractionEvent, message: string): Promise<void> {
-        const content = await this.buildMessageContent(event, message);
+    private async editAsync(event: InteractionEvent, message: MultiLingualString | string): Promise<void> {
+        var content: { content: string; components: DiscordActionRowBuilder<any>[] } | null = null;
+        if (typeof message === 'string')
+            content = await this.buildMessageContent(event, message);
+        else
+            content = {
+                content: message.getMessage(),
+                components: []
+            };
+
         if (!content) return;
-        
+
         await this.handleInteractionEdit(event, content);
     }
 
@@ -537,7 +553,7 @@ class DiscordService {
             // For button interactions, we can get the message ID
             if (interaction instanceof DiscordButtonInteraction && interaction.message)
                 EventService.markMessageAsInternallyDeleted(interaction.message.id);
-            
+
             await interaction.deleteReply();
         }
     }
@@ -562,7 +578,7 @@ class DiscordService {
         await event.addComponentAsync(selectMenu);
 
         // Edit the message to show the timeout
-        await this.editAsync(event, "Select menu timed out");
+        await this.editAsync(event, new MultiLingualString(i18n.common.timedOut));
         resolve(null);
     }
 
@@ -655,10 +671,10 @@ class DiscordService {
     private async buildMessageContent(event: InteractionEvent, message?: MultiLingualString | string): Promise<{ content: string; components: DiscordActionRowBuilder<any>[] } | null> {
         const components = await this.mapActionRowComponents(event);
         const textDisplayContent = this.extractTextDisplayContent(event);
-        
+
         const messageContent = typeof message === 'string' ? message : message?.getMessage() ?? '';
-        const finalContent = textDisplayContent ? 
-            (messageContent ? `${messageContent}\n${textDisplayContent}` : textDisplayContent) : 
+        const finalContent = textDisplayContent ?
+            (messageContent ? `${messageContent}\n${textDisplayContent}` : textDisplayContent) :
             messageContent;
 
         if (!finalContent && components.components.length === 0) {

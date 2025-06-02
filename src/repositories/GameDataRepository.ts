@@ -1,7 +1,8 @@
 import { GameDataModel, GameDataSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { TableEnum } from "../interfaces/enums/index";
+import { LanguageEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
+import { DEFAULT_LANGUAGE } from "../utils/i18n/MultiLangualString";
 
 class GameDataRepository {
     private baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
@@ -19,8 +20,8 @@ class GameDataRepository {
         return model[0];
     }
 
-    async getGameDataByGameIdAsync(gameId: GameTypeEnum): Promise<GameDataModel> {
-        const model = await this.baseRepository.Select().Where({ GameId: gameId }).OrderByRandom().Limit(1).Execute();
+    async getGameDataByGameIdAsync(gameId: GameTypeEnum, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GameDataModel> {
+        const model = await this.baseRepository.Select().Where({ GameId: gameId, LanguageEnum: language }).OrderByRandom().Limit(1).Execute();
         return model[0];
     }
 
