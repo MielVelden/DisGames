@@ -16,7 +16,8 @@ import {
     ActionRowBuilder as DiscordActionRowBuilder,
     Guild as DiscordServer,
     Message as DiscordMessage,
-    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
+    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
+    MessageType as DiscordMessageType
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { EventType, InteractionEvent, MessageInteractionEvent, SelectMenuInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
@@ -230,6 +231,7 @@ class DiscordService {
                 customId: interaction.customId,
                 reactAsync: async (emoji: string) => await this.reactAsync(interaction, emoji),
                 deleteAsync: async () => await this.deleteAsync(interaction),
+                sendAsync: async (message: MultiLingualString | undefined) => await this.sendAsync(event, message),
             } as MessageInteractionEvent;
         } else if (interaction.isStringSelectMenu()) {
             return {
@@ -238,6 +240,7 @@ class DiscordService {
                 replyAsync: async (content?: MultiLingualString) => await this.replyAsync(event, content),
                 selected: interaction.values[0],
                 deferReplyAsync: async () => await this.deferUpdateAsync(interaction),
+                sendAsync: async (message: MultiLingualString | undefined) => await this.sendAsync(event, message),
             } as SelectMenuInteractionEvent;
         } else {
             console.log("Unknown interaction type", interaction);
@@ -247,13 +250,12 @@ class DiscordService {
         return event;
     }
 
-    public async mapMessageToInteractionEventAsync(interaction: DiscordMessage): Promise<InteractionEvent> {
+    public async mapMessageToInteractionEventAsync(interaction: DiscordMessage, eventType: EventType): Promise<InteractionEvent> {
         const user = await this.mapDiscordUserToUser(interaction.author, interaction.member as DiscordGuildMember);
         const server = await this.mapDiscordServerToServer(interaction.guild as DiscordServer);
-
         // Create a base interaction event
         const event: InteractionEvent = {
-            type: EventType.MESSAGE,
+            type: eventType,
             customId: interaction.id,
             currentInteraction: interaction,
             user: user,
@@ -268,6 +270,7 @@ class DiscordService {
             addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await this.clearComponentsAsync(event),
             editAsync: async (content?: string) => await this.editAsync(event, content || ""),
+            sendAsync: async (message: MultiLingualString | undefined) => await this.sendAsync(event, message),
             replyAsync: async (content?: MultiLingualString) => await this.replyAsync(event, content),
             deleteAsync: async () => await this.deleteAsync(interaction),
             reactAsync: async (emoji: string) => await this.reactAsync(interaction, emoji),
@@ -494,73 +497,34 @@ class DiscordService {
     }
 
     private async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
-        const components = await this.mapActionRowComponents(event);
-        const textDisplayContent = this.extractTextDisplayContent(event);
+        const content = await this.buildMessageContent(event, message);
+        if (!content) return;
         
-        let content;
-        const messageContent = message ? message.getMessage() : '';
-        const finalContent = textDisplayContent ? 
-            (messageContent ? `${messageContent}\n${textDisplayContent}` : textDisplayContent) : 
-            messageContent;
+        await this.handleInteractionReply(event, content);
+    }
 
-        if(components.components.length > 0 && finalContent) {
-            content = {
-                content: finalContent,
-                components: [components]
-            };
-        } else if(finalContent) {
-            content = {
-                content: finalContent,
-            };
-        } else
-            return;
+    private async sendAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
+        const content = await this.buildMessageContent(event, message);
+        if (!content) return;
 
-        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-            if (event.currentInteraction.replied)
-                await event.currentInteraction.editReply(content);
-            else
-                await event.currentInteraction.reply(content);
-        } else if (event.currentInteraction instanceof DiscordMessage) {
-            if (event.currentInteraction.resolved)
-                await event.currentInteraction.edit(content);
-            else
-                await event.currentInteraction.reply(content);
-        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
-            await event.currentInteraction.update(content);
-        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
-            await event.currentInteraction.update(content);
-        } else {
-            throw new Error("Not implemented yet");
+        const guild = event.currentInteraction.guild;
+        if (!guild) {
+            throw new Error("Guild not found");
         }
+
+        const channel = await guild.channels.fetch(event.channelId);
+        if (!channel || !channel.isTextBased()) {
+            throw new Error("Channel not found or not text-based");
+        }
+
+        await channel.send(content);
     }
 
     private async editAsync(event: InteractionEvent, message: string): Promise<void> {
-        const components = await this.mapActionRowComponents(event);
-        const textDisplayContent = this.extractTextDisplayContent(event);
+        const content = await this.buildMessageContent(event, message);
+        if (!content) return;
         
-        const finalContent = textDisplayContent ? 
-            (message ? `${message}\n${textDisplayContent}` : textDisplayContent) : 
-            message;
-
-        const content = {
-            content: finalContent,
-            components: components.components.length > 0 ? [components] : []
-        };
-
-        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-            await event.currentInteraction.editReply(content);
-        } else if (event.currentInteraction instanceof DiscordMessage) {
-            await event.currentInteraction.edit(content);
-        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
-            await event.currentInteraction.update(content);
-        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
-            if(event.currentInteraction.deferred) 
-                await event.currentInteraction.editReply(content);
-            else
-                await event.currentInteraction.update(content);
-        } else {
-            throw new Error("Not implemented yet");
-        }
+        await this.handleInteractionEdit(event, content);
     }
 
     private async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction | DiscordMessage): Promise<void> {
@@ -679,6 +643,65 @@ class DiscordService {
         event.components = [];
     }
     // #endregion
+
+    private async buildMessageContent(event: InteractionEvent, message?: MultiLingualString | string): Promise<{ content: string; components: DiscordActionRowBuilder<any>[] } | null> {
+        const components = await this.mapActionRowComponents(event);
+        const textDisplayContent = this.extractTextDisplayContent(event);
+        
+        const messageContent = typeof message === 'string' ? message : message?.getMessage() ?? '';
+        const finalContent = textDisplayContent ? 
+            (messageContent ? `${messageContent}\n${textDisplayContent}` : textDisplayContent) : 
+            messageContent;
+
+        if (!finalContent && components.components.length === 0) {
+            return null;
+        }
+
+        return {
+            content: finalContent,
+            components: components.components.length > 0 ? [components] : []
+        };
+    }
+
+    private async handleInteractionReply(event: InteractionEvent, content: { content: string; components: DiscordActionRowBuilder<any>[] }): Promise<void> {
+        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
+            if (event.currentInteraction.replied) {
+                await event.currentInteraction.editReply(content);
+            } else {
+                await event.currentInteraction.reply(content);
+            }
+        } else if (event.currentInteraction instanceof DiscordMessage) {
+            if (event.currentInteraction.resolved) {
+                await event.currentInteraction.edit(content);
+            } else {
+                await event.currentInteraction.reply(content);
+            }
+        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
+            await event.currentInteraction.update(content);
+        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
+            await event.currentInteraction.update(content);
+        } else {
+            throw new Error("Not implemented yet");
+        }
+    }
+
+    private async handleInteractionEdit(event: InteractionEvent, content: { content: string; components: DiscordActionRowBuilder<any>[] }): Promise<void> {
+        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
+            await event.currentInteraction.editReply(content);
+        } else if (event.currentInteraction instanceof DiscordMessage) {
+            await event.currentInteraction.edit(content);
+        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
+            await event.currentInteraction.update(content);
+        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
+            if (event.currentInteraction.deferred) {
+                await event.currentInteraction.editReply(content);
+            } else {
+                await event.currentInteraction.update(content);
+            }
+        } else {
+            throw new Error("Not implemented yet");
+        }
+    }
 }
 
 export default new DiscordService();

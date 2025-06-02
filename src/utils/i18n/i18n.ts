@@ -28,7 +28,7 @@ export type LanguageEnumTranslations<T extends string | number> = {
 };
 
 export interface I18nTranslations {
-    common:{
+    common: {
         success: LanguageTranslations;
         cancel: LanguageTranslations;
     }
@@ -39,6 +39,9 @@ export interface I18nTranslations {
             setup: {
                 success: LanguageTranslations;
                 nextNumber: (number: string) => MultiLingualString;
+            },
+            event: {
+                messageChanged: (user: string, message: string) => MultiLingualString;
             }
         }
     }
@@ -95,6 +98,12 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Next number is {number}",
                     [LanguageEnum.NL]: "Volgend nummer is {number}",
                 }, { number }),
+            },
+            event: {
+                messageChanged: (user: string, message: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "{user}: {message}",
+                    [LanguageEnum.NL]: "{user}: {message}",
+                }, { user, message }),
             }
         },
     },
@@ -126,6 +135,22 @@ export const i18n: I18nTranslations = {
         [ExceptionEnum.GAME_MODULE_NOT_FOUND]: {
             [LanguageEnum.EN]: "Game module not found",
             [LanguageEnum.NL]: "Spelmodule niet gevonden",
+        },
+        [ExceptionEnum.SAME_USER_ALREADY_ANSWERED]: {
+            [LanguageEnum.EN]: "You have already answered",
+            [LanguageEnum.NL]: "Je hebt al een antwoord gegeven",
+        },
+        [ExceptionEnum.WRONG_ANSWER]: {
+            [LanguageEnum.EN]: "Wrong answer",
+            [LanguageEnum.NL]: "Fout antwoord",
+        },
+        [ExceptionEnum.GAME_NOT_ACTIVE]: {
+            [LanguageEnum.EN]: "Game is not active",
+            [LanguageEnum.NL]: "Spel is niet actief",
+        },
+        [ExceptionEnum.MESSAGE_CHANGE_DISABLED]: {
+            [LanguageEnum.EN]: "Message change is disabled",
+            [LanguageEnum.NL]: "Bericht wijziging is uitgeschakeld",
         }
     }
 };

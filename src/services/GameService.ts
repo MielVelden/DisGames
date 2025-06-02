@@ -1,6 +1,6 @@
-import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
+import { EventType, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
-import { GameAction, GameActionEnum, GameEvent, GameModule } from "../interfaces/domain/Game";
+import { GameAction, GameActionEnum, GameActionPriorityEnum, GameEvent, GameEventTypeEnum, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
 import GameRepository from "../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
@@ -129,25 +129,76 @@ class GameService {
     public async handleGameAsync(event: MessageInteractionEvent): Promise<void> {
         const gameEvent = await this.createGameEvent(event);
 
+        await this.handleGameOptions(gameEvent, event);
+
         if (gameEvent.validateAnswer(gameEvent)) {
             // Answer is correct
             gameEvent.processAnswer(gameEvent);
             gameEvent.getNextAnswer(gameEvent);
 
             // Add points to the user
-            await PointService.addPoints(gameEvent.user.id, gameEvent.server.ServerId, gameEvent.gameConfig.points);
+            await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
 
             // Save the model
             await GameRepository.save(gameEvent.gameData);
         }
-        
+
         // Loop through all actions and handle them
-        gameEvent.actions.forEach(async (action) => {
-            await this.handleGameAction(action, event);
-        });
+        await this.handleGameActions(gameEvent, event);
 
         // Reply to the game channel
         await event.replyAsync();
+    }
+
+    private async handleGameActions(gameEvent: GameEvent, event: MessageInteractionEvent) {
+        gameEvent.actions.forEach(async (action) => {
+            await this.handleGameAction(action, event);
+        });
+    }
+
+    private async handleGameOptions(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
+        const options = Object.entries(gameEvent.gameConfig.options)
+            .filter(([_, value]) => value === true)
+            .map(([key]) => Number(key))
+            .sort((a, b) => a - b);
+
+        options.forEach(option => {
+            switch (option) {
+                case GameOptionEnum.SAME_USER_DISABLED:
+                    // Check if the user has already answered
+                    if (gameEvent.gameData.LastUser === gameEvent.user.id) {
+                        gameEvent.deleteMessage();
+                        throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
+                    } else {
+                        gameEvent.gameData.LastUser = gameEvent.user.id;
+                        gameEvent.gameData.MessageId = gameEvent.messageId;
+                    }
+                    break;
+                case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
+                    if (!gameEvent.validateAnswer(gameEvent)) {
+                        gameEvent.deleteMessage();
+                        throw ErrorHelper.throwError(ExceptionEnum.WRONG_ANSWER);
+                    }
+                    break;
+                case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
+                    if (gameEvent.gameData.LastUser === gameEvent.user.id && gameEvent.eventType === GameEventTypeEnum.MESSAGE_UPDATE) {
+                        gameEvent.deleteMessage();
+                        gameEvent.addAction({
+                            enum: GameActionEnum.COMPONENT,
+                            priority: GameActionPriorityEnum.HIGH,
+                            component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.answer as string))
+                        });
+                        this.handleGameActions(gameEvent, event);
+                        event.sendAsync();
+                        throw ErrorHelper.throwError(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
+                    }
+                    break;
+                case GameOptionEnum.IS_INACTIVE:
+                    throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
+                default:
+                    throw new Error(`Unhandled game option: ${option}`);
+            }
+        });
     }
 
     private async handleGameAction(action: GameAction, event: MessageInteractionEvent): Promise<void> {
@@ -190,11 +241,13 @@ class GameService {
         }
 
         const gameEvent: GameEvent = {
-            gameId: game.Id,
+            eventType: event.type === EventType.MESSAGE ? GameEventTypeEnum.MESSAGE_CREATE : GameEventTypeEnum.MESSAGE_UPDATE,
+            gameId: gameModule.config.id,
             gameConfig: gameModule.config,
             user: event.user,
             server: event.server,
             answer: answer,
+            messageId: event.messageId,
             addAction: (action: GameAction) => {
                 gameEvent.actions.push(action);
             },
@@ -203,6 +256,9 @@ class GameService {
             validateAnswer: gameModule.functions.validateAnswer,
             processAnswer: gameModule.functions.processAnswer,
             getNextAnswer: gameModule.functions.getNextAnswer,
+            deleteMessage: async () => {
+                await event.deleteAsync();
+            }
         } as GameEvent;
 
         return gameEvent;

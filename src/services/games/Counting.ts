@@ -12,10 +12,10 @@ export default {
         expectedType: "number",
         firstAnswer: "1",
         options: {
-            [GameOptionEnum.IS_ACTIVE]: true,
-            [GameOptionEnum.ALLOW_MESSAGE_CHANGE]: false,
-            [GameOptionEnum.REACT]: true,
-            [GameOptionEnum.SAME_USER_ALLOWED]: false,
+            [GameOptionEnum.IS_INACTIVE]: false,
+            [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
+            [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true,
+            [GameOptionEnum.SAME_USER_DISABLED]: true,
         }
     },
 
@@ -34,12 +34,6 @@ export default {
 
         getNextAnswer(event: GameEvent): void {
             event.gameData.Answer = (Number(event.gameData.Answer) + 1).toString();
-            
-            event.addAction({
-                enum: GameActionEnum.COMPONENT,
-                priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContent(i18n.commands.games.setup.nextNumber(event.gameData.Answer))
-            })
         }
     }
 } as GameModule;

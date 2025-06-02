@@ -12,8 +12,8 @@ export default {
         expectedType: "number",
         firstAnswer: "1",
         options: {
-            [GameOptionEnum.IS_ACTIVE]: true,
-            [GameOptionEnum.ALLOW_MESSAGE_CHANGE]: false
+            [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
+            [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true
         }
     },
 

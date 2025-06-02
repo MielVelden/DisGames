@@ -27,6 +27,7 @@ export class EventService {
         EventService.registerSelectMenuHandler(handler);
         break;
       case EventType.MESSAGE:
+      case EventType.MESSAGE_UPDATE:
       case EventType.SLASH_COMMAND:
       case EventType.MODAL_SUBMIT:
         throw new Error("Event type not implemented");
@@ -97,6 +98,7 @@ export class EventService {
       case EventType.SELECT_MENU:
         return this.handleSelectMenuInteraction(event as SelectMenuInteractionEvent);
       case EventType.MESSAGE:
+      case EventType.MESSAGE_UPDATE:
       case EventType.SLASH_COMMAND:
       case EventType.MODAL_SUBMIT:
         throw new Error("Event type not implemented");

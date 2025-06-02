@@ -11,6 +11,7 @@ export enum EventType {
     SELECT_MENU = "SELECT_MENU",
     MODAL_SUBMIT = "MODAL_SUBMIT",
     MESSAGE = "MESSAGE",
+    MESSAGE_UPDATE = "MESSAGE_UPDATE",
 }
 
 export interface InteractionEvent {
@@ -49,6 +50,7 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
 }
 
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    sendAsync(): Promise<void>;
     reactAsync(emoji: string): Promise<void>;
     deleteAsync(): Promise<void>;
     content: string;

@@ -31,11 +31,14 @@ export interface GameModule {
     functions: GameFunctions;
 }
 
+// Name enums where the number is the order of the run order
+// The lower the number, the earlier it runs
+// Naming convention: if the value is true, the game option will run
 export enum GameOptionEnum {
-    IS_ACTIVE = "is_active",
-    REACT = "react",
-    SAME_USER_ALLOWED = "same_user_allowed",
-    ALLOW_MESSAGE_CHANGE = "allow_message_change",
+    IS_INACTIVE = 1,
+    DISABLE_MESSAGE_CHANGE = 2,
+    REMOVE_ON_WRONG_ANSWER = 5,
+    SAME_USER_DISABLED = 10,
 }
 
 export interface GameAction {
@@ -56,7 +59,14 @@ export enum GameActionPriorityEnum {
     CRITICAL = 3,
 }
 
+export enum GameEventTypeEnum {
+    MESSAGE_CREATE = "message_create",
+    MESSAGE_UPDATE = "message_update",
+}
+
 export interface GameEvent extends GameFunctions {
+    eventType: GameEventTypeEnum;
+    messageId: string;
     gameId: number;
     gameConfig: GameConfig;
 
@@ -68,4 +78,6 @@ export interface GameEvent extends GameFunctions {
     
     actions: GameAction[];
     addAction(action: GameAction): void;
+
+    deleteMessage: () => Promise<void>;
 }
