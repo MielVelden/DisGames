@@ -1,5 +1,5 @@
 import { CommandOptionChoice } from "../interfaces/application/Command";
-import { ButtonHandler, EventType, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
+import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
 import { ActionButton, Component, ComponentType, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
@@ -20,11 +20,11 @@ class ComponentService {
             type: ComponentType.BUTTON,
             custom_id: crypto.randomUUID(),
             ...config,
-        }, EventType.BUTTON, handlerConfig);
+        }, EventTypeEnum.BUTTON, handlerConfig);
     }
 
     public createSelectMenu(config: SelectMenu, handlerConfig?: HandlerConfig): SelectMenu {
-        return this.createComponent(config, EventType.SELECT_MENU, handlerConfig);
+        return this.createComponent(config, EventTypeEnum.SELECT_MENU, handlerConfig);
     }
 
     public createContent(content: MultiLingualString): TextDisplay {
@@ -34,7 +34,7 @@ class ComponentService {
         };
     }
 
-    private createComponent<T extends Component>(config: T, type: EventType, handlerConfig?: HandlerConfig): T {
+    private createComponent<T extends Component>(config: T, type: EventTypeEnum, handlerConfig?: HandlerConfig): T {
         if (!handlerConfig)
             return config;
 

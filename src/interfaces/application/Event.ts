@@ -5,17 +5,18 @@ import { ServersModel } from "../database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 
-export enum EventType {
+export enum EventTypeEnum {
     SLASH_COMMAND = "SLASH_COMMAND",
     BUTTON = "BUTTON",
     SELECT_MENU = "SELECT_MENU",
     MODAL_SUBMIT = "MODAL_SUBMIT",
     MESSAGE = "MESSAGE",
     MESSAGE_UPDATE = "MESSAGE_UPDATE",
+    MESSAGE_DELETE = "MESSAGE_DELETE",
 }
 
 export interface InteractionEvent {
-    type: EventType;
+    type: EventTypeEnum;
     customId: string;
 
     currentInteraction: DiscordInteraction | DiscordMessage;

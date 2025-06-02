@@ -1,6 +1,6 @@
-import { EventType, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
+import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
-import { GameAction, GameActionEnum, GameActionPriorityEnum, GameEvent, GameEventTypeEnum, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
+import { GameAction, GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
 import GameRepository from "../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
@@ -181,14 +181,20 @@ class GameService {
                     }
                     break;
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
-                    if (gameEvent.gameData.LastUser === gameEvent.user.id && gameEvent.eventType === GameEventTypeEnum.MESSAGE_UPDATE) {
-                        gameEvent.deleteMessage();
+                    if (gameEvent.gameData.LastUser === gameEvent.user.id && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
+                        // Only delete the message if it is an update
+                        if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
+                            gameEvent.deleteMessage();
+
+                        // Add message changed component
                         gameEvent.addAction({
                             enum: GameActionEnum.COMPONENT,
                             priority: GameActionPriorityEnum.HIGH,
                             component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.answer as string))
                         });
+                        // Handle the actions
                         this.handleGameActions(gameEvent, event);
+                        // Send the message
                         event.sendAsync();
                         throw ErrorHelper.throwError(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                     }
@@ -241,7 +247,7 @@ class GameService {
         }
 
         const gameEvent: GameEvent = {
-            eventType: event.type === EventType.MESSAGE ? GameEventTypeEnum.MESSAGE_CREATE : GameEventTypeEnum.MESSAGE_UPDATE,
+            eventType: event.type,
             gameId: gameModule.config.id,
             gameConfig: gameModule.config,
             user: event.user,

@@ -13,6 +13,7 @@ export default {
         firstAnswer: "1",
         options: {
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
+            [GameOptionEnum.SAME_USER_DISABLED]: true,
             [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true
         }
     },

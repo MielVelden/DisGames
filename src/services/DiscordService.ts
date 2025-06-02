@@ -20,7 +20,7 @@ import {
     MessageType as DiscordMessageType
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { EventType, InteractionEvent, MessageInteractionEvent, SelectMenuInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
+import { EventTypeEnum, InteractionEvent, MessageInteractionEvent, SelectMenuInteractionEvent, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { User } from '../interfaces/domain/User';
 import { Permission } from '../interfaces/application/Permission';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu, TextDisplay } from '../interfaces/application/Message';
@@ -37,6 +37,7 @@ import ComponentService from './ComponentService';
 import { ServersModel } from '../interfaces/database/TableInterfaces';
 import ServerService from './ServerService';
 import { MultiLingualString } from '../utils/i18n/MultiLangualString';
+import { EventService } from './EventService';
 
 type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
@@ -250,7 +251,7 @@ class DiscordService {
         return event;
     }
 
-    public async mapMessageToInteractionEventAsync(interaction: DiscordMessage, eventType: EventType): Promise<InteractionEvent> {
+    public async mapMessageToInteractionEventAsync(interaction: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {
         const user = await this.mapDiscordUserToUser(interaction.author, interaction.member as DiscordGuildMember);
         const server = await this.mapDiscordServerToServer(interaction.guild as DiscordServer);
         // Create a base interaction event
@@ -472,15 +473,15 @@ class DiscordService {
         return buttonStyleValue;
     }
 
-    private mapInteractionTypeToEventType(interaction: DiscordInteraction): EventType {
+    private mapInteractionTypeToEventType(interaction: DiscordInteraction): EventTypeEnum {
         if (interaction.isChatInputCommand())
-            return EventType.SLASH_COMMAND;
+            return EventTypeEnum.SLASH_COMMAND;
         else if (interaction.isButton())
-            return EventType.BUTTON;
+            return EventTypeEnum.BUTTON;
         else if (interaction.isStringSelectMenu())
-            return EventType.SELECT_MENU;
+            return EventTypeEnum.SELECT_MENU;
         else if (interaction.isModalSubmit())
-            return EventType.MODAL_SUBMIT;
+            return EventTypeEnum.MODAL_SUBMIT;
         else
             throw new Error(`Unhandled interaction type: ${interaction.type}`);
     }
@@ -528,10 +529,17 @@ class DiscordService {
     }
 
     private async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction | DiscordMessage): Promise<void> {
-        if (interaction instanceof DiscordMessage)
+        // Mark message as internally deleted before deleting
+        if (interaction instanceof DiscordMessage) {
+            EventService.markMessageAsInternallyDeleted(interaction.id);
             await interaction.delete();
-        else
+        } else {
+            // For button interactions, we can get the message ID
+            if (interaction instanceof DiscordButtonInteraction && interaction.message)
+                EventService.markMessageAsInternallyDeleted(interaction.message.id);
+            
             await interaction.deleteReply();
+        }
     }
 
     private async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {

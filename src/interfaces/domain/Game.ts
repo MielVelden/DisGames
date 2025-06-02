@@ -1,6 +1,7 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
 import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
+import { EventTypeEnum } from "../application/Event";
 
 // Game configuration interface
 export interface GameConfig {
@@ -59,13 +60,8 @@ export enum GameActionPriorityEnum {
     CRITICAL = 3,
 }
 
-export enum GameEventTypeEnum {
-    MESSAGE_CREATE = "message_create",
-    MESSAGE_UPDATE = "message_update",
-}
-
 export interface GameEvent extends GameFunctions {
-    eventType: GameEventTypeEnum;
+    eventType: EventTypeEnum;
     messageId: string;
     gameId: number;
     gameConfig: GameConfig;
