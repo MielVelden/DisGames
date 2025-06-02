@@ -2,17 +2,9 @@ import { CommandOptionChoice } from "../interfaces/application/Command";
 import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
 import { ActionButton, Component, ComponentType, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
+import { LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { EventService } from "./EventService";
-
-type LanguageEnumTranslations<T extends string | number> = {
-    [K in T]: {
-        [LanguageEnum.EN]: string;
-        [LanguageEnum.NL]: string;
-        [LanguageEnum.ES]?: string;
-        [LanguageEnum.DE]?: string;
-    }
-};
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {

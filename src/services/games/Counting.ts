@@ -6,6 +6,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 export default {
     config: {
         id: GameTypeEnum.COUNTING,
+        emoji: "📊",
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].description),
         points: 1,

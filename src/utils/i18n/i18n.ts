@@ -40,6 +40,7 @@ export interface I18nTranslations {
         success: LanguageTranslations;
         cancel: LanguageTranslations;
         timedOut: LanguageTranslations;
+        delete: LanguageTranslations;
     }
     commands: {
         games: {
@@ -50,6 +51,9 @@ export interface I18nTranslations {
                 nextNumber: (number: string) => MultiLingualString;
                 nextWord: (word: string) => MultiLingualString;
                 selectGame: LanguageTranslations;
+                wantToDelete: LanguageTranslations;
+                deleteSuccess: LanguageTranslations;
+                moveToThisChannel: LanguageTranslations;
             },
             types: LanguageGameTypeTranslations<GameTypeEnum>;
             event: {
@@ -73,6 +77,10 @@ export const i18n: I18nTranslations = {
         timedOut: {
             [LanguageEnum.EN]: "Interaction timed out",
             [LanguageEnum.NL]: "Interactie is verlopen",
+        },
+        delete: {
+            [LanguageEnum.EN]: "Delete",
+            [LanguageEnum.NL]: "Verwijder",
         }
     },
     commands: {
@@ -121,6 +129,18 @@ export const i18n: I18nTranslations = {
                 selectGame: {
                     [LanguageEnum.EN]: "Select a game",
                     [LanguageEnum.NL]: "Selecteer een spel",
+                },
+                wantToDelete: {
+                    [LanguageEnum.EN]: "Do you want to delete this game?",
+                    [LanguageEnum.NL]: "Wil je dit spel verwijderen?",
+                },
+                deleteSuccess: {
+                    [LanguageEnum.EN]: "Game deleted successfully",
+                    [LanguageEnum.NL]: "Spel succesvol verwijderd",
+                },
+                moveToThisChannel: {
+                    [LanguageEnum.EN]: "Move to this channel",
+                    [LanguageEnum.NL]: "Verplaats naar dit kanaal",
                 }
             },
             types: {

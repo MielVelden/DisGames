@@ -8,7 +8,7 @@ export function createCancelButton(userId: string): ActionButton {
     return ComponentService.createButton(
         {
             style: ButtonStyle.DANGER,
-            label: "Cancel",
+            label: new MultiLingualString(i18n.common.cancel),
             emoji: "❌"
         },
         {
@@ -24,8 +24,24 @@ export function createCancelButton(userId: string): ActionButton {
 export function createMoveButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
     return ComponentService.createButton(
         {
-            label: "Move to this channel",
+            label: new MultiLingualString(i18n.commands.games.labels.moveToThisChannel),
             style: ButtonStyle.SECONDARY,
+        },
+        {
+            userId: userId,
+            handle: async (event: InteractionEvent) => {
+                await handle(event);
+            }
+        }
+    )
+}   
+
+export function createDeleteButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
+    return ComponentService.createButton(
+        {
+            label: new MultiLingualString(i18n.common.delete),
+            style: ButtonStyle.DANGER,
+            emoji: "🗑️"
         },
         {
             userId: userId,

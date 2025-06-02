@@ -50,7 +50,7 @@ export enum ButtonStyle {
 export interface BaseButton extends Component {
     type: ComponentType.BUTTON;
     style: ButtonStyle;
-    label?: string;
+    label?: MultiLingualString;
     emoji?: {
         name?: string;
         id?: string;
@@ -91,11 +91,7 @@ export interface SelectOption {
     label: MultiLingualString;
     value: string;
     description?: MultiLingualString;
-    emoji?: {
-        name?: string;
-        id?: string;
-        animated?: boolean;
-    };
+    emoji?: string;
     default?: boolean;
 }
 

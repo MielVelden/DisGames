@@ -11,6 +11,7 @@ export function createGamesSelectMenu(gameModules: GameModule[]): SelectMenu {
         placeholder: new MultiLingualString(i18n.commands.games.labels.selectGame),
         options: gameModules.map(game => ({
             label: game.config.name,
+            emoji: game.config.emoji,
             description: game.config.description,
             value: game.config.id.toString()
         }))

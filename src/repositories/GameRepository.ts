@@ -23,9 +23,14 @@ class GameRepository {
         return model[0];
     }
 
-    async getByServerIdAsync(serverId: string, gameType: GameTypeEnum): Promise<GamesModel> {
+    async getByServerAndGameIdAsync(serverId: string, gameType: GameTypeEnum): Promise<GamesModel> {
         const model = await this.baseRepository.Select().Where({ ServerId: serverId, GameTypeEnum: gameType }).Limit(1).Execute();
         return model[0];
+    }
+
+    async getByServerIdAsync(serverId: string): Promise<GamesModel[]> {
+        const model = await this.baseRepository.Select().Where({ ServerId: serverId }).Execute();
+        return model;
     }
 
     async save(model: GamesSaveModel): Promise<GamesModel> {

@@ -7,6 +7,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 // Game configuration interface
 export interface GameConfig {
     id: number;
+    emoji: string;
     name: MultiLingualString;
     description: MultiLingualString;
     points: number;

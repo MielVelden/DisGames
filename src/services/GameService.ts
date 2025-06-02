@@ -53,12 +53,22 @@ class GameService {
         return this.games;
     }
 
+    public async getActiveGamesAsync(serverId: string): Promise<GameModule[]> {
+        const activeGames = await GameRepository.getByServerIdAsync(serverId);
+        return this.games.filter(game => activeGames.some(activeGame => activeGame.GameTypeEnum === game.config.id));
+    }
+
     public getGameById(gameId: GameTypeEnum): GameModule | undefined {
         return this.games.find(game => game.config.id === gameId);
     }
 
     public async getGameByChannelIdAsync(channelId: string): Promise<GamesModel> {
         const game = await GameRepository.getByChannelIdAsync(channelId);
+        return game;
+    }
+
+    public async getGameByServerIdAndGameIdAsync(serverId: string, gameId: GameTypeEnum): Promise<GamesModel> {
+        const game = await GameRepository.getByServerAndGameIdAsync(serverId, gameId);
         return game;
     }
 
@@ -79,7 +89,7 @@ class GameService {
         // Check if game exists in channel or server
         const [activeChannelGame, activeServerGame] = await Promise.all([
             GameRepository.getByChannelIdAsync(savable.ChannelId),
-            GameRepository.getByServerIdAsync(savable.ServerId, savable.GameTypeEnum as GameTypeEnum)
+            GameRepository.getByServerAndGameIdAsync(savable.ServerId, savable.GameTypeEnum as GameTypeEnum)
         ]);
 
         const handleReplace = async (existingGame: GamesModel, event: InteractionEvent) => {
@@ -126,6 +136,11 @@ class GameService {
         return await GameRepository.save(savable);
     }
 
+    public async deleteAsync(id: number): Promise<void> {
+        await GameRepository.deleteAsync(id);
+    }
+
+    // #region Handle Game
     public async handleGameAsync(event: MessageInteractionEvent): Promise<void> {
         const gameEvent = await this.createGameEvent(event);
 
@@ -206,7 +221,7 @@ class GameService {
                 case GameOptionEnum.IS_INACTIVE:
                     throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.ALLOW_SKIPPING:
-                    if(gameEvent.answer === "?") {
+                    if (gameEvent.answer === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
                         await this.handleGameActionsAsync(gameEvent, event);
                         await event.sendAsync();
@@ -280,7 +295,7 @@ class GameService {
 
         return gameEvent;
     }
-
+    // #endregion
 }
 
 export default new GameService();

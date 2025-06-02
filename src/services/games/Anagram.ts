@@ -8,6 +8,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 export default {
     config: {
         id: GameTypeEnum.ANAGRAM,
+        emoji: "🔍",
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].description),
         points: 1,

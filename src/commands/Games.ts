@@ -1,9 +1,11 @@
 import { Command, CommandOptionType } from "../interfaces/application/Command";
 import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { Permission } from "../interfaces/application/Permission";
+import { GameTypeEnum } from "../interfaces/enums";
 import { GamesCommandActionEnum } from "../interfaces/enums/commands/Games";
 import ComponentService from "../services/ComponentService";
 import GameService from "../services/GameService";
+import { createDeleteButton } from "../utils/Button";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createGamesSelectMenu } from "../utils/SelectMenu";
@@ -34,6 +36,21 @@ export class GamesCommand implements Command {
 
         switch (action) {
             case GamesCommandActionEnum.MANAGE:
+                const manageEvent = await event.getUserInputBySelectMenuAsync(createGamesSelectMenu(await GameService.getActiveGamesAsync(event.server.ServerId)));
+                if (manageEvent) {
+                    await manageEvent.clearComponentsAsync();
+                    await manageEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.wantToDelete)));
+                    await manageEvent.addComponentAsync(createDeleteButton(event.user.id, async (btnEvent) => {
+                        const selected = Number(manageEvent.selected) as GameTypeEnum;
+                        const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, selected);
+                        await GameService.deleteAsync(game.Id);
+                        await btnEvent.clearComponentsAsync();
+                        await btnEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
+                        await btnEvent.editAsync();
+                    }));
+                    await manageEvent.editAsync();
+                }
+                break;
             case GamesCommandActionEnum.HELP:
                 break;
             case GamesCommandActionEnum.SETUP:

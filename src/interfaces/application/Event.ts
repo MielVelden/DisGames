@@ -29,7 +29,7 @@ export interface InteractionEvent {
     editAsync(): Promise<void>;
 
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
-    getUserInputByButtonsAsync(question: MultiLingualString, buttons: string[]): Promise<string | null>;
+    getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
 
     user: User;
     server: ServersModel;

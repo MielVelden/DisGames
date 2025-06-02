@@ -8,6 +8,7 @@ const MAX_NUMBER = 100;
 export default {
     config: {
         id: GameTypeEnum.NUMBER_GUESS,
+        emoji: "🔢",
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].description),
         points: 1,
