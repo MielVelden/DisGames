@@ -44,9 +44,7 @@ export class GamesCommand implements Command {
                         const selected = Number(manageEvent.selected) as GameTypeEnum;
                         const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, selected);
                         await GameService.deleteAsync(game.Id);
-                        await btnEvent.clearComponentsAsync();
-                        await btnEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
-                        await btnEvent.editAsync();
+                        await btnEvent.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
                     }));
                     await manageEvent.editAsync();
                 }
@@ -62,11 +60,9 @@ export class GamesCommand implements Command {
                         GameTypeEnum: Number(gameEvent.selected),
                         ChannelId: event.channelId,
                         ServerId: event.guildId
-                    }, event.user);
+                    }, event);
 
-                    await gameEvent.clearComponentsAsync();
-                    await gameEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.success)));
-                    await gameEvent.editAsync();
+                    await gameEvent.replyAsync();
                 }
                 break;
         }

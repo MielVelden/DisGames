@@ -27,6 +27,7 @@ export interface InteractionEvent {
     clearComponentsAsync(): Promise<void>;
     
     editAsync(): Promise<void>;
+    editWithComponentAsync(component: Component): Promise<void>;
 
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;

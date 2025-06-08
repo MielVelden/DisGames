@@ -1,4 +1,5 @@
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { Media } from "./Image";
 
 export interface MessageContainer {
     components: Component[];
@@ -166,19 +167,15 @@ export interface TextDisplay extends Component {
 
 // #region Media Components
 
-export interface UnfurledMediaItem {
-    url: string;
-}
-
 export interface Thumbnail extends Component {
     type: ComponentType.THUMBNAIL;
-    media: UnfurledMediaItem;
+    media: Media;
     description?: string;
     spoiler?: boolean;
 }
 
 export interface MediaGalleryItem {
-    media: UnfurledMediaItem;
+    media: Media;
     description?: string;
     spoiler?: boolean;
 }
@@ -190,7 +187,7 @@ export interface MediaGallery extends Component {
 
 export interface File extends Component {
     type: ComponentType.FILE;
-    file: UnfurledMediaItem;
+    file: Media;
     spoiler?: boolean;
 }
 

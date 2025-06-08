@@ -5,15 +5,15 @@ import { i18n } from "./i18n/i18n";
 import { MultiLingualString } from "./i18n/MultiLangualString";
 
 export class ErrorHelper {
-    static throwErrorWithComponents(message: ExceptionEnum, components: Component[]): ComponentError {
-        return new ComponentError({
+    static throwErrorWithComponents(message: ExceptionEnum, components: Component[]): never {
+        throw new ComponentError({
             message,
             components
         });
     }
 
-    static throwError(message: ExceptionEnum): ComponentError {
-        return new ComponentError({ message });
+    static throwError(message: ExceptionEnum): never {
+        throw new ComponentError({ message });
     }
 }
 

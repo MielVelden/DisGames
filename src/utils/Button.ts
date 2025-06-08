@@ -14,9 +14,7 @@ export function createCancelButton(userId: string): ActionButton {
         {
             userId: userId,
             handle: async (event: InteractionEvent) => {
-                await event.clearComponentsAsync();
-                event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.common.cancel)));
-                await event.editAsync();
+                await event.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.common.cancel)));
             }
         })
 }

@@ -72,7 +72,7 @@ class GameService {
         return game;
     }
 
-    public async saveAsync(savable: GamesSaveModel, user: User): Promise<GamesModel> {
+    public async saveAsync(savable: GamesSaveModel, event: InteractionEvent): Promise<GamesModel> {
         // Check if the savable is valid
         if (savable.Id)
             throw ErrorHelper.throwError(ExceptionEnum.GAME_ALREADY_EXISTS);
@@ -92,11 +92,9 @@ class GameService {
             GameRepository.getByServerAndGameIdAsync(savable.ServerId, savable.GameTypeEnum as GameTypeEnum)
         ]);
 
-        const handleReplace = async (existingGame: GamesModel, event: InteractionEvent) => {
+        const handleReplace = async (existingGame: GamesModel, event: MessageInteractionEvent) => {
             await GameRepository.deleteAsync(existingGame.Id);
-            await this.saveAsync(savable, user);
-            await event.clearComponentsAsync();
-            await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.success)));
+            await this.saveAsync(savable, event);
             await event.editAsync();
         };
 
@@ -104,8 +102,8 @@ class GameService {
         if (activeChannelGame) {
             throw ErrorHelper.throwErrorWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
-                [createMoveButton(user.id, (event) => handleReplace(activeChannelGame, event)),
-                createCancelButton(user.id)]
+                [createMoveButton(event.user.id, (event: InteractionEvent) => handleReplace(activeChannelGame, event as MessageInteractionEvent)),
+                createCancelButton(event.user.id)]
             );
         }
 
@@ -113,8 +111,8 @@ class GameService {
         if (activeServerGame) {
             throw ErrorHelper.throwErrorWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_GAME,
-                [createMoveButton(user.id, (event) => handleReplace(activeServerGame, event)),
-                createCancelButton(user.id)]
+                [createMoveButton(event.user.id, (event: InteractionEvent) => handleReplace(activeServerGame, event as MessageInteractionEvent)),
+                createCancelButton(event.user.id)]
             );
         }
 
@@ -132,8 +130,14 @@ class GameService {
             savable.Answer = gameData.Response;
         }
 
+        const model = await GameRepository.save(savable);
+
+        // Add start message
+        const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum as GameTypeEnum, model.Answer as string);
+        await event.addComponentAsync(startMessage);
+
         // Save the game
-        return await GameRepository.save(savable);
+        return model;
     }
 
     public async deleteAsync(id: number): Promise<void> {
@@ -170,9 +174,9 @@ class GameService {
     }
 
     private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {
-        gameEvent.actions.forEach(async (action) => {
+        for (const action of gameEvent.actions) {
             await this.handleGameAction(action, event);
-        });
+        }
     }
 
     private async handleGameOptionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
@@ -181,10 +185,9 @@ class GameService {
             .map(([key]) => Number(key))
             .sort((a, b) => a - b);
 
-        options.forEach(async (option) => {
+        for (const option of options) {
             switch (option as GameOptionEnum) {
                 case GameOptionEnum.SAME_USER_DISABLED:
-                    // Check if the user has already answered
                     if (gameEvent.gameData.LastUser === gameEvent.user.id) {
                         gameEvent.deleteMessage();
                         throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
@@ -201,20 +204,16 @@ class GameService {
                     break;
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.gameData.LastUser === gameEvent.user.id && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
-                        // Only delete the message if it is an update
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 
-                        // Add message changed component
                         gameEvent.addAction({
                             enum: GameActionEnum.COMPONENT,
                             priority: GameActionPriorityEnum.HIGH,
                             component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.answer as string))
                         });
-                        // Handle the actions
-                        this.handleGameActionsAsync(gameEvent, event);
-                        // Send the message
-                        event.sendAsync();
+                        await this.handleGameActionsAsync(gameEvent, event);
+                        await event.sendAsync();
                         throw ErrorHelper.throwError(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                     }
                     break;
@@ -230,7 +229,7 @@ class GameService {
                 default:
                     throw new Error(`Unhandled game option: ${option}`);
             }
-        });
+        }
     }
 
     private async handleGameAction(action: GameAction, event: MessageInteractionEvent): Promise<void> {

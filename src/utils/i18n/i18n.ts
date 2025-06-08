@@ -32,6 +32,7 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
     [K in T]: {
         name: LanguageTranslations;
         description: LanguageTranslations;
+        startMessage: (firstAnswer: string) => MultiLingualString;
     }
 }
 
@@ -152,7 +153,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Count the numbers in the message",
                         [LanguageEnum.NL]: "Tel de nummers in het bericht",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first number is {firstAnswer}",
+                        [LanguageEnum.NL]: "Het eerste nummer is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.WORD_SNAKE]: {
                     name: {
@@ -162,7 +167,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Make a word snake",
                         [LanguageEnum.NL]: "Maak een woord slang",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first letter is {firstAnswer}",
+                        [LanguageEnum.NL]: "Het eerste letter is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.ANAGRAM]: {
                     name: {
@@ -172,7 +181,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Guess the anagram of the word",
                         [LanguageEnum.NL]: "Gok het anagram van het woord",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first letter is {firstAnswer}",
+                        [LanguageEnum.NL]: "Het eerste letter is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.NUMBER_GUESS]: {
                     name: {
@@ -182,7 +195,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Guess the number",
                         [LanguageEnum.NL]: "Gok het nummer",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first number is {firstAnswer}",
+                        [LanguageEnum.NL]: "Het eerste nummer is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.TRIVIA_QUIZ]: {
                     name: {
@@ -192,7 +209,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Answer the trivia questions",
                         [LanguageEnum.NL]: "Beantwoord de trivia vragen",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first question is {firstAnswer}",
+                        [LanguageEnum.NL]: "De eerste vraag is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.GUESS_THE_PRICE]: {
                     name: {
@@ -202,7 +223,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Guess the price of the item",
                         [LanguageEnum.NL]: "Gok de prijs van het item",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first price is {firstAnswer}",
+                        [LanguageEnum.NL]: "De eerste prijs is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.MATH_QUIZ]: {
                     name: {
@@ -212,7 +237,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Solve the math problem",
                         [LanguageEnum.NL]: "Los de wiskunde opgave op",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first math problem is {firstAnswer}",
+                        [LanguageEnum.NL]: "De eerste wiskunde opgave is {firstAnswer}",
+                    }, { firstAnswer }),
                 },
                 [GameTypeEnum.GUESS_THE_FLAG]: {
                     name: {
@@ -222,7 +251,11 @@ export const i18n: I18nTranslations = {
                     description: {
                         [LanguageEnum.EN]: "Guess the flag of the country",
                         [LanguageEnum.NL]: "Gok de vlag van het land",
-                    }
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The first flag is {firstAnswer}",
+                        [LanguageEnum.NL]: "De eerste vlag is {firstAnswer}",
+                    }, { firstAnswer }),
                 }
             },
             event: {

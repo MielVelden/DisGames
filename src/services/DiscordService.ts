@@ -218,6 +218,7 @@ class DiscordService {
             addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await this.clearComponentsAsync(event),
             editAsync: async (content?: string) => await this.editAsync(event, content || ""),
+            editWithComponentAsync: async (component: Component) => await this.editWithComponentAsync(event, component),
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
 
             getUserInputByButtonsAsync: async (question: MultiLingualString, buttons: MultiLingualString[]) => await this.getUserInputByButtonsAsync(event, question, buttons),
@@ -277,6 +278,7 @@ class DiscordService {
             addComponentsAsync: async (components: Component[]) => await this.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await this.clearComponentsAsync(event),
             editAsync: async (content?: string) => await this.editAsync(event, content || ""),
+            editWithComponentAsync: async (component: Component) => await this.editWithComponentAsync(event, component),
             sendAsync: async (message: MultiLingualString | undefined) => await this.sendAsync(event, message),
             replyAsync: async (content?: MultiLingualString) => await this.replyAsync(event, content),
             deleteAsync: async () => await this.deleteAsync(interaction),
@@ -537,6 +539,12 @@ class DiscordService {
         }
 
         await channel.send(content);
+    }
+
+    private async editWithComponentAsync(event: InteractionEvent, component: Component): Promise<void> {
+        event.clearComponentsAsync();
+        await event.addComponentAsync(component);
+        await this.editAsync(event, "");
     }
 
     private async editAsync(event: InteractionEvent, message: MultiLingualString | string): Promise<void> {

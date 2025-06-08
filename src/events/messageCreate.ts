@@ -6,6 +6,10 @@ import {
 import DiscordService from '../services/DiscordService';
 import { MessageInteractionEvent, EventTypeEnum } from '../interfaces/application/Event';
 import GameService from '../services/GameService';
+import { ComponentError } from '../utils/ErrorHelper';
+import { i18n } from '../utils/i18n/i18n';
+import { MultiLingualString } from '../utils/i18n/MultiLangualString';
+import ComponentService from '../services/ComponentService';
 
 export default {
     name: Events.MessageCreate,
@@ -16,14 +20,31 @@ export default {
 };
 
 export async function handleMessageCreateAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
+    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
+
     try {
         if (message.author.bot)
             return;
 
-        const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
         await GameService.handleGameAsync(event);
     }
     catch (error) {
+        if (error instanceof ComponentError) {          
+            if (error.hasComponents()) {
+                const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
+                event.clearComponentsAsync();
+                event.addComponentAsync(ComponentService.createContent(errorMessage));
+                for (const component of error.components!) {
+                    await event.addComponentAsync(component);
+                }
+            } else {
+                const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
+                await event.addComponentAsync(ComponentService.createContent(errorMessage));
+            }
+            
+            await event.replyAsync();
+        }
+        
         console.error(`Error handling interaction: ${error}`);
     }
 }

@@ -1,10 +1,14 @@
 import { CommandOptionChoice } from "../interfaces/application/Command";
 import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
-import { ActionButton, Component, ComponentType, SelectMenu, TextDisplay } from "../interfaces/application/Message";
+import { MediaType } from "../interfaces/application/Image";
+import { ActionButton, Component, ComponentType, Container, SelectMenu, TextDisplay } from "../interfaces/application/Message";
+import { GamesModel } from "../interfaces/database";
+import { GameTypeEnum } from "../interfaces/enums";
 import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
-import { LanguageEnumTranslations } from "../utils/i18n/i18n";
+import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { EventService } from "./EventService";
+import MediaService from "./MediaService";
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
@@ -44,7 +48,7 @@ class ComponentService {
     }
 
     private createCommandOptionChoice<T extends string | number>(
-        enumValue: T, 
+        enumValue: T,
         translations: LanguageEnumTranslations<T>
     ): CommandOptionChoice {
         return {
@@ -57,6 +61,32 @@ class ComponentService {
         translations: LanguageEnumTranslations<T>
     ): CommandOptionChoice[] {
         return Object.keys(translations).map(value => this.createCommandOptionChoice(value as T, translations));
+    }
+
+    public createStartMessageAsync(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component {
+        const gameImage = MediaService.getGameImage(gameTypeEnum);
+
+        return {
+            type: ComponentType.CONTAINER,
+            components: [
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: i18n.commands.games.types[gameTypeEnum].startMessage(firstAnswer)
+                },
+                {
+                    type: ComponentType.MEDIA_GALLERY,
+                    items: [
+                        {
+                            media: {
+                                url: gameImage,
+                                name: gameTypeEnum,
+                                type: MediaType.PNG
+                            }
+                        }
+                    ]
+                },
+            ]
+        } as Container
     }
 }
 
