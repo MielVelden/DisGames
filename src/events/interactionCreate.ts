@@ -2,7 +2,7 @@ import {
     Interaction,
     Events,
 } from 'discord.js';
-import DiscordService from '../services/DiscordService';
+import DiscordService from '../services/discord/DiscordService';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
 import { EventTypeEnum, SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommand } from '../utils/Commands';

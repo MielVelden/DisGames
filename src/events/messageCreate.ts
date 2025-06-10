@@ -3,7 +3,7 @@ import {
     Events,
     Message,
 } from 'discord.js';
-import DiscordService from '../services/DiscordService';
+import DiscordService from '../services/discord/DiscordService';
 import { MessageInteractionEvent, EventTypeEnum } from '../interfaces/application/Event';
 import GameService from '../services/GameService';
 import { ComponentError } from '../utils/ErrorHelper';

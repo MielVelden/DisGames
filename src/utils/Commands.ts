@@ -4,7 +4,7 @@ import { DiscordClient } from "../interfaces/application/DiscordClient";
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { Command } from "../interfaces/application/Command";
-import discordService from "../services/DiscordService";
+import discordService from "../services/discord/DiscordService";
 import { InteractionEvent } from "../interfaces/application/Event";
 
 const commands: Command[] = [];

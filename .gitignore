@@ -134,3 +134,4 @@ package-lock.json
 enterLargeJsons.js
 
 TableInterfaces.ts
+settings.json
