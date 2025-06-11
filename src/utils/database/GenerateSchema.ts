@@ -21,20 +21,15 @@ const SaveSuffix = 'SaveModel' as string;
 
 // #region Database Connection
 
-const databaseName = process.env.DB_NAME as string;
+const databaseUrl = process.env.DATABASE_URL as string;
+const databaseName = databaseUrl.split('/').pop()?.split('?')[0] as string;
 
 let pool: mysql.Pool;
 let connection: mysql.PoolConnection;
 
 // Maak een connectie met de database
 async function createDatabaseConnection(): Promise<void> {
-    pool = mysql.createPool({
-        host: process.env.DB_HOST as string,
-        user: process.env.DB_USER as string,
-        database: databaseName as string,
-        password: process.env.DB_PASSWORD as string,
-        port: Number(process.env.DB_PORT) || 3306,
-    });
+    pool = mysql.createPool(databaseUrl);
     connection = await pool.getConnection();
 }
 

@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
+import { URL } from 'url';
 
 dotenv.config();
 
@@ -10,13 +11,23 @@ let table_enums: Array<{ Id: number, TableName: string }> = [];
 
 export async function createConnectionAsync(): Promise<boolean> {
     try {
+        const dbUrl = process.env.DATABASE_URL as string;
+        
+        if (!dbUrl) {
+            throw new Error('DATABASE_URL environment variable is not set');
+        }
+        
+        const url = new URL(dbUrl);
+        const dbName = url.pathname.replace(/^\//, '');
+        
         pool = mysql.createPool({
-            host: process.env.DB_HOST as string,
-            user: process.env.DB_USER as string,
-            database: process.env.DB_NAME as string,
-            password: process.env.DB_PASSWORD as string,
-            port: Number(process.env.DB_PORT) || 3306,
+            host: url.hostname,
+            user: url.username,
+            database: dbName,
+            password: url.password,
+            port: Number(url.port) || 3306,
         });
+        
         connection = await pool.getConnection();
         await getTableEnumsAsync();
         return true;
