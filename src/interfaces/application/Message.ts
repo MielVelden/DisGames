@@ -25,7 +25,13 @@ export enum ComponentType {
     MEDIA_GALLERY = 'MEDIA_GALLERY',
     FILE = 'FILE',
     SEPARATOR = 'SEPARATOR',
-    CONTAINER = 'CONTAINER'
+    CONTAINER = 'CONTAINER',
+    CONTENT = 'CONTENT'
+}
+
+export interface Content extends Component {
+    type: ComponentType.CONTENT;
+    content: MultiLingualString;
 }
 
 // #region Action Row
@@ -176,7 +182,7 @@ export interface Thumbnail extends Component {
 
 export interface MediaGalleryItem {
     media: Media;
-    description?: string;
+    description?: MultiLingualString;
     spoiler?: boolean;
 }
 

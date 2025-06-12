@@ -2,7 +2,7 @@ import {
     GuildMember as DiscordGuildMember
 } from 'discord.js';
 import { Permission } from '../../interfaces/application/Permission';
-import DiscordEnumMapper from './handlers/DiscordEnumMapper';
+import DiscordEnumMapper from './mappers/DiscordEnumMapper';
 
 class DiscordPermissionService {
     public checkUserHasPermission(user: DiscordGuildMember, permission: Permission): boolean {

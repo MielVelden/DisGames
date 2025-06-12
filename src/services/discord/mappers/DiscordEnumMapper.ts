@@ -4,7 +4,8 @@ import {
     ButtonStyle as DiscordButtonStyle} from 'discord.js';
 import { EventTypeEnum } from '../../../interfaces/application/Event';
 import { Permission } from '../../../interfaces/application/Permission';
-import { ButtonStyle } from '../../../interfaces/application/Message';
+import { ButtonStyle, Component, ComponentType } from '../../../interfaces/application/Message';
+import { DiscordComponentBuilder } from '../DiscordService';
 
 class DiscordEnumMapper {
     public mapPermissionToDiscordPermission(permission: Permission): PermissionResolvable {
@@ -50,6 +51,15 @@ class DiscordEnumMapper {
             return EventTypeEnum.MODAL_SUBMIT;
         else
             throw new Error(`Unhandled interaction type: ${interaction.type}`);
+    }
+
+    public isActionRowComponent(component: Component): boolean {
+        return component.type === ComponentType.BUTTON || 
+            component.type === ComponentType.STRING_SELECT ||
+            component.type === ComponentType.USER_SELECT || 
+            component.type === ComponentType.ROLE_SELECT || 
+            component.type === ComponentType.MENTIONABLE_SELECT || 
+            component.type === ComponentType.CHANNEL_SELECT;
     }
 }
 

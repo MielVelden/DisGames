@@ -26,3 +26,11 @@ export class MultiLingualString {
         return this.translations[language] || this.translations[DEFAULT_LANGUAGE];        
     }
 }
+
+export function createMultiLingualString(message: string): MultiLingualString {
+    return new MultiLingualString({
+        [LanguageEnum.EN]: message,
+        [LanguageEnum.NL]: message
+    });
+}
+

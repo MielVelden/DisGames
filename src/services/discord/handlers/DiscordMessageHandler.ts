@@ -1,11 +1,12 @@
 import {
     User as DiscordUser,
-    
+
     ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
     ButtonInteraction as DiscordButtonInteraction,
     ButtonBuilder as DiscordButtonBuilder,
     Message as DiscordMessage,
-    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction} from 'discord.js';
+    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
+} from 'discord.js';
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
 import {
@@ -15,7 +16,7 @@ import ComponentService from '../../ComponentService';
 import { MultiLingualString } from '../../../utils/i18n/MultiLangualString';
 import { EventService } from '../../EventService';
 import { i18n } from '../../../utils/i18n/i18n';
-import DiscordComponentMapper from '../handlers/DiscordComponentMapper';
+import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
 
 class DiscordMessageHandler {
@@ -84,12 +85,15 @@ class DiscordMessageHandler {
     public async deferUpdateAsync(interaction: DiscordStringSelectMenuInteraction): Promise<void> {
         await interaction.deferUpdate();
     }
-    
-    
+
+
     public async handleInteractionReplyAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
         if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
             if (event.currentInteraction.replied) {
-                await event.currentInteraction.editReply(content);
+                await event.currentInteraction.editReply({
+                    ...content,
+                    content: null
+                });
             } else {
                 await event.currentInteraction.reply(content);
             }

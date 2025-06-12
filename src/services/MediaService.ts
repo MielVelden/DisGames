@@ -8,7 +8,7 @@ class MediaService {
     private readonly notFoundImage: string;
 
     constructor() {
-        this.imagesPath = path.join(__dirname, '../../images');
+        this.imagesPath = path.join(process.cwd(), 'images');
         this.notFoundImage = path.join(this.imagesPath, 'NotFound.png');
     }
 
@@ -49,7 +49,7 @@ class MediaService {
     }
 
     public getGameImage(gameName: GameTypeEnum): string {
-        const gameImagePath = path.join(this.imagesPath, 'games', `${gameName}.${MediaType.PNG}`);
+        const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameName}.${MediaType.PNG}`);
         
         if (fs.existsSync(gameImagePath)) {
             return gameImagePath;

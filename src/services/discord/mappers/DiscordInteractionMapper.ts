@@ -14,9 +14,9 @@ import {
 import { ServersModel } from '../../../interfaces/database/TableInterfaces';
 import ServerService from '../../ServerService';
 import { MultiLingualString } from '../../../utils/i18n/MultiLangualString';
-import DiscordMessageHandler from '../mappers/DiscordMessageHandler';
+import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
 import DiscordPermissionService from '../DiscordPermissionService';
-import DiscordComponentMapper from '../handlers/DiscordComponentMapper';
+import DiscordComponentMapper from './DiscordComponentMapper';
 import DiscordEnumMapper from './DiscordEnumMapper';
 import DiscordService from '../DiscordService';
 
@@ -77,6 +77,7 @@ class DiscordInteractionMapper {
                 reactAsync: async (emoji: string) => await DiscordMessageHandler.reactAsync(interaction, emoji),
                 deleteAsync: async () => await DiscordMessageHandler.deleteAsync(interaction),
                 sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),
+                replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
             } as MessageInteractionEvent;
         } else if (interaction.isStringSelectMenu()) {
             return {

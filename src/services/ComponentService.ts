@@ -1,7 +1,7 @@
 import { CommandOptionChoice } from "../interfaces/application/Command";
 import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
 import { MediaType } from "../interfaces/application/Image";
-import { ActionButton, Component, ComponentType, Container, SelectMenu, TextDisplay } from "../interfaces/application/Message";
+import { ActionButton, Component, ComponentType, Container, Content, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { GamesModel } from "../interfaces/database";
 import { GameTypeEnum } from "../interfaces/enums";
 import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";

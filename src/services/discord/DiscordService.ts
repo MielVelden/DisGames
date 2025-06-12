@@ -10,7 +10,10 @@ import {
     ChannelSelectMenuBuilder as DiscordChannelSelectMenuBuilder,
     ButtonBuilder as DiscordButtonBuilder,
     ActionRowBuilder as DiscordActionRowBuilder,
-    Message as DiscordMessage
+    Message as DiscordMessage,
+    TextDisplayBuilder as DiscordTextDisplayBuilder,
+    MediaGalleryBuilder as DiscordMediaGalleryBuilder,
+    ContainerBuilder as DiscordContainerBuilder,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { EventTypeEnum, InteractionEvent } from '../../interfaces/application/Event';
@@ -19,18 +22,20 @@ import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLangualString';
 
 // Mappers
-import DiscordCommandMapper from './handlers/DiscordCommandMapper';
-import DiscordComponentMapper from './handlers/DiscordComponentMapper';
-import DiscordInteractionMapper from './handlers/DiscordInteractionMapper';
-import DiscordMessageHandler from './mappers/DiscordMessageHandler';
+import DiscordCommandMapper from './mappers/DiscordCommandMapper';
+import DiscordComponentMapper from './mappers/DiscordComponentMapper';
+import DiscordInteractionMapper from './mappers/DiscordInteractionMapper';
+import DiscordMessageHandler from './handlers/DiscordMessageHandler';
 
 export type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 export type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
-export type DiscordComponentBuilder = DiscordButtonBuilder | DiscordSelectMenuBuilder;
+export type DiscordComponentBuilder = DiscordButtonBuilder | DiscordSelectMenuBuilder | DiscordTextDisplayBuilder | DiscordMediaGalleryBuilder | DiscordContainerBuilder;
+export type DiscordActionRowComponent = DiscordSelectMenuBuilder | DiscordButtonBuilder;
 
 export interface DiscordMessageContent {
-    content: string;
     components: DiscordActionRowBuilder<any>[];
+    files?: any[];
+    flags?: any;
 }
 
 class DiscordService {
