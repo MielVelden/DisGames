@@ -40,9 +40,9 @@ export interface GameModule {
 export enum GameOptionEnum {
     IS_INACTIVE = 1,
     DISABLE_MESSAGE_CHANGE = 2,
-    REMOVE_ON_WRONG_ANSWER = 5,
-    SAME_USER_DISABLED = 10,
-    ALLOW_SKIPPING,
+    SAME_USER_DISABLED = 5,
+    REMOVE_ON_WRONG_ANSWER = 10,
+    ALLOW_SKIPPING = 15,
 }
 
 export interface GameAction {

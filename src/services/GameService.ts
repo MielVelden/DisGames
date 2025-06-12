@@ -187,21 +187,9 @@ class GameService {
 
         for (const option of options) {
             switch (option as GameOptionEnum) {
-                case GameOptionEnum.SAME_USER_DISABLED:
-                    if (gameEvent.gameData.LastUser === gameEvent.user.id) {
-                        gameEvent.deleteMessage();
-                        throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
-                    } else {
-                        gameEvent.gameData.LastUser = gameEvent.user.id;
-                        gameEvent.gameData.MessageId = gameEvent.messageId;
-                    }
-                    break;
-                case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
-                    if (!gameEvent.validateAnswer(gameEvent)) {
-                        gameEvent.deleteMessage();
-                        throw ErrorHelper.throwError(ExceptionEnum.WRONG_ANSWER);
-                    }
-                    break;
+                // Sort by run order
+                case GameOptionEnum.IS_INACTIVE:
+                    throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.gameData.LastUser === gameEvent.user.id && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
@@ -217,8 +205,22 @@ class GameService {
                         throw ErrorHelper.throwError(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                     }
                     break;
-                case GameOptionEnum.IS_INACTIVE:
-                    throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
+                case GameOptionEnum.SAME_USER_DISABLED:
+                    if (gameEvent.gameData.LastUser === gameEvent.user.id) {
+                        gameEvent.deleteMessage();
+                        throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
+                    } else {
+                        gameEvent.gameData.LastUser = gameEvent.user.id;
+                        gameEvent.gameData.MessageId = gameEvent.messageId;
+                    }
+                    break;   
+                case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
+                    if (!gameEvent.validateAnswer(gameEvent)) {
+                        gameEvent.deleteMessage();
+                        throw ErrorHelper.throwError(ExceptionEnum.WRONG_ANSWER);
+                    }
+                    break;
+                            
                 case GameOptionEnum.ALLOW_SKIPPING:
                     if (gameEvent.answer === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
@@ -227,7 +229,9 @@ class GameService {
                     }
                     break;
                 default:
-                    throw new Error(`Unhandled game option: ${option}`);
+                    // Cast to unknown first, then never to handle the exhaustive check properly
+                    const exhaustiveCheck: never = (option as unknown) as never;
+                    throw new Error(`Unhandled game option: ${exhaustiveCheck}`);
             }
         }
     }
