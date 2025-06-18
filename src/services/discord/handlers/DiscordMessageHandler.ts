@@ -7,13 +7,13 @@ import {
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from 'discord.js';
-import { InteractionEvent } from '../../../interfaces/application/Event';
+import { InteractionEvent, MessageInteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
 import {
     Component
 } from '../../../interfaces/application/Message';
 import ComponentService from '../../ComponentService';
-import { MultiLingualString } from '../../../utils/i18n/MultiLangualString';
+import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLangualString';
 import { EventService } from '../../EventService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
@@ -28,7 +28,7 @@ class DiscordMessageHandler {
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, message);
         if (!content) return;
 
-        await this.handleInteractionReplyAsync(event, content);
+        await this.handleInteractionReplyAsync(event as MessageInteractionEvent, content);
     }
 
     public async sendAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
@@ -61,17 +61,23 @@ class DiscordMessageHandler {
         await this.handleInteractionEditAsync(event, content);
     }
 
-    public async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction | DiscordMessage): Promise<void> {
+    public async deleteAsync(event: MessageInteractionEvent): Promise<void> {
         // Mark message as internally deleted before deleting
-        if (interaction instanceof DiscordMessage) {
-            EventService.markMessageAsInternallyDeleted(interaction.id);
-            await interaction.delete();
+        if(event.messageDeleted)
+            return;
+
+        event.messageDeleted = true;
+
+        if (event.currentInteraction instanceof DiscordMessage) {
+            EventService.markMessageAsInternallyDeleted(event.currentInteraction.id);
+            await event.currentInteraction.delete();
         } else {
             // For button interactions, we can get the message ID
-            if (interaction instanceof DiscordButtonInteraction && interaction.message)
-                EventService.markMessageAsInternallyDeleted(interaction.message.id);
+            if (event.currentInteraction instanceof DiscordButtonInteraction && event.currentInteraction.message)
+                EventService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
 
-            await interaction.deleteReply();
+            if(event.currentInteraction instanceof DiscordButtonInteraction)
+                await event.currentInteraction.deleteReply();
         }
     }
 
@@ -87,7 +93,11 @@ class DiscordMessageHandler {
     }
 
 
-    public async handleInteractionReplyAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
+    public async handleInteractionReplyAsync(event: MessageInteractionEvent, content: DiscordMessageContent): Promise<void> {
+        // If the message is deleted, don't reply
+        if(event.messageDeleted)
+            return;
+
         if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
             if (event.currentInteraction.replied) {
                 await event.currentInteraction.editReply({
@@ -155,12 +165,12 @@ class DiscordMessageHandler {
             });
 
             // Map and send select menu
-            const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
-            const replyOptions = {
-                content: "test",
-                components: [DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)]
-            };
+            const message = await ComponentService.createContent(createMultiLingualString("test?"));
+            const discordMessage = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(message);
 
+            const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
+            const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
+            
             if (event.currentInteraction instanceof DiscordChatInputCommandInteraction ||
                 event.currentInteraction instanceof DiscordMessage) {
                 await event.currentInteraction.reply(replyOptions);
@@ -188,16 +198,14 @@ class DiscordMessageHandler {
                 return DiscordComponentMapper.mapButtonToDiscordButtonAsync(btn);
             }));
 
+            const discordMessage = ComponentService.createContent(question);
+
+            const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordButtons)], []);
+
             if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-                await event.currentInteraction.reply({
-                    content: question.getMessage(),
-                    components: [DiscordComponentMapper.createActionRowWithComponents(discordButtons)]
-                });
+                await event.currentInteraction.reply(replyOptions);
             } else if (event.currentInteraction instanceof DiscordMessage) {
-                await event.currentInteraction.reply({
-                    content: question.getMessage(),
-                    components: [DiscordComponentMapper.createActionRowWithComponents(discordButtons)]
-                });
+                await event.currentInteraction.reply(replyOptions);
             } else {
                 throw new Error("Not implemented yet");
             }

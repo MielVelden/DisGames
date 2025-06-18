@@ -150,7 +150,7 @@ class GameService {
 
         await this.handleGameOptionsAsync(gameEvent, event);
 
-        if (gameEvent.validateAnswer(gameEvent)) {
+        if (gameEvent.validateAnswer(gameEvent) && gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Answer is correct
             await this.handleValidAnswerAsync(gameEvent);
         }
@@ -267,7 +267,8 @@ class GameService {
         if (expectedType === "number") {
             answer = Number(event.content);
             if (isNaN(answer)) {
-                throw new Error(`Invalid number: ${event.content}`);
+                await event.deleteAsync();
+                throw ErrorHelper.throwError(ExceptionEnum.INVALID_NUMBER);
             }
         } else if (expectedType === "boolean") {
             answer = event.content.toLowerCase() === "true";

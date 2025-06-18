@@ -300,8 +300,12 @@ class DiscordComponentMapper {
         // Collect all local attachments from MediaGallery components
         const files: AttachmentBuilder[] = this.collectLocalAttachments(event);
 
+        return this.createReplyOptions(rootComponents, files);
+    }
+
+    public createReplyOptions(components: any[], files: AttachmentBuilder[]): DiscordMessageContent {
         return {
-            components: rootComponents,
+            components: components,
             flags: DiscordMessageFlags.IsComponentsV2,
             files: files.length > 0 ? files : undefined
         };

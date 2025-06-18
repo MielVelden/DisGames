@@ -54,6 +54,8 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
     sendAsync(): Promise<void>;
     reactAsync(emoji: string): Promise<void>;
+
+    messageDeleted: boolean;
     deleteAsync(): Promise<void>;
     content: string;
 }

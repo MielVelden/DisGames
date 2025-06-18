@@ -16,7 +16,7 @@ import {
     ContainerBuilder as DiscordContainerBuilder,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { EventTypeEnum, InteractionEvent } from '../../interfaces/application/Event';
+import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
 import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLangualString';
@@ -84,8 +84,8 @@ class DiscordService {
         return await DiscordMessageHandler.editWithComponentAsync(event, component);
     }
 
-    public async deleteAsync(interaction: DiscordChatInputCommandInteraction | DiscordButtonInteraction | DiscordMessage): Promise<void> {
-        return await DiscordMessageHandler.deleteAsync(interaction);
+    public async deleteAsync(event: InteractionEvent): Promise<void> {
+        return await DiscordMessageHandler.deleteAsync(event as MessageInteractionEvent);
     }
 
     public async getUserInputBySelectMenuAsync(event: InteractionEvent, selectMenu: SelectMenu): Promise<InteractionEvent | null> {

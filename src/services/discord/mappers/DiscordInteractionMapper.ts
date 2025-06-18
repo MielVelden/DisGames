@@ -66,7 +66,7 @@ class DiscordInteractionMapper {
             return {
                 ...event,
                 replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
-                deleteAsync: async () => await DiscordMessageHandler.deleteAsync(interaction),
+                deleteAsync: async () => await DiscordMessageHandler.deleteAsync(event as MessageInteractionEvent),
                 getOption: (name: string) => DiscordService.getOption(interaction, name),
                 commandName: interaction.commandName,
             } as SlashCommandInteractionEvent;
@@ -75,7 +75,7 @@ class DiscordInteractionMapper {
                 ...event,
                 customId: interaction.customId,
                 reactAsync: async (emoji: string) => await DiscordMessageHandler.reactAsync(interaction, emoji),
-                deleteAsync: async () => await DiscordMessageHandler.deleteAsync(interaction),
+                deleteAsync: async () => await DiscordMessageHandler.deleteAsync(event as MessageInteractionEvent),
                 sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),
                 replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
             } as MessageInteractionEvent;
@@ -119,7 +119,7 @@ class DiscordInteractionMapper {
             editWithComponentAsync: async (component: Component) => await DiscordMessageHandler.editWithComponentAsync(event, component),
             sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),
             replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
-            deleteAsync: async () => await DiscordMessageHandler.deleteAsync(interaction),
+            deleteAsync: async () => await DiscordMessageHandler.deleteAsync(event as MessageInteractionEvent),
             reactAsync: async (emoji: string) => await DiscordMessageHandler.reactAsync(interaction, emoji),
 
             getUserInputByButtonsAsync: async (question: MultiLingualString, buttons: MultiLingualString[]) => await DiscordMessageHandler.getUserInputByButtonsAsync(event, question, buttons),

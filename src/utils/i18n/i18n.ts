@@ -310,6 +310,10 @@ export const i18n: I18nTranslations = {
         [ExceptionEnum.MESSAGE_CHANGE_DISABLED]: {
             [LanguageEnum.EN]: "Message change is disabled",
             [LanguageEnum.NL]: "Bericht wijziging is uitgeschakeld",
+        },
+        [ExceptionEnum.INVALID_NUMBER]: {
+            [LanguageEnum.EN]: "Invalid number",
+            [LanguageEnum.NL]: "Ongeldig nummer",
         }
     }
 };
