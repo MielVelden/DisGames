@@ -14,6 +14,7 @@ export default {
         points: 1,
         expectedType: "number",
         firstAnswer: "1",
+        addCorrectReaction: true,
         options: {
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
             [GameOptionEnum.SAME_USER_DISABLED]: true,
@@ -47,14 +48,6 @@ export default {
                 });
 
             return false;
-        },
-
-        processAnswer(event: GameEvent): void {
-            event.addAction({
-                enum: GameActionEnum.REACTION,
-                priority: GameActionPriorityEnum.HIGH,
-                component: "✅"
-            })
         },
 
         getNextAnswerAsync(event: GameEvent): void {

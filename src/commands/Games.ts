@@ -15,8 +15,8 @@ export class GamesCommand implements Command {
     description = new MultiLingualString(i18n.commands.games.description);
     isSlashCommand = true;
     isMessageCommand = false;
-    permissions? = [Permission.ADMINISTRATOR];
-    options? = [
+    permissions = [Permission.ADMINISTRATOR];
+    options = [
         {
             name: "action",
             description: new MultiLingualString(i18n.commands.games.option.action),

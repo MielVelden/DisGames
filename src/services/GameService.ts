@@ -151,8 +151,18 @@ class GameService {
         await this.handleGameOptionsAsync(gameEvent, event);
 
         if (gameEvent.validateAnswer(gameEvent) && gameEvent.eventType === EventTypeEnum.MESSAGE) {
+            // Add correct reaction
+            if (gameEvent.gameConfig.addCorrectReaction)
+                gameEvent.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: "✅"
+                })
+
             // Answer is correct
             await this.handleValidAnswerAsync(gameEvent);
+            // Add points to the user
+            await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
         }
 
         // Loop through all actions and handle them
@@ -163,11 +173,7 @@ class GameService {
     }
 
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
-        gameEvent.processAnswer(gameEvent);
         await gameEvent.getNextAnswerAsync(gameEvent);
-
-        // Add points to the user
-        await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
 
         // Save the model
         await GameRepository.save(gameEvent.gameData);
@@ -213,14 +219,13 @@ class GameService {
                         gameEvent.gameData.LastUser = gameEvent.user.id;
                         gameEvent.gameData.MessageId = gameEvent.messageId;
                     }
-                    break;   
+                    break;
                 case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
                     if (!gameEvent.validateAnswer(gameEvent)) {
                         gameEvent.deleteMessage();
                         throw ErrorHelper.throwError(ExceptionEnum.WRONG_ANSWER);
                     }
                     break;
-                            
                 case GameOptionEnum.ALLOW_SKIPPING:
                     if (gameEvent.answer === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
@@ -290,7 +295,7 @@ class GameService {
             gameData: game,
             actions: [],
             validateAnswer: gameModule.functions.validateAnswer,
-            processAnswer: gameModule.functions.processAnswer,
+            addCorrectReaction: gameModule.config.addCorrectReaction,
             getNextAnswerAsync: gameModule.functions.getNextAnswerAsync,
             deleteMessage: async () => {
                 await event.deleteAsync();

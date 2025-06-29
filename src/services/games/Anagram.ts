@@ -1,4 +1,4 @@
-import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
 import ComponentService from "../ComponentService";
 import { i18n } from "../../utils/i18n/i18n";
@@ -13,6 +13,7 @@ export default {
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].description),
         points: 1,
         expectedType: "string",
+        addCorrectReaction: true,
         options: {
             [GameOptionEnum.ALLOW_SKIPPING]: true,
         }
@@ -21,14 +22,6 @@ export default {
     functions: {
         validateAnswer(event: GameEvent): boolean {
             return event.answer === event.gameData.Answer;
-        },
-
-        processAnswer(event: GameEvent): void {
-            event.addAction({
-                enum: GameActionEnum.REACTION,
-                priority: GameActionPriorityEnum.HIGH,
-                component: "✅"
-            })
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
@@ -51,5 +44,5 @@ export default {
 
             event.gameData.Answer = newAnswer.Response;
         }
-    }
+    } as GameFunctions
 } as GameModule;

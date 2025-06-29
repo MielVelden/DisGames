@@ -13,6 +13,7 @@ export interface GameConfig {
     points: number;
     expectedType: "string" | "number" | "boolean";
     firstAnswer: string;
+    addCorrectReaction: boolean;
     options: {
         [key in GameOptionEnum]: boolean;
     };
@@ -21,9 +22,6 @@ export interface GameConfig {
 export interface GameFunctions {
     // Validate the answer
     validateAnswer(event: GameEvent): boolean;
-    
-    // Process the answer
-    processAnswer(event: GameEvent): void;
     
     // Get the next answer/prompt
     getNextAnswerAsync(event: GameEvent): Promise<void>;

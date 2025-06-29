@@ -1,4 +1,4 @@
-import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameEvent, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
@@ -12,6 +12,7 @@ export default {
         points: 1,
         expectedType: "string",
         firstAnswer: "e",
+        addCorrectReaction: true,
         options: {
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
             [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true,
@@ -26,18 +27,10 @@ export default {
                    event.answer.toLowerCase().charAt(0) === event.gameData.Answer.toLowerCase();
         },
 
-        processAnswer(event: GameEvent): void {
-            event.addAction({
-                enum: GameActionEnum.REACTION,
-                priority: GameActionPriorityEnum.HIGH,
-                component: "✅"
-            })
-        },
-
         getNextAnswerAsync(event: GameEvent): void {
             if (!event.answer) return;
             const lastLetter = event.answer.toString().toLowerCase().charAt(event.answer.toString().length - 1);
             event.gameData.Answer = lastLetter;
         }
-    }
+    } as GameFunctions
 } as GameModule;
