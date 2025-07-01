@@ -1,5 +1,6 @@
+import { LanguageCommandOptionTranslations } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
-import { InteractionEvent } from "./Event";
+import { InteractionEvent, SlashCommandInteractionEvent } from "./Event";
 import { Permission } from "./Permission";
 
 export interface Command {
@@ -10,15 +11,27 @@ export interface Command {
     isMessageCommand: boolean;
 
     permissions?: Permission[];
-    options?: CommandOption[];
+    options?: CommandOptionConfig<string | number>[];
 
     executeAsync(interactionEvent: InteractionEvent): Promise<void>;
 }
 
 // #region Command Option
+export interface CommandOptionConfig<T extends string | number> {
+    key: LanguageCommandOptionTranslations<T>;
+    type: CommandOptionType;
+    required: boolean;
+    choices: CommandOptionChoiceConfig<T>[];
+}
+
+export interface CommandOptionChoiceConfig<T extends string | number> {
+    enumValue: T;
+    validate?: (event: SlashCommandInteractionEvent) => Promise<boolean>;
+    handler?: (event: SlashCommandInteractionEvent) => Promise<void>;
+}
 
 export interface CommandOption {
-    name: string;
+    name: MultiLingualString;
     description: MultiLingualString;
     type: CommandOptionType;
     required?: boolean;

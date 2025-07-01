@@ -1,9 +1,10 @@
 import { User } from "../domain/User";
-import { Component, BaseSelectMenu, ActionButton } from "./Message";
+import { Component, BaseSelectMenu } from "./Message";
 import { Duration } from "../../utils/Duration";
 import { ServersModel } from "../database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { Command } from "./Command";
 
 export enum EventTypeEnum {
     SLASH_COMMAND = "SLASH_COMMAND",
@@ -45,10 +46,11 @@ export interface ReplyInteractionEvent extends InteractionEvent {
 }
 
 export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
-    commandName: string;
-
+    command: Command;
+    
     getOption(name: string): string | number | boolean | undefined;
     getOption<T>(name: string): T | undefined;
+    handleCommandOptionsAsync(): Promise<void>;
 }
 
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {

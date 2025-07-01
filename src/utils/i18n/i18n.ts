@@ -15,6 +15,7 @@ export type ParameterizedTranslation = (...params: string[]) => MultiLingualStri
 
 export type LanguageCommandOptionTranslations<T extends string | number> = {
     action: LanguageTranslations,
+    actionDescription: LanguageTranslations,
     noAction: LanguageTranslations,
     choices: LanguageEnumTranslations<T>;
 };
@@ -92,6 +93,10 @@ export const i18n: I18nTranslations = {
             },
             option: {
                 action: {
+                    [LanguageEnum.EN]: "Action",
+                    [LanguageEnum.NL]: "Actie",
+                },
+                actionDescription: {
                     [LanguageEnum.EN]: "Manage games and their settings",
                     [LanguageEnum.NL]: "Spellen en hun instellingen beheren",
                 },

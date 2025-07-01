@@ -22,7 +22,7 @@ export default {
 
         try {
             if (event.type === EventTypeEnum.SLASH_COMMAND)
-                await handleCommand(event.commandName, event);
+                await handleCommand(event.command, event);
             else
                 await EventService.handleEventAsync(event);
         }

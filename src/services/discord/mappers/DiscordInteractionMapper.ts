@@ -19,6 +19,7 @@ import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordComponentMapper from './DiscordComponentMapper';
 import DiscordEnumMapper from './DiscordEnumMapper';
 import DiscordService from '../DiscordService';
+import { getCommandConfig, handleCommandOptions } from '../../../utils/Commands';
 
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
@@ -63,13 +64,19 @@ class DiscordInteractionMapper {
         } as InteractionEvent;
 
         if (interaction.isChatInputCommand()) {
-            return {
+            const command = getCommandConfig(interaction.commandName);
+            const slashCommandEvent = {
                 ...event,
                 replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
                 deleteAsync: async () => await DiscordMessageHandler.deleteAsync(event as MessageInteractionEvent),
                 getOption: (name: string) => DiscordService.getOption(interaction, name),
-                commandName: interaction.commandName,
+                command: command,
+                handleCommandOptionsAsync: async () => Promise.resolve(),
             } as SlashCommandInteractionEvent;
+            
+            slashCommandEvent.handleCommandOptionsAsync = async () => await handleCommandOptions(slashCommandEvent);
+            
+            return slashCommandEvent;
         } else if (interaction.isButton()) {
             return {
                 ...event,

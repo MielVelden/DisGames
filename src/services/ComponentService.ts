@@ -1,10 +1,8 @@
-import { CommandOptionChoice } from "../interfaces/application/Command";
-import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
+import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig, CommandOptionType } from "../interfaces/application/Command";
+import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { MediaType } from "../interfaces/application/Image";
 import { ActionButton, Component, ComponentType, Container, Content, SelectMenu, TextDisplay } from "../interfaces/application/Message";
-import { GamesModel } from "../interfaces/database";
 import { GameTypeEnum } from "../interfaces/enums";
-import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
 import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { EventService } from "./EventService";
@@ -48,45 +46,58 @@ class ComponentService {
     }
 
     private createCommandOptionChoice<T extends string | number>(
-        enumValue: T,
+        choice: CommandOptionChoiceConfig<T>,
         translations: LanguageEnumTranslations<T>
     ): CommandOptionChoice {
         return {
-            name: new MultiLingualString(translations[enumValue]),
-            value: enumValue as string
+            name: new MultiLingualString(translations[choice.enumValue]),
+            value: choice.enumValue as string
         };
     }
 
-    public createCommandOptionChoices<T extends string | number>(
-        translations: LanguageEnumTranslations<T>
-    ): CommandOptionChoice[] {
-        return Object.keys(translations).map(value => this.createCommandOptionChoice(value as T, translations));
+    public createCommandOptionChoices<T extends string | number>(option: CommandOptionConfig<T>): CommandOption[] {
+        return [
+            {
+                name: new MultiLingualString(option.key.action),
+                description: new MultiLingualString(option.key.action),
+                type: option.type,
+                required: option.required,
+                choices: option.choices.map(choice => this.createCommandOptionChoice(choice, option.key.choices))
+            }
+        ];
     }
 
-    public createStartMessageAsync(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component {
+    public createStartMessageAsync(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component[] {
         const gameImage = MediaService.getGameImage(gameTypeEnum);
 
-        return {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: i18n.commands.games.types[gameTypeEnum].startMessage(firstAnswer)
-                },
-                {
-                    type: ComponentType.MEDIA_GALLERY,
-                    items: [
-                        {
-                            media: {
-                                url: gameImage,
-                                name: gameTypeEnum,
-                                type: MediaType.PNG
+        return [
+            {
+                type: ComponentType.CONTAINER,
+                components: [
+                    {
+                        type: ComponentType.MEDIA_GALLERY,
+                        items: [
+                            {
+                                media: {
+                                    url: gameImage,
+                                    name: gameTypeEnum.toString(),
+                                    type: MediaType.PNG
+                                }
                             }
-                        }
-                    ]
-                },
-            ]
-        } as Container
+                        ]
+                    },
+                ]
+            } as Container,
+            {
+                type: ComponentType.CONTAINER,
+                components: [
+                    {
+                        type: ComponentType.TEXT_DISPLAY,
+                        content: i18n.commands.games.types[gameTypeEnum].startMessage(firstAnswer)
+                    }
+                ]
+            } as Container
+        ];
     }
 }
 

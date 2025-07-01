@@ -1,5 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command, CommandOptionType } from '../../../interfaces/application/Command';
+import { MultiLingualString } from '../../../utils/i18n/MultiLangualString';
+import { getCommandName } from '../../../utils/Commands';
 
 class DiscordInteractionMapper {
     public mapCommandToSlashCommandBuilder(command: Command): SlashCommandBuilder {
@@ -9,19 +11,24 @@ class DiscordInteractionMapper {
 
         if (command.options) {
             for (const option of command.options) {
+                const nameMessage = getCommandName(option.key);
+                const descriptionMessage = new MultiLingualString(option.key.actionDescription).getMessage();
                 switch (option.type) {
                     case CommandOptionType.STRING:
                         builder.addStringOption(stringOption => {
                             stringOption
-                                .setName(option.name)
-                                .setDescription(option.description.getMessage())
+                                .setName(nameMessage)
+                                .setDescription(descriptionMessage)
                                 .setRequired(option.required || false);
 
                             if (option.choices && option.choices.length > 0) {
-                                stringOption.addChoices(...option.choices.map(choice => ({
-                                    name: choice.name.getMessage(),
-                                    value: choice.value
-                                })));
+                                stringOption.addChoices(...option.choices.map(choice => {
+                                    const choiceName = new MultiLingualString(option.key.choices[choice.enumValue]);
+                                    return {
+                                        name: choiceName.getMessage(),
+                                        value: choice.enumValue.toString()
+                                    };
+                                }));
                             }
 
                             return stringOption;
@@ -30,108 +37,28 @@ class DiscordInteractionMapper {
                     case CommandOptionType.INTEGER:
                         builder.addIntegerOption(intOption => {
                             intOption
-                                .setName(option.name)
-                                .setDescription(option.description.getMessage())
+                                .setName(nameMessage)
+                                .setDescription(descriptionMessage)
                                 .setRequired(option.required || false);
 
                             if (option.choices && option.choices.length > 0) {
-                                intOption.addChoices(...option.choices.map(choice => ({
-                                    name: choice.name.getMessage(),
-                                    value: parseInt(choice.value)
-                                })));
+                                intOption.addChoices(...option.choices.map(choice => {
+                                    const choiceName = new MultiLingualString(option.key.choices[choice.enumValue]);
+                                    return {
+                                        name: choiceName.getMessage(),
+                                        value: Number(choice.enumValue)
+                                    };
+                                }));
                             }
 
                             return intOption;
                         });
                         break;
-                    case CommandOptionType.SUB_COMMAND:
-                        builder.addSubcommand(subCommand => {
-                            subCommand
-                                .setName(option.name)
-                                .setDescription(option.description.getMessage());
-
-                            if (option.options) {
-                                for (const subOption of option.options) {
-                                    // Recursively handle sub-options
-                                    this.addOptionToBuilder(subCommand, subOption);
-                                }
-                            }
-
-                            return subCommand;
-                        });
-                        break;
-                    case CommandOptionType.SUB_COMMAND_GROUP:
-                        builder.addSubcommandGroup(subGroup => {
-                            subGroup
-                                .setName(option.name)
-                                .setDescription(option.description.getMessage());
-
-                            if (option.options) {
-                                for (const subOption of option.options) {
-                                    if (subOption.type === CommandOptionType.SUB_COMMAND) {
-                                        subGroup.addSubcommand(subCommand => {
-                                            subCommand
-                                                .setName(subOption.name)
-                                                .setDescription(subOption.description.getMessage());
-
-                                            if (subOption.options) {
-                                                for (const subSubOption of subOption.options) {
-                                                    this.addOptionToBuilder(subCommand, subSubOption);
-                                                }
-                                            }
-
-                                            return subCommand;
-                                        });
-                                    }
-                                }
-                            }
-
-                            return subGroup;
-                        });
-                        break;
                 }
             }
         }
-
         return builder;
     }
-
-    public addOptionToBuilder(builder: any, option: any): void {
-        switch (option.type) {
-            case CommandOptionType.STRING:
-                builder.addStringOption((stringOption: any) => {
-                    stringOption
-                        .setName(option.name)
-                        .setDescription(option.description)
-                        .setRequired(option.required || false);
-
-                    if (option.choices && option.choices.length > 0) {
-                        stringOption.addChoices(...option.choices);
-                    }
-
-                    return stringOption;
-                });
-                break;
-            case CommandOptionType.INTEGER:
-                builder.addIntegerOption((intOption: any) => {
-                    intOption
-                        .setName(option.name)
-                        .setDescription(option.description)
-                        .setRequired(option.required || false);
-
-                    if (option.choices && option.choices.length > 0) {
-                        intOption.addChoices(...option.choices.map((choice: any) => ({
-                            name: choice.name,
-                            value: parseInt(choice.value)
-                        })));
-                    }
-
-                    return intOption;
-                });
-                break;
-        }
-    }
-
 }
 
 export default new DiscordInteractionMapper();

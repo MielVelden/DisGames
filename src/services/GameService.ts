@@ -11,11 +11,9 @@ import { isValidEnumValue } from "../utils/Enum";
 import GameDataRepository from "../repositories/GameDataRepository";
 import { ErrorHelper } from "../utils/ErrorHelper";
 import ComponentService from "./ComponentService";
-import { User } from "../interfaces/domain/User";
 import { createCancelButton, createMoveButton } from "../utils/Button";
 import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 
 class GameService {
     private games: GameModule[] = [];
@@ -134,7 +132,7 @@ class GameService {
 
         // Add start message
         const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum as GameTypeEnum, model.Answer as string);
-        await event.addComponentAsync(startMessage);
+        await event.addComponentsAsync(startMessage);
 
         // Save the game
         return model;

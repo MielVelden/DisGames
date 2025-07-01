@@ -18,54 +18,56 @@ export class GamesCommand implements Command {
     permissions = [Permission.ADMINISTRATOR];
     options = [
         {
-            name: "action",
-            description: new MultiLingualString(i18n.commands.games.option.action),
+            key: i18n.commands.games.option,
             type: CommandOptionType.STRING,
             required: true,
-            choices: ComponentService.createCommandOptionChoices(i18n.commands.games.option.choices)
+            choices: [
+                {
+                    enumValue: GamesCommandActionEnum.MANAGE,
+                    handler: async (event: SlashCommandInteractionEvent) => {
+                        const manageEvent = await event.getUserInputBySelectMenuAsync(createGamesSelectMenu(await GameService.getActiveGamesAsync(event.server.ServerId)));
+                        if (manageEvent) {
+                            await manageEvent.clearComponentsAsync();
+                            await manageEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.wantToDelete)));
+                            await manageEvent.addComponentAsync(createDeleteButton(event.user.id, async (btnEvent) => {
+                                const selected = Number(manageEvent.selected) as GameTypeEnum;
+                                const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, selected);
+                                await GameService.deleteAsync(game.Id);
+                                await btnEvent.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
+                            }));
+                            await manageEvent.editAsync();
+                        }
+                    },
+                },
+                {
+                    enumValue: GamesCommandActionEnum.HELP,
+                    handler: async (event: SlashCommandInteractionEvent) => {
+                        console.log("HELP");
+                    }
+                },
+                {
+                    enumValue: GamesCommandActionEnum.SETUP,
+                    handler: async (event: SlashCommandInteractionEvent) => {
+                        const selectMenu = createGamesSelectMenu(GameService.getGames());
+                        const gameEvent = await event.getUserInputBySelectMenuAsync(selectMenu);
+
+                        if (gameEvent) {
+                            const game = await GameService.saveAsync({
+                                GameTypeEnum: Number(gameEvent.selected),
+                                ChannelId: event.channelId,
+                                ServerId: event.guildId
+                            }, event);
+
+                            await gameEvent.replyAsync();
+                        }
+                    }
+                }
+            ]
         }
     ];
 
     async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {
-        const action = event.getOption<GamesCommandActionEnum>("action");
-
-        if (!action) {
-            await event.replyAsync(new MultiLingualString(i18n.commands.games.option.noAction));
-            return;
-        }
-
-        switch (action) {
-            case GamesCommandActionEnum.MANAGE:
-                const manageEvent = await event.getUserInputBySelectMenuAsync(createGamesSelectMenu(await GameService.getActiveGamesAsync(event.server.ServerId)));
-                if (manageEvent) {
-                    await manageEvent.clearComponentsAsync();
-                    await manageEvent.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.wantToDelete)));
-                    await manageEvent.addComponentAsync(createDeleteButton(event.user.id, async (btnEvent) => {
-                        const selected = Number(manageEvent.selected) as GameTypeEnum;
-                        const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, selected);
-                        await GameService.deleteAsync(game.Id);
-                        await btnEvent.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
-                    }));
-                    await manageEvent.editAsync();
-                }
-                break;
-            case GamesCommandActionEnum.HELP:
-                break;
-            case GamesCommandActionEnum.SETUP:
-                const selectMenu = createGamesSelectMenu(GameService.getGames());
-                const gameEvent = await event.getUserInputBySelectMenuAsync(selectMenu);
-
-                if (gameEvent) {
-                    const game = await GameService.saveAsync({
-                        GameTypeEnum: Number(gameEvent.selected),
-                        ChannelId: event.channelId,
-                        ServerId: event.guildId
-                    }, event);
-
-                    await gameEvent.replyAsync();
-                }
-                break;
-        }
+        await event.handleCommandOptionsAsync();
     }
 }
 
