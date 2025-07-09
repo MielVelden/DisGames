@@ -26,9 +26,9 @@ export default {
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
             const newAnswer = await GameDataService.getGameDataAsync(event.gameConfig.id, event.server.LanguageEnum);
-
+            const nextAnswer = newAnswer.Response.getMessage(event.server.LanguageEnum);
             // Scramble the answer
-            const charArray = newAnswer.Response.split("");
+            const charArray = nextAnswer.split("");
             for (let i = charArray.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [charArray[i], charArray[j]] = [charArray[j], charArray[i]];
@@ -42,7 +42,7 @@ export default {
                 component: ComponentService.createContent(i18n.commands.games.labels.nextWord(scrambledMessage))
             })
 
-            event.gameData.Answer = newAnswer.Response;
+            event.gameData.Answer = nextAnswer;
         }
     } as GameFunctions
 } as GameModule;

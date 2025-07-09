@@ -75,6 +75,7 @@ export interface GameEvent extends GameFunctions {
     
     actions: GameAction[];
     addAction(action: GameAction): void;
+    removeAction(action: GameAction): void;
 
     deleteMessage: () => Promise<void>;
 }

@@ -9,7 +9,7 @@
     "dev": "tsc && node dist/index.js",
     "watch": "tsc -w",
     "deploy": "npm run build && node dist/deploy-commands.js",
-    "schema:generate": "ts-node src/utils/database/GenerateSchema.ts"
+    "db:down": "ts-node src/utils/database/GenerateSchema.ts"
   },
   "dependencies": {
     "@discordjs/builders": "^1.7.0",

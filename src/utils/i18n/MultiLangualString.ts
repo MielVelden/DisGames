@@ -25,6 +25,57 @@ export class MultiLingualString {
     public getMessage(language: LanguageEnum = DEFAULT_LANGUAGE): string {
         return this.translations[language] || this.translations[DEFAULT_LANGUAGE];        
     }
+
+    public toJSON(): Record<number, string> {
+        const result: Record<number, string> = {};
+        
+        for (const [langKey, translation] of Object.entries(this.translations)) {
+            const languageEnum = parseInt(langKey) as LanguageEnum;
+            if (translation && translation.trim() !== '') {
+                result[languageEnum] = translation;
+            }
+        }
+        
+        return result;
+    }
+
+    public static fromJSON(json: string | Record<number, string> | null): MultiLingualString | null {
+        if (!json) return null;
+        
+        let data: Record<number, string>;
+        
+        if (typeof json === 'string') {
+            try {
+                data = JSON.parse(json);
+            } catch (error) {
+                console.warn('Failed to parse MultiLingualString JSON:', error);
+                return null;
+            }
+        } else {
+            data = json;
+        }
+        
+        const translations: LanguageTranslations = {} as LanguageTranslations;
+        
+        for (const [langKey, translation] of Object.entries(data)) {
+            const languageEnum = parseInt(langKey) as LanguageEnum;
+            if (Object.values(LanguageEnum).includes(languageEnum)) {
+                translations[languageEnum] = translation;
+            }
+        }
+        
+        // Ensure at least the default language exists
+        if (!translations[DEFAULT_LANGUAGE]) {
+            const firstAvailableTranslation = Object.values(translations)[0];
+            if (firstAvailableTranslation) {
+                translations[DEFAULT_LANGUAGE] = firstAvailableTranslation;
+            } else {
+                return null;
+            }
+        }
+        
+        return new MultiLingualString(translations);
+    }
 }
 
 export function createMultiLingualString(message: string): MultiLingualString {

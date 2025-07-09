@@ -125,7 +125,7 @@ class GameService {
         else {
             // Set the answer to a random game data
             const gameData = await GameDataRepository.getGameDataByGameIdAsync(savable.GameTypeEnum as GameTypeEnum);
-            savable.Answer = gameData.Response;
+            savable.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
         }
 
         const model = await GameRepository.save(savable);
@@ -180,6 +180,7 @@ class GameService {
     private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {
         for (const action of gameEvent.actions) {
             await this.handleGameAction(action, event);
+            gameEvent.removeAction(action);
         }
     }
 
@@ -228,7 +229,6 @@ class GameService {
                     if (gameEvent.answer === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
                         await this.handleGameActionsAsync(gameEvent, event);
-                        await event.sendAsync();
                     }
                     break;
                 default:
@@ -289,6 +289,9 @@ class GameService {
             messageId: event.messageId,
             addAction: (action: GameAction) => {
                 gameEvent.actions.push(action);
+            },
+            removeAction: (action: GameAction) => {
+                gameEvent.actions = gameEvent.actions.filter(a => a.enum !== action.enum);
             },
             gameData: game,
             actions: [],

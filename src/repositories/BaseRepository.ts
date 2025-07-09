@@ -1,5 +1,7 @@
 import { TableEnum } from "../interfaces/enums/index";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
+import { MultiLingualString } from "../utils/i18n/MultiLangualString";
+import { isMultiLingualString, removeMultiLingualStringSuffix } from "../utils/database/GenerateSchema";
 
 type Condition<T> = (x: T) => any;
 type QueryCondition = string | { [key: string]: any };
@@ -15,6 +17,42 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 
   constructor(table: TableEnum) {
     this.table = getTableName(table);
+  }
+
+  private serializeMultiLingualStrings(entity: any): any {
+    if (!entity || typeof entity !== 'object') 
+      return entity;
+    
+    const serialized = { ...entity };
+    
+    for (const [key, value] of Object.entries(serialized)) {
+      if (value instanceof MultiLingualString) {
+        serialized[key] = JSON.stringify(value.toJSON());
+      }
+    }
+    
+    return serialized;
+  }
+
+  private deserializeMultiLingualStrings(entity: any): any {
+    if (!entity || typeof entity !== 'object') return entity;
+    
+    const deserialized = { ...entity };
+    
+    for (const [key, value] of Object.entries(deserialized)) {
+      if (typeof value === 'string' && isMultiLingualString(key)) {
+        try {
+          const multiLingualString = MultiLingualString.fromJSON(value);
+          if (multiLingualString) {
+            deserialized[removeMultiLingualStringSuffix(key)] = multiLingualString;
+          }
+        } catch (error) {
+          // Silently continue if parsing fails
+        }
+      }
+    }
+    
+    return deserialized;
   }
 
   Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel> {
@@ -59,36 +97,46 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   async Execute(): Promise<Model[]> {
     const results = await runQueryAsync(this.query, this.params);
     this.params = [];
-    return results as Model[];
+    
+    if (!results) 
+      return [];
+    
+    // Deserialize MultiLingualString fields
+    const deserializedResults = results.map((result: any) => this.deserializeMultiLingualStrings(result));
+    
+    return deserializedResults as Model[];
   }
 
   async Save(entity: Partial<SaveModel>): Promise<Model> {
-    if (entity.Id) {
+    // Serialize MultiLingualString fields before saving
+    const serializedEntity = this.serializeMultiLingualStrings(entity);
+    
+    if (serializedEntity.Id) {
       // UPDATE
-      const setClause = Object.keys(entity)
+      const setClause = Object.keys(serializedEntity)
         .filter(key => key !== 'Id')
         .map(key => `${key} = ?`)
         .join(', ');
 
       const query = `UPDATE ${this.table} SET ${setClause} WHERE id = ?`;
-      const params = [...Object.values(entity).filter((_, index) => Object.keys(entity)[index] !== 'Id'), entity.Id];
+      const params = [...Object.values(serializedEntity).filter((_, index) => Object.keys(serializedEntity)[index] !== 'Id'), serializedEntity.Id];
 
       // Run the update
       await runQueryAsync(query, params);
 
-      const result = await this.Select().Where({ Id: entity.Id }).Execute();
+      const result = await this.Select().Where({ Id: serializedEntity.Id }).Execute();
       if (result?.length === 0)
         throw new Error('Record not found');
       return result?.[0] as Model;
     } else {
       // INSERT
-      const keys = Object.keys(entity).join(', ');
-      const values = Object.values(entity)
+      const keys = Object.keys(serializedEntity).join(', ');
+      const values = Object.values(serializedEntity)
         .map(() => '?')
         .join(', ');
 
       const query = `INSERT INTO ${this.table} (${keys}) VALUES (${values})`;
-      const params = Object.values(entity);
+      const params = Object.values(serializedEntity);
 
       await runQueryAsync(query, params);
       

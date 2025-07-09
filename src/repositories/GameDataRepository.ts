@@ -21,7 +21,8 @@ class GameDataRepository {
     }
 
     async getGameDataByGameIdAsync(gameId: GameTypeEnum, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GameDataModel> {
-        const model = await this.baseRepository.Select().Where({ GameId: gameId, LanguageEnum: language }).OrderByRandom().Limit(1).Execute();
+        // TODO: Add Stored procedure to get the next game data
+        const model = await this.baseRepository.Select().Where({ GameId: gameId }).OrderByRandom().Limit(1).Execute();
         return model[0];
     }
 
