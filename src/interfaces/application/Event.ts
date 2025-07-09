@@ -51,6 +51,9 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
     getOption(name: string): string | number | boolean | undefined;
     getOption<T>(name: string): T | undefined;
     handleCommandOptionsAsync(): Promise<void>;
+    getFollowUpOption(key: string): string | number | boolean | undefined;
+    setFollowUpOption(key: string, value: string | number | boolean): void;
+    followUpOptions: Record<string, string | number | boolean>;
 }
 
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {

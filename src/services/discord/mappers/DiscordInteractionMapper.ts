@@ -72,13 +72,21 @@ class DiscordInteractionMapper {
                 getOption: (name: string) => DiscordService.getOption(interaction, name),
                 command: command,
                 handleCommandOptionsAsync: async () => Promise.resolve(),
+
+                getFollowUpOption: (key: string) => {
+                    return slashCommandEvent.followUpOptions[key];
+                },
+                setFollowUpOption: (key: string, value: string | number | boolean) => {
+                    slashCommandEvent.followUpOptions[key] = value;
+                },
+                followUpOptions: {},
             } as SlashCommandInteractionEvent;
             
             slashCommandEvent.handleCommandOptionsAsync = async () => await handleCommandOptions(slashCommandEvent);
             
             return slashCommandEvent;
         } else if (interaction.isButton()) {
-            return {
+            const buttonEvent = {
                 ...event,
                 customId: interaction.customId,
                 reactAsync: async (emoji: string) => await DiscordMessageHandler.reactAsync(interaction, emoji),
@@ -86,8 +94,13 @@ class DiscordInteractionMapper {
                 sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),
                 replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
             } as MessageInteractionEvent;
+            
+            buttonEvent.deleteAsync = async () => await DiscordMessageHandler.deleteAsync(buttonEvent as MessageInteractionEvent);
+            buttonEvent.replyAsync = async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(buttonEvent, content);
+            
+            return buttonEvent;
         } else if (interaction.isStringSelectMenu()) {
-            return {
+            const selectMenuEvent = {
                 ...event,
                 customId: interaction.customId,
                 replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
@@ -95,6 +108,10 @@ class DiscordInteractionMapper {
                 deferReplyAsync: async () => await DiscordMessageHandler.deferUpdateAsync(interaction),
                 sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),
             } as SelectMenuInteractionEvent;
+            
+            selectMenuEvent.replyAsync = async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(selectMenuEvent, content);
+            
+            return selectMenuEvent;
         } else {
             console.log("Unknown interaction type", interaction);
             throw new Error("Unknown interaction type");

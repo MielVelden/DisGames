@@ -174,6 +174,8 @@ class DiscordMessageHandler {
             if (event.currentInteraction instanceof DiscordChatInputCommandInteraction ||
                 event.currentInteraction instanceof DiscordMessage) {
                 await event.currentInteraction.reply(replyOptions);
+            } else if(event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
+                await event.currentInteraction.editReply(replyOptions);
             } else
                 throw new Error("Not implemented yet");
         });

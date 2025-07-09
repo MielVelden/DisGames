@@ -3,7 +3,7 @@ import fs from "fs";
 import { DiscordClient } from "../interfaces/application/DiscordClient";
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
-import { Command } from "../interfaces/application/Command";
+import { Command, CommandOptionFollowUpType } from "../interfaces/application/Command";
 import discordService from "../services/discord/DiscordService";
 import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { MultiLingualString } from "./i18n/MultiLangualString";
@@ -57,6 +57,27 @@ export async function handleCommandOptions(event: SlashCommandInteractionEvent):
                         const isValid = await choice.validate(event);
                         if (!isValid)
                             return await event.replyAsync(new MultiLingualString(option.key.noAction));
+                    }
+
+                    if (choice.followUps) {
+                        let allFollowUpsCompleted = true;
+                        let currentEvent: InteractionEvent = event;
+                        for (const followUp of choice.followUps) {
+                            if (followUp.type === CommandOptionFollowUpType.SELECT_MENU) {
+                                const selectMenu = await followUp.configAsync(event);
+                                const selectMenuEvent = await currentEvent.getUserInputBySelectMenuAsync(selectMenu);
+                                if (selectMenuEvent) {
+                                    event.setFollowUpOption(followUp.key, selectMenuEvent.selected);
+                                    currentEvent = selectMenuEvent;
+                                } else {
+                                    allFollowUpsCompleted = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!allFollowUpsCompleted)
+                            return;
                     }
 
                     if (choice.handler)

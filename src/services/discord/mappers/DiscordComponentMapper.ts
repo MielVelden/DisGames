@@ -205,19 +205,19 @@ class DiscordComponentMapper {
     }
 
     public async mapRootComponentsAsync(event: InteractionEvent): Promise<any[]> {
-        // ActionRow-compatibele componenten
+        // ActionRow components
         const actionRowComponents = await this.mapActionRowComponentsAsync(event.components.filter(
             component => DiscordEnumMapper.isActionRowComponent(component)
         ));
         
-        // Niet-ActionRow componenten (zoals TextDisplay, MediaGallery, Container)
+        // Non-ActionRow components (TextDisplay, MediaGallery, Container)
         const otherComponentPromises = event.components
             .filter(component => !DiscordEnumMapper.isActionRowComponent(component))
             .map(component => this.mapComponentToDiscordComponentAsync(component));
         
         const otherComponents = await Promise.all(otherComponentPromises);
         
-        // Return alle componenten samen (met type cast naar any[] om type-incompatibiliteit op te lossen)
+        // Return all components together (with type cast to any[] to resolve type incompatibility)
         return [...actionRowComponents, ...otherComponents];
     }
 

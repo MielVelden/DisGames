@@ -1,6 +1,7 @@
 import { LanguageCommandOptionTranslations } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { InteractionEvent, SlashCommandInteractionEvent } from "./Event";
+import { SelectMenu } from "./Message";
 import { Permission } from "./Permission";
 
 export interface Command {
@@ -26,8 +27,19 @@ export interface CommandOptionConfig<T extends string | number> {
 
 export interface CommandOptionChoiceConfig<T extends string | number> {
     enumValue: T;
+    followUps?: CommandOptionFollowUpConfig<string>[];
     validate?: (event: SlashCommandInteractionEvent) => Promise<boolean>;
     handler?: (event: SlashCommandInteractionEvent) => Promise<void>;
+}
+
+export enum CommandOptionFollowUpType {
+    SELECT_MENU = 1,
+}
+
+export interface CommandOptionFollowUpConfig<TKey extends string = string> {
+    type: CommandOptionFollowUpType;
+    key: TKey;
+    configAsync(event: SlashCommandInteractionEvent): Promise<SelectMenu>;
 }
 
 export interface CommandOption {
