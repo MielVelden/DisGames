@@ -11,9 +11,11 @@ export interface GameConfig {
     name: MultiLingualString;
     description: MultiLingualString;
     points: number;
+    isCalculated: boolean;
     expectedType: "string" | "number" | "boolean";
     firstAnswer: string;
     addCorrectReaction: boolean;
+    hasImages?: boolean;
     options: {
         [key in GameOptionEnum]: boolean;
     };
@@ -71,6 +73,7 @@ export interface GameEvent extends GameFunctions {
     server: ServersModel;
     
     answer?: string | number | boolean;
+    nextAnswer?: GameDataModel;
     gameData: GamesModel;
     
     actions: GameAction[];

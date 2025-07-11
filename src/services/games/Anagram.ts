@@ -12,6 +12,7 @@ export default {
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].description),
         points: 1,
+        isCalculated: false,
         expectedType: "string",
         addCorrectReaction: true,
         options: {
@@ -25,8 +26,7 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            const newAnswer = await GameDataService.getGameDataAsync(event.gameConfig.id, event.server.LanguageEnum);
-            const nextAnswer = newAnswer.Response.getMessage(event.server.LanguageEnum);
+            const nextAnswer = event.nextAnswer!.Response.getMessage(event.server.LanguageEnum);
             // Scramble the answer
             const charArray = nextAnswer.split("");
             for (let i = charArray.length - 1; i > 0; i--) {

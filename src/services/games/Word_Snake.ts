@@ -10,6 +10,7 @@ export default {
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.WORD_SNAKE].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.WORD_SNAKE].description),
         points: 1,
+        isCalculated: true,
         expectedType: "string",
         firstAnswer: "e",
         addCorrectReaction: true,

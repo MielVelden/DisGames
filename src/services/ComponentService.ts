@@ -1,7 +1,7 @@
 import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig, CommandOptionType } from "../interfaces/application/Command";
 import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler, SlashCommandInteractionEvent } from "../interfaces/application/Event";
-import { MediaType } from "../interfaces/application/Image";
-import { ActionButton, Component, ComponentType, Container, Content, SelectMenu, TextDisplay } from "../interfaces/application/Message";
+import { Media, MediaType } from "../interfaces/application/Image";
+import { ActionButton, Component, ComponentType, Container, Content, MediaGallery, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { GameTypeEnum } from "../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
@@ -78,11 +78,7 @@ class ComponentService {
                         type: ComponentType.MEDIA_GALLERY,
                         items: [
                             {
-                                media: {
-                                    url: gameImage,
-                                    name: gameTypeEnum.toString(),
-                                    type: MediaType.PNG
-                                }
+                                media: gameImage
                             }
                         ]
                     },
@@ -98,6 +94,17 @@ class ComponentService {
                 ]
             } as Container
         ];
+    }
+
+    public createImage(image: Media): MediaGallery {
+        return {
+            type: ComponentType.MEDIA_GALLERY,
+            items: [
+                {
+                    media: image
+                }
+            ]
+        };
     }
 }
 

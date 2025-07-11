@@ -10,6 +10,7 @@ export default {
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].description),
         points: 1,
+        isCalculated: true,
         expectedType: "number",
         firstAnswer: "1",
         addCorrectReaction: true,

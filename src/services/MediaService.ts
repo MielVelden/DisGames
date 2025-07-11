@@ -48,20 +48,47 @@ class MediaService {
         return fs.existsSync(imagePath);
     }
 
-    public getGameImage(gameName: GameTypeEnum): string {
+    public getGameImage(gameName: GameTypeEnum): Media {
         const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameName}.${MediaType.PNG}`);
         
         if (fs.existsSync(gameImagePath)) {
-            return gameImagePath;
+            return {
+                url: gameImagePath,
+                name: gameName.toString(),
+                type: MediaType.PNG
+            };
         }
 
         console.log(`[INFO] Game image not found: ${gameImagePath}, using NotFound.png`);
-        return this.notFoundImage;
+        return {
+            url: this.notFoundImage,
+            name: 'NotFound',
+            type: MediaType.PNG
+        };
+    }
+
+    public getGameDataImage(gameId: GameTypeEnum, gameDataId: number): Media {
+        const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameId}`, `${gameDataId}.${MediaType.PNG}`);
+        
+        if (fs.existsSync(gameImagePath)) {
+            return {
+                url: gameImagePath,
+                name: `${gameId}_${gameDataId}`,
+                type: MediaType.PNG
+            };
+        }
+
+        console.log(`[INFO] Game image not found: ${gameImagePath}, using NotFound.png`);
+        return {
+            url: this.notFoundImage,
+            name: 'NotFound',
+            type: MediaType.PNG
+        };
     }
 
     public getGameImageBuffer(gameName: GameTypeEnum): Buffer {
-        const imagePath = this.getGameImage(gameName);
-        return fs.readFileSync(imagePath);
+        const media = this.getGameImage(gameName);
+        return fs.readFileSync(media.url);
     }
 }
 

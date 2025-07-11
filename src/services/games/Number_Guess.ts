@@ -12,6 +12,7 @@ export default {
         name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].name),
         description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].description),
         points: 1,
+        isCalculated: true,
         expectedType: "number",
         firstAnswer: "1",
         addCorrectReaction: true,

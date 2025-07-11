@@ -14,6 +14,7 @@ import ComponentService from "./ComponentService";
 import { createCancelButton, createMoveButton } from "../utils/Button";
 import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
 import { i18n } from "../utils/i18n/i18n";
+import MediaService from "./MediaService";
 
 class GameService {
     private games: GameModule[] = [];
@@ -171,6 +172,20 @@ class GameService {
     }
 
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
+
+        // Get the next answer
+        if (!gameEvent.gameConfig.isCalculated)
+            gameEvent.nextAnswer = await GameDataRepository.getGameDataByGameIdAsync(gameEvent.gameId, gameEvent.server.LanguageEnum);
+
+        if (gameEvent.gameConfig.hasImages) {
+            const image = MediaService.getGameDataImage(gameEvent.gameId, gameEvent.nextAnswer!.Id);
+            gameEvent.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.HIGH,
+                component: ComponentService.createImage(image)
+            })
+        }
+
         await gameEvent.getNextAnswerAsync(gameEvent);
 
         // Save the model
