@@ -28,6 +28,18 @@ class ComponentService {
         };
     }
 
+    public createContainer(content: MultiLingualString): Container {
+        return {
+            type: ComponentType.CONTAINER,
+            components: [
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: content
+                }
+            ]
+        } as Container
+    }
+
     private createComponent<T extends Component>(config: T, type: EventTypeEnum, handlerConfig?: HandlerConfig): T {
         if (!handlerConfig)
             return config;
@@ -95,16 +107,21 @@ class ComponentService {
             } as Container
         ];
     }
-
-    public createImage(image: Media): MediaGallery {
+    
+    public createImage(image: Media): Container {
         return {
-            type: ComponentType.MEDIA_GALLERY,
-            items: [
+            type: ComponentType.CONTAINER,
+            components: [
                 {
-                    media: image
-                }
+                    type: ComponentType.MEDIA_GALLERY,
+                    items: [
+                        {
+                            media: image
+                        }
+                    ]
+                },
             ]
-        };
+        } as Container;
     }
 }
 

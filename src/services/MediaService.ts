@@ -68,7 +68,7 @@ class MediaService {
     }
 
     public getGameDataImage(gameId: GameTypeEnum, gameDataId: number): Media {
-        const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameId}`, `${gameDataId}.${MediaType.PNG}`);
+        const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameId}`, `${gameDataId}.${MediaType.GIF}`);
         
         if (fs.existsSync(gameImagePath)) {
             return {

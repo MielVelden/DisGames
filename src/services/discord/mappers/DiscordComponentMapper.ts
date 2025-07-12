@@ -218,7 +218,7 @@ class DiscordComponentMapper {
         const otherComponents = await Promise.all(otherComponentPromises);
         
         // Return all components together (with type cast to any[] to resolve type incompatibility)
-        return [...actionRowComponents, ...otherComponents];
+        return [...otherComponents, ...actionRowComponents];
     }
 
     private async mapTextDisplayToDiscordTextDisplayAsync(textDisplay: TextDisplay): Promise<DiscordTextDisplayBuilder> {

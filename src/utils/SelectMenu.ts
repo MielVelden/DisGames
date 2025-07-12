@@ -8,6 +8,7 @@ export function createGamesSelectMenu(gameModules: GameModule[]): SelectMenu {
     return ComponentService.createSelectMenu({
         custom_id: "game",
         type: ComponentType.STRING_SELECT,
+        question: new MultiLingualString(i18n.commands.games.labels.selectGame),
         placeholder: new MultiLingualString(i18n.commands.games.labels.selectGame),
         options: gameModules.map(game => ({
             label: game.config.name,

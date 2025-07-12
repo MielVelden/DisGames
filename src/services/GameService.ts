@@ -57,8 +57,8 @@ class GameService {
         return this.games.filter(game => activeGames.some(activeGame => activeGame.GameTypeEnum === game.config.id));
     }
 
-    public getGameById(gameId: GameTypeEnum): GameModule | undefined {
-        return this.games.find(game => game.config.id === gameId);
+    public getGameByType(gameTypeEnum: GameTypeEnum): GameModule | undefined {
+        return this.games.find(game => game.config.id === gameTypeEnum);
     }
 
     public async getGameByChannelIdAsync(channelId: string): Promise<GamesModel> {
@@ -116,7 +116,7 @@ class GameService {
         }
 
         // Get the game module
-        const gameModule = this.getGameById(savable.GameTypeEnum as GameTypeEnum);
+        const gameModule = this.getGameByType(savable.GameTypeEnum as GameTypeEnum);
         if (!gameModule)
             throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
@@ -172,7 +172,6 @@ class GameService {
     }
 
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
-
         // Get the next answer
         if (!gameEvent.gameConfig.isCalculated)
             gameEvent.nextAnswer = await GameDataRepository.getGameDataByGameIdAsync(gameEvent.gameId, gameEvent.server.LanguageEnum);
@@ -275,7 +274,7 @@ class GameService {
         if (!game)
             throw new Error(`Game not found for channel ${event.channelId}`);
 
-        const gameModule = this.getGameById(game.GameTypeEnum);
+        const gameModule = this.getGameByType(game.GameTypeEnum);
         if (!gameModule)
             throw new Error(`Game module not found for game type ${game.GameTypeEnum}`);
 

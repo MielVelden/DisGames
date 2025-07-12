@@ -7,6 +7,7 @@ import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfa
 import ComponentService from "../services/ComponentService";
 import GameService from "../services/GameService";
 import { createDeleteButton } from "../utils/Button";
+import { createActiveGameContainer } from "../utils/Container";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createGamesSelectMenu } from "../utils/SelectMenu";
@@ -33,11 +34,11 @@ export class GamesCommand implements Command {
                         }
                     }],
                     handler: async (event: SlashCommandInteractionEvent) => {
-                        await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.wantToDelete)));
+                        await event.addComponentsAsync(createActiveGameContainer(await GameService.getGameByServerIdAndGameIdAsync(event.guildId, Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum)));
                         await event.addComponentAsync(createDeleteButton(event.user.id, async (btnEvent) => {
                             const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum);
                             await GameService.deleteAsync(game.Id);
-                            await btnEvent.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
+                            await btnEvent.editWithComponentAsync(ComponentService.createContainer(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
                         }));
                         await event.editAsync();
                     }

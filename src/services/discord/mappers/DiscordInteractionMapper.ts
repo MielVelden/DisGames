@@ -55,7 +55,7 @@ class DiscordInteractionMapper {
             addComponentAsync: async (component: Component) => await DiscordComponentMapper.addComponentAsync(event, component),
             addComponentsAsync: async (components: Component[]) => await DiscordComponentMapper.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await DiscordComponentMapper.clearComponentsAsync(event),
-            editAsync: async (content?: string) => await DiscordMessageHandler.editAsync(event, content || ""),
+            editAsync: async (content?: string) => await DiscordMessageHandler.editAsync(event, content),
             editWithComponentAsync: async (component: Component) => await DiscordMessageHandler.editWithComponentAsync(event, component),
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
 
@@ -139,7 +139,7 @@ class DiscordInteractionMapper {
             addComponentAsync: async (component: Component) => await DiscordComponentMapper.addComponentAsync(event, component),
             addComponentsAsync: async (components: Component[]) => await DiscordComponentMapper.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await DiscordComponentMapper.clearComponentsAsync(event),
-            editAsync: async (content?: string) => await DiscordMessageHandler.editAsync(event, content || ""),
+            editAsync: async (content?: string) => await DiscordMessageHandler.editAsync(event, content),
             editWithComponentAsync: async (component: Component) => await DiscordMessageHandler.editWithComponentAsync(event, component),
             sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),
             replyAsync: async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(event, content),
