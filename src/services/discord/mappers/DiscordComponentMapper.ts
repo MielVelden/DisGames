@@ -204,14 +204,14 @@ class DiscordComponentMapper {
         return actionRows;
     }
 
-    public async mapRootComponentsAsync(event: InteractionEvent): Promise<any[]> {
+    public async mapRootComponentsAsync(components: Component[]): Promise<any[]> {
         // ActionRow components
-        const actionRowComponents = await this.mapActionRowComponentsAsync(event.components.filter(
+        const actionRowComponents = await this.mapActionRowComponentsAsync(components.filter(
             component => DiscordEnumMapper.isActionRowComponent(component)
         ));
         
         // Non-ActionRow components (TextDisplay, MediaGallery, Container)
-        const otherComponentPromises = event.components
+        const otherComponentPromises = components
             .filter(component => !DiscordEnumMapper.isActionRowComponent(component))
             .map(component => this.mapComponentToDiscordComponentAsync(component));
         
@@ -283,22 +283,22 @@ class DiscordComponentMapper {
     }
     // #endregion
 
-    public async buildMessageContentAsync(event: InteractionEvent, message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
+    public async buildMessageContentAsync(event: InteractionEvent, components: Component[], message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
         if(message) {
             if(typeof message === 'string')
                 message = createMultiLingualString(message);
 
-            event.components.push(ComponentService.createContent(message));
+            components.push(ComponentService.createContent(message));
         }
 
-        const rootComponents = await this.mapRootComponentsAsync(event);
+        const rootComponents = await this.mapRootComponentsAsync(components);
         
         if (rootComponents.length === 0) {
             return null;
         }
 
         // Collect all local attachments from MediaGallery components
-        const files: AttachmentBuilder[] = this.collectLocalAttachments(event);
+        const files: AttachmentBuilder[] = this.collectLocalAttachments(components);
 
         return this.createReplyOptions(rootComponents, files);
     }
@@ -311,7 +311,7 @@ class DiscordComponentMapper {
         };
     }
 
-    private collectLocalAttachments(event: InteractionEvent): AttachmentBuilder[] {
+    private collectLocalAttachments(components: Component[]): AttachmentBuilder[] {
         const files: AttachmentBuilder[] = [];
         
         const findMediaGalleries = (components: Component[]): void => {
@@ -333,7 +333,7 @@ class DiscordComponentMapper {
             }
         };
         
-        findMediaGalleries(event.components);
+        findMediaGalleries(components);
         return files;
     }
 

@@ -73,8 +73,16 @@ class GameService {
 
     public async saveAsync(savable: GamesSaveModel, event: InteractionEvent): Promise<GamesModel> {
         // Check if the savable is valid
-        if (savable.Id)
-            throw ErrorHelper.throwError(ExceptionEnum.GAME_ALREADY_EXISTS);
+        if (savable.Id) {
+            // Update
+            const model = await GameRepository.save(savable);
+
+            // Add start message
+            const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum, model.Answer as string);
+            await event.sendToChannelAsync(model.ChannelId, startMessage);
+
+            return model;
+        }
 
         if (!savable.ChannelId || !savable.ServerId)
             throw ErrorHelper.throwError(ExceptionEnum.CHANNEL_OR_SERVER_NOT_FOUND);

@@ -5,7 +5,8 @@ import {
     ButtonInteraction as DiscordButtonInteraction,
     ButtonBuilder as DiscordButtonBuilder,
     Message as DiscordMessage,
-    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
+    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
+    ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction
 } from 'discord.js';
 import { InteractionEvent, MessageInteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
@@ -25,14 +26,14 @@ class DiscordMessageHandler {
     }
 
     public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, message);
+        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
         if (!content) return;
 
         await this.handleInteractionReplyAsync(event as MessageInteractionEvent, content);
     }
 
     public async sendAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, message);
+        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
         if (!content) return;
 
         const guild = event.currentInteraction.guild;
@@ -55,7 +56,7 @@ class DiscordMessageHandler {
     }
 
     public async editAsync(event: InteractionEvent, message?: MultiLingualString | string): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, message);
+        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
         if (!content) return;
 
         await this.handleInteractionEditAsync(event, content);
@@ -63,7 +64,7 @@ class DiscordMessageHandler {
 
     public async deleteAsync(event: MessageInteractionEvent): Promise<void> {
         // Mark message as internally deleted before deleting
-        if(event.messageDeleted)
+        if (event.messageDeleted)
             return;
 
         event.messageDeleted = true;
@@ -76,7 +77,7 @@ class DiscordMessageHandler {
             if (event.currentInteraction instanceof DiscordButtonInteraction && event.currentInteraction.message)
                 EventService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
 
-            if(event.currentInteraction instanceof DiscordButtonInteraction)
+            if (event.currentInteraction instanceof DiscordButtonInteraction)
                 await event.currentInteraction.deleteReply();
         }
     }
@@ -88,14 +89,14 @@ class DiscordMessageHandler {
             await interaction.message.react(emoji);
     }
 
-    public async deferUpdateAsync(interaction: DiscordStringSelectMenuInteraction): Promise<void> {
+    public async deferUpdateAsync(interaction: DiscordStringSelectMenuInteraction | DiscordChannelSelectMenuInteraction): Promise<void> {
         await interaction.deferUpdate();
     }
 
 
     public async handleInteractionReplyAsync(event: MessageInteractionEvent, content: DiscordMessageContent): Promise<void> {
         // If the message is deleted, don't reply
-        if(event.messageDeleted)
+        if (event.messageDeleted)
             return;
 
         if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
@@ -129,7 +130,7 @@ class DiscordMessageHandler {
             await event.currentInteraction.edit(content);
         } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
             await event.currentInteraction.update(content);
-        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
+        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction || event.currentInteraction instanceof DiscordChannelSelectMenuInteraction) {
             if (event.currentInteraction.deferred) {
                 await event.currentInteraction.editReply(content);
             } else {
@@ -171,12 +172,14 @@ class DiscordMessageHandler {
 
             const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
-            
+
             if (event.currentInteraction instanceof DiscordChatInputCommandInteraction ||
                 event.currentInteraction instanceof DiscordMessage) {
                 await event.currentInteraction.reply(replyOptions);
-            } else if(event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
+            } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
                 await event.currentInteraction.editReply(replyOptions);
+            } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
+                await event.currentInteraction.update(replyOptions);
             } else
                 throw new Error("Not implemented yet");
         });
@@ -213,6 +216,23 @@ class DiscordMessageHandler {
                 throw new Error("Not implemented yet");
             }
         });
+    }
+
+    public async sendToChannelAsync(event: InteractionEvent, channelId: string, components: Component[]): Promise<void> {
+        const guild = event.currentInteraction.guild;
+        if (!guild) {
+            throw new Error("Guild not found");
+        }
+
+        const channel = await guild.channels.fetch(channelId);
+        if (!channel || !channel.isTextBased()) {
+            throw new Error("Channel not found or not text-based");
+        }
+
+        const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
+        if (!content) return;
+
+        await channel.send(content);
     }
 }
 

@@ -51,8 +51,8 @@ class DiscordService {
         return await DiscordComponentMapper.mapComponentToDiscordComponentAsync(component);
     }
 
-    public async buildMessageContentAsync(event: InteractionEvent, message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
-        return await DiscordComponentMapper.buildMessageContentAsync(event, message);
+    public async buildMessageContentAsync(event: InteractionEvent, components: Component[], message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
+        return await DiscordComponentMapper.buildMessageContentAsync(event, components, message);
     }
 
     // Interaction Mapping

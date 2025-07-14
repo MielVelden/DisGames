@@ -27,6 +27,7 @@ export interface InteractionEvent {
     addComponentsAsync(components: Component[]): Promise<void>;
     clearComponentsAsync(): Promise<void>;
     
+    sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
     editAsync(): Promise<void>;
     editWithComponentAsync(component: Component): Promise<void>;
 

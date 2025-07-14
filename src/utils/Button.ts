@@ -22,7 +22,7 @@ export function createCancelButton(userId: string): ActionButton {
 export function createMoveButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
     return ComponentService.createButton(
         {
-            label: new MultiLingualString(i18n.commands.games.labels.moveToThisChannel),
+            label: new MultiLingualString(i18n.commands.games.labels.wantToMoveChannel),
             style: ButtonStyle.SECONDARY,
         },
         {

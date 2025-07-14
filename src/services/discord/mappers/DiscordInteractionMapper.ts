@@ -55,6 +55,7 @@ class DiscordInteractionMapper {
             addComponentAsync: async (component: Component) => await DiscordComponentMapper.addComponentAsync(event, component),
             addComponentsAsync: async (components: Component[]) => await DiscordComponentMapper.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await DiscordComponentMapper.clearComponentsAsync(event),
+            sendToChannelAsync: async (channelId: string, components: Component[]) => await DiscordMessageHandler.sendToChannelAsync(event, channelId, components),
             editAsync: async (content?: string) => await DiscordMessageHandler.editAsync(event, content),
             editWithComponentAsync: async (component: Component) => await DiscordMessageHandler.editWithComponentAsync(event, component),
             reactAsync: async (emoji: string) => { throw new Error("Not implemented yet"); },
@@ -99,7 +100,7 @@ class DiscordInteractionMapper {
             buttonEvent.replyAsync = async (content?: MultiLingualString) => await DiscordMessageHandler.replyAsync(buttonEvent, content);
             
             return buttonEvent;
-        } else if (interaction.isStringSelectMenu()) {
+        } else if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
             const selectMenuEvent = {
                 ...event,
                 customId: interaction.customId,
@@ -139,6 +140,7 @@ class DiscordInteractionMapper {
             addComponentAsync: async (component: Component) => await DiscordComponentMapper.addComponentAsync(event, component),
             addComponentsAsync: async (components: Component[]) => await DiscordComponentMapper.addComponentsAsync(event, components),
             clearComponentsAsync: async () => await DiscordComponentMapper.clearComponentsAsync(event),
+            sendToChannelAsync: async (channelId: string, components: Component[]) => await DiscordMessageHandler.sendToChannelAsync(event, channelId, components),
             editAsync: async (content?: string) => await DiscordMessageHandler.editAsync(event, content),
             editWithComponentAsync: async (component: Component) => await DiscordMessageHandler.editWithComponentAsync(event, component),
             sendAsync: async (message: MultiLingualString | undefined) => await DiscordMessageHandler.sendAsync(event, message),

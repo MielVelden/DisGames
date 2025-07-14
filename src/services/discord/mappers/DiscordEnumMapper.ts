@@ -45,7 +45,7 @@ class DiscordEnumMapper {
             return EventTypeEnum.SLASH_COMMAND;
         else if (interaction.isButton())
             return EventTypeEnum.BUTTON;
-        else if (interaction.isStringSelectMenu())
+        else if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu())
             return EventTypeEnum.SELECT_MENU;
         else if (interaction.isModalSubmit())
             return EventTypeEnum.MODAL_SUBMIT;

@@ -55,7 +55,10 @@ export interface I18nTranslations {
                 selectGame: LanguageTranslations;
                 wantToDelete: LanguageTranslations;
                 deleteSuccess: LanguageTranslations;
+                wantToMoveChannel: LanguageTranslations;
+                chooseChannel: LanguageTranslations;
                 moveToThisChannel: LanguageTranslations;
+                movedToChannel: (channel: string) => MultiLingualString;
             },
             types: LanguageGameTypeTranslations<GameTypeEnum>;
             event: {
@@ -144,10 +147,22 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Game removed",
                     [LanguageEnum.NL]: "Spel verwijderd",
                 },
+                wantToMoveChannel: {
+                    [LanguageEnum.EN]: "Move Channel",
+                    [LanguageEnum.NL]: "Kanaal verplaatsen",
+                },
                 moveToThisChannel: {
                     [LanguageEnum.EN]: "Switch to this channel",
                     [LanguageEnum.NL]: "Overschakelen naar dit kanaal",
-                }
+                },
+                chooseChannel: {
+                    [LanguageEnum.EN]: "Choose a channel",
+                    [LanguageEnum.NL]: "Kies een kanaal",
+                },
+                movedToChannel: (channel: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Moved to {channel}",
+                    [LanguageEnum.NL]: "Verplaatst naar {channel}",
+                }, { channel }),
             },
             types: {
                 [GameTypeEnum.COUNTING]: {
@@ -251,17 +266,17 @@ export const i18n: I18nTranslations = {
                 [GameTypeEnum.GUESS_THE_FLAG]: {
                     name: {
                         [LanguageEnum.EN]: "Guess the Flag",
-                        [LanguageEnum.NL]: "Raad de vlag",
+                        [LanguageEnum.NL]: "Raad de Vlag",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Match the flag to the country",
-                        [LanguageEnum.NL]: "Koppel de vlag aan het juiste land",
+                        [LanguageEnum.EN]: "Can you match the flag to the right country?",
+                        [LanguageEnum.NL]: "Kun jij de vlag aan het juiste land koppelen?",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First flag: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste vlag: {firstAnswer}",
+                        [LanguageEnum.EN]: "Let’s start, the first flag is: {firstAnswer}",
+                        [LanguageEnum.NL]: "We beginnen, de eerste vlag is: {firstAnswer}",
                     }, { firstAnswer }),
-                },
+                },                
             },
             event: {
                 messageChanged: (user: string, message: string) => new MultiLingualString({
