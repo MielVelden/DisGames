@@ -28,7 +28,7 @@ export interface InteractionEvent {
     clearComponentsAsync(): Promise<void>;
     
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
-    editAsync(): Promise<void>;
+    editAsync(content?: string): Promise<void>;
     editWithComponentAsync(component: Component): Promise<void>;
 
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
@@ -66,9 +66,16 @@ export interface MessageInteractionEvent extends InteractionEvent, ReplyInteract
     content: string;
 }
 
+export interface ButtonInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    sendAsync(): Promise<void>;
+    reactAsync(emoji: string): Promise<void>;
+    deleteAsync(): Promise<void>;
+}
+
 export interface SelectMenuInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
     selected: string;
     deferReplyAsync(): Promise<void>;
+    sendAsync(): Promise<void>;
 }
 
 export interface Handler {
