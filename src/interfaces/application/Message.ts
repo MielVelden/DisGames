@@ -26,11 +26,23 @@ export enum ComponentType {
     FILE = 'FILE',
     SEPARATOR = 'SEPARATOR',
     CONTAINER = 'CONTAINER',
-    CONTENT = 'CONTENT'
+    CONTENT = 'CONTENT',
+    TITLE = 'TITLE',
+    FOOTER = 'FOOTER'
 }
 
 export interface Content extends Component {
     type: ComponentType.CONTENT;
+    content: MultiLingualString;
+}
+
+export interface Title extends Component {
+    type: ComponentType.TITLE;
+    content: MultiLingualString;
+}
+
+export interface Footer extends Component {
+    type: ComponentType.FOOTER;
     content: MultiLingualString;
 }
 
@@ -210,9 +222,17 @@ export interface Separator extends Component {
 
 export interface Container extends Component {
     type: ComponentType.CONTAINER;
-    components: (ActionRow | TextDisplay | Section | MediaGallery | Separator | File)[];
+    title?: MultiLingualString;
+    footer?: MultiLingualString;
+    components: (ActionRow | TextDisplay | Section | MediaGallery | Separator | File | ActionButton | Title | Footer)[];
     accent_color?: number;
     spoiler?: boolean;
+}
+
+export interface ContainerBuilder {
+    title?: MultiLingualString;
+    description: MultiLingualString;
+    footer?: MultiLingualString;
 }
 
 // #endregion

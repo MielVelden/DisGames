@@ -15,10 +15,11 @@ import {
     MediaGalleryBuilder as DiscordMediaGalleryBuilder,
     ContainerBuilder as DiscordContainerBuilder,
 } from 'discord.js';
+import { SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
-import { Component, SelectMenu } from '../../interfaces/application/Message';
+import { Component, ComponentType, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLangualString';
 
 // Mappers
@@ -29,7 +30,7 @@ import DiscordMessageHandler from './handlers/DiscordMessageHandler';
 
 export type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 export type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
-export type DiscordComponentBuilder = DiscordButtonBuilder | DiscordSelectMenuBuilder | DiscordTextDisplayBuilder | DiscordMediaGalleryBuilder | DiscordContainerBuilder;
+export type DiscordComponentBuilder = DiscordButtonBuilder | DiscordSelectMenuBuilder | DiscordTextDisplayBuilder | DiscordMediaGalleryBuilder | DiscordContainerBuilder | DiscordSeparatorBuilder;
 export type DiscordActionRowComponent = DiscordSelectMenuBuilder | DiscordButtonBuilder;
 
 export interface DiscordMessageContent {

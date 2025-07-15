@@ -146,7 +146,9 @@ class DiscordMessageHandler {
 
         // Clear the components and add the select menu back to the components
         await event.clearComponentsAsync();
-        await event.addComponentAsync(ComponentService.createContainer(new MultiLingualString(i18n.common.timedOut)));
+        await event.addComponentAsync(ComponentService.createContainer({
+            description: new MultiLingualString(i18n.common.timedOut)
+        }));
         await event.addComponentAsync(selectMenu);
 
         // Edit the message to show the timeout
@@ -166,7 +168,9 @@ class DiscordMessageHandler {
             });
 
             // Map and send select menu
-            const message = ComponentService.createContainer(selectMenu.question ?? createMultiLingualString("test?"));
+            const message = ComponentService.createContainer({
+                description: selectMenu.question ?? createMultiLingualString("test?")
+            });
             const discordMessage = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(message);
 
             const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);

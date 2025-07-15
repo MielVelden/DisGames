@@ -34,6 +34,7 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
         name: LanguageTranslations;
         description: LanguageTranslations;
         startMessage: (firstAnswer: string) => MultiLingualString;
+        nextAnswer?: (nextAnswer?: string) => MultiLingualString;
     }
 }
 
@@ -50,15 +51,16 @@ export interface I18nTranslations {
             option: LanguageCommandOptionTranslations<GamesCommandActionEnum>;
             labels: {
                 success: LanguageTranslations;
-                nextNumber: (number: string) => MultiLingualString;
-                nextWord: (word: string) => MultiLingualString;
                 selectGame: LanguageTranslations;
-                wantToDelete: LanguageTranslations;
                 deleteSuccess: LanguageTranslations;
-                wantToMoveChannel: LanguageTranslations;
                 chooseChannel: LanguageTranslations;
-                moveToThisChannel: LanguageTranslations;
                 movedToChannel: (channel: string) => MultiLingualString;
+                skipAnswer: LanguageTranslations;
+            },
+            buttons: {
+                delete: LanguageTranslations;
+                move: LanguageTranslations;
+                moveHere: LanguageTranslations;
             },
             types: LanguageGameTypeTranslations<GameTypeEnum>;
             event: {
@@ -127,33 +129,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Game setup complete",
                     [LanguageEnum.NL]: "Spel succesvol ingesteld",
                 },
-                nextNumber: (number: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Next number: {number}",
-                    [LanguageEnum.NL]: "Volgend nummer: {number}",
-                }, { number }),
-                nextWord: (word: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Next word: {word}",
-                    [LanguageEnum.NL]: "Volgend woord: {word}",
-                }, { word }),
                 selectGame: {
                     [LanguageEnum.EN]: "Choose a game",
                     [LanguageEnum.NL]: "Kies een spel",
                 },
-                wantToDelete: {
-                    [LanguageEnum.EN]: "Are you sure you want to delete this game?",
-                    [LanguageEnum.NL]: "Weet je zeker dat je dit spel wilt verwijderen?",
-                },
                 deleteSuccess: {
                     [LanguageEnum.EN]: "Game removed",
                     [LanguageEnum.NL]: "Spel verwijderd",
-                },
-                wantToMoveChannel: {
-                    [LanguageEnum.EN]: "Move Channel",
-                    [LanguageEnum.NL]: "Kanaal verplaatsen",
-                },
-                moveToThisChannel: {
-                    [LanguageEnum.EN]: "Switch to this channel",
-                    [LanguageEnum.NL]: "Overschakelen naar dit kanaal",
                 },
                 chooseChannel: {
                     [LanguageEnum.EN]: "Choose a channel",
@@ -163,6 +145,24 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Moved to {channel}",
                     [LanguageEnum.NL]: "Verplaatst naar {channel}",
                 }, { channel }),
+                skipAnswer: {
+                    [LanguageEnum.EN]: "Not familiar with the word? Enter '?'",
+                    [LanguageEnum.NL]: "Niet bekend met het woord? Voer '?' in",
+                },
+            },
+            buttons: {
+                delete: {
+                    [LanguageEnum.EN]: "Are you sure you want to delete this game?",
+                    [LanguageEnum.NL]: "Weet je zeker dat je dit spel wilt verwijderen?",
+                },
+                move: {
+                    [LanguageEnum.EN]: "Move Channel",
+                    [LanguageEnum.NL]: "Kanaal verplaatsen",
+                },
+                moveHere: {
+                    [LanguageEnum.EN]: "Switch to this channel",
+                    [LanguageEnum.NL]: "Overschakelen naar dit kanaal",
+                },
             },
             types: {
                 [GameTypeEnum.COUNTING]: {
@@ -206,6 +206,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "First letter: {firstAnswer}",
                         [LanguageEnum.NL]: "Eerste letter: {firstAnswer}",
                     }, { firstAnswer }),
+                    nextAnswer: (nextAnswer: string = "") => new MultiLingualString({
+                        [LanguageEnum.EN]: "Next word: {nextAnswer}",
+                        [LanguageEnum.NL]: "Volgend woord: {nextAnswer}",
+                    }, { nextAnswer }),
                 },
                 [GameTypeEnum.NUMBER_GUESS]: {
                     name: {
@@ -276,6 +280,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Let’s start, the first flag is: {firstAnswer}",
                         [LanguageEnum.NL]: "We beginnen, de eerste vlag is: {firstAnswer}",
                     }, { firstAnswer }),
+                    nextAnswer: (nextAnswer: string = "") => new MultiLingualString({
+                        [LanguageEnum.EN]: "Can you guess the flag?",
+                        [LanguageEnum.NL]: "Kun jij de vlag raden?",
+                    }, { nextAnswer }),
                 },                
             },
             event: {

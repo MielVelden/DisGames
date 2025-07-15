@@ -37,26 +37,29 @@ export class GamesCommand implements Command {
                     handler: async (event: SlashCommandInteractionEvent) => {
                         const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
                         const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
-                        await event.addComponentsAsync(createActiveGameContainer(game));
-
-                        await event.addComponentAsync(createMoveButton(event.user.id, async (btnEvent) => {
-                            const channelSelectMenu = createChannelSelectMenu();
-                            const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);
-                            if(channelEvent) {
-                                await GameService.saveAsync({
-                                    Id: game.Id,
-                                    ChannelId: channelEvent.selected
-                                }, channelEvent);
-                                await channelEvent.addComponentAsync(ComponentService.createContainer(i18n.commands.games.labels.movedToChannel(channelEvent.selected)));
-                                await channelEvent.editAsync();
-                            }
-                        }));
-
-                        await event.addComponentAsync(createDeleteButton(event.user.id, async (btnEvent) => {
-                            await GameService.deleteAsync(game.Id);
-                            await btnEvent.clearComponentsAsync();
-                            await btnEvent.editWithComponentAsync(ComponentService.createContainer(new MultiLingualString(i18n.commands.games.labels.deleteSuccess)));
-                        }));
+                        await event.addComponentsAsync(createActiveGameContainer(game, [
+                            createMoveButton(event.user.id, async (btnEvent) => {
+                                const channelSelectMenu = createChannelSelectMenu();
+                                const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);
+                                if(channelEvent) {
+                                    await GameService.saveAsync({
+                                        Id: game.Id,
+                                        ChannelId: channelEvent.selected
+                                    }, channelEvent);
+                                    await channelEvent.addComponentAsync(ComponentService.createContainer({
+                                        description: i18n.commands.games.labels.movedToChannel(channelEvent.selected)
+                                    }));
+                                    await channelEvent.editAsync();
+                                }
+                            }),
+                            createDeleteButton(event.user.id, async (btnEvent) => {
+                                await GameService.deleteAsync(game.Id);
+                                await btnEvent.clearComponentsAsync();
+                                await btnEvent.editWithComponentAsync(ComponentService.createContainer({
+                                    description: new MultiLingualString(i18n.commands.games.labels.deleteSuccess)
+                                }));
+                            })
+                        ]));
                         await event.editAsync();
                     }
                 },

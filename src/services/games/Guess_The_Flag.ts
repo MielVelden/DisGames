@@ -1,9 +1,9 @@
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
-import ComponentService from "../ComponentService";
 import { i18n } from "../../utils/i18n/i18n";
-import GameDataService from "../GameDataService";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import ComponentService from "../ComponentService";
+import MediaService from "../MediaService";
 
 export default {
     config: {
@@ -27,7 +27,18 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            event.gameData.Answer = event.nextAnswer!.Response.getMessage(event.server.LanguageEnum);
+            const nextAnswer = event.nextAnswer!.Response.getMessage(event.server.LanguageEnum);
+            event.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.HIGH,
+                component: ComponentService.createContainer({
+                    title: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
+                    description: i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].nextAnswer!(),
+                    footer: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
+                })
+            })
+
+            event.gameData.Answer = nextAnswer;
         }
     } as GameFunctions
 } as GameModule;

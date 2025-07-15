@@ -9,9 +9,9 @@ import {
     MessageFlags as DiscordMessageFlags,
     AttachmentBuilder
 } from 'discord.js';
-import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder } from '@discordjs/builders';
+import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { InteractionEvent } from '../../../interfaces/application/Event';
-import { ActionButton, ComponentType, Container, Content, MediaGallery, SelectMenu, SelectOption, TextDisplay } from '../../../interfaces/application/Message';
+import { ActionButton, ComponentType, Container, Content, Footer, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -154,6 +154,8 @@ class DiscordComponentMapper {
                 return await this.mapButtonToDiscordButtonAsync(component as ActionButton);
             case ComponentType.TEXT_DISPLAY:
                 return await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
+            case ComponentType.SEPARATOR:
+                return await this.mapSeparatorToDiscordSeparatorAsync(component as Separator);
             case ComponentType.STRING_SELECT:
             case ComponentType.USER_SELECT:
             case ComponentType.ROLE_SELECT:
@@ -176,8 +178,33 @@ class DiscordComponentMapper {
         return new DiscordActionRowBuilder<any>().addComponents(componentArray);
     }
 
+    private excludeComponentsInContainers(components: Component[]): Component[] {
+        const componentsInContainers: Set<Component> = new Set();
+        
+        // Find all components that are inside containers
+        const findComponentsInContainers = (comps: Component[]): void => {
+            for (const component of comps) {
+                if (component.type === ComponentType.CONTAINER) {
+                    const container = component as Container;
+                    if (container.components) {
+                        container.components.forEach(nestedComp => componentsInContainers.add(nestedComp));
+                        findComponentsInContainers(container.components);
+                    }
+                }
+            }
+        };
+        
+        findComponentsInContainers(components);
+        
+        // Return only components that are not inside containers
+        return components.filter(component => !componentsInContainers.has(component));
+    }
+
     public async mapActionRowComponentsAsync(components: Component[]): Promise<DiscordActionRowBuilder<any>[]> {
-        const discordComponents = await Promise.all(components.map(component => this.mapComponentToDiscordComponentAsync(component)));
+        // Exclude buttons that are already inside containers
+        const componentsToProcess = this.excludeComponentsInContainers(components);
+        
+        const discordComponents = await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)));
         
         // Group components by type - only including ActionRow-compatible components
         const buttons = discordComponents.filter(c => c instanceof DiscordButtonBuilder);
@@ -222,9 +249,36 @@ class DiscordComponentMapper {
         return [...otherComponents, ...actionRowComponents];
     }
 
-    private async mapTextDisplayToDiscordTextDisplayAsync(textDisplay: TextDisplay): Promise<DiscordTextDisplayBuilder> {
-        return new DiscordTextDisplayBuilder()
-            .setContent(textDisplay.content?.getMessage() || "No content");
+    private async mapTextDisplayToDiscordTextDisplayAsync(textDisplay: TextDisplay | Title | Footer): Promise<DiscordTextDisplayBuilder> {
+        switch (textDisplay.type) {
+            case ComponentType.TEXT_DISPLAY:
+                return new DiscordTextDisplayBuilder()
+                    .setContent(textDisplay.content?.getMessage() || "No content");
+            case ComponentType.TITLE:
+                return new DiscordTextDisplayBuilder()
+                    .setContent(`## ${textDisplay.content?.getMessage() || "No content"}`);
+            case ComponentType.FOOTER:
+                return new DiscordTextDisplayBuilder()
+                    .setContent(`-# ${textDisplay.content?.getMessage() || "No content"}`);
+            default:
+                throw new Error(`Unhandled text display type: ${textDisplay}`);
+        }
+    }
+
+    private async mapSeparatorToDiscordSeparatorAsync(separator: Separator): Promise<DiscordSeparatorBuilder> {
+        const discordSeparator = new DiscordSeparatorBuilder();
+        
+        if (separator.divider !== undefined) {
+            discordSeparator.setDivider(separator.divider);
+        }
+        
+        if (separator.spacing !== undefined) {
+            // Map spacing values 1 -> Small, 2 -> Large (based on Discord's enum)
+            const spacingSize = separator.spacing === 1 ? 1 : 2; // SeparatorSpacingSize.Small : SeparatorSpacingSize.Large
+            discordSeparator.setSpacing(spacingSize);
+        }
+        
+        return discordSeparator;
     }
 
     private async mapMediaGalleryToDiscordMediaGalleryAsync(mediaGallery: MediaGallery): Promise<DiscordMediaGalleryBuilder> {
@@ -257,15 +311,57 @@ class DiscordComponentMapper {
             .setAccentColor(container.accent_color || DEFAULT_EMBED_COLOR)
             .setSpoiler(container.spoiler || false);
 
-        const textDisplayComponents = await Promise.all((container.components?.filter(component => component.type === ComponentType.TEXT_DISPLAY) ?? [])
-            .map(component => this.mapTextDisplayToDiscordTextDisplayAsync(component)));
-        if (textDisplayComponents.length > 0)
-            discordContainer.addTextDisplayComponents(textDisplayComponents);
+        if (!container.components) {
+            return discordContainer;
+        }
 
-        const mediaGalleryComponents = container.components?.filter(component => component.type === ComponentType.MEDIA_GALLERY) ?? [];
-        const discordMediaGalleryComponents = await Promise.all(mediaGalleryComponents.map(component => this.mapMediaGalleryToDiscordMediaGalleryAsync(component)));
-        if (discordMediaGalleryComponents.length > 0)
-            discordContainer.addMediaGalleryComponents(discordMediaGalleryComponents);
+        // Process components in order to maintain sequence
+        const textDisplayComponents: DiscordTextDisplayBuilder[] = [];
+        const mediaGalleryComponents: DiscordMediaGalleryBuilder[] = [];
+        const separatorComponents: DiscordSeparatorBuilder[] = [];
+        const buttonComponents: DiscordButtonBuilder[] = [];
+
+        for (const component of container.components) {
+            if (!component || !component.type) {
+                continue;
+            }
+
+            switch (component.type) {
+                case ComponentType.TEXT_DISPLAY:
+                case ComponentType.TITLE:
+                case ComponentType.FOOTER:
+                    const textDisplay = await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
+                    textDisplayComponents.push(textDisplay);
+                    break;
+                case ComponentType.MEDIA_GALLERY:
+                    const mediaGallery = await this.mapMediaGalleryToDiscordMediaGalleryAsync(component as MediaGallery);
+                    mediaGalleryComponents.push(mediaGallery);
+                    break;
+                case ComponentType.SEPARATOR:
+                    const separator = await this.mapSeparatorToDiscordSeparatorAsync(component as Separator);
+                    separatorComponents.push(separator);
+                    break;
+                case ComponentType.BUTTON:
+                    const button = await this.mapButtonToDiscordButtonAsync(component as ActionButton);
+                    buttonComponents.push(button);
+                    break;
+            }
+        }
+
+        // Add components to Discord container in the correct order
+        if (textDisplayComponents.length > 0) {
+            discordContainer.addTextDisplayComponents(textDisplayComponents);
+        }
+        if (mediaGalleryComponents.length > 0) {
+            discordContainer.addMediaGalleryComponents(mediaGalleryComponents);
+        }
+        if (separatorComponents.length > 0) {
+            discordContainer.addSeparatorComponents(separatorComponents);
+        }
+        if (buttonComponents.length > 0) {
+            const buttonActionRows = this.createActionRowWithComponents(buttonComponents);
+            discordContainer.addActionRowComponents([buttonActionRows]);
+        }
 
         return discordContainer;
     }
@@ -317,6 +413,9 @@ class DiscordComponentMapper {
         
         const findMediaGalleries = (components: Component[]): void => {
             for (const component of components) {
+                if (!component || !component.type)
+                    continue;
+
                 if (component.type === ComponentType.MEDIA_GALLERY) {
                     const mediaGallery = component as MediaGallery;
                     

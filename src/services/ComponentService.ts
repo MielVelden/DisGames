@@ -1,7 +1,7 @@
 import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig, CommandOptionType } from "../interfaces/application/Command";
 import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { Media, MediaType } from "../interfaces/application/Image";
-import { ActionButton, Component, ComponentType, Container, Content, MediaGallery, SelectMenu, TextDisplay } from "../interfaces/application/Message";
+import { ActionButton, Component, ComponentType, Container, ContainerBuilder, Content, MediaGallery, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { GameTypeEnum } from "../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
@@ -29,13 +29,23 @@ class ComponentService {
         };
     }
 
-    public createContainer(content: MultiLingualString): Container {
+    public createContainer(builder: ContainerBuilder): Container {
         return {
             type: ComponentType.CONTAINER,
+            title: builder.title,
+            footer: builder.footer,
             components: [
-                {
+                builder.title && {
+                    type: ComponentType.TITLE,
+                    content: builder.title
+                },
+                builder.description && {
                     type: ComponentType.TEXT_DISPLAY,
-                    content: content
+                    content: builder.description
+                },
+                builder.footer && {
+                    type: ComponentType.FOOTER,
+                    content: builder.footer
                 }
             ]
         } as Container

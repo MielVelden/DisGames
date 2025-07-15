@@ -38,7 +38,9 @@ export default {
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContent(i18n.commands.games.labels.nextWord(scrambledMessage))
+                component: ComponentService.createContainer({
+                    description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambledMessage)
+                })
             })
 
             event.gameData.Answer = nextAnswer;
