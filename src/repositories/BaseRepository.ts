@@ -1,7 +1,7 @@
-import { TableEnum } from "../interfaces/enums/index";
+import { TableEnum, StoredProcedureEnum } from "../interfaces/enums/index";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
-import { isMultiLingualString, removeMultiLingualStringSuffix } from "../utils/database/GenerateSchema";
+import { SchemaUtils } from "../utils/database/SchemaUtils";
 
 type Condition<T> = (x: T) => any;
 type QueryCondition = string | { [key: string]: any };
@@ -40,11 +40,11 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     const deserialized = { ...entity };
     
     for (const [key, value] of Object.entries(deserialized)) {
-      if (typeof value === 'string' && isMultiLingualString(key)) {
+      if (typeof value === 'string' && SchemaUtils.isMultiLingualString(key)) {
         try {
           const multiLingualString = MultiLingualString.fromJSON(value);
           if (multiLingualString) {
-            deserialized[removeMultiLingualStringSuffix(key)] = multiLingualString;
+            deserialized[SchemaUtils.removeMultiLingualStringSuffix(key)] = multiLingualString;
           }
         } catch (error) {
           // Silently continue if parsing fails
@@ -121,7 +121,8 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return deserializedResults as Model[];
   }
 
-  async CallStoredProcedure(procedureName: string, params: any[] = []): Promise<Model[]> {
+  async CallStoredProcedure(procedure: StoredProcedureEnum, params: any[] = []): Promise<Model[]> {
+    const procedureName = procedure.toString();
     const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
     const results = await runQueryAsync(query, params);
     

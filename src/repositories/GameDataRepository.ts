@@ -1,6 +1,6 @@
 import { GameDataModel, GameDataSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { LanguageEnum, TableEnum } from "../interfaces/enums/index";
+import { LanguageEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
 import { DEFAULT_LANGUAGE } from "../utils/i18n/MultiLangualString";
 
@@ -21,7 +21,7 @@ class GameDataRepository {
     }
 
     async getGameDataByGameIdAsync(gamesId: number): Promise<GameDataModel> {
-        const result = await this.baseRepository.CallStoredProcedure('GetRandomGameData', [gamesId]);
+        const result = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.Getrandomgamedata, [gamesId]);
         if (!result || result.length === 0) {
             throw new Error('No game data found');
         }
