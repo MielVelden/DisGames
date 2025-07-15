@@ -11,6 +11,7 @@ import ComponentService from '../services/ComponentService';
 import { ComponentError } from '../utils/ErrorHelper';
 import { MultiLingualString } from '../utils/i18n/MultiLangualString';
 import { i18n } from '../utils/i18n/i18n';
+import Logger from '../utils/Logger';
 
 
 export default {
@@ -42,7 +43,7 @@ export default {
             }
 
             await event.replyAsync();
-            console.error(`Error handling interaction: ${error}`);
+            Logger.logError(`Error handling interaction`, error as Error);
         }
     },
 };

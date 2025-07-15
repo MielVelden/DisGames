@@ -2,8 +2,8 @@ import { GamesXDatasheetsModel, GamesXDatasheetsSaveModel } from "../interfaces/
 import GamesXDatasheetRepository from "../repositories/GamesXDatasheetRepository";
 
 class GamesXDatasheetService {
-    public async getGamesXDatasheetsByGameId(gameId: number): Promise<GamesXDatasheetsModel[]> {
-        const gamesXDatasheets = await GamesXDatasheetRepository.getGamesXDatasheetsByGameIdAsync(gameId);
+    public async getGamesXDatasheetsByGameIdAsync(gameId: number): Promise<GamesXDatasheetsModel[]> {
+        const gamesXDatasheets = await GamesXDatasheetRepository.getByGameIdAsync(gameId);
         if (!gamesXDatasheets)
             throw new Error("Games x datasheets not found");
 
@@ -11,7 +11,7 @@ class GamesXDatasheetService {
     }
 
     public async saveAsync(model: GamesXDatasheetsSaveModel): Promise<GamesXDatasheetsModel> {
-        return await GamesXDatasheetRepository.save(model);
+        return await GamesXDatasheetRepository.saveAsync(model);
     }
 }
 

@@ -2,6 +2,7 @@ import { Media, MediaType } from "../interfaces/application/Image";
 import * as fs from 'fs';
 import * as path from 'path';
 import { GameTypeEnum } from "../interfaces/enums";
+import Logger from "../utils/Logger";
 
 class MediaService {
     private readonly imagesPath: string;
@@ -19,7 +20,7 @@ class MediaService {
             return imagePath;
         }
 
-        console.log(`[INFO] Image not found: ${image.name}.${image.type}, using NotFound.png`);
+        Logger.logInfo(`Image not found: ${image.name}.${image.type}, using NotFound.png`);
         return this.notFoundImage;
     }
 
@@ -59,7 +60,7 @@ class MediaService {
             };
         }
 
-        console.log(`[INFO] Game image not found: ${gameImagePath}, using NotFound.png`);
+        Logger.logInfo(`Game image not found: ${gameImagePath}, using NotFound.png`);
         return {
             url: this.notFoundImage,
             name: 'NotFound',
@@ -78,7 +79,7 @@ class MediaService {
             };
         }
 
-        console.log(`[INFO] Game image not found: ${gameImagePath}, using NotFound.png`);
+        Logger.logInfo(`Game image not found: ${gameImagePath}, using NotFound.png`);
         return {
             url: this.notFoundImage,
             name: 'NotFound',

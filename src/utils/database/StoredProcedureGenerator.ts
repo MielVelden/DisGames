@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import mysql from 'mysql2/promise';
 import { DatabaseConnection } from './DatabaseConnection';
 import { SchemaUtils } from './SchemaUtils';
+import Logger from '../Logger';
 
 export class StoredProcedureGenerator {
   static async generateStoredProcedureEnum(enumFilePath: string): Promise<void> {
@@ -37,6 +38,6 @@ export class StoredProcedureGenerator {
     // Write enum to file
     fs.writeFileSync(enumFilePath, enumContent);
 
-    console.log(`Stored procedure enum gegenereerd in ${enumFilePath}`);
+    Logger.logInfo(`Stored procedure enum gegenereerd in ${enumFilePath}`);
   }
 } 

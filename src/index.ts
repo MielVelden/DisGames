@@ -4,10 +4,11 @@ import { DiscordClient } from './interfaces/application/DiscordClient';
 import { loadEvents } from './utils/Events';
 import { loadCommands } from './utils/Commands';
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
+import Logger from './utils/Logger';
 
 const token = TOKEN;
 if (!token) {
-  console.error('No Discord token found in .env file!');
+  Logger.logError('No Discord token found in .env file!');
   process.exit(1);
 }
 
@@ -21,13 +22,13 @@ const client = new DiscordClient({
 });
 
 client.once('ready', async () => {
-  console.log(`[INFO] Logged in as ${client.user?.tag}`);
+  Logger.logInfo(`Logged in as ${client.user?.tag}`);
   await createConnectionAsync().then(async (success) => {
     if (success) {
       await loadCommands(client);
       await loadEvents(client);
     } else {
-      console.error(`[ERROR] Failed to connect to database`);
+      Logger.logError(`Failed to connect to database`);
     }
   });
 });

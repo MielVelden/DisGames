@@ -6,7 +6,7 @@ class PointService {
         const user = await PointRepository.getPointsByUserIdAsync(userId, serverId);
 
         if (!user) {
-            return await PointRepository.save({
+            return await PointRepository.saveAsync({
                 UserId: userId,
                 ServerId: serverId,
                 Points: points,
@@ -15,7 +15,7 @@ class PointService {
         }
 
         user.Points += points;
-        return await PointRepository.save(user);
+        return await PointRepository.saveAsync(user);
     }
 }
 

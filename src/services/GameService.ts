@@ -15,6 +15,7 @@ import { createCancelButton, createMoveButton } from "../utils/Button";
 import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
 import { i18n } from "../utils/i18n/i18n";
 import MediaService from "./MediaService";
+import Logger from "../utils/Logger";
 
 class GameService {
     private games: GameModule[] = [];
@@ -40,11 +41,11 @@ class GameService {
                         this.games.push(gameModule);
                     }
                 } catch (error) {
-                    console.error(`Fout bij laden van game bestand ${file}:`, error);
+                    Logger.logError(`Fout bij laden van game bestand ${file}:`, error as Error);
                 }
             }
         } catch (error) {
-            console.error('Fout bij laden van games map:', error);
+            Logger.logError('Fout bij laden van games map:', error as Error);
         }
     }
 
@@ -75,7 +76,7 @@ class GameService {
         // Check if the savable is valid
         if (savable.Id) {
             // Update
-            const model = await GameRepository.save(savable);
+            const model = await GameRepository.saveAsync(savable);
 
             // Add start message
             const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum, model.Answer as string);
@@ -100,7 +101,7 @@ class GameService {
         ]);
 
         const handleReplace = async (existingGame: GamesModel, event: MessageInteractionEvent) => {
-            await GameRepository.deleteAsync(existingGame.Id);
+            await GameRepository.purgeAsync(existingGame.Id);
             await this.saveAsync(savable, event);
             await event.editAsync();
         };
@@ -138,7 +139,7 @@ class GameService {
             savable.Answer = "start";
         }
 
-        const model = await GameRepository.save(savable);
+        const model = await GameRepository.saveAsync(savable);
 
         // Add start message
         const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum as GameTypeEnum, model.Answer as string);
@@ -149,7 +150,7 @@ class GameService {
     }
 
     public async deleteAsync(id: number): Promise<void> {
-        await GameRepository.deleteAsync(id);
+        await GameRepository.purgeAsync(id);
     }
 
     // #region Handle Game
@@ -183,7 +184,7 @@ class GameService {
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
         // Get the next answer
         if (!gameEvent.gameConfig.isCalculated)
-            gameEvent.nextAnswer = await GameDataRepository.getGameDataByGameIdAsync(gameEvent.gameData.Id);
+            gameEvent.nextAnswer = await GameDataRepository.getGameDataByGamesIdAsync(gameEvent.gameData.Id);
 
         if (gameEvent.gameConfig.hasImages) {
             const image = MediaService.getGameDataImage(gameEvent.gameId, gameEvent.nextAnswer!.Id);
@@ -197,7 +198,7 @@ class GameService {
         await gameEvent.getNextAnswerAsync(gameEvent);
 
         // Save the model
-        await GameRepository.save(gameEvent.gameData);
+        await GameRepository.saveAsync(gameEvent.gameData);
     }
 
     private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {

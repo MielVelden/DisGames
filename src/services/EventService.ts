@@ -1,5 +1,6 @@
 import { ButtonHandler, SelectMenuHandler, InteractionEvent, EventTypeEnum, SelectMenuInteractionEvent } from '../interfaces/application/Event';
 import { calculateDuration, DurationEnum, durationToMilliseconds } from '../utils/Duration';
+import Logger from '../utils/Logger';
 
 export const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
 
@@ -92,13 +93,13 @@ export class EventService {
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
     } else {
-      console.log(`No handler found for button: ${interaction.customId}`);
+      Logger.logInfo(`No handler found for button: ${interaction.customId}`);
     }
   }
 
   public static async handleSelectMenuInteraction(interaction: SelectMenuInteractionEvent): Promise<void> {
     const handler = EventService.selectMenuHandlers.get(interaction.customId);
-    console.log(`[INFO] Handling select menu interaction: ${interaction.customId}`);
+    Logger.logInfo(`Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.id) {
         return;
@@ -108,7 +109,7 @@ export class EventService {
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
     } else {
-      console.log(`No handler found for select menu: ${interaction.customId}`);
+      Logger.logInfo(`No handler found for select menu: ${interaction.customId}`);
     }
   }
 

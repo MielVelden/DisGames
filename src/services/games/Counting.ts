@@ -26,7 +26,7 @@ export default {
             return event.answer === Number(event.gameData.Answer);
         },
 
-        getNextAnswerAsync(event: GameEvent): void {
+        async getNextAnswerAsync(event: GameEvent): Promise<void> {
             event.gameData.Answer = (Number(event.gameData.Answer) + 1).toString();
         }
     }

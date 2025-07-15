@@ -2,7 +2,6 @@ import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameFunctions, GameM
 import { GameTypeEnum } from "../../interfaces/enums";
 import ComponentService from "../ComponentService";
 import { i18n } from "../../utils/i18n/i18n";
-import GameDataService from "../GameDataService";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 
 export default {

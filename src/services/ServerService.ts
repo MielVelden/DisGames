@@ -3,10 +3,10 @@ import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
 import ServerRepository from "../repositories/ServerRepository";
 
 class ServerService {
-    public async getServer(serverId: string, createIfNotExists: boolean = false): Promise<ServersModel> {
-        const server = ServerRepository.getByServerIdAsync(serverId);
+    public async getServerAsync(serverId: string, createIfNotExists: boolean = false): Promise<ServersModel> {
+        const server = await ServerRepository.getByServerIdAsync(serverId);
         if (!server && createIfNotExists) {
-            return await ServerRepository.save({
+            return await ServerRepository.saveAsync({
                 ServerId: serverId,
                 LanguageEnum: LanguageEnum.NL,
                 Points: 0,

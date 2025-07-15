@@ -1,25 +1,33 @@
-import { DatasheetsModel, DatasheetsSaveModel, GamesXDatasheetsModel, GamesXDatasheetsSaveModel } from "../interfaces/database";
+import { GamesXDatasheetsModel, GamesXDatasheetsSaveModel } from "../interfaces/database";
+import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum } from "../interfaces/enums/index";
 
-class GamesXDatasheetRepository {
+class GamesXDatasheetRepository implements Repository<GamesXDatasheetsModel> {
     private baseRepository: BaseRepository<GamesXDatasheetsModel, GamesXDatasheetsSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<GamesXDatasheetsModel, GamesXDatasheetsSaveModel>(TableEnum.GAMESXDATASHEETS);
     }
 
-    async getGamesXDatasheetsByGameIdAsync(gameId: number): Promise<GamesXDatasheetsModel[]> {
-        return this.baseRepository.Select().Where({ GameId: gameId }).Execute();
+    async getByIDAsync(id: number): Promise<GamesXDatasheetsModel | null> {
+        return this.baseRepository.getById(id);
     }
 
-    async getGamesXDatasheetByIdAsync(id: number): Promise<GamesXDatasheetsModel> {
-        const model = await this.baseRepository.Select().Where({ Id: id }).Limit(1).Execute();
-        return model[0];
+    async getAllAsync(): Promise<GamesXDatasheetsModel[]> {
+        return this.baseRepository.Select().Execute();
     }
 
-    async save(model: GamesXDatasheetsSaveModel): Promise<GamesXDatasheetsModel> {
+    async saveAsync(model: GamesXDatasheetsSaveModel): Promise<GamesXDatasheetsModel> {
         return this.baseRepository.Save(model);
+    }
+
+    async purgeAsync(id: number): Promise<void> {
+        await this.baseRepository.Delete(id);
+    }
+
+    async getByGameIdAsync(gameId: number): Promise<GamesXDatasheetsModel[]> {
+        return this.baseRepository.Select().Where({ GameId: gameId }).Execute();
     }
 }
 

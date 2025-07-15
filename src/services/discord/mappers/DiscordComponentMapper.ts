@@ -6,7 +6,6 @@ import {
     ChannelSelectMenuBuilder as DiscordChannelSelectMenuBuilder,
     ButtonBuilder as DiscordButtonBuilder,
     ActionRowBuilder as DiscordActionRowBuilder,
-    MediaGalleryItem as DiscordMediaGalleryItem,
     MessageFlags as DiscordMessageFlags,
     AttachmentBuilder
 } from 'discord.js';
@@ -23,10 +22,11 @@ import {
 } from '../../../interfaces/application/Message';
 import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLangualString';
 import DiscordEnumMapper from './DiscordEnumMapper';
-import { DiscordActionRowComponent, DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
+import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/Colors';
 import * as fs from 'fs';
+import Logger from '../../../utils/Logger';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -325,16 +325,16 @@ class DiscordComponentMapper {
                             try {
                                 // Validate that file exists before trying to read it
                                 if (!fs.existsSync(item.media.url)) {
-                                    console.warn(`[WARNING] File not found: ${item.media.url}`);
+                                    Logger.logWarning(`File not found: ${item.media.url}`);
                                     continue;
                                 }
 
                                 // Read file as Buffer to prevent stream issues
                                 const fileBuffer = fs.readFileSync(item.media.url);
-                                console.log(`[INFO] Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                                Logger.logInfo(`Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
                                 files.push(new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` }));
                             } catch (error) {
-                                console.error(`[ERROR] Error loading file: ${item.media.url}`, error instanceof Error ? error.message : error);
+                                Logger.logError(`Error loading file: ${item.media.url}`, error as Error);
                                 // Skip this file if it cannot be loaded
                             }
                         }

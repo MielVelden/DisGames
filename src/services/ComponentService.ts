@@ -7,6 +7,7 @@ import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { EventService } from "./EventService";
 import MediaService from "./MediaService";
+import Logger from "../utils/Logger";
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
@@ -48,7 +49,7 @@ class ComponentService {
             ...handlerConfig,
             id: crypto.randomUUID()
         };
-        console.log(`[INFO] Registering component (type: ${type}) with id: ${handler.id}`);
+        Logger.logInfo(`Registering component (type: ${type}) with id: ${handler.id}`);
         EventService.registerHandler(type, handler);
 
         return {

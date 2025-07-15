@@ -1,30 +1,33 @@
-import { UsersModel, UsersSaveModel } from "../interfaces/database";
+import { Repository, UsersModel, UsersSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum } from "../interfaces/enums/index";
 
-class UserRepository {
+class UserRepository implements Repository<UsersModel> {
     private baseRepository: BaseRepository<UsersModel, UsersSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel>(TableEnum.USERS);
     }
 
-    async getAllUsersAsync(): Promise<UsersModel[]> {
+    async getByIDAsync(id: number): Promise<UsersModel | null> {
+        return this.baseRepository.getById(id);
+    }
+
+    async getAllAsync(): Promise<UsersModel[]> {
         return this.baseRepository.Select().Execute();
+    }
+
+    async saveAsync(model: UsersSaveModel): Promise<UsersModel> {
+        return this.baseRepository.Save(model);
+    }
+
+    async purgeAsync(id: number): Promise<void> {
+        await this.baseRepository.Delete(id);
     }
 
     async getByUserIdAsync(userId: string): Promise<UsersModel> {
         const model = await this.baseRepository.Select().Where({ UserId: userId }).Limit(1).Execute();
         return model[0];
-    }
-
-    async getUserByIdAsync(id: number) {
-        const model = await this.baseRepository.Select().Where({ Id: id }).Limit(1).Execute();
-        return model[0];
-    }
-
-    async save(model: UsersSaveModel): Promise<UsersModel> {
-        return this.baseRepository.Save(model);
     }
 }
 

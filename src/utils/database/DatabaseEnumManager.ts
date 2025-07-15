@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import { TableEnum } from '../../interfaces/enums/index';
 import { DatabaseConnection } from './DatabaseConnection';
+import Logger from '../Logger';
 
 export class DatabaseEnumManager {
   static async updateDatabaseWithEnums(): Promise<void> {
@@ -24,7 +25,7 @@ export class DatabaseEnumManager {
 
         // Check if the enum exists in 'table_enums'
         if (!existingEnumMap.has(lowerCaseTableName)) {
-          console.log(`Table '${lowerCaseTableName}' does not exist in 'table_enums'. Adding...`);
+          Logger.logInfo(`Table '${lowerCaseTableName}' does not exist in 'table_enums'. Adding...`);
 
           // Add the enum to 'table_enums'
           await connection.query(`
@@ -32,10 +33,10 @@ export class DatabaseEnumManager {
                     VALUES (?, ?)
                 `, [enumValue, lowerCaseTableName]);
         } else {
-          console.log(`Table '${lowerCaseTableName}' already exists in 'table_enums' with ID ${existingEnumMap.get(lowerCaseTableName)}.`);
+          Logger.logInfo(`Table '${lowerCaseTableName}' already exists in 'table_enums' with ID ${existingEnumMap.get(lowerCaseTableName)}.`);
         }
       }
     }
-    console.log("All enums checked and added to 'table_enums' where necessary.");
+    Logger.logInfo("All enums checked and added to 'table_enums' where necessary.");
   }
 } 

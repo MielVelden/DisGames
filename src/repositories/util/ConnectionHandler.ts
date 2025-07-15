@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { URL } from 'url';
+import Logger from '../../utils/Logger';
 
 dotenv.config();
 
@@ -13,9 +14,8 @@ export async function createConnectionAsync(): Promise<boolean> {
     try {
         const dbUrl = process.env.DATABASE_URL as string;
         
-        if (!dbUrl) {
+        if (!dbUrl)
             throw new Error('DATABASE_URL environment variable is not set');
-        }
         
         const url = new URL(dbUrl);
         const dbName = url.pathname.replace(/^\//, '');
@@ -32,21 +32,20 @@ export async function createConnectionAsync(): Promise<boolean> {
         await getTableEnumsAsync();
         return true;
     } catch (err) {
-        throw new Error(`Failed to connect to database: ${err}`);
+        Logger.logError(`Failed to connect to database`, err as Error);
+        throw new Error(`Failed to connect to database`);
     }
 }
 export async function runQueryAsync(query: string, params?: any[]): Promise<any[] | undefined> {
     try {
-        if (!connection) {
+        if (!connection)
             throw new Error('Database connection not established');
-        }
 
+        Logger.logInfo(params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
         const [rows] = await pool!.query(query, params);
         return rows as any[];
     } catch (err) {
-        console.log('Query:', query);
-        console.log('Parameters:', params);
-        console.error('Error while running database query:', err);
+        Logger.logError(`Error while running database query`, err as Error);
         throw err;
     }
 }

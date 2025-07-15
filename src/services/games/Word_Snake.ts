@@ -28,7 +28,7 @@ export default {
                    event.answer.toLowerCase().charAt(0) === event.gameData.Answer.toLowerCase();
         },
 
-        getNextAnswerAsync(event: GameEvent): void {
+        async getNextAnswerAsync(event: GameEvent): Promise<void> {
             if (!event.answer) return;
             const lastLetter = event.answer.toString().toLowerCase().charAt(event.answer.toString().length - 1);
             event.gameData.Answer = lastLetter;

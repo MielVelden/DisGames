@@ -37,14 +37,12 @@ class DiscordMessageHandler {
         if (!content) return;
 
         const guild = event.currentInteraction.guild;
-        if (!guild) {
+        if (!guild)
             throw new Error("Guild not found");
-        }
 
         const channel = await guild.channels.fetch(event.channelId);
-        if (!channel || !channel.isTextBased()) {
+        if (!channel || !channel.isTextBased())
             throw new Error("Channel not found or not text-based");
-        }
 
         await channel.send(content);
     }
@@ -57,7 +55,8 @@ class DiscordMessageHandler {
 
     public async editAsync(event: InteractionEvent, message?: MultiLingualString | string): Promise<void> {
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
-        if (!content) return;
+        if (!content) 
+            return;
 
         await this.handleInteractionEditAsync(event, content);
     }
@@ -220,17 +219,16 @@ class DiscordMessageHandler {
 
     public async sendToChannelAsync(event: InteractionEvent, channelId: string, components: Component[]): Promise<void> {
         const guild = event.currentInteraction.guild;
-        if (!guild) {
+        if (!guild)
             throw new Error("Guild not found");
-        }
 
         const channel = await guild.channels.fetch(channelId);
-        if (!channel || !channel.isTextBased()) {
+        if (!channel || !channel.isTextBased())
             throw new Error("Channel not found or not text-based");
-        }
 
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
-        if (!content) return;
+        if (!content)
+            return;
 
         await channel.send(content);
     }

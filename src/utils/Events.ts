@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { DiscordClient } from "../interfaces/application/DiscordClient";
+import Logger from "./Logger";
 
 const eventsPath = path.join(__dirname, '..', 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js') || file.endsWith('.ts'));
@@ -16,6 +17,6 @@ export async function loadEvents(client: DiscordClient): Promise<void> {
             client.on(event.name, (...args) => event.execute(...args, client));
         }
 
-        console.log(`[INFO] Event loaded: ${event.name}`);
+        Logger.logInfo(`Event loaded: ${event.name}`);
     }
 }

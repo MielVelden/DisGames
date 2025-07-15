@@ -10,6 +10,7 @@ import { ComponentError } from '../utils/ErrorHelper';
 import { i18n } from '../utils/i18n/i18n';
 import { MultiLingualString } from '../utils/i18n/MultiLangualString';
 import ComponentService from '../services/ComponentService';
+import Logger from '../utils/Logger';
 
 export default {
     name: Events.MessageCreate,
@@ -45,7 +46,7 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
             await event.replyAsync();
         }
         
-        console.error(`Error handling interaction: ${error}`);
+        Logger.logError(`Error handling message`, error as Error);
     }
 }
 

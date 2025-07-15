@@ -11,6 +11,7 @@ import { createActiveGameContainer } from "../utils/Container";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
+import Logger from "../utils/Logger";
 
 export class GamesCommand implements Command {
     name = "games";
@@ -62,7 +63,7 @@ export class GamesCommand implements Command {
                 {
                     enumValue: GamesCommandActionEnum.HELP,
                     handler: async (event: SlashCommandInteractionEvent) => {
-                        console.log("HELP");
+                        Logger.logInfo("HELP");
                     }
                 },
                 {

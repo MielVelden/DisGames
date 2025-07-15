@@ -7,7 +7,8 @@ import { Command, CommandOptionFollowUpType } from "../interfaces/application/Co
 import discordService from "../services/discord/DiscordService";
 import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { MultiLingualString } from "./i18n/MultiLangualString";
-import { i18n, LanguageCommandOptionTranslations } from "./i18n/i18n";
+import { LanguageCommandOptionTranslations } from "./i18n/i18n";
+import Logger from "./Logger";
 
 const commands: Command[] = [];
 
@@ -25,9 +26,9 @@ export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
             if (client) {
                 client.commands.set(command.name, command);
             }
-            console.log(`[INFO] Command loaded: ${command.name}`);
+            Logger.logInfo(`Command loaded: ${command.name}`);
         } else {
-            console.warn(`[WARNING] Command in ${filePath} is not a valid Command object!`);
+            Logger.logWarning(`Command in ${filePath} is not a valid Command object!`);
         }
     }
 
@@ -36,9 +37,9 @@ export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
 
 export function getCommandConfig(commandName: string): Command {
     const command = commands.find(c => c.name === commandName);
-    if (!command) {
+    if (!command)
         throw new Error(`Command ${commandName} not found!`);
-    }
+    
     return command;
 }
 
@@ -99,7 +100,7 @@ export async function deployCommands(): Promise<void> {
     const clientId = process.env.CLIENT_ID;
 
     if (!token || !clientId) {
-        console.error('Missing environment variables: TOKEN and/or CLIENT_ID must be set in .env file!');
+        Logger.logError('Missing environment variables: TOKEN and/or CLIENT_ID must be set in .env file!');
         process.exit(1);
     }
 
@@ -109,22 +110,22 @@ export async function deployCommands(): Promise<void> {
     for (const command of loadedCommands) {
         const slashCommandBuilder = discordService.mapCommandToSlashCommandBuilder(command as Command);
         commandsForRegistration.push(slashCommandBuilder.toJSON());
-        console.log(`[INFO] Command added for registration: ${command.name}`);
+        Logger.logInfo(`Command added for registration: ${command.name}`);
     }
 
     const rest = new REST().setToken(token);
 
     try {
-        console.log(`Starting refresh of ${commandsForRegistration.length} application (/) commands.`);
+        Logger.logInfo(`Starting refresh of ${commandsForRegistration.length} application (/) commands.`);
 
         const data = await rest.put(
             Routes.applicationCommands(clientId),
             { body: commandsForRegistration },
         ) as any[];
 
-        console.log(`Successfully registered ${data.length} application (/) commands.`);
+        Logger.logInfo(`Successfully registered ${data.length} application (/) commands.`);
     } catch (error) {
-        console.error(error);
+        Logger.logError(`Error registering commands: ${error as Error}`);
         throw error;
     }
 }

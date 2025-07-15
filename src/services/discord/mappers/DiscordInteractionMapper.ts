@@ -22,7 +22,7 @@ import {
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
         const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember);
-        const server = await this.mapDiscordServerToServer(interaction.guild as DiscordServer);
+        const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer);
         
         const baseParams = {
             user,
@@ -75,7 +75,7 @@ class DiscordInteractionMapper {
 
     public async mapMessageToInteractionEventAsync(message: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {
         const user = await this.mapDiscordUserToUser(message.author, message.member as DiscordGuildMember);
-        const server = await this.mapDiscordServerToServer(message.guild as DiscordServer);
+        const server = await this.mapDiscordServerToServerAsync(message.guild as DiscordServer);
 
         return new MessageDiscordEvent(
             message,
@@ -104,8 +104,8 @@ class DiscordInteractionMapper {
         };
     }
 
-    private async mapDiscordServerToServer(server: DiscordServer): Promise<ServersModel> {
-        return await ServerService.getServer(server.id, true);
+    private async mapDiscordServerToServerAsync(server: DiscordServer): Promise<ServersModel> {
+        return await ServerService.getServerAsync(server.id, true);
     }
 }
 

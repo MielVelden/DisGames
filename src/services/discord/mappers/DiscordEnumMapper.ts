@@ -5,7 +5,6 @@ import {
 import { EventTypeEnum } from '../../../interfaces/application/Event';
 import { Permission } from '../../../interfaces/application/Permission';
 import { ButtonStyle, Component, ComponentType } from '../../../interfaces/application/Message';
-import { DiscordComponentBuilder } from '../DiscordService';
 
 class DiscordEnumMapper {
     public mapPermissionToDiscordPermission(permission: Permission): PermissionResolvable {

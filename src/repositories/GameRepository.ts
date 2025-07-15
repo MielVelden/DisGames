@@ -1,21 +1,29 @@
 import { GamesModel, GamesSaveModel } from "../interfaces/database";
+import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { GameTypeEnum, TableEnum } from "../interfaces/enums/index";
 
-class GameRepository {
+class GameRepository implements Repository<GamesModel> {
     private baseRepository: BaseRepository<GamesModel, GamesSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<GamesModel, GamesSaveModel>(TableEnum.GAMES);
     }
 
-    async getAllGamesAsync(): Promise<GamesModel[]> {
+    async getByIDAsync(id: number): Promise<GamesModel | null> {
+        return this.baseRepository.getById(id);
+    }
+
+    async getAllAsync(): Promise<GamesModel[]> {
         return this.baseRepository.Select().Execute();
     }
 
-    async getByIdAsync(id: number) {
-        const model = await this.baseRepository.Select().Where({ Id: id }).Limit(1).Execute();
-        return model[0];
+    async saveAsync(model: GamesSaveModel): Promise<GamesModel> {
+        return this.baseRepository.Save(model);
+    }
+
+    async purgeAsync(id: number): Promise<void> {
+        await this.baseRepository.Delete(id);
     }
 
     async getByChannelIdAsync(channelId: string): Promise<GamesModel> {
@@ -31,16 +39,6 @@ class GameRepository {
     async getByServerIdAsync(serverId: string): Promise<GamesModel[]> {
         const model = await this.baseRepository.Select().Where({ ServerId: serverId }).Execute();
         return model;
-    }
-
-    async save(model: GamesSaveModel): Promise<GamesModel> {
-        // TODO: Check if values are valid
-
-        return this.baseRepository.Save(model);
-    }
-
-    async deleteAsync(id: number): Promise<void> {
-        await this.baseRepository.Delete(id);
     }
 }
 

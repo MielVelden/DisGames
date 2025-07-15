@@ -1,4 +1,5 @@
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
+import Logger from "../Logger";
 import { LanguageTranslations } from "./i18n";
 
 export const DEFAULT_LANGUAGE = LanguageEnum.EN;
@@ -48,7 +49,7 @@ export class MultiLingualString {
             try {
                 data = JSON.parse(json);
             } catch (error) {
-                console.warn('Failed to parse MultiLingualString JSON:', error);
+                Logger.logWarning(`Failed to parse MultiLingualString JSON: ${error as Error}`);
                 return null;
             }
         } else {

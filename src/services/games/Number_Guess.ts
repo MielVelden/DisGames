@@ -51,7 +51,7 @@ export default {
             return false;
         },
 
-        getNextAnswerAsync(event: GameEvent): void {
+        async getNextAnswerAsync(event: GameEvent): Promise<void> {
             event.gameData.Answer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
         }
     }
