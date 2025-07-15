@@ -323,19 +323,19 @@ class DiscordComponentMapper {
                     for (const item of mediaGallery.items) {
                         if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:')) {
                             try {
-                                // Valideer dat het bestand bestaat voordat we het proberen te lezen
+                                // Validate that file exists before trying to read it
                                 if (!fs.existsSync(item.media.url)) {
-                                    console.warn(`[WARNING] Bestand niet gevonden: ${item.media.url}`);
+                                    console.warn(`[WARNING] File not found: ${item.media.url}`);
                                     continue;
                                 }
 
-                                // Lees het bestand als Buffer om stream problemen te voorkomen
+                                // Read file as Buffer to prevent stream issues
                                 const fileBuffer = fs.readFileSync(item.media.url);
-                                console.log(`[INFO] Attachment geladen: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                                console.log(`[INFO] Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
                                 files.push(new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` }));
                             } catch (error) {
-                                console.error(`[ERROR] Fout bij laden van bestand: ${item.media.url}`, error instanceof Error ? error.message : error);
-                                // Skip dit bestand als het niet geladen kan worden
+                                console.error(`[ERROR] Error loading file: ${item.media.url}`, error instanceof Error ? error.message : error);
+                                // Skip this file if it cannot be loaded
                             }
                         }
                     }

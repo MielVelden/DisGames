@@ -55,6 +55,20 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return deserialized;
   }
 
+  private transformDatabaseKeys(entity: any): any {
+    if (!entity || typeof entity !== 'object') return entity;
+    
+    const transformed: any = {};
+    
+    for (const [key, value] of Object.entries(entity)) {
+      // Transform database field names (camelCase/lowercase) to PascalCase
+      const pascalCaseKey = key.charAt(0).toUpperCase() + key.slice(1);
+      transformed[pascalCaseKey] = value;
+    }
+    
+    return transformed;
+  }
+
   Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel> {
     this.params = [];
     this.query = `SELECT ${fields.join(', ')} FROM ${this.table}`;
@@ -105,6 +119,21 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     const deserializedResults = results.map((result: any) => this.deserializeMultiLingualStrings(result));
     
     return deserializedResults as Model[];
+  }
+
+  async CallStoredProcedure(procedureName: string, params: any[] = []): Promise<Model[]> {
+    const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
+    const results = await runQueryAsync(query, params);
+    
+    if (!results || !results[0]) 
+      return [];
+    
+    // Transform database keys to PascalCase and deserialize MultiLingualString fields
+    const transformedResults = results[0]
+      .map((result: any) => this.transformDatabaseKeys(result))
+      .map((result: any) => this.deserializeMultiLingualStrings(result));
+    
+    return transformedResults as Model[];
   }
 
   async Save(entity: Partial<SaveModel>): Promise<Model> {

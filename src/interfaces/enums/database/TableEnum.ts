@@ -5,4 +5,5 @@ export enum TableEnum {
     POINTS,
     USERS,
     DATASHEETS,
+    GAMESXDATASHEETS,
 }

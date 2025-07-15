@@ -1,10 +1,9 @@
 import { GameDataModel } from "../interfaces/database/TableInterfaces";
-import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import GameDataRepository from "../repositories/GameDataRepository";
 
 class GameDataService {
-    public async getGameDataAsync(gameId: GameTypeEnum, language?: LanguageEnum): Promise<GameDataModel> {
-        const gameData = await GameDataRepository.getGameDataByGameIdAsync(gameId, language);
+    public async getGameDataAsync(gamesId: number): Promise<GameDataModel> {
+        const gameData = await GameDataRepository.getGameDataByGameIdAsync(gamesId);
         return gameData;
     }
 }

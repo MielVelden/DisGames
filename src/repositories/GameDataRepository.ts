@@ -20,10 +20,12 @@ class GameDataRepository {
         return model[0];
     }
 
-    async getGameDataByGameIdAsync(gameId: GameTypeEnum, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GameDataModel> {
-        // TODO: Add Stored procedure to get the next game data
-        const model = await this.baseRepository.Select().Where({ GameId: gameId }).OrderByRandom().Limit(1).Execute();
-        return model[0];
+    async getGameDataByGameIdAsync(gamesId: number): Promise<GameDataModel> {
+        const result = await this.baseRepository.CallStoredProcedure('GetRandomGameData', [gamesId]);
+        if (!result || result.length === 0) {
+            throw new Error('No game data found');
+        }
+        return result[0];
     }
 
     async getGameDataByIdAsync(id: number) {

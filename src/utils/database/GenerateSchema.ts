@@ -175,7 +175,7 @@ export function isMultiLingualString(columnName: string): boolean {
 }
 
 export function removeMultiLingualStringSuffix(columnName: string): string {
-    return columnName.replace('MLS', '');
+    return columnName.replace('MLS', '').replace('mls', '');
 }
 
 // #region Database Enums

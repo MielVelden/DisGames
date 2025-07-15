@@ -133,8 +133,9 @@ class GameService {
             savable.Answer = gameModule.config.firstAnswer;
         else {
             // Set the answer to a random game data
-            const gameData = await GameDataRepository.getGameDataByGameIdAsync(savable.GameTypeEnum as GameTypeEnum);
-            savable.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
+            // const gameData = await GameDataRepository.getGameDataByGameIdAsync(game));
+            // savable.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
+            savable.Answer = "start";
         }
 
         const model = await GameRepository.save(savable);
@@ -182,7 +183,7 @@ class GameService {
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
         // Get the next answer
         if (!gameEvent.gameConfig.isCalculated)
-            gameEvent.nextAnswer = await GameDataRepository.getGameDataByGameIdAsync(gameEvent.gameId, gameEvent.server.LanguageEnum);
+            gameEvent.nextAnswer = await GameDataRepository.getGameDataByGameIdAsync(gameEvent.gameData.Id);
 
         if (gameEvent.gameConfig.hasImages) {
             const image = MediaService.getGameDataImage(gameEvent.gameId, gameEvent.nextAnswer!.Id);
@@ -298,7 +299,7 @@ class GameService {
         } else if (expectedType === "boolean") {
             answer = event.content.toLowerCase() === "true";
         } else {
-            answer = event.content;
+            answer = event.content.toLowerCase();
         }
 
         const gameEvent: GameEvent = {
