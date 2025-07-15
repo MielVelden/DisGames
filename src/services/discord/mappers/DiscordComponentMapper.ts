@@ -26,6 +26,7 @@ import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordActionRowComponent, DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/Colors';
+import * as fs from 'fs';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -321,7 +322,21 @@ class DiscordComponentMapper {
                     
                     for (const item of mediaGallery.items) {
                         if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:')) {
-                            files.push(new AttachmentBuilder(item.media.url, { name: `${item.media.name}.${item.media.type}` }));
+                            try {
+                                // Valideer dat het bestand bestaat voordat we het proberen te lezen
+                                if (!fs.existsSync(item.media.url)) {
+                                    console.warn(`[WARNING] Bestand niet gevonden: ${item.media.url}`);
+                                    continue;
+                                }
+
+                                // Lees het bestand als Buffer om stream problemen te voorkomen
+                                const fileBuffer = fs.readFileSync(item.media.url);
+                                console.log(`[INFO] Attachment geladen: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                                files.push(new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` }));
+                            } catch (error) {
+                                console.error(`[ERROR] Fout bij laden van bestand: ${item.media.url}`, error instanceof Error ? error.message : error);
+                                // Skip dit bestand als het niet geladen kan worden
+                            }
                         }
                     }
                 } else if (component.type === ComponentType.CONTAINER) {
