@@ -33,8 +33,7 @@ export default {
                 priority: GameActionPriorityEnum.HIGH,
                 component: ComponentService.createContainer({
                     title: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
-                    description: i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].nextAnswer!(),
-                    footer: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
+                    description: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
                 })
             })
 

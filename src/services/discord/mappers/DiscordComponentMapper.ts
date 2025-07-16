@@ -315,52 +315,54 @@ class DiscordComponentMapper {
             return discordContainer;
         }
 
-        // Process components in order to maintain sequence
-        const textDisplayComponents: DiscordTextDisplayBuilder[] = [];
-        const mediaGalleryComponents: DiscordMediaGalleryBuilder[] = [];
-        const separatorComponents: DiscordSeparatorBuilder[] = [];
-        const buttonComponents: DiscordButtonBuilder[] = [];
-
-        for (const component of container.components) {
+        // Process components sequentially but group consecutive buttons
+        let i = 0;
+        while (i < container.components.length) {
+            const component = container.components[i];
+            
             if (!component || !component.type) {
+                i++;
                 continue;
             }
 
-            switch (component.type) {
-                case ComponentType.TEXT_DISPLAY:
-                case ComponentType.TITLE:
-                case ComponentType.FOOTER:
-                    const textDisplay = await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
-                    textDisplayComponents.push(textDisplay);
-                    break;
-                case ComponentType.MEDIA_GALLERY:
-                    const mediaGallery = await this.mapMediaGalleryToDiscordMediaGalleryAsync(component as MediaGallery);
-                    mediaGalleryComponents.push(mediaGallery);
-                    break;
-                case ComponentType.SEPARATOR:
-                    const separator = await this.mapSeparatorToDiscordSeparatorAsync(component as Separator);
-                    separatorComponents.push(separator);
-                    break;
-                case ComponentType.BUTTON:
-                    const button = await this.mapButtonToDiscordButtonAsync(component as ActionButton);
-                    buttonComponents.push(button);
-                    break;
+            if (component.type === ComponentType.BUTTON) {
+                // Collect consecutive buttons
+                const consecutiveButtons: ActionButton[] = [];
+                let j = i;
+                
+                while (j < container.components.length && 
+                       container.components[j]?.type === ComponentType.BUTTON) {
+                    consecutiveButtons.push(container.components[j] as ActionButton);
+                    j++;
+                }
+                
+                // Map all consecutive buttons and group them in one ActionRow
+                const buttonPromises = consecutiveButtons.map(btn => this.mapButtonToDiscordButtonAsync(btn));
+                const discordButtons = await Promise.all(buttonPromises);
+                const buttonActionRow = this.createActionRowWithComponents(discordButtons);
+                discordContainer.addActionRowComponents([buttonActionRow]);
+                
+                i = j; // Skip processed buttons
+            } else {
+                // Process other component types individually
+                switch (component.type) {
+                    case ComponentType.TEXT_DISPLAY:
+                    case ComponentType.TITLE:
+                    case ComponentType.FOOTER:
+                        const textDisplay = await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
+                        discordContainer.addTextDisplayComponents([textDisplay]);
+                        break;
+                    case ComponentType.MEDIA_GALLERY:
+                        const mediaGallery = await this.mapMediaGalleryToDiscordMediaGalleryAsync(component as MediaGallery);
+                        discordContainer.addMediaGalleryComponents([mediaGallery]);
+                        break;
+                    case ComponentType.SEPARATOR:
+                        const separator = await this.mapSeparatorToDiscordSeparatorAsync(component as Separator);
+                        discordContainer.addSeparatorComponents([separator]);
+                        break;
+                }
+                i++;
             }
-        }
-
-        // Add components to Discord container in the correct order
-        if (textDisplayComponents.length > 0) {
-            discordContainer.addTextDisplayComponents(textDisplayComponents);
-        }
-        if (mediaGalleryComponents.length > 0) {
-            discordContainer.addMediaGalleryComponents(mediaGalleryComponents);
-        }
-        if (separatorComponents.length > 0) {
-            discordContainer.addSeparatorComponents(separatorComponents);
-        }
-        if (buttonComponents.length > 0) {
-            const buttonActionRows = this.createActionRowWithComponents(buttonComponents);
-            discordContainer.addActionRowComponents([buttonActionRows]);
         }
 
         return discordContainer;

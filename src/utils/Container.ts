@@ -5,6 +5,7 @@ import { i18n } from "./i18n/i18n";
 import { createMultiLingualString, MultiLingualString } from "./i18n/MultiLangualString";
 import GameService from "../services/GameService";
 import ComponentService from "../services/ComponentService";
+import { createTitle } from "./Markdown";
 
 export function createActiveGameContainer(game: GamesModel, actions: ActionButton[]): Component[] {
     const gameModule = GameService.getGameByType(game.GameTypeEnum);
@@ -29,8 +30,20 @@ export function createActiveGameContainer(game: GamesModel, actions: ActionButto
             components: [
                 {
                     type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString('Test your word skills with scrambled letter puzzles\n**Channel:** `gamechannel-5`')
+                    content: createMultiLingualString('Test your word skills with scrambled letter puzzles')
                 },
+                {
+                    type: ComponentType.TITLE,
+                    content: createMultiLingualString(`Channel`)
+                },
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: createMultiLingualString(`Select the channel you want to use for this game.`)
+                },
+                ComponentService.createButton({
+                    style: ButtonStyle.SECONDARY,
+                    label: createMultiLingualString('Gamechannel-5'),
+                }),
                 {
                     type: ComponentType.SEPARATOR,
                     divider: true,
@@ -39,37 +52,49 @@ export function createActiveGameContainer(game: GamesModel, actions: ActionButto
                 // Difficulty
                 {
                     type: ComponentType.TITLE,
-                    content: createMultiLingualString('Difficulty')
+                    content: createMultiLingualString(`Difficulty`)
+                },
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: createMultiLingualString(`Select a difficulty level for this game.`)
                 },
                 ComponentService.createButton({
-                    style: ButtonStyle.SUCCESS,
-                    label: createMultiLingualString('⭐'),
+                    style: ButtonStyle.SECONDARY,
+                    label: createMultiLingualString('Easy'),
                 }),
                 ComponentService.createButton({
                     style: ButtonStyle.SUCCESS,
-                    label: createMultiLingualString('⭐'),
+                    label: createMultiLingualString('Medium'),
                 }),
                 ComponentService.createButton({
                     style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('⭐'),
+                    label: createMultiLingualString('Hard'),
                 }),
-                // Datasheets
-                // {
-                //     type: ComponentType.TITLE,
-                //     content: createMultiLingualString('Datasheets')
-                // },
-                // ComponentService.createButton({
-                //     style: ButtonStyle.SECONDARY,
-                //     label: createMultiLingualString('General'),
-                // }),
-                // ComponentService.createButton({
-                //     style: ButtonStyle.SECONDARY,
-                //     label: createMultiLingualString('Holidays'),
-                // }),
-                // ComponentService.createButton({
-                //     style: ButtonStyle.SECONDARY,
-                //     label: createMultiLingualString('Popular Movies'),
-                // }),
+                {
+                    type: ComponentType.SEPARATOR,
+                    divider: true,
+                    spacing: 1
+                },
+                {
+                    type: ComponentType.TITLE,
+                    content: createMultiLingualString(`Datasheets`)
+                },
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: createMultiLingualString(`Quickly select the datasheets from the list below you want to use for this game.`)
+                },
+                ComponentService.createButton({
+                    style: ButtonStyle.SECONDARY,
+                    label: createMultiLingualString('General'),
+                }),
+                ComponentService.createButton({
+                    style: ButtonStyle.SECONDARY,
+                    label: createMultiLingualString('Holidays'),
+                }),
+                ComponentService.createButton({
+                    style: ButtonStyle.SECONDARY,
+                    label: createMultiLingualString('Popular Movies'),
+                }),
                 // {
                 //     type: ComponentType.SEPARATOR,
                 //     divider: true,
