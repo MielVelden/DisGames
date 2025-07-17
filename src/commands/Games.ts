@@ -7,7 +7,7 @@ import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfa
 import ComponentService from "../services/ComponentService";
 import GameService from "../services/GameService";
 import { createDeleteButton, createMoveButton } from "../utils/Button";
-import { createActiveGameContainer } from "../utils/Container";
+import { createActiveGameContainer, createGameHelpContainer } from "../utils/Container";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
@@ -42,12 +42,14 @@ export class GamesCommand implements Command {
                                 const channelSelectMenu = createChannelSelectMenu();
                                 const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);
                                 if(channelEvent) {
+                                    const channelName = await channelEvent.getChannelNameAsync(channelEvent.selected);
+                                    
                                     await GameService.saveAsync({
                                         Id: game.Id,
                                         ChannelId: channelEvent.selected
                                     }, channelEvent);
                                     await channelEvent.addComponentAsync(ComponentService.createContainer({
-                                        description: i18n.commands.games.labels.movedToChannel(channelEvent.selected)
+                                        description: i18n.commands.games.labels.movedToChannel(channelName)
                                     }));
                                     await channelEvent.editAsync();
                                 }
@@ -65,8 +67,18 @@ export class GamesCommand implements Command {
                 },
                 {
                     enumValue: GamesCommandActionEnum.HELP,
+                    followUps: [{
+                        key: GamesCommandFollowUpKeysEnum.ALL_GAMES,
+                        type: CommandOptionFollowUpType.SELECT_MENU,
+                        configAsync: async (): Promise<SelectMenu> => {
+                            return createGamesSelectMenu(GameService.getGames());
+                        }
+                    }],
                     handler: async (event: SlashCommandInteractionEvent) => {
-                        Logger.logInfo("HELP");
+                        const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)) as GameTypeEnum;
+                        const helpComponents = createGameHelpContainer(gameId);
+                        await event.addComponentsAsync(helpComponents);
+                        await event.editAsync();
                     }
                 },
                 {

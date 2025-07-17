@@ -34,6 +34,8 @@ export interface InteractionEvent {
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
 
+    getChannelNameAsync(channelId: string): Promise<string>;
+
     user: User;
     server: ServersModel;
 

@@ -1,11 +1,60 @@
 import { ActionButton, ButtonStyle, Component, ComponentType, Container } from "../interfaces/application/Message";
 import { GamesModel } from "../interfaces/database";
+import { GameTypeEnum } from "../interfaces/enums";
 import MediaService from "../services/MediaService";
 import { i18n } from "./i18n/i18n";
 import { createMultiLingualString, MultiLingualString } from "./i18n/MultiLangualString";
 import GameService from "../services/GameService";
 import ComponentService from "../services/ComponentService";
 import { createTitle } from "./Markdown";
+
+export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
+    const gameModule = GameService.getGameByType(gameType);
+    const gameImage = MediaService.getGameImage(gameType);
+    const gameInfo = i18n.commands.games.types[gameType];
+
+    return [
+        {
+            type: ComponentType.CONTAINER,
+            components: [
+                {
+                    type: ComponentType.MEDIA_GALLERY,
+                    items: [
+                        {
+                            media: gameImage
+                        }
+                    ]
+                },
+            ]
+        } as Container,
+        {
+            type: ComponentType.CONTAINER,
+            components: [
+                {
+                    type: ComponentType.TITLE,
+                    content: new MultiLingualString(gameInfo.name)
+                },
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: new MultiLingualString(gameInfo.longDescription)
+                },
+                {
+                    type: ComponentType.SEPARATOR,
+                    divider: true,
+                    spacing: 1
+                },
+                {
+                    type: ComponentType.TITLE,
+                    content: new MultiLingualString(i18n.commands.games.labels.howToPlay)
+                },
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: new MultiLingualString(gameInfo.howToPlay)
+                },
+            ]
+        } as Container
+    ];
+}
 
 export function createActiveGameContainer(game: GamesModel, actions: ActionButton[]): Component[] {
     const gameModule = GameService.getGameByType(game.GameTypeEnum);

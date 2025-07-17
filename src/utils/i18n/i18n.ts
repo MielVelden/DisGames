@@ -33,6 +33,8 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
     [K in T]: {
         name: LanguageTranslations;
         description: LanguageTranslations;
+        longDescription: LanguageTranslations;
+        howToPlay: LanguageTranslations;
         startMessage: (firstAnswer: string) => MultiLingualString;
         nextAnswer?: (nextAnswer?: string) => MultiLingualString;
     }
@@ -56,6 +58,7 @@ export interface I18nTranslations {
                 chooseChannel: LanguageTranslations;
                 movedToChannel: (channel: string) => MultiLingualString;
                 skipAnswer: LanguageTranslations;
+                howToPlay: LanguageTranslations;
             },
             buttons: {
                 delete: LanguageTranslations;
@@ -149,6 +152,10 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Not familiar with the word? Enter '?'",
                     [LanguageEnum.NL]: "Niet bekend met het woord? Voer '?' in",
                 },
+                howToPlay: {
+                    [LanguageEnum.EN]: "How to Play",
+                    [LanguageEnum.NL]: "Hoe te spelen",
+                },
             },
             buttons: {
                 delete: {
@@ -171,8 +178,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Tellen",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Count the numbers in the messages",
-                        [LanguageEnum.NL]: "Tel de getallen in de berichten",
+                        [LanguageEnum.EN]: "Count incrementally from the starting number",
+                        [LanguageEnum.NL]: "Tel vanaf het startnummer op",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "A simple yet engaging counting game where players take turns adding the next number in sequence. Perfect for keeping your community active and fostering friendly competition.",
+                        [LanguageEnum.NL]: "Een eenvoudig maar boeiend telspel waarbij spelers om de beurt het volgende nummer in de reeks toevoegen. Perfect om je gemeenschap actief te houden en vriendschappelijke competitie te bevorderen.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "Players take turns sending the next number in sequence. Start from the given number and count upward. Each player can only send one number at a time, and the sequence must be continuous.",
+                        [LanguageEnum.NL]: "Spelers nemen om de beurt het volgende nummer in de reeks. Begin vanaf het gegeven nummer en tel omhoog. Elke speler kan maar één nummer per keer versturen, en de reeks moet doorlopend zijn.",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "Start with {firstAnswer}",
@@ -185,8 +200,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Woordslang",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Create a word snake",
-                        [LanguageEnum.NL]: "Vorm een woordslang",
+                        [LanguageEnum.EN]: "Chain words together where each word starts with the last letter",
+                        [LanguageEnum.NL]: "Keten woorden aan elkaar waarbij elk woord begint met de laatste letter",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Challenge your vocabulary in this clever word-chaining game. Each player must contribute a word that begins with the last letter of the previous word, creating an endless snake of connected words.",
+                        [LanguageEnum.NL]: "Daag je vocabulaire uit in dit slimme woordkettingspel. Elke speler moet een woord bijdragen dat begint met de laatste letter van het vorige woord, waardoor een eindeloze slang van verbonden woorden ontstaat.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "Start with the given letter and create a word. The next player must create a word that starts with the last letter of your word. Continue the chain as long as possible. No repeating words!",
+                        [LanguageEnum.NL]: "Begin met de gegeven letter en maak een woord. De volgende speler moet een woord maken dat begint met de laatste letter van jouw woord. Ga zo lang mogelijk door met de keten. Geen herhalende woorden!",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First letter: {firstAnswer}",
@@ -199,8 +222,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Anagram",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Unscramble the word",
-                        [LanguageEnum.NL]: "Los het anagram op",
+                        [LanguageEnum.EN]: "Solve scrambled letter puzzles to find the hidden word",
+                        [LanguageEnum.NL]: "Los puzzels met gemengde letters op om het verborgen woord te vinden",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Test your word skills with scrambled letter puzzles. Rearrange the given letters to discover the hidden word. A perfect brain teaser that challenges your pattern recognition and vocabulary.",
+                        [LanguageEnum.NL]: "Test je woordvaardigheden met puzzels van gemengde letters. Herschik de gegeven letters om het verborgen woord te ontdekken. Een perfecte hersenkraker die je patroonherkenning en vocabulaire uitdaagt.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "You'll receive a set of scrambled letters. Rearrange them to form a valid word. Type your answer when you think you've solved it. The faster you solve it, the more points you earn!",
+                        [LanguageEnum.NL]: "Je krijgt een set gemengde letters. Herschik ze om een geldig woord te vormen. Typ je antwoord wanneer je denkt dat je het hebt opgelost. Hoe sneller je het oplost, hoe meer punten je verdient!",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First letter: {firstAnswer}",
@@ -217,8 +248,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Getal raden",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Guess the hidden number",
-                        [LanguageEnum.NL]: "Raad het verborgen getal",
+                        [LanguageEnum.EN]: "Use clues to discover the secret number",
+                        [LanguageEnum.NL]: "Gebruik aanwijzingen om het geheime getal te ontdekken",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Put your deductive reasoning to the test in this classic guessing game. Use the clues provided to narrow down and discover the hidden number. A timeless game that sharpens your logical thinking.",
+                        [LanguageEnum.NL]: "Zet je deductieve redenering op de proef in dit klassieke raadspel. Gebruik de gegeven aanwijzingen om het verborgen getal te achterhalen. Een tijdloos spel dat je logisch denken scherpt.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "A secret number is chosen within a specific range. Make guesses and receive hints like 'higher' or 'lower' to guide your next attempt. Keep guessing until you find the correct number!",
+                        [LanguageEnum.NL]: "Er wordt een geheim getal gekozen binnen een specifiek bereik. Doe gissingen en ontvang hints zoals 'hoger' of 'lager' om je volgende poging te begeleiden. Blijf raden tot je het juiste getal vindt!",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First number: {firstAnswer}",
@@ -231,8 +270,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Triviaquiz",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Answer trivia questions",
-                        [LanguageEnum.NL]: "Beantwoord trivia-vragen",
+                        [LanguageEnum.EN]: "Test your knowledge with challenging trivia questions",
+                        [LanguageEnum.NL]: "Test je kennis met uitdagende trivia-vragen",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Challenge yourself and your friends with an endless variety of trivia questions. From history and science to pop culture and sports, expand your knowledge while having fun with your community.",
+                        [LanguageEnum.NL]: "Daag jezelf en je vrienden uit met een eindeloze variatie aan trivia-vragen. Van geschiedenis en wetenschap tot popcultuur en sport, breid je kennis uit terwijl je plezier hebt met je gemeenschap.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "Read each trivia question carefully and submit your answer. Questions cover various topics and difficulty levels. The first person to answer correctly wins the round and earns points.",
+                        [LanguageEnum.NL]: "Lees elke trivia-vraag zorgvuldig en verstuur je antwoord. Vragen beslaan verschillende onderwerpen en moeilijkheidsgraden. De eerste persoon die correct antwoordt wint de ronde en verdient punten.",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First question: {firstAnswer}",
@@ -245,8 +292,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Raad de prijs",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Estimate the price of the item",
-                        [LanguageEnum.NL]: "Raad de prijs van het product",
+                        [LanguageEnum.EN]: "Estimate the retail price of everyday items",
+                        [LanguageEnum.NL]: "Schat de winkelprijs van alledaagse producten",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Put your market knowledge to the test by estimating the prices of various products. From electronics to groceries, see how well you know the value of things around you in this engaging guessing game.",
+                        [LanguageEnum.NL]: "Zet je marktkennis op de proef door de prijzen van verschillende producten te schatten. Van elektronica tot boodschappen, kijk hoe goed je de waarde kent van dingen om je heen in dit boeiende raadspel.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "You'll be shown a product with its description. Study it carefully and submit your price estimate. The player with the closest guess without going over wins the round. Currency is usually in local format.",
+                        [LanguageEnum.NL]: "Je krijgt een product met bijbehorende beschrijving te zien. Bestudeer het zorgvuldig en verstuur je prijsschatting. De speler met de dichtste gissing zonder over te gaan wint de ronde. Valuta is meestal in lokaal formaat.",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First price: {firstAnswer}",
@@ -259,8 +314,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Rekenquiz",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Solve math problems",
-                        [LanguageEnum.NL]: "Los rekenvragen op",
+                        [LanguageEnum.EN]: "Sharpen your skills with mathematical challenges",
+                        [LanguageEnum.NL]: "Scherp je vaardigheden aan met wiskundige uitdagingen",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Exercise your mathematical skills with a variety of problems ranging from basic arithmetic to more complex calculations. Perfect for students and anyone looking to keep their math skills sharp and quick.",
+                        [LanguageEnum.NL]: "Train je wiskundige vaardigheden met verschillende problemen, van eenvoudige rekenkunde tot complexere berekeningen. Perfect voor studenten en iedereen die hun rekenvaardigheden scherp en snel wil houden.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "Solve the mathematical equation presented to you. Problems can include addition, subtraction, multiplication, division, and more advanced operations. Submit your numerical answer as quickly as possible for maximum points.",
+                        [LanguageEnum.NL]: "Los de wiskundige vergelijking op die aan je wordt voorgelegd. Problemen kunnen optellen, aftrekken, vermenigvuldigen, delen en meer geavanceerde bewerkingen bevatten. Verstuur je numerieke antwoord zo snel mogelijk voor maximale punten.",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First problem: {firstAnswer}",
@@ -273,8 +336,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Raad de Vlag",
                     },
                     description: {
-                        [LanguageEnum.EN]: "Can you match the flag to the right country?",
-                        [LanguageEnum.NL]: "Kun jij de vlag aan het juiste land koppelen?",
+                        [LanguageEnum.EN]: "Identify countries by their national flags",
+                        [LanguageEnum.NL]: "Herken landen aan hun nationale vlaggen",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Explore the world through flags in this educational and entertaining geography game. Test your knowledge of world cultures and expand your understanding of different nations and their symbols.",
+                        [LanguageEnum.NL]: "Ontdek de wereld via vlaggen in dit educatieve en vermakelijke aardrijkskundespel. Test je kennis van wereldculturen en breid je begrip uit van verschillende naties en hun symbolen.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "You'll be shown a country's flag and need to identify which nation it represents. Type the country name as your answer. Flags range from well-known to more obscure nations, so sharpen those geography skills!",
+                        [LanguageEnum.NL]: "Je krijgt de vlag van een land te zien en moet herkennen welke natie deze vertegenwoordigt. Typ de landnaam als je antwoord. Vlaggen variëren van bekende tot meer obscure landen, dus scherp die aardrijkskundevaardigheden aan!",
                     },
                     startMessage: (firstAnswer: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "Let’s start, the first flag is: {firstAnswer}",

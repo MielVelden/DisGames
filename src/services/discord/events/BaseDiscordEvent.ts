@@ -71,4 +71,13 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
     public async getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
         return await DiscordMessageHandler.getUserInputByButtonsAsync(this, question, buttons);
     }
+
+    public async getChannelNameAsync(channelId: string): Promise<string> {
+        const guild = this.currentInteraction.guild;
+        if (!guild)
+            throw new Error("Guild not found");
+
+        const channel = await guild.channels.fetch(channelId);
+        return channel?.name || channelId;
+    }
 } 
