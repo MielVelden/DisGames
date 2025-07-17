@@ -1,10 +1,10 @@
 import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
-import { GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
+import { GameDataModel, GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
 import GameRepository from "../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
-import { GameTypeEnum } from "../interfaces/enums";
+import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import { Component } from "../interfaces/application/Message";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../utils/Enum";
@@ -72,15 +72,50 @@ class GameService {
         return game;
     }
 
+    public async getStartMessageAsync(game: GamesModel, languageEnum: LanguageEnum, gameData?: GameDataModel): Promise<Component[]> {
+        const gameModule = this.getGameByType(game.GameTypeEnum);
+        if (!gameModule)
+            throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+
+        let components = ComponentService.createStartMessageAsync(game.GameTypeEnum as GameTypeEnum, game.Answer as string);
+
+        if (gameModule.functions.getStartComponents) {
+            const startComponents = gameModule.functions.getStartComponents(gameData!, languageEnum);
+            components[components.length - 1] = startComponents[startComponents.length - 1];
+        }
+
+        if (gameModule.config.hasImages && gameData) {
+            const image = MediaService.getGameDataImage(game.GameTypeEnum, gameData.Id);
+            components.push(ComponentService.createImage(image));
+        }
+
+        return components;
+    }
+
     public async saveAsync(savable: GamesSaveModel, event: InteractionEvent): Promise<GamesModel> {
+        let gameData: GameDataModel | undefined;
+
         // Check if the savable is valid
         if (savable.Id) {
+            const model = await GameRepository.getByIDAsync(savable.Id);
+            if (!model)
+                throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_FOUND);
+
+            const gameModule = this.getGameByType(model.GameTypeEnum as GameTypeEnum);
+            if (!gameModule)
+                throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+
+            if (!gameModule.config.isCalculated) {
+                gameData = await GameDataRepository.getGameDataByGamesIdAsync(model.Id);
+                savable.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
+            }
+
             // Update
-            const model = await GameRepository.saveAsync(savable);
+            const savedModel = await GameRepository.saveAsync(savable);
 
             // Add start message
-            const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum, model.Answer as string);
-            await event.sendToChannelAsync(model.ChannelId, startMessage);
+            const startMessage = await this.getStartMessageAsync(savedModel, event.server.LanguageEnum, gameData);
+            await event.sendToChannelAsync(savedModel.ChannelId, startMessage);
 
             return model;
         }
@@ -132,17 +167,19 @@ class GameService {
         // Set the answer
         if (gameModule.config.firstAnswer)
             savable.Answer = gameModule.config.firstAnswer;
-        else {
-            // Set the answer to a random game data
-            // const gameData = await GameDataRepository.getGameDataByGameIdAsync(game));
-            // savable.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
-            savable.Answer = "start";
-        }
+        else
+            savable.Answer = "temp";
 
         const model = await GameRepository.saveAsync(savable);
 
+        if (!gameModule.config.firstAnswer) {
+            gameData = await GameDataRepository.getGameDataByGamesIdAsync(model.Id!);
+            model.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
+            await GameRepository.saveAsync(model);
+        }
+
         // Add start message
-        const startMessage = ComponentService.createStartMessageAsync(model.GameTypeEnum as GameTypeEnum, model.Answer as string);
+        const startMessage = await this.getStartMessageAsync(model, event.server.LanguageEnum, gameData);
         await event.addComponentsAsync(startMessage);
 
         // Save the game

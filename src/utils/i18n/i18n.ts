@@ -342,6 +342,10 @@ export const i18n: I18nTranslations = {
         [ExceptionEnum.INVALID_NUMBER]: {
             [LanguageEnum.EN]: "That doesn’t seem to be a valid number",
             [LanguageEnum.NL]: "Dat lijkt geen geldig nummer te zijn",
-        }
+        },
+        [ExceptionEnum.GAME_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Game not found",
+            [LanguageEnum.NL]: "Spel niet gevonden",
+        },
     }    
 };

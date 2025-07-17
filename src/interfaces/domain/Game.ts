@@ -3,6 +3,7 @@ import { User } from "./User";
 import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
 import { EventTypeEnum } from "../application/Event";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { LanguageEnum } from "../enums";
 
 // Game configuration interface
 export interface GameConfig {
@@ -27,6 +28,8 @@ export interface GameFunctions {
     
     // Get the next answer/prompt
     getNextAnswerAsync(event: GameEvent): Promise<void>;
+
+    getStartComponents?(gameData: GameDataModel, languageEnum?: LanguageEnum): Component[];
 }
 
 export interface GameModule {

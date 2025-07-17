@@ -1,8 +1,19 @@
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
-import { GameTypeEnum } from "../../interfaces/enums";
+import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
 import ComponentService from "../ComponentService";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { GameDataModel } from "../../interfaces/database/TableInterfaces";
+import { Container } from "../../interfaces/application/Message";
+
+function scrambleWord(word: string): string {
+    const charArray = word.split("");
+    for (let i = charArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [charArray[i], charArray[j]] = [charArray[j], charArray[i]];
+    }
+    return charArray.join("");
+}
 
 export default {
     config: {
@@ -27,12 +38,7 @@ export default {
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
             const nextAnswer = event.nextAnswer!.Response.getMessage(event.server.LanguageEnum);
             // Scramble the answer
-            const charArray = nextAnswer.split("");
-            for (let i = charArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [charArray[i], charArray[j]] = [charArray[j], charArray[i]];
-            }
-            const scrambledMessage = charArray.join("");
+            const scrambledMessage = scrambleWord(nextAnswer);
 
             // Add the scrambled message to the event
             event.addAction({
@@ -41,9 +47,15 @@ export default {
                 component: ComponentService.createContainer({
                     description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambledMessage)
                 })
-            })
+            });
 
             event.gameData.Answer = nextAnswer;
+        },
+
+        getStartComponents(gameData: GameDataModel, languageEnum?: LanguageEnum): Container[] {
+            return [ComponentService.createContainer({
+                description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambleWord(gameData.Response.getMessage(languageEnum)))
+            })];
         }
     } as GameFunctions
 } as GameModule;
