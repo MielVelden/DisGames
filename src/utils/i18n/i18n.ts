@@ -44,6 +44,9 @@ export interface I18nTranslations {
     common: {
         success: LanguageTranslations;
         cancel: LanguageTranslations;
+        accept: LanguageTranslations;
+        deny: LanguageTranslations;
+        cancelled: LanguageTranslations;
         timedOut: LanguageTranslations;
         delete: LanguageTranslations;
     }
@@ -56,6 +59,8 @@ export interface I18nTranslations {
                 selectGame: LanguageTranslations;
                 deleteSuccess: LanguageTranslations;
                 chooseChannel: LanguageTranslations;
+                confirmSetupTitle: LanguageTranslations;
+                confirmSetupDescription: (gameName: string, channelName: string) => MultiLingualString;
                 movedToChannel: (channel: string) => MultiLingualString;
                 skipAnswer: LanguageTranslations;
                 howToPlay: LanguageTranslations;
@@ -83,6 +88,18 @@ export const i18n: I18nTranslations = {
         cancel: {
             [LanguageEnum.EN]: "Dismiss",
             [LanguageEnum.NL]: "Annuleer",
+        },
+        accept: {
+            [LanguageEnum.EN]: "Accept",
+            [LanguageEnum.NL]: "Accepteren",
+        },
+        deny: {
+            [LanguageEnum.EN]: "Deny",
+            [LanguageEnum.NL]: "Weigeren",
+        },
+        cancelled: {
+            [LanguageEnum.EN]: "This request has been cancelled",
+            [LanguageEnum.NL]: "Dit verzoek is geannuleerd",
         },
         timedOut: {
             [LanguageEnum.EN]: "Something went wrong, please try again",
@@ -144,6 +161,14 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Choose a channel",
                     [LanguageEnum.NL]: "Kies een kanaal",
                 },
+                confirmSetupTitle: {
+                    [LanguageEnum.EN]: "Confirm Game Setup",
+                    [LanguageEnum.NL]: "Bevestig Spel Instelling",
+                },
+                confirmSetupDescription: (gameName: string, channelName: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Game: `{gameName}`\nChannel: `{channelName}`",
+                    [LanguageEnum.NL]: "Spel: `{gameName}`\nKanaal: `{channelName}`",
+                }, { gameName, channelName }),
                 movedToChannel: (channel: string) => new MultiLingualString({
                     [LanguageEnum.EN]: "Moved to {channel}",
                     [LanguageEnum.NL]: "Verplaatst naar {channel}",

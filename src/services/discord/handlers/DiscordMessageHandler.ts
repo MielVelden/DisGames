@@ -19,6 +19,7 @@ import { EventService } from '../../EventService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
+import { createAcceptButton, createDenyButton } from '../../../utils/Button';
 
 class DiscordMessageHandler {
     public async sendMessageAsync(user: DiscordUser, message: string): Promise<void> {
@@ -215,6 +216,46 @@ class DiscordMessageHandler {
                 await event.currentInteraction.reply(replyOptions);
             } else if (event.currentInteraction instanceof DiscordMessage) {
                 await event.currentInteraction.reply(replyOptions);
+            } else {
+                throw new Error("Not implemented yet");
+            }
+        });
+    }
+
+    public async getConfirmationFromUser(event: InteractionEvent, container: Component): Promise<InteractionEvent | null> {
+        return new Promise(async (resolve) => {
+            const acceptButton = createAcceptButton(event.user.id, async (btnEvent: InteractionEvent) => {
+                resolve(btnEvent);
+            });
+
+            const denyButton = createDenyButton(event.user.id, async (btnEvent: InteractionEvent) => {
+                await btnEvent.editWithComponentAsync(ComponentService.createContainer({
+                    description: new MultiLingualString(i18n.common.cancelled)
+                }));
+                resolve(null);
+            });
+
+            const discordAcceptButton = await DiscordComponentMapper.mapButtonToDiscordButtonAsync(acceptButton);
+            const discordDenyButton = await DiscordComponentMapper.mapButtonToDiscordButtonAsync(denyButton);
+
+            const discordContainer = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(container);
+
+            const replyOptions = DiscordComponentMapper.createReplyOptions(
+                [discordContainer, DiscordComponentMapper.createActionRowWithComponents([discordAcceptButton, discordDenyButton])], 
+                []
+            );
+
+            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
+                if (event.currentInteraction.replied)
+                    await event.currentInteraction.editReply(replyOptions);
+                else
+                    await event.currentInteraction.reply(replyOptions);
+            } else if (event.currentInteraction instanceof DiscordMessage) {
+                await event.currentInteraction.reply(replyOptions);
+            } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
+                await event.currentInteraction.update(replyOptions);
+            } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
+                await event.currentInteraction.update(replyOptions);
             } else {
                 throw new Error("Not implemented yet");
             }

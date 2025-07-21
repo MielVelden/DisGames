@@ -72,6 +72,10 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
         return await DiscordMessageHandler.getUserInputByButtonsAsync(this, question, buttons);
     }
 
+    public async getConfirmationFromUser(container: Component): Promise<InteractionEvent | null> {
+        return await DiscordMessageHandler.getConfirmationFromUser(this, container);
+    }
+
     public async getChannelNameAsync(channelId: string): Promise<string> {
         const guild = this.currentInteraction.guild;
         if (!guild)

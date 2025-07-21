@@ -48,4 +48,36 @@ export function createDeleteButton(userId: string, handle: (event: InteractionEv
             }
         }
     )
+}
+
+export function createAcceptButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
+    return ComponentService.createButton(
+        {
+            label: new MultiLingualString(i18n.common.accept),
+            style: ButtonStyle.SUCCESS,
+            emoji: "✅"
+        },
+        {
+            userId: userId,
+            handle: async (event: InteractionEvent) => {
+                await handle(event);
+            }
+        }
+    )
+}
+
+export function createDenyButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
+    return ComponentService.createButton(
+        {
+            label: new MultiLingualString(i18n.common.deny),
+            style: ButtonStyle.SECONDARY,
+            emoji: "❌"
+        },
+        {
+            userId: userId,
+            handle: async (event: InteractionEvent) => {
+                await handle(event);
+            }
+        }
+    )
 }   

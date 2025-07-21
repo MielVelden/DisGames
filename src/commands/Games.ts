@@ -2,16 +2,15 @@ import { Command, CommandOptionFollowUpType, CommandOptionType } from "../interf
 import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { SelectMenu } from "../interfaces/application/Message";
 import { Permission } from "../interfaces/application/Permission";
-import { GameTypeEnum } from "../interfaces/enums";
+import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfaces/enums/commands/Games";
 import ComponentService from "../services/ComponentService";
 import GameService from "../services/GameService";
 import { createDeleteButton, createMoveButton } from "../utils/Button";
-import { createActiveGameContainer, createGameHelpContainer } from "../utils/Container";
+import { createActiveGameContainer, createGameHelpContainer, createGameSetupConfirmationContainer } from "../utils/Container";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
-import Logger from "../utils/Logger";
 
 export class GamesCommand implements Command {
     name = "games";
@@ -91,12 +90,25 @@ export class GamesCommand implements Command {
                         }
                     }],
                     handler: async (event: SlashCommandInteractionEvent) => {
-                        await GameService.saveAsync({
-                            GameTypeEnum: Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)),
-                            ChannelId: event.channelId,
-                            ServerId: event.guildId
-                        }, event);
-                        await event.editAsync();
+                        const gameTypeEnum = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)) as GameTypeEnum;
+                        const gameModule = GameService.getGameByType(gameTypeEnum);
+                        const channelName = await event.getChannelNameAsync(event.channelId);
+                        
+                        const confirmationContainer = createGameSetupConfirmationContainer(
+                            gameModule?.config.name.getMessage(event.server.LanguageEnum) || 'Unknown',
+                            channelName
+                        );
+
+                        const confirmedEvent = await event.getConfirmationFromUser(confirmationContainer);
+                        
+                        if (confirmedEvent) {
+                            await GameService.saveAsync({
+                                GameTypeEnum: gameTypeEnum,
+                                ChannelId: event.channelId,
+                                ServerId: event.guildId
+                            }, confirmedEvent);
+                            await confirmedEvent.editAsync();
+                        }
                     }
                 }
             ]

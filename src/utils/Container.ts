@@ -155,3 +155,10 @@ export function createActiveGameContainer(game: GamesModel, actions: ActionButto
         ...actions
     ];
 }
+
+export function createGameSetupConfirmationContainer(gameName: string, channelName: string): Component {
+    return ComponentService.createContainer({
+        title: new MultiLingualString(i18n.commands.games.labels.confirmSetupTitle),
+        description: i18n.commands.games.labels.confirmSetupDescription(gameName, channelName)
+    });
+}
