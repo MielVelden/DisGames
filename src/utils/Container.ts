@@ -1,12 +1,14 @@
 import { ActionButton, ButtonStyle, Component, ComponentType, Container } from "../interfaces/application/Message";
 import { GamesModel } from "../interfaces/database";
-import { GameTypeEnum } from "../interfaces/enums";
+import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import MediaService from "../services/MediaService";
 import { i18n } from "./i18n/i18n";
 import { createMultiLingualString, MultiLingualString } from "./i18n/MultiLangualString";
 import GameService from "../services/GameService";
 import ComponentService from "../services/ComponentService";
-import { createTitle } from "./Markdown";
+import { GameSettingsValues } from "../interfaces/domain/GameSettings";
+import { GameSettingsUtils } from "./GameSettingsUtils";
+import { GameSettingsContainer } from "./GameSettingsContainer";
 
 export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
     const gameModule = GameService.getGameByType(gameType);
@@ -56,7 +58,12 @@ export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
     ];
 }
 
-export function createActiveGameContainer(game: GamesModel, actions: ActionButton[]): Component[] {
+export function createActiveGameContainer(
+    game: GamesModel, 
+    actions: ActionButton[], 
+    settings?: GameSettingsValues,
+    languageEnum: LanguageEnum = LanguageEnum.NL
+): Component[] {
     const gameModule = GameService.getGameByType(game.GameTypeEnum);
     const gameImage = MediaService.getGameImage(game.GameTypeEnum);
 
@@ -79,7 +86,7 @@ export function createActiveGameContainer(game: GamesModel, actions: ActionButto
             components: [
                 {
                     type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString('Test your word skills with scrambled letter puzzles')
+                    content: gameModule?.config.description || new MultiLingualString(i18n.commands.games.settings.gameDescription)
                 },
                 {
                     type: ComponentType.TITLE,
@@ -87,78 +94,105 @@ export function createActiveGameContainer(game: GamesModel, actions: ActionButto
                 },
                 {
                     type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString(`Select the channel you want to use for this game.`)
+                    content: new MultiLingualString(i18n.commands.games.settings.currentChannel)
                 },
-                ComponentService.createButton({
-                    style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('Gamechannel-5'),
-                }),
-                {
-                    type: ComponentType.SEPARATOR,
-                    divider: true,
-                    spacing: 1
-                },
-                // Difficulty
-                {
-                    type: ComponentType.TITLE,
-                    content: createMultiLingualString(`Difficulty`)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString(`Select a difficulty level for this game.`)
-                },
-                ComponentService.createButton({
-                    style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('Easy'),
-                }),
-                ComponentService.createButton({
-                    style: ButtonStyle.SUCCESS,
-                    label: createMultiLingualString('Medium'),
-                }),
-                ComponentService.createButton({
-                    style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('Hard'),
-                }),
-                {
-                    type: ComponentType.SEPARATOR,
-                    divider: true,
-                    spacing: 1
-                },
-                {
-                    type: ComponentType.TITLE,
-                    content: createMultiLingualString(`Datasheets`)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString(`Quickly select the datasheets from the list below you want to use for this game.`)
-                },
-                ComponentService.createButton({
-                    style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('General'),
-                }),
-                ComponentService.createButton({
-                    style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('Holidays'),
-                }),
-                ComponentService.createButton({
-                    style: ButtonStyle.SECONDARY,
-                    label: createMultiLingualString('Popular Movies'),
-                }),
-                // {
-                //     type: ComponentType.SEPARATOR,
-                //     divider: true,
-                //     spacing: 1
-                // },
                 
+                // Add game settings if available
+                ...(gameModule?.config.settings && settings ? [
+                    {
+                        type: ComponentType.SEPARATOR,
+                        divider: true,
+                        spacing: 1
+                    },
+                    ...GameSettingsUtils.createSettingsDisplayComponents(
+                        gameModule.config.settings,
+                        settings,
+                        languageEnum,
+                        true
+                    )
+                ] : [])
             ]
         } as Container,
         ...actions
     ];
 }
 
-export function createGameSetupConfirmationContainer(gameName: string, channelName: string): Component {
-    return ComponentService.createContainer({
+export function createGameSetupConfirmationContainer(
+    gameName: string, 
+    channelName: string, 
+    gameTypeEnum?: GameTypeEnum,
+    settings?: GameSettingsValues,
+    languageEnum: LanguageEnum = LanguageEnum.NL
+): Component {
+    const baseContainer = ComponentService.createContainer({
         title: new MultiLingualString(i18n.commands.games.labels.confirmSetupTitle),
         description: i18n.commands.games.labels.confirmSetupDescription(gameName, channelName)
     });
+
+    // If game has settings, add them to the confirmation
+    if (gameTypeEnum && settings) {
+        const gameModule = GameService.getGameByType(gameTypeEnum);
+        if (gameModule?.config.settings) {
+            const compactSettingsDisplay = GameSettingsContainer.createCompactSettingsDisplay(
+                gameModule.config.settings,
+                settings,
+                languageEnum
+            );
+            
+            // Combine both containers
+            return {
+                type: ComponentType.CONTAINER,
+                components: [
+                    ...baseContainer.components,
+                    {
+                        type: ComponentType.SEPARATOR,
+                        divider: true,
+                        spacing: 1
+                    },
+                    ...compactSettingsDisplay
+                ]
+            } as Container;
+        }
+    }
+
+    return baseContainer;
+}
+
+export function createGameSettingsContainer(
+    gameTypeEnum: GameTypeEnum,
+    currentSettings: GameSettingsValues,
+    languageEnum: LanguageEnum = LanguageEnum.NL
+): Container | null {
+    const gameModule = GameService.getGameByType(gameTypeEnum);
+    
+    if (!gameModule?.config.settings) {
+        return null;
+    }
+
+    const settingsComponents = GameSettingsUtils.createSettingsDisplayComponents(
+        gameModule.config.settings,
+        currentSettings,
+        languageEnum,
+        false
+    );
+
+    return {
+        type: ComponentType.CONTAINER,
+        components: [
+            {
+                type: ComponentType.TITLE,
+                content: new MultiLingualString(i18n.commands.games.settings.title)
+            },
+            {
+                type: ComponentType.TEXT_DISPLAY,
+                content: new MultiLingualString(i18n.commands.games.settings.description)
+            },
+            {
+                type: ComponentType.SEPARATOR,
+                divider: true,
+                spacing: 1
+            },
+            ...settingsComponents
+        ]
+    } as Container;
 }

@@ -5,6 +5,8 @@ import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { GameDataModel } from "../../interfaces/database/TableInterfaces";
 import { Container } from "../../interfaces/application/Message";
+import { GameSettingType } from "../../interfaces/domain/GameSettings";
+import { DifficultyEnum } from "../../interfaces/enums/games/DifficultyEnum";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");
@@ -24,9 +26,41 @@ export default {
         points: 1,
         isCalculated: false,
         expectedType: "string",
+        firstAnswer: "",
         addCorrectReaction: true,
         options: {
+            [GameOptionEnum.IS_INACTIVE]: false,
+            [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: false,
+            [GameOptionEnum.SAME_USER_DISABLED]: false,
+            [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: false,
             [GameOptionEnum.ALLOW_SKIPPING]: true,
+        },
+        settings: {
+            difficulty: {
+                key: "difficulty",
+                type: GameSettingType.ENUM,
+                label: new MultiLingualString(i18n.commands.games.settings.difficulty.label),
+                description: new MultiLingualString(i18n.commands.games.settings.difficulty.description),
+                defaultValue: DifficultyEnum.MEDIUM,
+                options: [
+                    {
+                        value: DifficultyEnum.EASY,
+                        label: new MultiLingualString(i18n.commands.games.settings.difficulty.easy),
+                        description: new MultiLingualString(i18n.commands.games.settings.difficulty.easyDescription)
+                    },
+                    {
+                        value: DifficultyEnum.MEDIUM,
+                        label: new MultiLingualString(i18n.commands.games.settings.difficulty.medium),
+                        description: new MultiLingualString(i18n.commands.games.settings.difficulty.mediumDescription),
+                        isDefault: true
+                    },
+                    {
+                        value: DifficultyEnum.HARD,
+                        label: new MultiLingualString(i18n.commands.games.settings.difficulty.hard),
+                        description: new MultiLingualString(i18n.commands.games.settings.difficulty.hardDescription)
+                    }
+                ]
+            }
         }
     },
 

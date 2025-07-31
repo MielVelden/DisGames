@@ -2,6 +2,7 @@ import { GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/G
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { GameSettingType } from "../../interfaces/domain/GameSettings";
 
 export default {
     config: {
@@ -15,9 +16,20 @@ export default {
         firstAnswer: "1",
         addCorrectReaction: true,
         options: {
+            [GameOptionEnum.IS_INACTIVE]: false,
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
-            [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true,
             [GameOptionEnum.SAME_USER_DISABLED]: true,
+            [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true,
+            [GameOptionEnum.ALLOW_SKIPPING]: false,
+        },
+        settings: {
+            resetOnFail: {
+                key: "resetOnFail",
+                type: GameSettingType.BOOLEAN,
+                label: new MultiLingualString(i18n.commands.games.settings.resetOnFail.label),
+                description: new MultiLingualString(i18n.commands.games.settings.resetOnFail.description),
+                defaultValue: false
+            }
         }
     },
 

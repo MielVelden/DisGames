@@ -5,6 +5,7 @@ import { ServersModel } from "../database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { Command } from "./Command";
+import { GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 
 export enum EventTypeEnum {
     SLASH_COMMAND = "SLASH_COMMAND",
@@ -34,6 +35,7 @@ export interface InteractionEvent {
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUser(container: Component): Promise<InteractionEvent | null>;
+    getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<GameSettingsValues | null>;
 
     getChannelNameAsync(channelId: string): Promise<string>;
 

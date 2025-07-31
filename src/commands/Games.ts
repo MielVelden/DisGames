@@ -2,7 +2,7 @@ import { Command, CommandOptionFollowUpType, CommandOptionType } from "../interf
 import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { SelectMenu } from "../interfaces/application/Message";
 import { Permission } from "../interfaces/application/Permission";
-import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
+import { GameTypeEnum } from "../interfaces/enums";
 import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfaces/enums/commands/Games";
 import ComponentService from "../services/ComponentService";
 import GameService from "../services/GameService";
@@ -11,6 +11,8 @@ import { createActiveGameContainer, createGameHelpContainer, createGameSetupConf
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
+import { GameSettingsUtils } from "../utils/GameSettingsUtils";
+import { GameSettingsValues } from "../interfaces/domain/GameSettings";
 
 export class GamesCommand implements Command {
     name = "games";
@@ -36,6 +38,13 @@ export class GamesCommand implements Command {
                     handler: async (event: SlashCommandInteractionEvent) => {
                         const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
                         const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
+                        
+                        // Get current settings for this game (in full implementation, this would come from database)
+                        const gameModule = GameService.getGameByType(game.GameTypeEnum);
+                        const currentSettings = gameModule?.config.settings 
+                            ? GameSettingsUtils.getDefaultValues(gameModule.config.settings)
+                            : {};
+                        
                         await event.addComponentsAsync(createActiveGameContainer(game, [
                             createMoveButton(event.user.id, async (btnEvent) => {
                                 const channelSelectMenu = createChannelSelectMenu();
@@ -60,7 +69,7 @@ export class GamesCommand implements Command {
                                     description: new MultiLingualString(i18n.commands.games.labels.deleteSuccess)
                                 }));
                             })
-                        ]));
+                        ], currentSettings, event.server.LanguageEnum));
                         await event.editAsync();
                     }
                 },
@@ -94,14 +103,35 @@ export class GamesCommand implements Command {
                         const gameModule = GameService.getGameByType(gameTypeEnum);
                         const channelName = await event.getChannelNameAsync(event.channelId);
                         
+                        let gameSettings: GameSettingsValues = {};
+                        
+                        // Check if game has settings and show settings configuration
+                        if (gameModule?.config.settings) {
+                            const defaultSettings = GameSettingsUtils.getDefaultValues(gameModule.config.settings);
+                            
+                            // Use the new interactive settings container
+                            const userSelectedSettings = await event.getSettingsContainer(gameModule.config.settings, defaultSettings);
+                            
+                            if (userSelectedSettings) {
+                                gameSettings = userSelectedSettings;
+                            } else {
+                                // User cancelled, exit setup
+                                return;
+                            }
+                        }
+                        
                         const confirmationContainer = createGameSetupConfirmationContainer(
                             gameModule?.config.name.getMessage(event.server.LanguageEnum) || 'Unknown',
-                            channelName
+                            channelName,
+                            gameTypeEnum,
+                            gameSettings,
+                            event.server.LanguageEnum
                         );
 
                         const confirmedEvent = await event.getConfirmationFromUser(confirmationContainer);
                         
                         if (confirmedEvent) {
+                            // Save the game with settings
                             await GameService.saveAsync({
                                 GameTypeEnum: gameTypeEnum,
                                 ChannelId: event.channelId,

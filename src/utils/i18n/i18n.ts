@@ -65,6 +65,30 @@ export interface I18nTranslations {
                 skipAnswer: LanguageTranslations;
                 howToPlay: LanguageTranslations;
             },
+            settings: {
+                title: LanguageTranslations;
+                description: LanguageTranslations;
+                currentSettings: LanguageTranslations;
+                enabled: LanguageTranslations;
+                disabled: LanguageTranslations;
+                unknown: LanguageTranslations;
+                gameDescription: LanguageTranslations;
+                currentChannel: LanguageTranslations;
+                resetOnFail: {
+                    label: LanguageTranslations;
+                    description: LanguageTranslations;
+                };
+                difficulty: {
+                    label: LanguageTranslations;
+                    description: LanguageTranslations;
+                    easy: LanguageTranslations;
+                    medium: LanguageTranslations;
+                    hard: LanguageTranslations;
+                    easyDescription: LanguageTranslations;
+                    mediumDescription: LanguageTranslations;
+                    hardDescription: LanguageTranslations;
+                };
+            },
             buttons: {
                 delete: LanguageTranslations;
                 move: LanguageTranslations;
@@ -180,6 +204,84 @@ export const i18n: I18nTranslations = {
                 howToPlay: {
                     [LanguageEnum.EN]: "How to Play",
                     [LanguageEnum.NL]: "Hoe te spelen",
+                },
+            },
+            settings: {
+                title: {
+                    [LanguageEnum.EN]: "Game Settings",
+                    [LanguageEnum.NL]: "Spelinstellingen",
+                },
+                description: {
+                    [LanguageEnum.EN]: "Configure the settings for this game:",
+                    [LanguageEnum.NL]: "Configureer de instellingen voor dit spel:",
+                },
+                currentSettings: {
+                    [LanguageEnum.EN]: "Current Settings",
+                    [LanguageEnum.NL]: "Huidige instellingen",
+                },
+                enabled: {
+                    [LanguageEnum.EN]: "Enabled",
+                    [LanguageEnum.NL]: "Ingeschakeld",
+                },
+                disabled: {
+                    [LanguageEnum.EN]: "Disabled",
+                    [LanguageEnum.NL]: "Uitgeschakeld",
+                },
+                unknown: {
+                    [LanguageEnum.EN]: "Unknown",
+                    [LanguageEnum.NL]: "Onbekend",
+                },
+                gameDescription: {
+                    [LanguageEnum.EN]: "Game description",
+                    [LanguageEnum.NL]: "Spelbeschrijving",
+                },
+                currentChannel: {
+                    [LanguageEnum.EN]: "Current game channel",
+                    [LanguageEnum.NL]: "Huidige spelkanaal",
+                },
+                resetOnFail: {
+                    label: {
+                        [LanguageEnum.EN]: "Reset on Wrong Answer",
+                        [LanguageEnum.NL]: "Reset bij fout antwoord",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "When enabled, the count resets to 1 when someone gives a wrong answer",
+                        [LanguageEnum.NL]: "Wanneer ingeschakeld, wordt de telling teruggezet naar 1 bij een fout antwoord",
+                    },
+                },
+                difficulty: {
+                    label: {
+                        [LanguageEnum.EN]: "Difficulty Level",
+                        [LanguageEnum.NL]: "Moeilijkheidsgraad",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Choose the difficulty level for word scrambling",
+                        [LanguageEnum.NL]: "Kies de moeilijkheidsgraad voor woordverwarring",
+                    },
+                    easy: {
+                        [LanguageEnum.EN]: "Easy",
+                        [LanguageEnum.NL]: "Makkelijk",
+                    },
+                    medium: {
+                        [LanguageEnum.EN]: "Medium",
+                        [LanguageEnum.NL]: "Gemiddeld",
+                    },
+                    hard: {
+                        [LanguageEnum.EN]: "Hard",
+                        [LanguageEnum.NL]: "Moeilijk",
+                    },
+                    easyDescription: {
+                        [LanguageEnum.EN]: "Simple words, less scrambling",
+                        [LanguageEnum.NL]: "Eenvoudige woorden, minder verwarring",
+                    },
+                    mediumDescription: {
+                        [LanguageEnum.EN]: "Moderate difficulty",
+                        [LanguageEnum.NL]: "Gemiddelde moeilijkheid",
+                    },
+                    hardDescription: {
+                        [LanguageEnum.EN]: "Complex words, heavy scrambling",
+                        [LanguageEnum.NL]: "Complexe woorden, sterke verwarring",
+                    },
                 },
             },
             buttons: {

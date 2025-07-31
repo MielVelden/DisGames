@@ -4,6 +4,7 @@ import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterf
 import { EventTypeEnum } from "../application/Event";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { LanguageEnum } from "../enums";
+import { GameSettingsSchema } from "./GameSettings";
 
 // Game configuration interface
 export interface GameConfig {
@@ -20,6 +21,7 @@ export interface GameConfig {
     options: {
         [key in GameOptionEnum]: boolean;
     };
+    settings?: GameSettingsSchema;
 }
 
 export interface GameFunctions {
