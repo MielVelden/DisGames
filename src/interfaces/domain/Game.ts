@@ -29,7 +29,8 @@ export interface GameFunctions {
     validateAnswer(event: GameEvent): boolean;
     
     // Get the next answer/prompt
-    getNextAnswerAsync(event: GameEvent): Promise<void>;
+    getNextAnswerAsync?(event: GameEvent): Promise<void>;
+    onIncorrectAnswerAsync?(event: GameEvent): Promise<void>;
 
     getStartComponents?(gameData: GameDataModel, languageEnum?: LanguageEnum): Component[];
 }

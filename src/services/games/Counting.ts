@@ -1,8 +1,10 @@
 import { GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
+import { GameSettingsEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
+import GameService from "../GameService";
 
 export default {
     config: {
@@ -22,15 +24,15 @@ export default {
             [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: true,
             [GameOptionEnum.ALLOW_SKIPPING]: false,
         },
-        settings: {
-            resetOnFail: {
-                key: "resetOnFail",
+        settings: [
+            {
+                key: GameSettingsEnum.RESET_ON_FAIL,
                 type: GameSettingType.BOOLEAN,
                 label: new MultiLingualString(i18n.commands.games.settings.resetOnFail.label),
                 description: new MultiLingualString(i18n.commands.games.settings.resetOnFail.description),
                 defaultValue: false
             }
-        }
+        ]
     },
 
     functions: {
@@ -40,6 +42,16 @@ export default {
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
             event.gameData.Answer = (Number(event.gameData.Answer) + 1).toString();
+        },
+
+        async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
+            // Get the resetOnFail setting value from GameService
+            const resetOnFail = GameService.getSettingValue<boolean>(event.gameData, GameSettingsEnum.RESET_ON_FAIL);
+            
+            if (resetOnFail) {
+                // Reset the counter back to 1
+                event.gameData.Answer = "1";
+            }
         }
     }
 } as GameModule;

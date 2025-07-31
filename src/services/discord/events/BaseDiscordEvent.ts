@@ -6,10 +6,15 @@ import { MultiLingualString } from "../../../utils/i18n/MultiLangualString";
 import { EventTypeEnum, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
-import { GameSettingsSchema, GameSettingsValues } from "../../../interfaces/domain/GameSettings";
-import { GameSettingsUtils } from "../../../utils/GameSettingsUtils";
-import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
+import { GameSettingsValues, GameSettingsSchema } from "../../../interfaces/domain/GameSettings";
+import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSettingsContainer";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
+import { GameSettingsEnum } from "../../../interfaces/enums";
+import { createGameHelpContainer, createGameSetupConfirmationContainer } from "../../../utils/Container";
+import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../../../interfaces/enums/commands/Games";
+import GameService from "../../GameService";
+import { createGamesSelectMenu } from "../../../utils/SelectMenu";
+import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
 
 export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
@@ -82,99 +87,74 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
 
     public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<GameSettingsValues | null> {
         return new Promise(async (resolve) => {
-            // Initialize current settings with defaults
-            let currentSettings = initialSettings || GameSettingsUtils.getDefaultValues(settingsSchema);
-            let currentEvent: InteractionEvent = this;
-            let isResolved = false; // Prevent multiple resolves
+            let currentSettings = initialSettings || GameService.getDefaultSettings(settingsSchema);
+            let isResolved = false;
             
-            // Define handlers outside of updateContainer to maintain proper scope
-            const onBooleanClick = async (btnEvent: InteractionEvent, key: string, currentValue: boolean) => {
-                if (isResolved) return; // Don't process if already resolved
-                currentSettings[key] = !currentValue;
-                currentEvent = btnEvent; // Update current event context
-                await updateContainer(btnEvent);
-            };
-
-            const onEnumClick = async (btnEvent: InteractionEvent, key: string, enumSetting: any, currentValue: any) => {
-                if (isResolved) return; // Don't process if already resolved
-                // Create proper select menu with correct SelectOption structure
-                const selectMenu: StringSelect = {
-                    type: ComponentType.STRING_SELECT,
-                    custom_id: crypto.randomUUID(),
-                    placeholder: enumSetting.label,
-                    question: enumSetting.label,
-                    options: enumSetting.options.map((option: any): SelectOption => ({
-                        label: option.label,
-                        value: option.value.toString(),
-                        description: option.description,
-                        default: option.value === currentValue
-                    }))
-                };
-                
-                const selectResult = await btnEvent.getUserInputBySelectMenuAsync(selectMenu);
-                if (selectResult && !isResolved) {
-                    // Update the setting value
-                    const newValue = enumSetting.options.find((opt: any) => opt.value.toString() === selectResult.selected)?.value;
-                    if (newValue !== undefined) {
-                        currentSettings[key] = newValue;
-                        currentEvent = selectResult; // Update current event context
-                        await updateContainer(selectResult);
+            const config: GameSettingsContainerConfig = {
+                settingsSchema,
+                currentSettings,
+                languageEnum: this.server.LanguageEnum,
+                userId: this.user.id,
+                onSettingChange: (btnEvent, key, value) => {
+                    if (!isResolved) {
+                        (currentSettings as any)[key] = value;
+                        updateContainer(btnEvent);
+                    }
+                },
+                onAccept: () => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        resolve(currentSettings);
+                    }
+                },
+                onCancel: () => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        resolve(null);
                     }
                 }
             };
 
-            const onAcceptClick = async (btnEvent: InteractionEvent) => {
-                if (!isResolved) {
-                    isResolved = true;
-                    resolve(currentSettings);
-                }
-            };
-
-            const onCancelClick = async (btnEvent: InteractionEvent) => {
-                if (!isResolved) {
-                    isResolved = true;
-                    resolve(null);
+            const handlers: GameSettingsHandler = {
+                onEnumClick: async (btnEvent, key, enumSetting, currentValue) => {
+                    if (isResolved) 
+                        return;
+                    
+                    const selectMenu: StringSelect = {
+                        type: ComponentType.STRING_SELECT,
+                        custom_id: crypto.randomUUID(),
+                        placeholder: enumSetting.label,
+                        question: enumSetting.label,
+                        options: enumSetting.options.map((option: any): SelectOption => ({
+                            label: option.label,
+                            value: option.value.toString(),
+                            description: option.description,
+                            default: option.value === currentValue
+                        }))
+                    };
+                    
+                    const selectResult = await btnEvent.getUserInputBySelectMenuAsync(selectMenu);
+                    if (selectResult && !isResolved) {
+                        const newValue = enumSetting.options.find((opt: any) => opt.value.toString() === selectResult.selected)?.value;
+                        if (newValue !== undefined) {
+                            (currentSettings as any)[key] = newValue;
+                            config.currentSettings = currentSettings;
+                            await updateContainer(selectResult);
+                        }
+                    }
                 }
             };
             
             const updateContainer = async (btnEvent?: InteractionEvent) => {
-                // Use button event if available, otherwise use original event
-                const eventToUse = btnEvent || currentEvent;
+                const container = GameSettingsContainer.createInteractiveContainer(config, handlers);
                 
-                const container = GameSettingsContainer.createInteractiveSettingsContainer(
-                    settingsSchema,
-                    currentSettings,
-                    this.server.LanguageEnum,
-                    // Boolean toggle callback - not used anymore, kept for compatibility
-                    (key: string, currentValue: boolean) => {
-                        // This is not called anymore
-                    },
-                    // Enum select callback - not used anymore, kept for compatibility
-                    async (key: string, enumSetting: any, currentValue: any) => {
-                        // This is not called anymore
-                    },
-                    // Accept callback - not used anymore, kept for compatibility
-                    () => {
-                        // This is not called anymore
-                    },
-                    // Cancel callback - not used anymore, kept for compatibility  
-                    () => {
-                        // This is not called anymore
-                    },
-                    this.user.id,
-                    // Pass the actual handler functions
-                    {
-                        onBooleanClick,
-                        onEnumClick,
-                        onAcceptClick,
-                        onCancelClick
-                    }
-                );
-                
-                await eventToUse.editWithComponentAsync(container);
+                if (btnEvent) {
+                    await btnEvent.editWithComponentAsync(container);
+                } else {
+                    await this.editWithComponentAsync(container);
+                }
             };
             
-            // Show initial container
             await updateContainer();
         });
     }

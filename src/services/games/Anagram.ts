@@ -1,12 +1,13 @@
 import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
-import ComponentService from "../ComponentService";
+import { GameSettingsEnum } from "../../interfaces/enums";
+import { DifficultyEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import { GameDataModel } from "../../interfaces/database/TableInterfaces";
 import { Container } from "../../interfaces/application/Message";
-import { GameSettingType } from "../../interfaces/domain/GameSettings";
-import { DifficultyEnum } from "../../interfaces/enums/games/DifficultyEnum";
+import ComponentService from "../ComponentService";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");
@@ -26,7 +27,6 @@ export default {
         points: 1,
         isCalculated: false,
         expectedType: "string",
-        firstAnswer: "",
         addCorrectReaction: true,
         options: {
             [GameOptionEnum.IS_INACTIVE]: false,
@@ -35,9 +35,9 @@ export default {
             [GameOptionEnum.REMOVE_ON_WRONG_ANSWER]: false,
             [GameOptionEnum.ALLOW_SKIPPING]: true,
         },
-        settings: {
-            difficulty: {
-                key: "difficulty",
+        settings: [
+            {
+                key: GameSettingsEnum.DIFFICULTY,
                 type: GameSettingType.ENUM,
                 label: new MultiLingualString(i18n.commands.games.settings.difficulty.label),
                 description: new MultiLingualString(i18n.commands.games.settings.difficulty.description),
@@ -61,7 +61,7 @@ export default {
                     }
                 ]
             }
-        }
+        ]
     },
 
     functions: {

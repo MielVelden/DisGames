@@ -1,4 +1,5 @@
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { GameSettingsEnum } from "../enums/games/GameSettingsEnum";
 
 export enum GameSettingType {
     BOOLEAN = "boolean",
@@ -13,7 +14,7 @@ export interface GameSettingOption {
 }
 
 export interface BaseGameSetting {
-    key: string;
+    key: GameSettingsEnum;
     label: MultiLingualString;
     description?: MultiLingualString;
     required?: boolean;
@@ -33,16 +34,12 @@ export interface EnumGameSetting extends BaseGameSetting {
 
 export type GameSetting = BooleanGameSetting | EnumGameSetting;
 
-export interface GameSettingsSchema {
-    [key: string]: GameSetting;
-}
+export type GameSettingsSchema = GameSetting[];
 
-export interface GameSettingsValues {
-    [key: string]: boolean | string | number;
-}
+export type GameSettingsValues = Partial<Record<GameSettingsEnum, boolean | string | number>>;
 
 export interface GameSettingsValidationResult {
     isValid: boolean;
-    errors: string[];
+    errors: MultiLingualString[];
     values: GameSettingsValues;
 } 

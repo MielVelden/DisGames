@@ -1,28 +1,27 @@
-import { Component, ComponentType, Container, ActionButton, ButtonStyle, Title, TextDisplay, Separator } from "../interfaces/application/Message";
-import { GameSettingsSchema, GameSettingsValues, GameSettingType, BooleanGameSetting, EnumGameSetting } from "../interfaces/domain/GameSettings";
+import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../interfaces/application/Message";
+import { ButtonStyle } from "../interfaces/application/Message";
+import { 
+    GameSettingsSchema, 
+    GameSettingsValues, 
+    GameSettingType,
+    BooleanGameSetting,
+    EnumGameSetting
+} from "../interfaces/domain/GameSettings";
+import { GameSettingsEnum } from "../interfaces/enums/games/GameSettingsEnum";
 import { LanguageEnum } from "../interfaces/enums";
+import { 
+    GameSettingsContainerConfig, 
+    GameSettingsHandler, 
+    GameSettingsDisplayConfig 
+} from "../interfaces/application/GameSettingsContainer";
 import ComponentService from "../services/ComponentService";
-import { i18n } from "./i18n/i18n";
 import { MultiLingualString } from "./i18n/MultiLangualString";
+import { i18n } from "./i18n/i18n";
+import { ButtonInteractionEvent } from "../interfaces/application/Event";
 
 export class GameSettingsContainer {
     
-    static createInteractiveSettingsContainer(
-        settingsSchema: GameSettingsSchema,
-        currentSettings: GameSettingsValues,
-        languageEnum: LanguageEnum,
-        onBooleanToggle: (key: string, currentValue: boolean) => void,
-        onEnumSelect: (key: string, enumSetting: EnumGameSetting, currentValue: any) => void,
-        onAccept: () => void,
-        onCancel: () => void,
-        userId: string,
-        handlers?: {
-            onBooleanClick: (btnEvent: any, key: string, currentValue: boolean) => Promise<void>;
-            onEnumClick: (btnEvent: any, key: string, enumSetting: EnumGameSetting, currentValue: any) => Promise<void>;
-            onAcceptClick: (btnEvent: any) => Promise<void>;
-            onCancelClick: (btnEvent: any) => Promise<void>;
-        }
-    ): Container {
+    static createInteractiveContainer(config: GameSettingsContainerConfig, handlers?: GameSettingsHandler): Container {
         const components: Component[] = [];
         
         // Add title
@@ -43,9 +42,9 @@ export class GameSettingsContainer {
             spacing: 1
         } as Separator);
         
-        // Create buttons for each setting
-        Object.entries(settingsSchema).forEach(([key, setting]) => {
-            const currentValue = currentSettings[key];
+        // Create settings components
+        config.settingsSchema.forEach((setting) => {
+            const currentValue = config.currentSettings[setting.key];
             
             // Setting title
             components.push({
@@ -63,17 +62,16 @@ export class GameSettingsContainer {
             
             if (setting.type === GameSettingType.BOOLEAN) {
                 const boolValue = currentValue as boolean;
-                // Boolean toggle button
                 components.push(ComponentService.createButton({
                     style: boolValue ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
                     label: new MultiLingualString(boolValue ? i18n.commands.games.settings.enabled : i18n.commands.games.settings.disabled),
                 }, {
-                    userId: userId,
-                    handle: async (btnEvent) => {
+                    userId: config.userId,
+                    handle: async (btnEvent: any) => {
                         if (handlers?.onBooleanClick) {
-                            await handlers.onBooleanClick(btnEvent, key, boolValue);
-                        } else {
-                            onBooleanToggle(key, boolValue);
+                            await handlers.onBooleanClick(btnEvent, setting.key, boolValue);
+                        } else if (config.onSettingChange) {
+                            config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, !boolValue);
                         }
                     }
                 }));
@@ -81,17 +79,14 @@ export class GameSettingsContainer {
                 const enumSetting = setting as EnumGameSetting;
                 const selectedOption = enumSetting.options.find(opt => opt.value === currentValue);
                 
-                // Enum selection button
                 components.push(ComponentService.createButton({
                     style: ButtonStyle.PRIMARY,
                     label: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown),
                 }, {
-                    userId: userId,
-                    handle: async (btnEvent) => {
+                    userId: config.userId,
+                    handle: async (btnEvent: any) => {
                         if (handlers?.onEnumClick) {
-                            await handlers.onEnumClick(btnEvent, key, enumSetting, currentValue);
-                        } else {
-                            onEnumSelect(key, enumSetting, currentValue);
+                            await handlers.onEnumClick(btnEvent, setting.key, enumSetting, currentValue);
                         }
                     }
                 }));
@@ -106,34 +101,38 @@ export class GameSettingsContainer {
         });
         
         // Add Accept button
-        components.push(ComponentService.createButton({
-            style: ButtonStyle.SUCCESS,
-            label: new MultiLingualString(i18n.common.accept),
-        }, {
-            userId: userId,
-            handle: async (btnEvent) => {
-                if (handlers?.onAcceptClick) {
-                    await handlers.onAcceptClick(btnEvent);
-                } else {
-                    onAccept();
+        if (config.onAccept || handlers?.onAcceptClick) {
+            components.push(ComponentService.createButton({
+                style: ButtonStyle.SUCCESS,
+                label: new MultiLingualString(i18n.common.accept),
+            }, {
+                userId: config.userId,
+                handle: async (btnEvent) => {
+                    if (handlers?.onAcceptClick) {
+                        await handlers.onAcceptClick(btnEvent as ButtonInteractionEvent);
+                    } else if (config.onAccept) {
+                        config.onAccept();
+                    }
                 }
-            }
-        }));
+            }));
+        }
         
         // Add Cancel button
-        components.push(ComponentService.createButton({
-            style: ButtonStyle.SECONDARY,
-            label: new MultiLingualString(i18n.common.cancel),
-        }, {
-            userId: userId,
-            handle: async (btnEvent) => {
-                if (handlers?.onCancelClick) {
-                    await handlers.onCancelClick(btnEvent);
-                } else {
-                    onCancel();
+        if (config.onCancel || handlers?.onCancelClick) {
+            components.push(ComponentService.createButton({
+                style: ButtonStyle.SECONDARY,
+                label: new MultiLingualString(i18n.common.cancel),
+            }, {
+                userId: config.userId,
+                handle: async (btnEvent) => {
+                    if (handlers?.onCancelClick) {
+                        await handlers.onCancelClick(btnEvent as ButtonInteractionEvent);
+                    } else if (config.onCancel) {
+                        config.onCancel();
+                    }
                 }
-            }
-        }));
+            }));
+        }
         
         return {
             type: ComponentType.CONTAINER,
@@ -141,15 +140,11 @@ export class GameSettingsContainer {
         } as Container;
     }
     
-    static createCompactSettingsDisplay(
-        settingsSchema: GameSettingsSchema,
-        settings: GameSettingsValues,
-        languageEnum: LanguageEnum
-    ): Component[] {
+    static createReadOnlyDisplay(config: GameSettingsDisplayConfig): Component[] {
         const components: Component[] = [];
         
-        Object.entries(settingsSchema).forEach(([key, setting]) => {
-            const currentValue = settings[key];
+        config.settingsSchema.forEach((setting) => {
+            const currentValue = config.settings[setting.key];
             let statusEmoji = "";
             
             if (setting.type === GameSettingType.BOOLEAN) {
@@ -163,8 +158,8 @@ export class GameSettingsContainer {
             components.push({
                 type: ComponentType.TEXT_DISPLAY,
                 content: new MultiLingualString({
-                    [LanguageEnum.EN]: `${statusEmoji} ${setting.label.getMessage(languageEnum)}`,
-                    [LanguageEnum.NL]: `${statusEmoji} ${setting.label.getMessage(languageEnum)}`,
+                    [LanguageEnum.EN]: `${statusEmoji} ${setting.label.getMessage(config.languageEnum)}`,
+                    [LanguageEnum.NL]: `${statusEmoji} ${setting.label.getMessage(config.languageEnum)}`,
                 })
             } as TextDisplay);
         });

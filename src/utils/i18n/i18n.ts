@@ -498,15 +498,15 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.NL]: "Dit spel bestaat al",
         },
         [ExceptionEnum.CHANNEL_OR_SERVER_NOT_FOUND]: {
-            [LanguageEnum.EN]: "We couldn’t find the channel or server",
+            [LanguageEnum.EN]: "We couldn't find the channel or server",
             [LanguageEnum.NL]: "Kanaal of server niet gevonden",
         },
         [ExceptionEnum.ANSWER_ALREADY_EXISTS]: {
-            [LanguageEnum.EN]: "You’ve already submitted an answer",
+            [LanguageEnum.EN]: "You've already submitted an answer",
             [LanguageEnum.NL]: "Je hebt al een antwoord gegeven",
         },
         [ExceptionEnum.INVALID_GAME_TYPE]: {
-            [LanguageEnum.EN]: "This game type isn’t supported",
+            [LanguageEnum.EN]: "This game type isn't supported",
             [LanguageEnum.NL]: "Dit speltype wordt niet ondersteund",
         },
         [ExceptionEnum.WANT_TO_REPLACE_CHANNEL]: {
@@ -518,19 +518,19 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.NL]: "Dit spel is al actief. Wil je het vervangen?",
         },
         [ExceptionEnum.GAME_MODULE_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Game module couldn’t be found",
+            [LanguageEnum.EN]: "Game module couldn't be found",
             [LanguageEnum.NL]: "Spelmodule niet gevonden",
         },
         [ExceptionEnum.SAME_USER_ALREADY_ANSWERED]: {
-            [LanguageEnum.EN]: "You’ve already answered",
+            [LanguageEnum.EN]: "You've already answered",
             [LanguageEnum.NL]: "Je hebt al een antwoord gegeven",
         },
         [ExceptionEnum.WRONG_ANSWER]: {
-            [LanguageEnum.EN]: "That’s not the correct answer",
+            [LanguageEnum.EN]: "That's not the correct answer",
             [LanguageEnum.NL]: "Dat is niet het juiste antwoord",
         },
         [ExceptionEnum.GAME_NOT_ACTIVE]: {
-            [LanguageEnum.EN]: "The game isn’t active right now",
+            [LanguageEnum.EN]: "The game isn't active right now",
             [LanguageEnum.NL]: "Het spel is momenteel niet actief",
         },
         [ExceptionEnum.MESSAGE_CHANGE_DISABLED]: {
@@ -538,12 +538,24 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.NL]: "Berichten bewerken is uitgeschakeld",
         },
         [ExceptionEnum.INVALID_NUMBER]: {
-            [LanguageEnum.EN]: "That doesn’t seem to be a valid number",
+            [LanguageEnum.EN]: "That doesn't seem to be a valid number",
             [LanguageEnum.NL]: "Dat lijkt geen geldig nummer te zijn",
         },
         [ExceptionEnum.GAME_NOT_FOUND]: {
             [LanguageEnum.EN]: "Game not found",
             [LanguageEnum.NL]: "Spel niet gevonden",
+        },
+        [ExceptionEnum.SETTING_REQUIRED]: {
+            [LanguageEnum.EN]: "This setting is required",
+            [LanguageEnum.NL]: "Deze instelling is verplicht",
+        },
+        [ExceptionEnum.SETTING_INVALID_TYPE]: {
+            [LanguageEnum.EN]: "Invalid value type for this setting",
+            [LanguageEnum.NL]: "Ongeldig waardetype voor deze instelling",
+        },
+        [ExceptionEnum.SETTING_INVALID_VALUE]: {
+            [LanguageEnum.EN]: "Invalid value for this setting",
+            [LanguageEnum.NL]: "Ongeldige waarde voor deze instelling",
         },
     }    
 };

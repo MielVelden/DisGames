@@ -7,7 +7,6 @@ import { createMultiLingualString, MultiLingualString } from "./i18n/MultiLangua
 import GameService from "../services/GameService";
 import ComponentService from "../services/ComponentService";
 import { GameSettingsValues } from "../interfaces/domain/GameSettings";
-import { GameSettingsUtils } from "./GameSettingsUtils";
 import { GameSettingsContainer } from "./GameSettingsContainer";
 
 export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
@@ -104,7 +103,7 @@ export function createActiveGameContainer(
                         divider: true,
                         spacing: 1
                     },
-                    ...GameSettingsUtils.createSettingsDisplayComponents(
+                    ...GameService.createSettingsDisplayComponents(
                         gameModule.config.settings,
                         settings,
                         languageEnum,
@@ -133,11 +132,11 @@ export function createGameSetupConfirmationContainer(
     if (gameTypeEnum && settings) {
         const gameModule = GameService.getGameByType(gameTypeEnum);
         if (gameModule?.config.settings) {
-            const compactSettingsDisplay = GameSettingsContainer.createCompactSettingsDisplay(
-                gameModule.config.settings,
-                settings,
-                languageEnum
-            );
+            const compactSettingsDisplay = GameSettingsContainer.createReadOnlyDisplay({
+                settingsSchema: gameModule.config.settings,
+                settings: settings,
+                languageEnum: languageEnum
+            });
             
             // Combine both containers
             return {
@@ -169,7 +168,7 @@ export function createGameSettingsContainer(
         return null;
     }
 
-    const settingsComponents = GameSettingsUtils.createSettingsDisplayComponents(
+    const settingsComponents = GameService.createSettingsDisplayComponents(
         gameModule.config.settings,
         currentSettings,
         languageEnum,

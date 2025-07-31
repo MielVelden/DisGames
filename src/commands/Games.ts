@@ -11,7 +11,6 @@ import { createActiveGameContainer, createGameHelpContainer, createGameSetupConf
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
-import { GameSettingsUtils } from "../utils/GameSettingsUtils";
 import { GameSettingsValues } from "../interfaces/domain/GameSettings";
 
 export class GamesCommand implements Command {
@@ -42,7 +41,7 @@ export class GamesCommand implements Command {
                         // Get current settings for this game (in full implementation, this would come from database)
                         const gameModule = GameService.getGameByType(game.GameTypeEnum);
                         const currentSettings = gameModule?.config.settings 
-                            ? GameSettingsUtils.getDefaultValues(gameModule.config.settings)
+                            ? GameService.getDefaultSettings(gameModule.config.settings)
                             : {};
                         
                         await event.addComponentsAsync(createActiveGameContainer(game, [
@@ -63,7 +62,7 @@ export class GamesCommand implements Command {
                                 }
                             }),
                             createDeleteButton(event.user.id, async (btnEvent) => {
-                                await GameService.deleteAsync(game.Id);
+                                await GameService.deleteAsync(game.Id!);
                                 await btnEvent.clearComponentsAsync();
                                 await btnEvent.editWithComponentAsync(ComponentService.createContainer({
                                     description: new MultiLingualString(i18n.commands.games.labels.deleteSuccess)
@@ -107,7 +106,7 @@ export class GamesCommand implements Command {
                         
                         // Check if game has settings and show settings configuration
                         if (gameModule?.config.settings) {
-                            const defaultSettings = GameSettingsUtils.getDefaultValues(gameModule.config.settings);
+                            const defaultSettings = GameService.getDefaultSettings(gameModule.config.settings);
                             
                             // Use the new interactive settings container
                             const userSelectedSettings = await event.getSettingsContainer(gameModule.config.settings, defaultSettings);
