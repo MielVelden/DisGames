@@ -8,4 +8,5 @@ export enum TimelineTypeEnum {
     SERVER_CREATED,
     SERVER_UPDATED,
     POINTS_ADDED,
+    GAME_RESET,
 } 

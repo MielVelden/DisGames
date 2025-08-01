@@ -1,10 +1,12 @@
-import { GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { GameSettingsEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../GameService";
+import TimelineBuilder from "../TimelineBuilder";
+import ComponentService from "../ComponentService";
 
 export default {
     config: {
@@ -49,8 +51,20 @@ export default {
             const resetOnFail = GameService.getSettingValue<boolean>(event.gameData, GameSettingsEnum.RESET_ON_FAIL);
             
             if (resetOnFail) {
-                // Reset the counter back to 1
-                event.gameData.Answer = "1";
+                // Reset the counter back to 0
+                event.gameData.Answer = "0";
+
+                event.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: "❌"
+                });
+                
+                event.addAction({
+                    enum: GameActionEnum.COMPONENT,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.incorrectAnswer))
+                });
             }
         }
     }

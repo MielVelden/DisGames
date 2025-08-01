@@ -1,9 +1,9 @@
 import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { GameDataModel, GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
-import { 
-    GameSettingsSchema, 
-    GameSettingsValues, 
+import {
+    GameSettingsSchema,
+    GameSettingsValues,
     GameSettingType,
     BooleanGameSetting,
     EnumGameSetting,
@@ -29,6 +29,7 @@ import Logger from "../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";
 import UserRepository from "../repositories/UserRepository";
 import ServerRepository from "../repositories/ServerRepository";
+import { DEBUG_MODE } from "../config";
 
 class GameService {
     private games: GameModule[] = [];
@@ -137,7 +138,7 @@ class GameService {
             // Add start message
             const startMessage = await this.getStartMessageAsync(savedModel, event.server.LanguageEnum, gameData);
             await event.sendToChannelAsync(savedModel.ChannelId, startMessage);
-       
+
             await event.commitTimelineAsync();
 
             return model;
@@ -242,19 +243,31 @@ class GameService {
             await this.handleValidAnswerAsync(gameEvent);
             // Add points to the user
             await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
+
+            // Timeline for correct answer
+            await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
+                event: event,
+                old: null,
+                new: gameEvent.gameData,
+                objectId: gameEvent.gameData.Id
+            });
         } else if (gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Answer is incorrect - handle via game module if available
             const gameModule = this.getGameByType(gameEvent.gameData.GameTypeEnum);
-            if (gameModule && gameModule.functions) {
-                const onIncorrectAnswerFn = gameModule.functions.onIncorrectAnswerAsync;
-                if (onIncorrectAnswerFn) {
-                    await onIncorrectAnswerFn(gameEvent);
-                }
+            if (gameModule && gameModule.functions && gameModule.functions.onIncorrectAnswerAsync) {
+                await gameModule.functions.onIncorrectAnswerAsync(gameEvent);
+                await this.handleValidAnswerAsync(gameEvent);
+            } else {
+                // Delete the message
+                await event.deleteAsync();
             }
         }
 
         // Loop through all actions and handle them
         await this.handleGameActionsAsync(gameEvent, event);
+
+        // Commit timeline
+        await event.commitTimelineAsync();
 
         // Reply to the game channel
         await event.replyAsync();
@@ -289,6 +302,7 @@ class GameService {
     }
 
     private async handleGameOptionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
+        const gameModule = this.getGameByType(gameEvent.gameData.GameTypeEnum);
         const options = Object.entries(gameEvent.gameConfig.options)
             .filter(([_, value]) => value === true)
             .map(([key]) => Number(key))
@@ -315,6 +329,10 @@ class GameService {
                     }
                     break;
                 case GameOptionEnum.SAME_USER_DISABLED:
+                    // Skip this option in debug mode
+                    if (DEBUG_MODE)
+                        break;
+
                     if (gameEvent.gameData.LastUser === gameEvent.user.id) {
                         gameEvent.deleteMessage();
                         throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
@@ -324,7 +342,7 @@ class GameService {
                     }
                     break;
                 case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
-                    if (!gameEvent.validateAnswer(gameEvent)) {
+                    if (!gameEvent.validateAnswer(gameEvent) && !gameModule?.functions.onIncorrectAnswerAsync) {
                         gameEvent.deleteMessage();
                         throw ErrorHelper.throwError(ExceptionEnum.WRONG_ANSWER);
                     }
@@ -417,7 +435,7 @@ class GameService {
 
         schema.forEach((setting) => {
             const value = values[setting.key];
-            
+
             if (setting.required && (value === undefined || value === null)) {
                 errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_REQUIRED]));
                 return;
@@ -441,7 +459,7 @@ class GameService {
                 }
             } else {
                 // Use default value
-                validatedValues[setting.key] = setting.type === GameSettingType.BOOLEAN 
+                validatedValues[setting.key] = setting.type === GameSettingType.BOOLEAN
                     ? (setting as BooleanGameSetting).defaultValue
                     : (setting as EnumGameSetting).defaultValue;
             }
@@ -456,7 +474,7 @@ class GameService {
 
     public getDefaultSettings(schema: GameSettingsSchema): GameSettingsValues {
         const defaultValues: GameSettingsValues = {};
-        
+
         schema.forEach((setting) => {
             if (setting.type === GameSettingType.BOOLEAN) {
                 defaultValues[setting.key] = (setting as BooleanGameSetting).defaultValue;
@@ -470,29 +488,27 @@ class GameService {
 
     public getSettingValue<T = any>(game: GamesModel, settingKey: GameSettingsEnum): T | undefined {
         const gameModule = this.getGameByType(game.GameTypeEnum);
-        if (!gameModule?.config.settings) {
+        if (!gameModule?.config.settings) 
             return undefined;
-        }
 
-        // TODO: In future, get from database stored settings
-        // For now, return default value
         const setting = gameModule.config.settings.find(s => s.key === settingKey);
-        if (!setting) {
+        if (!setting) 
             return undefined;
-        }
 
-        if (setting.type === GameSettingType.BOOLEAN) {
+        if (game.Settings && game.Settings.hasOwnProperty(settingKey))
+            return game.Settings[settingKey] as T;
+
+        if (setting.type === GameSettingType.BOOLEAN)
             return (setting as BooleanGameSetting).defaultValue as T;
-        } else if (setting.type === GameSettingType.ENUM) {
+        else if (setting.type === GameSettingType.ENUM)
             return (setting as EnumGameSetting).defaultValue as T;
-        }
 
         return undefined;
     }
 
     public createSettingsDisplayComponents(
-        schema: GameSettingsSchema, 
-        values: GameSettingsValues, 
+        schema: GameSettingsSchema,
+        values: GameSettingsValues,
         languageEnum: LanguageEnum,
         isReadOnly: boolean = false
     ): Component[] {
@@ -508,7 +524,7 @@ class GameService {
             } as Title);
 
             // Description if available
-            if (setting.description) {
+            if (setting.description && !isReadOnly) {
                 components.push({
                     type: ComponentType.TEXT_DISPLAY,
                     content: setting.description
@@ -517,7 +533,7 @@ class GameService {
 
             if (setting.type === GameSettingType.BOOLEAN) {
                 const booleanValue = currentValue as boolean;
-                
+
                 if (isReadOnly) {
                     components.push({
                         type: ComponentType.TEXT_DISPLAY,
@@ -529,7 +545,7 @@ class GameService {
                         style: booleanValue ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
                         label: new MultiLingualString(i18n.commands.games.settings.enabled),
                     }));
-                    
+
                     components.push(ComponentService.createButton({
                         style: !booleanValue ? ButtonStyle.DANGER : ButtonStyle.SECONDARY,
                         label: new MultiLingualString(i18n.commands.games.settings.disabled),
@@ -579,7 +595,7 @@ class GameService {
         languageEnum: LanguageEnum
     ): Container {
         const components = this.createSettingsDisplayComponents(schema, values, languageEnum, true);
-        
+
         return {
             type: ComponentType.CONTAINER,
             components: [

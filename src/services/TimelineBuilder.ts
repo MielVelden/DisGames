@@ -1,10 +1,12 @@
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums";
 import { TimelineChanges, TimelineChange } from "../interfaces/domain/Timeline";
 import TimelineRepository from "../repositories/TimelineRepository";
-import { TimelineEntriesSaveModel } from "../interfaces/database";
+import { GamesModel, TimelineEntriesSaveModel } from "../interfaces/database";
 import { InteractionEvent } from "../interfaces/application/Event";
 import UserRepository from "../repositories/UserRepository";
 import ServerRepository from "../repositories/ServerRepository";
+import { GameEvent } from "../interfaces/domain";
+import GameRepository from "../repositories/GameRepository";
 
 interface TimelineContext {
    event: InteractionEvent;
@@ -14,7 +16,7 @@ interface TimelineContext {
 }
 
 class TimelineBuilder {
-    
+
     private detectChanges(oldObject: any, newObject: any): TimelineChanges {
         const changes: TimelineChanges = {};
         
@@ -103,6 +105,22 @@ class TimelineBuilder {
             TableEnum.GAMES,
             context.objectId,
             timelineType,
+            changes,
+            context
+        );
+    }
+
+    async forGameResetAsync(gameId: number, context: TimelineContext): Promise<void> {
+        const game = await GameRepository.getByIDAsync(gameId);
+        if (!game) 
+            throw new Error('Game not found');
+
+        const changes = this.detectChanges(game, context.new);
+        
+        await this.createTimelineEntryAsync(
+            TableEnum.GAMES,
+            gameId,
+            TimelineTypeEnum.GAME_RESET,
             changes,
             context
         );

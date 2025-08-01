@@ -64,6 +64,7 @@ export interface I18nTranslations {
                 movedToChannel: (channel: string) => MultiLingualString;
                 skipAnswer: LanguageTranslations;
                 howToPlay: LanguageTranslations;
+                incorrectAnswer: LanguageTranslations;
             },
             settings: {
                 title: LanguageTranslations;
@@ -204,6 +205,10 @@ export const i18n: I18nTranslations = {
                 howToPlay: {
                     [LanguageEnum.EN]: "How to Play",
                     [LanguageEnum.NL]: "Hoe te spelen",
+                },
+                incorrectAnswer: {
+                    [LanguageEnum.EN]: "The answer is incorrect. The counter has been reset to 1.",
+                    [LanguageEnum.NL]: "Het antwoord is incorrect. De teller is teruggezet naar 1.",
                 },
             },
             settings: {

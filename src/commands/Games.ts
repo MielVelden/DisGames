@@ -11,8 +11,7 @@ import { createActiveGameContainer, createGameHelpContainer, createGameSetupConf
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
-import { GameSettingsValues, Games_Settings } from "../interfaces/domain/GameSettings";
-import { DifficultyEnum } from "../interfaces/enums/games/DifficultyEnum";
+import { Games_Settings } from "../interfaces/domain/GameSettings";
 
 export class GamesCommand implements Command {
     name = "games";
