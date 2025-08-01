@@ -26,6 +26,9 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import MediaService from "./MediaService";
 import Logger from "../utils/Logger";
+import TimelineBuilder from "./TimelineBuilder";
+import UserRepository from "../repositories/UserRepository";
+import ServerRepository from "../repositories/ServerRepository";
 
 class GameService {
     private games: GameModule[] = [];
@@ -123,9 +126,19 @@ class GameService {
             // Update
             const savedModel = await GameRepository.saveAsync(savable);
 
+            // Track timeline for game update
+            await TimelineBuilder.forGameUpdateAsync({
+                old: model,
+                new: savedModel,
+                objectId: savedModel.Id,
+                event
+            });
+
             // Add start message
             const startMessage = await this.getStartMessageAsync(savedModel, event.server.LanguageEnum, gameData);
             await event.sendToChannelAsync(savedModel.ChannelId, startMessage);
+       
+            await event.commitTimelineAsync();
 
             return model;
         }
@@ -188,9 +201,19 @@ class GameService {
             await GameRepository.saveAsync(model);
         }
 
+        // Track timeline for new game creation
+        await TimelineBuilder.forGameUpdateAsync({
+            old: null,
+            new: model,
+            objectId: model.Id,
+            event
+        });
+
         // Add start message
         const startMessage = await this.getStartMessageAsync(model, event.server.LanguageEnum, gameData);
         await event.addComponentsAsync(startMessage);
+
+        await event.commitTimelineAsync();
 
         // Save the game
         return model;

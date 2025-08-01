@@ -6,4 +6,5 @@ export enum TableEnum {
     USERS,
     DATASHEETS,
     GAMESXDATASHEETS,
+    TIMELINE_ENTRIES,
 }

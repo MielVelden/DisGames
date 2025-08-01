@@ -4,6 +4,7 @@ export * from './database/GameTypeEnum';
 export * from './database/LanguageEnum';
 export * from './database/StoredProcedureEnum';
 export * from './database/TableEnum';
+export * from './database/TimelineTypeEnum';
 export * from './database/UserRoleEnum';
 export * from './domain/ExpectionEnum';
 export * from './games/DifficultyEnum';

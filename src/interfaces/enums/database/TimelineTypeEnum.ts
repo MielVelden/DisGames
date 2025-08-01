@@ -1,0 +1,11 @@
+export enum TimelineTypeEnum {
+    GAME_CREATED = 1,
+    GAME_UPDATED,
+    GAME_PLAYED,
+    GAME_DELETED,
+    USER_CREATED,
+    USER_UPDATED,
+    SERVER_CREATED,
+    SERVER_UPDATED,
+    POINTS_ADDED,
+} 

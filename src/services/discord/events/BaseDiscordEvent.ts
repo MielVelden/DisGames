@@ -9,12 +9,10 @@ import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { GameSettingsValues, GameSettingsSchema } from "../../../interfaces/domain/GameSettings";
 import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSettingsContainer";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
-import { GameSettingsEnum } from "../../../interfaces/enums";
-import { createGameHelpContainer, createGameSetupConfirmationContainer } from "../../../utils/Container";
-import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../../../interfaces/enums/commands/Games";
 import GameService from "../../GameService";
-import { createGamesSelectMenu } from "../../../utils/SelectMenu";
 import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
+import { TimelineEntriesSaveModel } from "../../../interfaces/database";
+import TimelineBuilder from "../../TimelineBuilder";
 
 export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
@@ -27,6 +25,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly guildId: string;
 
     public components: Component[] = [];
+    public timelineEntries: TimelineEntriesSaveModel[] = [];
 
     constructor(
         type: EventTypeEnum,
@@ -166,5 +165,14 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
 
         const channel = await guild.channels.fetch(channelId);
         return channel?.name || channelId;
+    }
+
+    public addTimelineEntry(entry: TimelineEntriesSaveModel): void {
+        this.timelineEntries.push(entry);
+    }
+
+    public async commitTimelineAsync(): Promise<void> {
+        await TimelineBuilder.commitTimelineEntriesAsync(this.timelineEntries);
+        this.timelineEntries = [];
     }
 } 

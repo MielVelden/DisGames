@@ -6,6 +6,7 @@ import { Interaction as DiscordInteraction, Message as DiscordMessage } from "di
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { Command } from "./Command";
 import { GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
+import { TimelineEntriesSaveModel } from "../database";
 
 export enum EventTypeEnum {
     SLASH_COMMAND = "SLASH_COMMAND",
@@ -18,33 +19,46 @@ export enum EventTypeEnum {
 }
 
 export interface InteractionEvent {
+    // Event type and identifiers
     type: EventTypeEnum;
     customId: string;
 
+    // Discord interaction or message object
     currentInteraction: DiscordInteraction | DiscordMessage;
 
+    // Component management
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;
     addComponentsAsync(components: Component[]): Promise<void>;
     clearComponentsAsync(): Promise<void>;
     
+    // Message and component editing/sending
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
     editAsync(content?: string): Promise<void>;
     editWithComponentAsync(component: Component): Promise<void>;
 
+    // User input and interaction
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUser(container: Component): Promise<InteractionEvent | null>;
     getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<GameSettingsValues | null>;
 
+    // Channel utilities
     getChannelNameAsync(channelId: string): Promise<string>;
 
+    // User and server context
     user: User;
     server: ServersModel;
 
+    // Message and channel identifiers
     messageId: string;
     channelId: string;
     guildId: string;
+
+    // Timeline tracking
+    timelineEntries: TimelineEntriesSaveModel[];
+    addTimelineEntry(entry: TimelineEntriesSaveModel): void;
+    commitTimelineAsync(): Promise<void>;
 }
 
 export interface ReplyInteractionEvent extends InteractionEvent {
