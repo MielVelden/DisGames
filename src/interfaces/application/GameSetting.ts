@@ -1,7 +1,6 @@
 import { GameSettingsSchema, GameSettingsValues, EnumGameSetting } from "../domain/GameSettings";
 import { GameSettingsEnum } from "../enums/games/GameSettingsEnum";
 import { LanguageEnum } from "../enums";
-import { Component } from "./Message";
 import { ButtonInteractionEvent } from "./Event";
 
 export interface GameSettingsContainerConfig {

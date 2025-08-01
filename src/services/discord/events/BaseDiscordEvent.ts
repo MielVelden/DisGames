@@ -6,13 +6,14 @@ import { MultiLingualString } from "../../../utils/i18n/MultiLangualString";
 import { EventTypeEnum, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
-import { GameSettingsValues, GameSettingsSchema } from "../../../interfaces/domain/GameSettings";
-import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSettingsContainer";
+import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../../interfaces/domain/GameSettings";
+import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSetting";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
 import GameService from "../../GameService";
 import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../TimelineBuilder";
+import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 
 export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
@@ -84,7 +85,14 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
         return await DiscordMessageHandler.getConfirmationFromUser(this, container);
     }
 
-    public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<GameSettingsValues | null> {
+    public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {
+        const mapSettings = (settings: GameSettingsValues): Games_Settings => {
+            return {
+                difficulty: settings.difficulty as DifficultyEnum,
+                resetOnFail: settings.resetOnFail as boolean
+            };
+        };
+        
         return new Promise(async (resolve) => {
             let currentSettings = initialSettings || GameService.getDefaultSettings(settingsSchema);
             let isResolved = false;
@@ -103,7 +111,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
                 onAccept: () => {
                     if (!isResolved) {
                         isResolved = true;
-                        resolve(currentSettings);
+                        resolve(mapSettings(currentSettings));
                     }
                 },
                 onCancel: () => {

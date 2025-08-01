@@ -11,12 +11,7 @@ class TimelineRepository implements Repository<TimelineEntriesModel> {
     }
 
     async getByIDAsync(id: number): Promise<TimelineEntriesModel | null> {
-        const model = await this.baseRepository.getById(id);
-        if (!model)
-            return null;
-        
-        model.Changes = JSON.parse(model.Changes);
-        return model;
+        return this.baseRepository.getById(id);
     }
 
     async getAllAsync(): Promise<TimelineEntriesModel[]> {
@@ -24,8 +19,6 @@ class TimelineRepository implements Repository<TimelineEntriesModel> {
     }
 
     async saveAsync(model: TimelineEntriesSaveModel): Promise<TimelineEntriesModel> {
-        // Make sure the changes are serialized
-        model.Changes = JSON.stringify(model.Changes);
         return this.baseRepository.Save(model);
     }
 

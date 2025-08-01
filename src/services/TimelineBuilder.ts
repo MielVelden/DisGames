@@ -88,7 +88,7 @@ class TimelineBuilder {
             TimelineType: timelineType,
             UserId: user.Id!,
             ServerId: server.Id!,
-            Changes: changes
+            ChangesJSON: changes
         };
 
         context.event.addTimelineEntry(timelineEntry);

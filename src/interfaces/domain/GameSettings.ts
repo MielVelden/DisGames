@@ -1,5 +1,6 @@
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { GameSettingsEnum } from "../enums/games/GameSettingsEnum";
+import { DifficultyEnum } from "../enums/games/DifficultyEnum";
 
 export enum GameSettingType {
     BOOLEAN = "boolean",
@@ -42,4 +43,10 @@ export interface GameSettingsValidationResult {
     isValid: boolean;
     errors: MultiLingualString[];
     values: GameSettingsValues;
+} 
+
+// Specific settings for each game type
+export interface Games_Settings {
+  difficulty?: DifficultyEnum;
+  resetOnFail?: boolean;
 } 

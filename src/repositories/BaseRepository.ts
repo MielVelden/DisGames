@@ -78,6 +78,71 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return deserialized;
   }
 
+  private serializeJsonFields(entity: any): any {
+    if (!entity || typeof entity !== 'object') 
+      return entity;
+    
+    const serialized = { ...entity };
+    
+    // First, handle non-JSON fields that have JSON equivalents
+    const jsonFieldsToProcess = new Map<string, any>();
+    
+    for (const [key, value] of Object.entries(serialized)) {
+      if (!SchemaUtils.isJsonField(key)) {
+        const jsonFieldName = key + 'JSON';
+        // If there's a corresponding JSON field, use the non-JSON field as the source
+        if (serialized[jsonFieldName] !== undefined) {
+          jsonFieldsToProcess.set(jsonFieldName, value);
+          delete serialized[key]; // Remove the non-JSON field
+        }
+      }
+    }
+    
+    // Process JSON fields - serialize only from their non-JSON counterparts or if they're objects
+    for (const [key, value] of Object.entries(serialized)) {
+      if (SchemaUtils.isJsonField(key)) {
+        if (value === null) {
+          delete serialized[key];
+        } else if (jsonFieldsToProcess.has(key)) {
+          // Use the value from the non-JSON field (guaranteed to be an object)
+          serialized[key] = JSON.stringify(jsonFieldsToProcess.get(key));
+        } else if (value !== undefined && typeof value !== 'string') {
+          // Only serialize if it's not already a string
+          serialized[key] = JSON.stringify(value);
+        }
+        // If it's already a string, keep it as-is (already serialized)
+      }
+    }
+    
+    // Remove null values from all fields
+    for (const [key, value] of Object.entries(serialized)) {
+      if (value === null) {
+        delete serialized[key];
+      }
+    }
+    
+    return serialized;
+  }
+
+  private deserializeJsonFields(entity: any): any {
+    if (!entity || typeof entity !== 'object') return entity;
+    
+    const deserialized = { ...entity };
+    
+    for (const [key, value] of Object.entries(deserialized)) {
+      if (typeof value === 'string' && SchemaUtils.isJsonField(key)) {
+        try {
+          const parsedValue = JSON.parse(value);
+          deserialized[SchemaUtils.removeJsonSuffix(key)] = parsedValue;
+        } catch (error) {
+          // Silently continue if parsing fails
+        }
+      }
+    }
+    
+    return deserialized;
+  }
+
   private transformDatabaseKeys(entity: any): any {
     if (!entity || typeof entity !== 'object') return entity;
     
@@ -164,8 +229,12 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     if (!results) 
       return [];
     
-    // Deserialize MultiLingualString fields
-    const deserializedResults = results.map((result: any) => this.deserializeMultiLingualStrings(result));
+    // Deserialize MultiLingualString and JSON fields
+    const deserializedResults = results.map((result: any) => {
+      let deserialized = this.deserializeMultiLingualStrings(result);
+      deserialized = this.deserializeJsonFields(deserialized);
+      return deserialized;
+    });
     
     // Cache LIMIT 1 query results
     if (wasLimit1 && deserializedResults.length > 0) {
@@ -189,17 +258,22 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     if (!results || !results[0]) 
       return [];
     
-    // Transform database keys to PascalCase and deserialize MultiLingualString fields
+    // Transform database keys to PascalCase and deserialize MultiLingualString and JSON fields
     const transformedResults = results[0]
       .map((result: any) => this.transformDatabaseKeys(result))
-      .map((result: any) => this.deserializeMultiLingualStrings(result));
+      .map((result: any) => {
+        let deserialized = this.deserializeMultiLingualStrings(result);
+        deserialized = this.deserializeJsonFields(deserialized);
+        return deserialized;
+      });
     
     return transformedResults as Model[];
   }
 
   public async Save(entity: Partial<SaveModel>): Promise<Model> {
-    // Serialize MultiLingualString fields before saving
-    const serializedEntity = this.serializeMultiLingualStrings(entity);
+    // Serialize MultiLingualString and JSON fields before saving
+    let serializedEntity = this.serializeMultiLingualStrings(entity);
+    serializedEntity = this.serializeJsonFields(serializedEntity);
     
     if (serializedEntity.Id) {
       // UPDATE - invalidate cache for this ID and all query cache
@@ -212,7 +286,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
         .map(key => `${key} = ?`)
         .join(', ');
 
-      const query = `UPDATE ${this.table} SET ${setClause} WHERE id = ?`;
+      const query = `UPDATE ${this.table} SET ${setClause} WHERE Id = ?`;
       const params = [...Object.values(serializedEntity).filter((_, index) => Object.keys(serializedEntity)[index] !== 'Id'), serializedEntity.Id];
 
       // Run the update
@@ -259,7 +333,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     this.cacheManager.invalidateCache(id);
     this.cacheManager.invalidateAllQueryCache();
     
-    const query = `DELETE FROM ${this.table} WHERE id = ?`;
+    const query = `DELETE FROM ${this.table} WHERE Id = ?`;
     const params = [id];
     await runQueryAsync(query, params);
   }

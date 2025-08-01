@@ -10,7 +10,9 @@ export class SchemaUtils {
   }
 
   static formatColumnName(columnName: string): string {
-    return SchemaUtils.removeMultiLingualStringSuffix(columnName);
+    let formattedName = SchemaUtils.removeMultiLingualStringSuffix(columnName);
+    formattedName = SchemaUtils.removeJsonSuffix(formattedName);
+    return formattedName;
   }
 
   static isMultiLingualString(columnName: string): boolean {
@@ -21,6 +23,14 @@ export class SchemaUtils {
     return columnName.replace('MLS', '').replace('mls', '');
   }
 
+  static isJsonField(columnName: string): boolean {
+    return columnName.toLowerCase().endsWith('json');
+  }
+
+  static removeJsonSuffix(columnName: string): string {
+    return columnName.replace(/JSON$/i, '').replace(/json$/i, '');
+  }
+
   static convertToEnumName(procedureName: string): string {
     return procedureName
       .replace(/[^a-zA-Z0-9_]/g, '_')  // Replace special chars with underscores
@@ -29,7 +39,7 @@ export class SchemaUtils {
       .join('');
   }
 
-  static mapMySQLTypeToTypescript(columnName: string, mysqlType: string, enumMapping: Record<string, string>): string {
+  static mapMySQLTypeToTypescript(columnName: string, mysqlType: string, enumMapping: Record<string, string>, tableName?: string): string {
     const lowercaseName = columnName.toLowerCase();
 
     if (enumMapping[lowercaseName])
@@ -37,6 +47,12 @@ export class SchemaUtils {
 
     if (SchemaUtils.isMultiLingualString(columnName))
       return 'MultiLingualString';
+
+    if (SchemaUtils.isJsonField(columnName) && tableName) {
+      // Generate interface name: TableName_ColumnName
+      const interfaceName = `${SchemaUtils.capitalize(tableName)}_${SchemaUtils.removeJsonSuffix(columnName)}`;
+      return interfaceName;
+    }
 
     switch (mysqlType.toLowerCase()) {
       case 'int':

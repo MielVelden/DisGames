@@ -13,7 +13,7 @@ import {
     GameSettingsContainerConfig, 
     GameSettingsHandler, 
     GameSettingsDisplayConfig 
-} from "../interfaces/application/GameSettingsContainer";
+} from "../interfaces/application/GameSetting";
 import ComponentService from "../services/ComponentService";
 import { MultiLingualString } from "./i18n/MultiLangualString";
 import { i18n } from "./i18n/i18n";
