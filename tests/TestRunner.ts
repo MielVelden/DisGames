@@ -68,7 +68,7 @@ export class TestRunner {
             for (const suite of this.suites) {
                 Logger.logTest(`\n📦 Running suite: ${suite.name}`);
                 if (suite.description) {
-                    Logger.logTest(`   ${suite.description}`);
+                    Logger.logTest(`${suite.description}`);
                 }
 
                 const suiteResults = await this.runSuiteAsync(suite);

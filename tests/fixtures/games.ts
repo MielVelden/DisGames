@@ -1,5 +1,10 @@
 import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableInterfaces';
+import { GameSettingType } from '../../src/interfaces/domain';
+import { TableEnum } from '../../src/interfaces/enums';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
+import Logger from '../../src/utils/Logger';
+import TestDatabase from '../config/TestDatabase';
+import { DatabaseTestHelper } from '../helpers/DatabaseTestHelper';
 import { TEST_SERVER_IDS, TEST_CHANNEL_IDS } from './servers';
 
 export const TEST_GAMES: GamesSaveModel[] = [
@@ -9,8 +14,7 @@ export const TEST_GAMES: GamesSaveModel[] = [
         GameTypeEnum: GameTypeEnum.ANAGRAM,
         Answer: 'test',
         SettingsJSON: {
-            difficulty: 1, // medium
-            timeLimit: 60
+            difficulty: 'medium',
         } as any
     },
     {
@@ -50,7 +54,7 @@ export function getTestGame(gameType: GameTypeEnum): GamesModel | undefined {
     return MOCK_GAMES.find(game => game.GameTypeEnum === gameType);
 }
 
-export function createTestGame(overrides: Partial<GamesSaveModel> = {}): GamesSaveModel {
+export async function createTestGameAsync(overrides: Partial<GamesSaveModel> = {}, skipDatabaseInsert: boolean = false): Promise<GamesSaveModel> {
     const defaultGame = TEST_GAMES[0];
     const game = {
         ...defaultGame,
@@ -63,7 +67,12 @@ export function createTestGame(overrides: Partial<GamesSaveModel> = {}): GamesSa
     if (!overrides.Answer) {
         delete game.Answer;
     }
-    
+
+    // Save game to database
+    if (!skipDatabaseInsert)
+        await TestDatabase.insertAsync(TableEnum.GAMES, game);
+
+    Logger.logInfo(`Created test game: ${game.GameTypeEnum} in server: ${game.ServerId}`);
     return game;
 }
 
@@ -100,11 +109,11 @@ export const GAME_TEST_SETTINGS: Partial<Record<GameTypeEnum, any>> = {
     }
 };
 
-export function createGameWithCorrectAnswer(gameType: GameTypeEnum): GamesSaveModel {
+export async function createGameWithCorrectAnswerAsync(gameType: GameTypeEnum): Promise<GamesSaveModel> {
     const answers = GAME_TEST_ANSWERS[gameType] || ['test'];
     const settings = GAME_TEST_SETTINGS[gameType] || {};
     
-    return createTestGame({
+    return await createTestGameAsync({
         GameTypeEnum: gameType,
         Answer: answers[0],
         SettingsJSON: settings as any
@@ -117,6 +126,6 @@ export default {
     GAME_TEST_ANSWERS,
     GAME_TEST_SETTINGS,
     getTestGame,
-    createTestGame,
-    createGameWithCorrectAnswer
+    createTestGame: createTestGameAsync,
+    createGameWithCorrectAnswer: createGameWithCorrectAnswerAsync
 };

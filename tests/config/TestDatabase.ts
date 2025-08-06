@@ -1,6 +1,9 @@
 import * as mysql from 'mysql2/promise';
 import TestConfig from './TestConfig';
 import Logger from '../../src/utils/Logger';
+import { DatabaseHelper } from '../../src/utils/database/DatabaseHelper';
+import { TableEnum } from '../../src/interfaces/enums';
+import { getTableName } from '../helpers/TableNameMapping';
 
 export class TestDatabase {
     private static _instance: TestDatabase;
@@ -87,13 +90,79 @@ export class TestDatabase {
         }
 
         try {
-            Logger.logInfo(`Test query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
+            Logger.logInfo(`Query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
             const [rows] = await this._connection.query(query, params);
-            return rows as any[];
+            
+            // For non-SELECT queries (INSERT, UPDATE, DELETE), return empty array
+            const trimmedQuery = query.trim().toUpperCase();
+            if (!trimmedQuery.startsWith('SELECT') && !trimmedQuery.startsWith('CALL')) {
+                return [];
+            }
+            
+            const results = rows as any[];
+            
+            // Process results to handle MultiLingualString and JSON fields like BaseRepository
+            return DatabaseHelper.processResultsFromDatabase(results);
         } catch (error) {
             Logger.logError('Test database query failed', error as Error);
             throw error;
         }
+    }
+
+    public async runRawQueryAsync(query: string, params?: any[]): Promise<any[]> {
+        if (!this._connection) {
+            throw new Error('Database connection not established');
+        }
+
+        try {
+            Logger.logInfo(`Raw Query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
+            const [rows] = await this._connection.query(query, params);
+            return rows as any[];
+        } catch (error) {
+            Logger.logError('Test database raw query failed', error as Error);
+            throw error;
+        }
+    }
+
+    public async insertAsync(tableName: TableEnum, data: any): Promise<any> {
+        const processedData = DatabaseHelper.processEntityForDatabase(data);
+        const keys = Object.keys(processedData).join(', ');
+        const values = Object.values(processedData).map(() => '?').join(', ');
+        const query = `INSERT INTO ${getTableName(tableName)} (${keys}) VALUES (${values})`;
+        const params = Object.values(processedData);
+        
+        const result = await this.runRawQueryAsync(query, params);
+        
+        // Return the inserted record
+        //const selectQuery = `SELECT * FROM ${tableName} ORDER BY Id DESC LIMIT 1`;
+        //const result = await this.runQueryAsync(selectQuery);
+        return result?.[0] || null;
+    }
+
+    public async updateAsync(tableName: TableEnum, id: number, data: any): Promise<any> {
+        const processedData = DatabaseHelper.processEntityForDatabase(data);
+        const setClause = Object.keys(processedData)
+            .filter(key => key !== 'Id')
+            .map(key => `${key} = ?`)
+            .join(', ');
+
+        const query = `UPDATE ${getTableName(tableName)} SET ${setClause} WHERE Id = ?`;
+        const params = [...Object.values(processedData).filter((_, index) => Object.keys(processedData)[index] !== 'Id'), id];
+
+        await this.runRawQueryAsync(query, params);
+        
+        // Return the updated record
+        const selectQuery = `SELECT * FROM ${getTableName(tableName)} WHERE Id = ?`;
+        const result = await this.runQueryAsync(selectQuery, [id]);
+        return result?.[0] || null;
+    }
+
+    public async callStoredProcedureAsync(procedureName: string, params: any[] = []): Promise<any[]> {
+        const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
+        const results = await this.runRawQueryAsync(query, params);
+        
+        // Process stored procedure results
+        return DatabaseHelper.processStoredProcedureResults(results);
     }
 
     public getConnection(): mysql.Connection {

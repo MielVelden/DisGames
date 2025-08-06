@@ -1,4 +1,8 @@
 import { UsersModel, UsersSaveModel } from '../../src/interfaces/database/TableInterfaces';
+import Logger from '../../src/utils/Logger';
+import { DatabaseTestHelper } from '../helpers/DatabaseTestHelper';
+import { TableEnum } from '../../src/interfaces/enums';
+import TestDatabase from '../config/TestDatabase';
 
 export const TEST_USERS: UsersSaveModel[] = [
     {
@@ -29,13 +33,19 @@ export function getTestUser(userId: string): UsersModel | undefined {
     return MOCK_USERS.find(user => user.UserId === userId);
 }
 
-export function createTestUser(overrides: Partial<UsersSaveModel> = {}): UsersSaveModel {
+export async function createTestUserAsync(overrides: Partial<UsersSaveModel> = {}): Promise<UsersSaveModel> {
     const defaultUser = TEST_USERS[0];
-    return {
+    const user: UsersSaveModel = {
         ...defaultUser,
         ...overrides,
         UserId: overrides.UserId || `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
+
+    // Save user to database
+    await TestDatabase.insertAsync(TableEnum.USERS, user);
+
+    Logger.logInfo(`Created test user: ${user.UserId}`);
+    return user;
 }
 
 export const TEST_USER_IDS = {
@@ -50,5 +60,5 @@ export default {
     MOCK_USERS,
     TEST_USER_IDS,
     getTestUser,
-    createTestUser
+    createTestUserAsync
 };

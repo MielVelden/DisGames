@@ -9,6 +9,7 @@ import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/ap
 import { MultiLingualString } from "./i18n/MultiLangualString";
 import { LanguageCommandOptionTranslations } from "./i18n/i18n";
 import Logger from "./Logger";
+import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 
 const commands: Command[] = [];
 
@@ -36,6 +37,7 @@ export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
 }
 
 export function getCommandConfig(commandName: string): Command {
+    commandName = commandName.toUpperCase();
     const command = commands.find(c => c.name === commandName);
     if (!command)
         throw new Error(`Command ${commandName} not found!`);

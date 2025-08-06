@@ -1,12 +1,14 @@
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
-import { InteractionEvent } from '../../src/interfaces/application/Event';
 import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import GameService from '../../src/services/GameService';
 import GameRepository from '../../src/repositories/GameRepository';
 import { TestDiscordEventBuilder, MockDiscordEvent } from '../builders/TestDiscordEventBuilder';
 import { TestInputSimulator } from '../builders/TestInputSimulator';
-import { DatabaseTestHelper } from './DatabaseTestHelper';
 import Logger from '../../src/utils/Logger';
+import { LanguageEnum, TableEnum } from '../../src/interfaces/enums';
+import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
+import TestDatabase from '../config/TestDatabase';
+import { createTestServerAsync } from '../fixtures/servers';
 
 export interface GameFlowTestConfig {
     gameType: GameTypeEnum;
@@ -46,11 +48,13 @@ export class GameFlowTestHelper {
     public async startGameAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
             Logger.logInfo(`[TEST] Starting game flow test for ${GameTypeEnum[config.gameType]}`);
+            // Arrange
+            const testServer = await createTestServerAsync();
 
             // Setup event builder with test data
             this.eventBuilder
                 .withUser({ id: config.userId })
-                .withServer({ id: config.serverId })
+                .withServer({ id: testServer.ServerId })
                 .withChannel({ id: config.channelId });
 
             if (config.inputSimulator) {
@@ -58,21 +62,15 @@ export class GameFlowTestHelper {
             }
 
             // Create slash command event for starting the game
-            const startEvent = this.eventBuilder.buildSlashCommandEvent('games', {
+            const startEvent = this.eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES, {
                 game: GameTypeEnum[config.gameType].toLowerCase()
             });
 
-            // Ensure the server exists before creating the game
-            await DatabaseTestHelper.insertTestData('servers', [{
-                ServerId: config.serverId,
-                LanguageEnum: 2, // NL
-                Points: 0
-            }]);
 
             // Create game save model
             const gameSaveModel: GamesSaveModel = {
                 ChannelId: config.channelId,
-                ServerId: config.serverId,
+                ServerId: testServer.ServerId,
                 GameTypeEnum: config.gameType,
                 SettingsJSON: config.settings || {}
             };

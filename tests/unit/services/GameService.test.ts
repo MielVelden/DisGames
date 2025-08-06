@@ -3,11 +3,14 @@ import GameService from '../../../src/services/GameService';
 import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnum';
 import { TestDiscordEventBuilder } from '../../builders/TestDiscordEventBuilder';
 import { TestInputSimulator } from '../../builders/TestInputSimulator';
-import { createTestGame } from '../../fixtures/games';
-import { TEST_SERVER_IDS, TEST_CHANNEL_IDS } from '../../fixtures/servers';
-import { TEST_USER_IDS } from '../../fixtures/users';
+import { createTestGameAsync } from '../../fixtures/games';
+import { TEST_SERVER_IDS, TEST_CHANNEL_IDS, createTestServerAsync } from '../../fixtures/servers';
+import { createTestUserAsync, TEST_USER_IDS } from '../../fixtures/users';
 import { DatabaseTestHelper } from '../../helpers/DatabaseTestHelper';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
+import { LanguageEnum, TableEnum } from '../../../src/interfaces/enums';
+import { GameSettingsValues } from '../../../src/interfaces/domain';
+import { CommandEnum } from '../../../src/interfaces/enums/commands/CommandEnum';
 
 export default function registerGameServiceTests(runner: TestRunner): void {
     const suite: TestSuite = {
@@ -35,26 +38,23 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 name: 'should create anagram game successfully',
                 testFunction: async () => {
                     // Arrange
-                    await DatabaseTestHelper.insertTestData('servers', [{
-                        ServerId: TEST_SERVER_IDS.MAIN_SERVER,
-                        LanguageEnum: 2, // NL
-                        Points: 0
-                    }]);
+                    const testServer = await createTestServerAsync();
+                    const testUser = await createTestUserAsync();
                     
                     const eventBuilder = TestDiscordEventBuilder.create()
-                        .withUser({ id: TEST_USER_IDS.PLAYER1 })
-                        .withServer({ id: TEST_SERVER_IDS.MAIN_SERVER })
+                        .withUser({ id: testUser.UserId })
+                        .withServer({ id: testServer.ServerId })
                         .withChannel({ id: TEST_CHANNEL_IDS.MAIN_CHANNEL });
                     
-                    const event = eventBuilder.buildSlashCommandEvent('games', {
+                    const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES, {
                         game: 'anagram'
                     });
                     
-                    const gameData = createTestGame({
+                    const gameData = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.ANAGRAM,
                         ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
-                        ServerId: TEST_SERVER_IDS.MAIN_SERVER
-                    });
+                        ServerId: testServer.ServerId
+                    }, true);
                     
                     // Act
                     const result = await GameService.saveAsync(gameData, event);
@@ -63,7 +63,7 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     AssertionHelpers.assertGameExists(result, 'Game should be created');
                     AssertionHelpers.assertEqual(result.GameTypeEnum, GameTypeEnum.ANAGRAM, 'Game type should be ANAGRAM');
                     AssertionHelpers.assertEqual(result.ChannelId, TEST_CHANNEL_IDS.MAIN_CHANNEL, 'Channel ID should match');
-                    AssertionHelpers.assertEqual(result.ServerId, TEST_SERVER_IDS.MAIN_SERVER, 'Server ID should match');
+                    AssertionHelpers.assertEqual(result.ServerId, testServer.ServerId, 'Server ID should match');
                     AssertionHelpers.assertNotNull(result.Answer, 'Game should have an answer');
                 }
             },
@@ -90,14 +90,12 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     const anagramGame = GameService.getGameByType(GameTypeEnum.ANAGRAM);
                     AssertionHelpers.assertNotNull(anagramGame, 'Anagram game should exist');
                     
-                    const validSettings = {
+                    const validSettings: GameSettingsValues = {
                         difficulty: 'medium',
-                        timeLimit: 60
                     };
                     
-                    const invalidSettings = {
+                    const invalidSettings: GameSettingsValues = {
                         difficulty: 'invalid',
-                        timeLimit: -1
                     };
                     
                     // Act & Assert
@@ -115,36 +113,34 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 name: 'should handle duplicate game in channel',
                 testFunction: async () => {
                     // Arrange
-                    await DatabaseTestHelper.insertTestData('servers', [{
-                        ServerId: TEST_SERVER_IDS.MAIN_SERVER,
-                        LanguageEnum: 2, // NL
-                        Points: 0
-                    }]);
-                    
+                    const testServer = await createTestServerAsync();
+                    const testUser = await createTestUserAsync();
+
                     const eventBuilder = TestDiscordEventBuilder.create()
-                        .withUser({ id: TEST_USER_IDS.PLAYER1 })
-                        .withServer({ id: TEST_SERVER_IDS.MAIN_SERVER })
+                        .withUser({ id: testUser.UserId })
+                        .withServer({ id: testServer.ServerId })
                         .withChannel({ id: TEST_CHANNEL_IDS.MAIN_CHANNEL });
                     
-                    const event = eventBuilder.buildSlashCommandEvent('games');
+                    const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
                     
-                    const gameData1 = createTestGame({
+                    const gameData1 = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.ANAGRAM,
                         ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
-                        ServerId: TEST_SERVER_IDS.MAIN_SERVER
-                    });
+                        ServerId: testServer.ServerId
+                    }, true);
                     
-                    const gameData2 = createTestGame({
+                    const gameData2 = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.NUMBER_GUESS,
                         ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
-                        ServerId: TEST_SERVER_IDS.MAIN_SERVER
-                    });
+                        ServerId: testServer.ServerId
+                    }, true);
                     
                     // Act
                     const firstGame = await GameService.saveAsync(gameData1, event);
-                    AssertionHelpers.assertGameExists(firstGame, 'First game should be created');
                     
                     // Assert - Second game should throw error about duplicate
+                    AssertionHelpers.assertGameExists(firstGame, 'First game should be created');
+                    
                     await AssertionHelpers.assertThrowsAsync(
                         () => GameService.saveAsync(gameData2, event),
                         undefined,

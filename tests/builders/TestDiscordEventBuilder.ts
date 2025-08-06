@@ -20,6 +20,7 @@ import { TestChannel } from '../interfaces/ChannelTestInterface';
 import { TestMessage } from '../interfaces/MessageTestInterface';
 import { TestServer } from '../interfaces/ServerTestInterface';
 import { TestUser } from '../interfaces/UserTestInterface';
+import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 
 
 export class MockDiscordEvent implements InteractionEvent {
@@ -225,7 +226,7 @@ export class TestDiscordEventBuilder {
         return this;
     }
 
-    public buildSlashCommandEvent(commandName: string, options: Record<string, any> = {}): MockDiscordEvent {
+    public buildSlashCommandEvent(commandName: CommandEnum, options: Record<string, any> = {}): MockDiscordEvent {
         const mockCommand: Command = {
             name: commandName,
             description: new MultiLingualString({ 

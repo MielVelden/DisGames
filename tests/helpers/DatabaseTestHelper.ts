@@ -86,21 +86,6 @@ export class DatabaseTestHelper {
             }
         }
     }
-
-    public static async insertTestData(table: string, data: any[]): Promise<void> {
-        if (data.length === 0) return;
-
-        const keys = Object.keys(data[0]);
-        const placeholders = keys.map(() => '?').join(', ');
-        const query = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${placeholders})`;
-
-        for (const record of data) {
-            const values = keys.map(key => record[key]);
-            await TestDatabase.runQueryAsync(query, values);
-        }
-
-        Logger.logInfo(`Inserted ${data.length} test records into ${table}`);
-    }
 }
 
 export default DatabaseTestHelper;

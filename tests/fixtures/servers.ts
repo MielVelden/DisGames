@@ -1,5 +1,9 @@
 import { ServersModel, ServersSaveModel } from '../../src/interfaces/database/TableInterfaces';
+import { TableEnum } from '../../src/interfaces/enums';
 import { LanguageEnum } from '../../src/interfaces/enums/database/LanguageEnum';
+import Logger from '../../src/utils/Logger';
+import TestDatabase from '../config/TestDatabase';
+import DatabaseTestHelper from '../helpers/DatabaseTestHelper';
 
 export const TEST_SERVERS: ServersSaveModel[] = [
     {
@@ -30,13 +34,19 @@ export function getTestServer(serverId: string): ServersModel | undefined {
     return MOCK_SERVERS.find(server => server.ServerId === serverId);
 }
 
-export function createTestServer(overrides: Partial<ServersSaveModel> = {}): ServersSaveModel {
+export async function createTestServerAsync(overrides: Partial<ServersSaveModel> = {}): Promise<ServersSaveModel> {
     const defaultServer = TEST_SERVERS[0];
-    return {
+    const server: ServersSaveModel = {
         ...defaultServer,
         ...overrides,
         ServerId: overrides.ServerId || `test_server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
+
+    // Save server to database
+    await TestDatabase.insertAsync(TableEnum.SERVERS, server);
+
+    Logger.logInfo(`Created test server: ${server.ServerId}`);
+    return server;
 }
 
 export const TEST_SERVER_IDS = {
@@ -57,5 +67,5 @@ export default {
     TEST_SERVER_IDS,
     TEST_CHANNEL_IDS,
     getTestServer,
-    createTestServer
+    createTestServerAsync
 };

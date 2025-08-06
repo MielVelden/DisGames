@@ -1,7 +1,6 @@
 import { TableEnum, StoredProcedureEnum } from "../interfaces/enums/index";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
-import { MultiLingualString } from "../utils/i18n/MultiLangualString";
-import { SchemaUtils } from "../utils/database/SchemaUtils";
+import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 
 type Condition<T> = (x: T) => any;
@@ -12,13 +11,15 @@ interface BaseEntity {
 }
 
 class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
-  private table: string;
-  private query: string = '';
-  private params: any[] = [];
-  private cacheManager: CacheManager<Model>;
-  private hasLimit1: boolean = false;
+  protected tableEnum: TableEnum;
+  protected table: string;
+  protected query: string = '';
+  protected params: any[] = [];
+  protected cacheManager: CacheManager<Model>;
+  protected hasLimit1: boolean = false;
 
   constructor(table: TableEnum) {
+    this.tableEnum = table;
     this.table = getTableName(table);
     this.cacheManager = new CacheManager<Model>(this.table);
   }
@@ -42,120 +43,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return result;
   }
 
-  private serializeMultiLingualStrings(entity: any): any {
-    if (!entity || typeof entity !== 'object') 
-      return entity;
-    
-    const serialized = { ...entity };
-    
-    for (const [key, value] of Object.entries(serialized)) {
-      if (value instanceof MultiLingualString) {
-        serialized[key] = JSON.stringify(value.toJSON());
-      }
-    }
-    
-    return serialized;
-  }
 
-  private deserializeMultiLingualStrings(entity: any): any {
-    if (!entity || typeof entity !== 'object') return entity;
-    
-    const deserialized = { ...entity };
-    
-    for (const [key, value] of Object.entries(deserialized)) {
-      if (typeof value === 'string' && SchemaUtils.isMultiLingualString(key)) {
-        try {
-          const multiLingualString = MultiLingualString.fromJSON(value);
-          if (multiLingualString) {
-            deserialized[SchemaUtils.removeMultiLingualStringSuffix(key)] = multiLingualString;
-          }
-        } catch (error) {
-          // Silently continue if parsing fails
-        }
-      }
-    }
-    
-    return deserialized;
-  }
-
-  private serializeJsonFields(entity: any): any {
-    if (!entity || typeof entity !== 'object') 
-      return entity;
-    
-    const serialized = { ...entity };
-    
-    // First, handle non-JSON fields that have JSON equivalents
-    const jsonFieldsToProcess = new Map<string, any>();
-    
-    for (const [key, value] of Object.entries(serialized)) {
-      if (!SchemaUtils.isJsonField(key)) {
-        const jsonFieldName = key + 'JSON';
-        // If there's a corresponding JSON field, use the non-JSON field as the source
-        if (serialized[jsonFieldName] !== undefined) {
-          jsonFieldsToProcess.set(jsonFieldName, value);
-          delete serialized[key]; // Remove the non-JSON field
-        }
-      }
-    }
-    
-    // Process JSON fields - serialize only from their non-JSON counterparts or if they're objects
-    for (const [key, value] of Object.entries(serialized)) {
-      if (SchemaUtils.isJsonField(key)) {
-        if (value === null) {
-          delete serialized[key];
-        } else if (jsonFieldsToProcess.has(key)) {
-          // Use the value from the non-JSON field (guaranteed to be an object)
-          serialized[key] = JSON.stringify(jsonFieldsToProcess.get(key));
-        } else if (value !== undefined && typeof value !== 'string') {
-          // Only serialize if it's not already a string
-          serialized[key] = JSON.stringify(value);
-        }
-        // If it's already a string, keep it as-is (already serialized)
-      }
-    }
-    
-    // Remove null values from all fields
-    for (const [key, value] of Object.entries(serialized)) {
-      if (value === null) {
-        delete serialized[key];
-      }
-    }
-    
-    return serialized;
-  }
-
-  private deserializeJsonFields(entity: any): any {
-    if (!entity || typeof entity !== 'object') return entity;
-    
-    const deserialized = { ...entity };
-    
-    for (const [key, value] of Object.entries(deserialized)) {
-      if (typeof value === 'string' && SchemaUtils.isJsonField(key)) {
-        try {
-          const parsedValue = JSON.parse(value);
-          deserialized[SchemaUtils.removeJsonSuffix(key)] = parsedValue;
-        } catch (error) {
-          // Silently continue if parsing fails
-        }
-      }
-    }
-    
-    return deserialized;
-  }
-
-  private transformDatabaseKeys(entity: any): any {
-    if (!entity || typeof entity !== 'object') return entity;
-    
-    const transformed: any = {};
-    
-    for (const [key, value] of Object.entries(entity)) {
-      // Transform database field names (camelCase/lowercase) to PascalCase
-      const pascalCaseKey = key.charAt(0).toUpperCase() + key.slice(1);
-      transformed[pascalCaseKey] = value;
-    }
-    
-    return transformed;
-  }
 
   public Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel> {
     this.params = [];
@@ -230,11 +118,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       return [];
     
     // Deserialize MultiLingualString and JSON fields
-    const deserializedResults = results.map((result: any) => {
-      let deserialized = this.deserializeMultiLingualStrings(result);
-      deserialized = this.deserializeJsonFields(deserialized);
-      return deserialized;
-    });
+    const deserializedResults = DatabaseHelper.processResultsFromDatabase(results);
     
     // Cache LIMIT 1 query results
     if (wasLimit1 && deserializedResults.length > 0) {
@@ -259,21 +143,14 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       return [];
     
     // Transform database keys to PascalCase and deserialize MultiLingualString and JSON fields
-    const transformedResults = results[0]
-      .map((result: any) => this.transformDatabaseKeys(result))
-      .map((result: any) => {
-        let deserialized = this.deserializeMultiLingualStrings(result);
-        deserialized = this.deserializeJsonFields(deserialized);
-        return deserialized;
-      });
+    const transformedResults = DatabaseHelper.processStoredProcedureResults(results);
     
     return transformedResults as Model[];
   }
 
   public async Save(entity: Partial<SaveModel>): Promise<Model> {
     // Serialize MultiLingualString and JSON fields before saving
-    let serializedEntity = this.serializeMultiLingualStrings(entity);
-    serializedEntity = this.serializeJsonFields(serializedEntity);
+    const serializedEntity = DatabaseHelper.processEntityForDatabase(entity);
     
     if (serializedEntity.Id) {
       // UPDATE - invalidate cache for this ID and all query cache

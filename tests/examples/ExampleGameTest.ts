@@ -1,14 +1,9 @@
-/**
- * Voorbeeld van hoe je de testarchitectuur kunt gebruiken
- * Dit bestand toont verschillende test patterns en best practices
- */
-
 import TestRunner, { TestSuite } from '../TestRunner';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import { GameFlowTestHelper } from '../helpers/GameFlowTestHelper';
 import { TestDiscordEventBuilder } from '../builders/TestDiscordEventBuilder';
 import { TestInputSimulator } from '../builders/TestInputSimulator';
-import { createTestGame, GAME_TEST_ANSWERS } from '../fixtures/games';
+import { createTestGameAsync, GAME_TEST_ANSWERS } from '../fixtures/games';
 import { TEST_SERVER_IDS, TEST_CHANNEL_IDS } from '../fixtures/servers';
 import { TEST_USER_IDS } from '../fixtures/users';
 import { DatabaseTestHelper } from '../helpers/DatabaseTestHelper';
@@ -21,6 +16,8 @@ import {
 } from '../helpers/AssertionHelpers';
 import { TestDatabase } from '../config/TestDatabase';
 import Logger from '../../src/utils/Logger';
+import { LanguageEnum, TableEnum } from '../../src/interfaces/enums';
+import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 
 export default function registerExampleTests(runner: TestRunner): void {
     const suite: TestSuite = {
@@ -56,11 +53,11 @@ export default function registerExampleTests(runner: TestRunner): void {
                         .withServer({ id: TEST_SERVER_IDS.MAIN_SERVER, name: 'Test Server' })
                         .withChannel({ id: TEST_CHANNEL_IDS.MAIN_CHANNEL, name: 'test-channel' });
                     
-                    const event = eventBuilder.buildSlashCommandEvent('games', {
+                    const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES, {
                         game: 'anagram'
                     });
                     
-                    const gameData = createTestGame({
+                    const gameData = createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.ANAGRAM,
                         ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
                         ServerId: TEST_SERVER_IDS.MAIN_SERVER
@@ -138,13 +135,13 @@ export default function registerExampleTests(runner: TestRunner): void {
                     const testData = [
                         {
                             ServerId: 'transaction_test_server',
-                            LanguageEnum: 1,
+                            LanguageEnum: LanguageEnum.NL,
                             Points: 100
                         }
                     ];
                     
                     // 2. Insert test data (wordt automatisch gerollback na test)
-                    await DatabaseTestHelper.insertTestData('servers', testData);
+                    await TestDatabase.getInstance().insertAsync(TableEnum.SERVERS, testData[0]);
                     await Logger.logTest('Test data inserted');
                     
                     // 3. Verifieer dat data bestaat
@@ -258,7 +255,7 @@ export async function runStandaloneExample(): Promise<void> {
         const eventBuilder = TestDiscordEventBuilder.create()
             .withUser({ id: 'standalone_user', username: 'StandaloneTest' });
         
-        const event = eventBuilder.buildSlashCommandEvent('test');
+        const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
         await Logger.logTest('✅ Standalone test succesvol');
         
         // Cleanup

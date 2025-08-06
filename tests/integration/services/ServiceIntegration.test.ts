@@ -6,10 +6,12 @@ import GameService from '../../../src/services/GameService';
 import ServerService from '../../../src/services/ServerService';
 import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnum';
 import { LanguageEnum } from '../../../src/interfaces/enums/database/LanguageEnum';
-import { createTestGame } from '../../fixtures/games';
-import { createTestServer } from '../../fixtures/servers';
-import { createTestUser } from '../../fixtures/users';
+import { createTestGameAsync } from '../../fixtures/games';
+import { createTestServerAsync } from '../../fixtures/servers';
+import { createTestUserAsync } from '../../fixtures/users';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
+import { TableEnum } from '../../../src/interfaces/enums';
+import { CommandEnum } from '../../../src/interfaces/enums/commands/CommandEnum';
 
 export default function registerServiceIntegrationTests(runner: TestRunner): void {
     const suite: TestSuite = {
@@ -34,15 +36,8 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                 name: 'should integrate GameService with Discord events',
                 testFunction: async () => {
                     // Arrange
-                    const testServer = createTestServer({
-                        LanguageEnum: LanguageEnum.NL
-                    });
-                    
-                    const testUser = createTestUser();
-                    
-                    // Insert test data
-                    await DatabaseTestHelper.insertTestData('servers', [testServer]);
-                    await DatabaseTestHelper.insertTestData('users', [testUser]);
+                    const testServer = await createTestServerAsync();
+                    const testUser = await createTestUserAsync();
                     
                     const eventBuilder = TestDiscordEventBuilder.create()
                         .withUser({ id: testUser.UserId })
@@ -54,9 +49,9 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                     
                     const event = eventBuilder
                         .withInputSimulator(inputSimulator)
-                        .buildSlashCommandEvent('games', { game: 'anagram' });
+                        .buildSlashCommandEvent(CommandEnum.GAMES, { game: 'anagram' });
                     
-                    const gameData = createTestGame({
+                    const gameData = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.ANAGRAM,
                         ChannelId: 'test_channel_123',
                         ServerId: testServer.ServerId
@@ -95,9 +90,9 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                         .withServer({ id: newServerId })
                         .withChannel({ id: 'new_channel_123' });
                     
-                    const event = eventBuilder.buildSlashCommandEvent('games');
+                    const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
                     
-                    const gameData = createTestGame({
+                    const gameData = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.COUNTING,
                         ServerId: newServerId,
                         ChannelId: 'new_channel_123'
@@ -115,8 +110,7 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                 name: 'should handle multiple concurrent game requests',
                 testFunction: async () => {
                     // Arrange
-                    const testServer = createTestServer();
-                    await DatabaseTestHelper.insertTestData('servers', [testServer]);
+                    const testServer = await createTestServerAsync();
                     
                     const promises = [];
                     const gameChannels = ['channel_1', 'channel_2', 'channel_3'];
@@ -131,9 +125,9 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                             .withServer({ id: testServer.ServerId })
                             .withChannel({ id: channelId });
                         
-                        const event = eventBuilder.buildSlashCommandEvent('games');
+                        const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
                         
-                        const gameData = createTestGame({
+                        const gameData = await createTestGameAsync({
                             GameTypeEnum: GameTypeEnum.ANAGRAM,
                             ServerId: testServer.ServerId,
                             ChannelId: channelId
@@ -160,17 +154,16 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                 name: 'should handle database transaction rollback on error',
                 testFunction: async () => {
                     // Arrange
-                    const testServer = createTestServer();
-                    await DatabaseTestHelper.insertTestData('servers', [testServer]);
+                    const testServer = await createTestServerAsync();
                     
                     const eventBuilder = TestDiscordEventBuilder.create()
                         .withServer({ id: testServer.ServerId })
                         .withChannel({ id: 'error_test_channel' });
                     
-                    const event = eventBuilder.buildSlashCommandEvent('games');
+                    const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
                     
                     // Create invalid game data to trigger error
-                    const invalidGameData = createTestGame({
+                    const invalidGameData = await createTestGameAsync({
                         GameTypeEnum: 999 as GameTypeEnum, // Invalid game type
                         ServerId: testServer.ServerId,
                         ChannelId: 'error_test_channel'
@@ -204,7 +197,7 @@ export default function registerServiceIntegrationTests(runner: TestRunner): voi
                     const eventBuilder = TestDiscordEventBuilder.create()
                         .withInputSimulator(inputSimulator);
                     
-                    const event = eventBuilder.buildSlashCommandEvent('test');
+                    const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
                     
                     // Act - Simulate various input methods
                     const selectMenuResult = await event.getUserInputBySelectMenuAsync({
