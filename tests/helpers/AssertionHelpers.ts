@@ -1,7 +1,10 @@
 import { GamesModel } from '../../src/interfaces/database/TableInterfaces';
 import { Component, ComponentType } from '../../src/interfaces/application/Message';
-import { GameFlowTestResult } from './GameFlowTestHelper';
 import Logger from '../../src/utils/Logger';
+import { ExceptionEnum } from '../../src/interfaces/enums';
+import { ComponentError } from '../../src/utils/ErrorHelper';
+import { GameFlowTestResult } from '../interfaces/GameFlowInterface';
+import { TrackedMessage, TrackedReaction } from '../interfaces/InputQueueInterface';
 
 export class AssertionError extends Error {
     constructor(message: string, expected?: any, actual?: any) {
@@ -9,7 +12,7 @@ export class AssertionError extends Error {
         this.name = 'AssertionError';
         
         if (expected !== undefined && actual !== undefined) {
-            this.message += `\n  Expected: ${JSON.stringify(expected)}\n  Actual: ${JSON.stringify(actual)}`;
+            this.message += `\nExpected: ${JSON.stringify(expected)}\n  Actual: ${JSON.stringify(actual)}`;
         }
     }
 }
@@ -148,16 +151,20 @@ export class AssertionHelpers {
     }
 
     // Async assertion helper
-    public static async assertThrowsAsync(asyncFn: () => Promise<any>, expectedErrorType?: any, message?: string): Promise<void> {
+    public static async assertThrowsAsync(asyncFn: () => Promise<any>, expectedErrorType?: ExceptionEnum, message?: string): Promise<void> {
         try {
             await asyncFn();
             throw new AssertionError(message || 'Expected function to throw an error');
         } catch (error) {
-            if (expectedErrorType && !(error instanceof expectedErrorType)) {
+            if (expectedErrorType && (!(error instanceof ComponentError) || error.errorKey !== expectedErrorType)) {
+                const actualErrorType = error instanceof ComponentError ? 
+                    error.errorKey : 
+                    (error as Error).constructor.name;
+                    
                 throw new AssertionError(
-                    message || `Expected error of type ${expectedErrorType.name}`,
-                    expectedErrorType.name,
-                    (error as Error).constructor.name
+                    message || `Expected error of type ${expectedErrorType}`,
+                    expectedErrorType,
+                    actualErrorType
                 );
             }
             Logger.logInfo(`✓ Assertion passed: ${message || 'function threw expected error'}`);
@@ -171,6 +178,65 @@ export class AssertionHelpers {
         } catch (error) {
             throw new AssertionError(message || 'Expected function to not throw an error', 'no error', error);
         }
+    }
+
+    // Message and Reaction tracking assertions
+    public static assertMessageExists(messages: TrackedMessage[], channelId: string, message?: string): void {
+        const hasMessage = messages.some(msg => msg.channelId === channelId);
+        this.assertTrue(hasMessage, message || `Expected message to exist in channel ${channelId}`);
+    }
+
+    public static assertMessageContainsText(messages: TrackedMessage[], searchText: string, message?: string): void {
+        const containsText = messages.some(msg => 
+            JSON.stringify(msg.content).toLowerCase().includes(searchText.toLowerCase())
+        );
+        this.assertTrue(containsText, message || `Expected messages to contain text: "${searchText}"`);
+    }
+
+    public static assertMessageCount(messages: TrackedMessage[], expectedCount: number, message?: string): void {
+        this.assertEqual(messages.length, expectedCount, message || `Expected ${expectedCount} messages`);
+    }
+
+    public static assertReactionExists(reactions: TrackedReaction[] | undefined, emoji: string, messageId?: string, message?: string): void {
+        if(!reactions)
+            throw new AssertionError(message || `Expected reactions to exist`);
+
+        const reactionExists = reactions.some(reaction => 
+            reaction.emoji === emoji && 
+            reaction.isAdd && 
+            (!messageId || reaction.messageId === messageId)
+        );
+        this.assertTrue(reactionExists, message || `Expected reaction ${emoji} to exist${messageId ? ` on message ${messageId}` : ''}`);
+    }
+
+    public static assertReactionCount(reactions: TrackedReaction[] | undefined, emoji: string, expectedCount: number, message?: string): void {
+        if(!reactions)
+            throw new AssertionError(message || `Expected reactions to exist`);
+
+        const reactionCount = reactions.filter(reaction => reaction.emoji === emoji && reaction.isAdd).length;
+        this.assertEqual(reactionCount, expectedCount, message || `Expected ${expectedCount} reactions with emoji ${emoji}`);
+    }
+
+    public static assertNoReactionExists(reactions: TrackedReaction[] | undefined, emoji: string, messageId?: string, message?: string): void {
+        if(!reactions)
+            throw new AssertionError(message || `Expected reactions to exist`);
+
+        const reactionExists = reactions.some(reaction => 
+            reaction.emoji === emoji && 
+            reaction.isAdd && 
+            (!messageId || reaction.messageId === messageId)
+        );
+        this.assertFalse(reactionExists, message || `Expected no reaction ${emoji}${messageId ? ` on message ${messageId}` : ''}`);
+    }
+
+    public static assertMessageWasEdited(messages: TrackedMessage[], messageId: string, message?: string): void {
+        const wasEdited = messages.some(msg => msg.id === messageId && msg.isEdit);
+        this.assertTrue(wasEdited, message || `Expected message ${messageId} to be edited`);
+    }
+
+    public static assertMessageWasNotEdited(messages: TrackedMessage[], messageId: string, message?: string): void {
+        const wasEdited = messages.some(msg => msg.id === messageId && msg.isEdit);
+        this.assertFalse(wasEdited, message || `Expected message ${messageId} not to be edited`);
     }
 }
 
@@ -195,7 +261,15 @@ export const {
     assertMessagesContainText,
     assertTimelineEntryExists,
     assertThrowsAsync,
-    assertDoesNotThrowAsync
+    assertDoesNotThrowAsync,
+    assertMessageExists,
+    assertMessageContainsText,
+    assertMessageCount,
+    assertReactionExists,
+    assertReactionCount,
+    assertNoReactionExists,
+    assertMessageWasEdited,
+    assertMessageWasNotEdited,
 } = AssertionHelpers;
 
 export default AssertionHelpers;

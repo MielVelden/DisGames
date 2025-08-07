@@ -3,32 +3,12 @@ import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableI
 import GameService from '../../src/services/GameService';
 import GameRepository from '../../src/repositories/GameRepository';
 import { TestDiscordEventBuilder, MockDiscordEvent } from '../builders/TestDiscordEventBuilder';
-import { TestInputSimulator } from '../builders/TestInputSimulator';
 import Logger from '../../src/utils/Logger';
-import { LanguageEnum, TableEnum } from '../../src/interfaces/enums';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
-import TestDatabase from '../config/TestDatabase';
-import { createTestServerAsync } from '../fixtures/servers';
-
-export interface GameFlowTestConfig {
-    gameType: GameTypeEnum;
-    channelId: string;
-    serverId: string;
-    userId: string;
-    expectedAnswers?: string[];
-    settings?: Record<string, any>;
-    inputSimulator?: TestInputSimulator;
-}
-
-export interface GameFlowTestResult {
-    success: boolean;
-    game: GamesModel | null;
-    messages: any[][];
-    timeline: any[];
-    errors: Error[];
-    finalAnswer?: string;
-    points?: number;
-}
+import { GameFlowTestConfig, GameFlowTestResult } from '../interfaces/GameFlowInterface';
+import { ComponentError } from '../../src/utils/ErrorHelper';
+import { ExceptionEnum } from '../../src/interfaces/enums';
+import { createTestGameAsync } from '../fixtures/games';
 
 export class GameFlowTestHelper {
     private eventBuilder: TestDiscordEventBuilder;
@@ -38,7 +18,7 @@ export class GameFlowTestHelper {
         this.eventBuilder = TestDiscordEventBuilder.create();
         this.results = {
             success: false,
-            game: null,
+            game: undefined,
             messages: [],
             timeline: [],
             errors: []
@@ -47,81 +27,75 @@ export class GameFlowTestHelper {
 
     public async startGameAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
-            Logger.logInfo(`[TEST] Starting game flow test for ${GameTypeEnum[config.gameType]}`);
+            Logger.logInfo(`Starting game flow test for ${GameTypeEnum[config.gameType]}`);
             // Arrange
-            const testServer = await createTestServerAsync();
-
             // Setup event builder with test data
             this.eventBuilder
                 .withUser({ id: config.userId })
-                .withServer({ id: testServer.ServerId })
+                .withServer({ id: config.serverId })
                 .withChannel({ id: config.channelId });
 
-            if (config.inputSimulator) {
+            if (config.inputSimulator)
                 this.eventBuilder.withInputSimulator(config.inputSimulator);
-            }
 
             // Create slash command event for starting the game
             const startEvent = this.eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES, {
                 game: GameTypeEnum[config.gameType].toLowerCase()
             });
 
-
             // Create game save model
             const gameSaveModel: GamesSaveModel = {
                 ChannelId: config.channelId,
-                ServerId: testServer.ServerId,
+                ServerId: config.serverId,
                 GameTypeEnum: config.gameType,
-                SettingsJSON: config.settings || {}
+                SettingsJSON: config.settings || {},
+                Answer: config.expectedAnswers?.[0] || ''
             };
-
-            // Save the game
-            const savedGame = await GameService.saveAsync(gameSaveModel, startEvent);
-            this.results.game = savedGame;
+            const game = await createTestGameAsync(gameSaveModel);
+            this.results.game = game;
 
             // Collect sent messages
-            this.results.messages = (startEvent as MockDiscordEvent).getSentMessages();
+            this.results.messages = startEvent.getSentMessages();
             this.results.timeline = startEvent.timelineEntries;
 
-            Logger.logInfo(`[TEST] Game created with ID: ${savedGame.Id}`);
             this.results.success = true;
 
             return this.results;
-
         } catch (error) {
-            Logger.logError('[TEST] Game flow test failed', error as Error);
-            this.results.errors.push(error as Error);
+            Logger.logError('Game flow test failed', error as ComponentError);
+            this.results.errors.push(error as ComponentError);
             this.results.success = false;
             return this.results;
         }
     }
 
-    public async playGameAsync(config: GameFlowTestConfig, playerAnswers: string[]): Promise<GameFlowTestResult> {
+    public async playGameAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
             // Start the game first
             const startResult = await this.startGameAsync(config);
-            if (!startResult.success || !startResult.game) {
+            if (!startResult.success || !startResult.game)
                 return startResult;
-            }
 
-            Logger.logInfo(`[TEST] Playing game with ${playerAnswers.length} answers`);
+            Logger.logInfo(`Playing game with ${config.expectedAnswers?.length} answers`);
 
             // Play through the game with provided answers
-            for (let i = 0; i < playerAnswers.length; i++) {
-                const answer = playerAnswers[i];
-                
+            for (let i = 0; i < config.expectedAnswers?.length; i++) {
+                const input = config.inputSimulator?.getNextInputResponse();
+                const answer = input?.value as string;
+                const userId = input?.userId;
+
                 // Create message event for player answer
-                const answerEvent = this.eventBuilder.buildMessageEvent(answer);
+                const answerEvent = this.eventBuilder.buildMessageEvent(answer, userId);
                 
                 // Handle the game interaction
                 await GameService.handleGameAsync(answerEvent);
                 
                 // Collect results
-                const sentMessages = (answerEvent as MockDiscordEvent).getSentMessages();
+                const sentMessages = answerEvent.getSentMessages();
                 this.results.messages.push(...sentMessages);
                 this.results.timeline.push(...answerEvent.timelineEntries);
 
-                Logger.logInfo(`[TEST] Processed answer ${i + 1}: "${answer}"`);
+                Logger.logInfo(`Processed answer ${i + 1}: "${answer}"`);
             }
 
             // Get final game state
@@ -131,11 +105,13 @@ export class GameFlowTestHelper {
                 this.results.finalAnswer = finalGame.Answer;
             }
 
-            return this.results;
+            this.results.trackedMessages = config.inputSimulator?.getTrackedMessages();
+            this.results.trackedReactions = config.inputSimulator?.getTrackedReactions();
 
+            return this.results;
         } catch (error) {
-            Logger.logError('[TEST] Game play test failed', error as Error);
-            this.results.errors.push(error as Error);
+            Logger.logError('Game play test failed', error as ComponentError);
+            this.results.errors.push(error as ComponentError);
             this.results.success = false;
             return this.results;
         }
@@ -143,29 +119,22 @@ export class GameFlowTestHelper {
 
     public async completeGameFlowAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
-            // Start game
-            const startResult = await this.startGameAsync(config);
-            if (!startResult.success) {
-                return startResult;
-            }
-
             // Get the game module to understand expected answers
             const gameModule = GameService.getGameByType(config.gameType);
-            if (!gameModule) {
-                throw new Error(`Game module not found for type ${config.gameType}`);
-            }
+            if (!gameModule)
+                throw new ComponentError({ message: ExceptionEnum.GAME_MODULE_NOT_FOUND });
 
             // Use provided expected answers or generate them
-            const expectedAnswers = config.expectedAnswers || this.generateTestAnswers(config.gameType);
+            if(!config.expectedAnswers)
+                config.expectedAnswers = this.generateTestAnswers(config.gameType);
             
             // Play through with expected answers
-            const playResult = await this.playGameAsync(config, expectedAnswers);
+            const playResult = await this.playGameAsync(config);
             
             return playResult;
-
         } catch (error) {
-            Logger.logError('[TEST] Complete game flow test failed', error as Error);
-            this.results.errors.push(error as Error);
+            Logger.logError('Complete game flow test failed', error as ComponentError);
+            this.results.errors.push(error as ComponentError);
             this.results.success = false;
             return this.results;
         }
@@ -175,7 +144,7 @@ export class GameFlowTestHelper {
         try {
             const game = await GameRepository.getByIDAsync(gameId);
             if (!game) {
-                Logger.logError(`[TEST] Game ${gameId} not found`);
+                Logger.logError(`Game ${gameId} not found`);
                 return false;
             }
 
@@ -183,16 +152,16 @@ export class GameFlowTestHelper {
             for (const [key, expectedValue] of Object.entries(expectedState)) {
                 const actualValue = (game as any)[key];
                 if (actualValue !== expectedValue) {
-                    Logger.logError(`[TEST] Game property ${key} mismatch. Expected: ${expectedValue}, Actual: ${actualValue}`);
+                    Logger.logError(`Game property ${key} mismatch. Expected: ${expectedValue}, Actual: ${actualValue}`);
                     return false;
                 }
             }
 
-            Logger.logInfo(`[TEST] Game state verification passed for game ${gameId}`);
+            Logger.logInfo(`Game state verification passed for game ${gameId}`);
             return true;
 
         } catch (error) {
-            Logger.logError('[TEST] Game state verification failed', error as Error);
+            Logger.logError('Game state verification failed', error as Error);
             return false;
         }
     }
@@ -200,9 +169,9 @@ export class GameFlowTestHelper {
     public async cleanupGameAsync(gameId: number): Promise<void> {
         try {
             await GameRepository.purgeAsync(gameId);
-            Logger.logInfo(`[TEST] Cleaned up game ${gameId}`);
+            Logger.logInfo(`Cleaned up game ${gameId}`);
         } catch (error) {
-            Logger.logInfo(`[TEST] Failed to cleanup game ${gameId}: ${(error as Error).message}`);
+            Logger.logInfo(`Failed to cleanup game ${gameId}: ${(error as Error).message}`);
         }
     }
 
@@ -230,7 +199,7 @@ export class GameFlowTestHelper {
     public reset(): void {
         this.results = {
             success: false,
-            game: null,
+            game: undefined,
             messages: [],
             timeline: [],
             errors: []
@@ -247,7 +216,7 @@ export class GameFlowTestHelper {
             channelId: options.channelId || '123456789',
             serverId: options.serverId || '987654321',
             userId: options.userId || '555666777',
-            expectedAnswers: options.expectedAnswers,
+            expectedAnswers: options.expectedAnswers || [],
             settings: options.settings,
             inputSimulator: options.inputSimulator
         };

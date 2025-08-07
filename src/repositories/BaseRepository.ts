@@ -43,8 +43,6 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return result;
   }
 
-
-
   public Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel> {
     this.params = [];
     this.hasLimit1 = false;

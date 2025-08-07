@@ -3,9 +3,12 @@ import { GameSettingType } from '../../src/interfaces/domain';
 import { TableEnum } from '../../src/interfaces/enums';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import Logger from '../../src/utils/Logger';
+import TestInputSimulator from '../builders/TestInputSimulator';
 import TestDatabase from '../config/TestDatabase';
-import { DatabaseTestHelper } from '../helpers/DatabaseTestHelper';
-import { TEST_SERVER_IDS, TEST_CHANNEL_IDS } from './servers';
+import { GameFlowTestConfig } from '../interfaces/GameFlowInterface';
+import { createTestChannelAsync } from './channels';
+import { TEST_SERVER_IDS, TEST_CHANNEL_IDS, createTestServerAsync } from './servers';
+import { TEST_USER_IDS } from './users';
 
 export const TEST_GAMES: GamesSaveModel[] = [
     {
@@ -54,7 +57,7 @@ export function getTestGame(gameType: GameTypeEnum): GamesModel | undefined {
     return MOCK_GAMES.find(game => game.GameTypeEnum === gameType);
 }
 
-export async function createTestGameAsync(overrides: Partial<GamesSaveModel> = {}, skipDatabaseInsert: boolean = false): Promise<GamesSaveModel> {
+export async function createTestGameAsync(overrides: Partial<GamesSaveModel> = {}, skipDatabaseInsert: boolean = false): Promise<GamesModel> {
     const defaultGame = TEST_GAMES[0];
     const game = {
         ...defaultGame,
@@ -69,11 +72,13 @@ export async function createTestGameAsync(overrides: Partial<GamesSaveModel> = {
     }
 
     // Save game to database
-    if (!skipDatabaseInsert)
-        await TestDatabase.insertAsync(TableEnum.GAMES, game);
+    if (!skipDatabaseInsert) {
+        const savedGame = await TestDatabase.insertAsync(TableEnum.GAMES, game);
+        game.Id = savedGame.Id;
+    }
 
     Logger.logInfo(`Created test game: ${game.GameTypeEnum} in server: ${game.ServerId}`);
-    return game;
+    return game as GamesModel;
 }
 
 export const GAME_TEST_ANSWERS: Partial<Record<GameTypeEnum, string[]>> = {
@@ -118,6 +123,24 @@ export async function createGameWithCorrectAnswerAsync(gameType: GameTypeEnum): 
         Answer: answers[0],
         SettingsJSON: settings as any
     });
+}
+
+export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimulator?: TestInputSimulator): Promise<GameFlowTestConfig> {
+    const answers = GAME_TEST_ANSWERS[gameType] || ['test'];
+    const settings = GAME_TEST_SETTINGS[gameType] || {};
+    
+    const testServer = await createTestServerAsync();
+    const testChannelId = await createTestChannelAsync();
+
+    return {
+        gameType: gameType,
+        channelId: testChannelId,
+        serverId: testServer.ServerId || TEST_SERVER_IDS.MAIN_SERVER,
+        userId: TEST_USER_IDS.PLAYER1,
+        expectedAnswers: answers.slice(0, 3),
+        settings: settings,
+        inputSimulator: inputSimulator
+    };
 }
 
 export default {

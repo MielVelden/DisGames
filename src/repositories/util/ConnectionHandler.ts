@@ -7,19 +7,21 @@ import Logger from '../../utils/Logger';
 dotenv.config();
 
 let pool: mysql.Pool | null = null;
-let connection: mysql.Connection | null = null;
+let connection: mysql.PoolConnection | null = null;
 let table_enums: Array<{ Id: number, TableName: string }> = [];
+
+//#region Connection Functions
 
 export async function createConnectionAsync(): Promise<boolean> {
     try {
         const dbUrl = process.env.DATABASE_URL as string;
-        
+
         if (!dbUrl)
             throw new Error('DATABASE_URL environment variable is not set');
-        
+
         const url = new URL(dbUrl);
         const dbName = url.pathname.replace(/^\//, '');
-        
+
         pool = mysql.createPool({
             host: url.hostname,
             user: url.username,
@@ -27,7 +29,7 @@ export async function createConnectionAsync(): Promise<boolean> {
             password: url.password,
             port: Number(url.port) || 3306,
         });
-        
+
         connection = await pool.getConnection();
         await getTableEnumsAsync();
         return true;
@@ -36,6 +38,29 @@ export async function createConnectionAsync(): Promise<boolean> {
         throw new Error(`Failed to connect to database`);
     }
 }
+
+export async function closeConnectionAsync(): Promise<void> {
+    if (connection) {
+        connection.release();
+        connection = null;
+    }
+
+    if (pool) {
+        await pool.end();
+        pool = null;
+    }
+}
+
+export async function validateConnectionAsync(): Promise<boolean> {
+    if (!connection)
+        throw new Error('Database connection not established');
+    return true;
+}
+
+//#endregion
+
+//#region Query Functions
+
 export async function runQueryAsync(query: string, params?: any[]): Promise<any[] | undefined> {
     try {
         if (!connection)
@@ -49,6 +74,28 @@ export async function runQueryAsync(query: string, params?: any[]): Promise<any[
         throw err;
     }
 }
+
+//#region Transaction Functions
+
+export async function startTransactionAsync(): Promise<void> {
+    if (!connection)
+        throw new Error('Database connection not established');
+    await connection.beginTransaction();
+}
+
+export async function rollbackTransactionAsync(): Promise<void> {
+    if (!connection)
+        throw new Error('Database connection not established');
+    await connection.rollback();
+}
+
+export async function commitTransactionAsync(): Promise<void> {
+    if (!connection)
+        throw new Error('Database connection not established');
+    await connection.commit();
+}
+
+//#endregion
 
 //#region Table Enums
 

@@ -22,7 +22,6 @@ import { TestServer } from '../interfaces/ServerTestInterface';
 import { TestUser } from '../interfaces/UserTestInterface';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 
-
 export class MockDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
     public readonly customId: string;
@@ -75,41 +74,54 @@ export class MockDiscordEvent implements InteractionEvent {
 
     public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
         this.sentMessages.push([...components]);
-        Logger.logTest(`[TEST] Sent message to channel ${channelId} with ${components.length} components`);
+        
+        // Track the message
+        const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.inputSimulator.trackMessage(messageId, channelId, components, false);
+        
+        Logger.logTest(`Sent message to channel ${channelId} with ${components.length} components`);
     }
 
     public async editAsync(content?: string): Promise<void> {
-        if (content) {
+        if (content)
             this.editedContent.push(content);
-        }
-        Logger.logTest(`[TEST] Edited message: ${content || 'with components'}`);
+        
+        // Track the edit
+        this.inputSimulator.trackMessage(this.messageId, this.channelId, this.components, true);
+        
+        Logger.logTest(`Edited message: ${content || 'with components'}`);
     }
 
     public async editWithComponentAsync(component: Component): Promise<void> {
         this.components = [component];
-        Logger.logTest(`[TEST] Edited message with component`);
+        
+        // Track the edit
+        this.inputSimulator.trackMessage(this.messageId, this.channelId, [component], true);
+        
+        Logger.logTest(`Edited message with component`);
     }
 
     public async getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null> {
         const simulatedResponse = this.inputSimulator.getNextSelectMenuResponse();
         if (simulatedResponse) {
-            return this.createSelectMenuEvent(simulatedResponse);
+            return this.createSelectMenuEvent(simulatedResponse.value as string);
         }
         return null;
     }
 
     public async getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
-        return this.inputSimulator.getNextButtonResponse();
+        const simulatedResponse = this.inputSimulator.getNextButtonResponse();
+        return simulatedResponse?.value as string || null;
     }
 
     public async getConfirmationFromUser(container: Component): Promise<InteractionEvent | null> {
         const confirmation = this.inputSimulator.getNextConfirmationResponse();
-        return confirmation ? this : null;
+        return confirmation?.value as boolean ? this : null;
     }
 
     public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {
         const settings = this.inputSimulator.getNextSettingsResponse();
-        return settings || null;
+        return settings?.value as Games_Settings || null;
     }
 
     public async getChannelNameAsync(channelId: string): Promise<string> {
@@ -121,24 +133,37 @@ export class MockDiscordEvent implements InteractionEvent {
     }
 
     public async commitTimelineAsync(): Promise<void> {
-        Logger.logTest(`[TEST] Committed ${this.timelineEntries.length} timeline entries`);
+        Logger.logTest(`Committed ${this.timelineEntries.length} timeline entries`);
     }
 
     public async deleteAsync(): Promise<void> {
-        Logger.logTest(`[TEST] Deleted message ${this.messageId}`);
+        Logger.logTest(`Deleted message ${this.messageId}`);
     }
 
     // MessageInteractionEvent methods
     public async sendAsync(): Promise<void> {
-        Logger.logTest(`[TEST] Sent message response`);
+        Logger.logTest(`Sent message response`);
     }
 
     public async reactAsync(emoji: string): Promise<void> {
-        Logger.logTest(`[TEST] Reacted with emoji: ${emoji}`);
+        // Track the reaction
+        this.inputSimulator.trackReaction(this.messageId, emoji, this.user.id, true);
+        
+        Logger.logTest(`Reacted with emoji: ${emoji}`);
+    }
+
+    public async unreactAsync(emoji: string): Promise<void> {
+        // Track the reaction removal
+        this.inputSimulator.trackReaction(this.messageId, emoji, this.user.id, false);
+        
+        Logger.logTest(`Removed reaction emoji: ${emoji}`);
     }
 
     public async replyAsync(content?: MultiLingualString): Promise<void> {
-        Logger.logTest(`[TEST] Replied with: ${content?.getMessage() || 'empty reply'}`);
+        if(content)
+            Logger.logTest(`Replied with: ${content?.getMessage()}`);
+        else
+            Logger.logTest(`Replied with no content`);
     }
 
     // MessageInteractionEvent properties
@@ -169,6 +194,31 @@ export class MockDiscordEvent implements InteractionEvent {
 
     public setInputSimulator(simulator: TestInputSimulator): void {
         this.inputSimulator = simulator;
+    }
+
+    // Message and Reaction tracking helper methods
+    public getTrackedMessages(): any[] {
+        return this.inputSimulator.getTrackedMessages();
+    }
+
+    public getTrackedReactions(): any[] {
+        return this.inputSimulator.getTrackedReactions();
+    }
+
+    public getMessagesByChannel(channelId: string): any[] {
+        return this.inputSimulator.getMessagesByChannel(channelId);
+    }
+
+    public getReactionsByMessage(messageId: string): any[] {
+        return this.inputSimulator.getReactionsByMessage(messageId);
+    }
+
+    public getReactionsByEmoji(emoji: string): any[] {
+        return this.inputSimulator.getReactionsByEmoji(emoji);
+    }
+
+    public clearTracker(): void {
+        this.inputSimulator.clearTracker();
     }
 }
 
@@ -286,9 +336,9 @@ export class TestDiscordEventBuilder {
         return event as MockDiscordEvent;
     }
 
-    public buildMessageEvent(content: string = this.testMessage.content): MockDiscordEvent {
+    public buildMessageEvent(content: string = this.testMessage.content, userId?: string): MockDiscordEvent {
         const user: User = {
-            id: this.testUser.id,
+            id: userId || this.testUser.id,
             username: this.testUser.username,
             displayName: this.testUser.username,
             bot: this.testUser.bot || false,
@@ -307,7 +357,7 @@ export class TestDiscordEventBuilder {
         const mockMessage = {
             content,
             author: { 
-                id: this.testUser.id,
+                id: userId || this.testUser.id,
                 bot: this.testUser.bot || false
             },
             channel: { id: this.testChannel.id },

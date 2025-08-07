@@ -3,7 +3,6 @@ import { TableEnum } from '../../src/interfaces/enums';
 import { LanguageEnum } from '../../src/interfaces/enums/database/LanguageEnum';
 import Logger from '../../src/utils/Logger';
 import TestDatabase from '../config/TestDatabase';
-import DatabaseTestHelper from '../helpers/DatabaseTestHelper';
 
 export const TEST_SERVERS: ServersSaveModel[] = [
     {

@@ -30,6 +30,7 @@ import TimelineBuilder from "./TimelineBuilder";
 import UserRepository from "../repositories/UserRepository";
 import ServerRepository from "../repositories/ServerRepository";
 import { DEBUG_MODE } from "../config";
+import { DEFAULT_ACCEPT_EMOJI } from "../utils/Emojis";
 
 class GameService {
     private games: GameModule[] = [];
@@ -236,7 +237,7 @@ class GameService {
                 gameEvent.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: "✅"
+                    component: DEFAULT_ACCEPT_EMOJI
                 })
 
             // Answer is correct

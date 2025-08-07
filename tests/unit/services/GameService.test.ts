@@ -2,15 +2,14 @@ import TestRunner, { TestSuite } from '../../TestRunner';
 import GameService from '../../../src/services/GameService';
 import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnum';
 import { TestDiscordEventBuilder } from '../../builders/TestDiscordEventBuilder';
-import { TestInputSimulator } from '../../builders/TestInputSimulator';
 import { createTestGameAsync } from '../../fixtures/games';
-import { TEST_SERVER_IDS, TEST_CHANNEL_IDS, createTestServerAsync } from '../../fixtures/servers';
-import { createTestUserAsync, TEST_USER_IDS } from '../../fixtures/users';
-import { DatabaseTestHelper } from '../../helpers/DatabaseTestHelper';
+import { createTestServerAsync } from '../../fixtures/servers';
+import { createTestUserAsync } from '../../fixtures/users';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
-import { LanguageEnum, TableEnum } from '../../../src/interfaces/enums';
+import { ExceptionEnum } from '../../../src/interfaces/enums';
 import { GameSettingsValues } from '../../../src/interfaces/domain';
 import { CommandEnum } from '../../../src/interfaces/enums/commands/CommandEnum';
+import { createTestChannelAsync } from '../../fixtures/channels';
 
 export default function registerGameServiceTests(runner: TestRunner): void {
     const suite: TestSuite = {
@@ -40,11 +39,12 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     // Arrange
                     const testServer = await createTestServerAsync();
                     const testUser = await createTestUserAsync();
+                    const testChannel = await createTestChannelAsync();
                     
                     const eventBuilder = TestDiscordEventBuilder.create()
                         .withUser({ id: testUser.UserId })
                         .withServer({ id: testServer.ServerId })
-                        .withChannel({ id: TEST_CHANNEL_IDS.MAIN_CHANNEL });
+                        .withChannel({ id: testChannel });
                     
                     const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES, {
                         game: 'anagram'
@@ -52,7 +52,7 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     
                     const gameData = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.ANAGRAM,
-                        ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
+                        ChannelId: testChannel,
                         ServerId: testServer.ServerId
                     }, true);
                     
@@ -62,7 +62,7 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     // Assert
                     AssertionHelpers.assertGameExists(result, 'Game should be created');
                     AssertionHelpers.assertEqual(result.GameTypeEnum, GameTypeEnum.ANAGRAM, 'Game type should be ANAGRAM');
-                    AssertionHelpers.assertEqual(result.ChannelId, TEST_CHANNEL_IDS.MAIN_CHANNEL, 'Channel ID should match');
+                    AssertionHelpers.assertEqual(result.ChannelId, testChannel, 'Channel ID should match');
                     AssertionHelpers.assertEqual(result.ServerId, testServer.ServerId, 'Server ID should match');
                     AssertionHelpers.assertNotNull(result.Answer, 'Game should have an answer');
                 }
@@ -115,23 +115,24 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     // Arrange
                     const testServer = await createTestServerAsync();
                     const testUser = await createTestUserAsync();
+                    const testChannel = await createTestChannelAsync();
 
                     const eventBuilder = TestDiscordEventBuilder.create()
                         .withUser({ id: testUser.UserId })
                         .withServer({ id: testServer.ServerId })
-                        .withChannel({ id: TEST_CHANNEL_IDS.MAIN_CHANNEL });
+                        .withChannel({ id: testChannel });
                     
                     const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES);
                     
                     const gameData1 = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.ANAGRAM,
-                        ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
+                        ChannelId: testChannel,
                         ServerId: testServer.ServerId
                     }, true);
                     
                     const gameData2 = await createTestGameAsync({
                         GameTypeEnum: GameTypeEnum.NUMBER_GUESS,
-                        ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
+                        ChannelId: testChannel,
                         ServerId: testServer.ServerId
                     }, true);
                     
@@ -143,7 +144,7 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                     
                     await AssertionHelpers.assertThrowsAsync(
                         () => GameService.saveAsync(gameData2, event),
-                        undefined,
+                        ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
                         'Should throw error for duplicate game in channel'
                     );
                 }

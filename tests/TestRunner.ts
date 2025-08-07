@@ -84,7 +84,7 @@ export class TestRunner {
             }
 
         } catch (error) {
-            console.error('❌ Test environment setup failed:', error);
+            Logger.logError('❌ Test environment setup failed:', error as Error);
             return {
                 total: 0,
                 passed: 0,
@@ -147,14 +147,14 @@ export class TestRunner {
             }
 
         } catch (error) {
-            console.error(`❌ Suite ${suite.name} setup failed:`, error);
+            Logger.logError(`❌ Suite ${suite.name} setup failed:`, error as Error);
         } finally {
             // Run suite teardown
             if (suite.teardown) {
                 try {
                     await suite.teardown();
                 } catch (error) {
-                    console.error(`⚠️  Suite ${suite.name} teardown failed:`, error);
+                    Logger.logError(`⚠️  Suite ${suite.name} teardown failed:`, error as Error);
                 }
             }
         }
@@ -211,7 +211,7 @@ export class TestRunner {
                     await suite.afterEach();
                 }
             } catch (error) {
-                console.error(`⚠️  Test cleanup failed for ${test.name}:`, error);
+                Logger.logError(`⚠️  Test cleanup failed for ${test.name}:`, error as Error);
             }
         }
     }
@@ -243,7 +243,7 @@ export class TestRunner {
     }
 
     private async teardownTestEnvironmentAsync(): Promise<void> {
-        Logger.logTest('\n🧹 Cleaning up test environment...');
+        Logger.logTest('🧹 Cleaning up test environment...');
         
         // Cleanup database
         await DatabaseTestHelper.teardownAsync();
@@ -270,7 +270,7 @@ export class TestRunner {
     }
 
     private printFinalResults(results: TestRunResults): void {
-        Logger.logTest('\n=====================================');
+        Logger.logTest('=====================================');
         Logger.logTest('📈 Final Test Results');
         Logger.logTest('=====================================');
         
@@ -284,7 +284,7 @@ export class TestRunner {
         Logger.logTest(`⏱️  Duration: ${duration}ms`);
         
         if (failed > 0) {
-            Logger.logTest('\n💥 Failed Tests:');
+            Logger.logTest('💥 Failed Tests:');
             results.results
                 .filter(r => !r.success && r.error?.message !== 'Test skipped')
                 .forEach(result => {
@@ -293,7 +293,7 @@ export class TestRunner {
                 });
         }
         
-        Logger.logTest('\n' + (failed === 0 ? '🎉 All tests passed!' : '💔 Some tests failed'));
+        Logger.logTest(failed === 0 ? '🎉 All tests passed!' : '💔 Some tests failed');
     }
 
     public async loadTestFiles(directory: string): Promise<void> {
@@ -306,7 +306,7 @@ export class TestRunner {
                     await testModule.default(this);
                 }
             } catch (error) {
-                console.error(`Failed to load test file ${file}:`, error);
+                Logger.logError(`Failed to load test file ${file}:`, error as Error);
             }
         }
     }
@@ -359,7 +359,7 @@ async function main(): Promise<void> {
         process.exit(results.failed > 0 ? 1 : 0);
         
     } catch (error) {
-        console.error('❌ Test runner failed:', error);
+        Logger.logError('❌ Test runner failed:', error as Error);
         process.exit(1);
     }
 }

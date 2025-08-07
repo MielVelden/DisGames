@@ -1,7 +1,8 @@
 import { MultiLingualString } from '../../src/utils/i18n/MultiLangualString';
 import { Games_Settings } from '../../src/interfaces/domain/GameSettings';
 import Logger from '../../src/utils/Logger';
-import { InputQueue } from '../interfaces/InputQueueInterface';
+import { InputQueue, TestInputSimulatorOptions, MessageAndReactionTracker, TrackedMessage, TrackedReaction } from '../interfaces/InputQueueInterface';
+import { Component } from '../../src/interfaces/application/Message';
 
 export class TestInputSimulator {
     private queue: InputQueue = {
@@ -20,35 +21,40 @@ export class TestInputSimulator {
         inputResponses: 0
     };
 
-    public addSelectMenuResponse(value: string): TestInputSimulator {
-        this.queue.selectMenuResponses.push(value);
+    private tracker: MessageAndReactionTracker = {
+        messages: [],
+        reactions: []
+    };
+
+    public addSelectMenuResponse(options: TestInputSimulatorOptions): TestInputSimulator {
+        this.queue.selectMenuResponses.push(options);
         return this;
     }
 
-    public addButtonResponse(value: string): TestInputSimulator {
-        this.queue.buttonResponses.push(value);
+    public addButtonResponse(options: TestInputSimulatorOptions): TestInputSimulator {
+        this.queue.buttonResponses.push(options);
         return this;
     }
 
-    public addConfirmationResponse(value: boolean): TestInputSimulator {
-        this.queue.confirmationResponses.push(value);
+    public addConfirmationResponse(options: TestInputSimulatorOptions): TestInputSimulator {
+        this.queue.confirmationResponses.push(options);
         return this;
     }
 
-    public addSettingsResponse(settings: Games_Settings): TestInputSimulator {
-        this.queue.settingsResponses.push(settings);
+    public addSettingsResponse(options: TestInputSimulatorOptions): TestInputSimulator {
+        this.queue.settingsResponses.push(options);
         return this;
     }
 
-    public addInputResponse(value: string): TestInputSimulator {
-        this.queue.inputResponses.push(value);
+    public addInputResponse(options: TestInputSimulatorOptions): TestInputSimulator {
+        this.queue.inputResponses.push(options);
         return this;
     }
 
-    public getNextSelectMenuResponse(): string | null {
+    public getNextSelectMenuResponse(): TestInputSimulatorOptions | null {
         const responses = this.queue.selectMenuResponses;
         const index = this.currentIndex.selectMenuResponses;
-        
+
         if (index >= responses.length) {
             Logger.logTest('No more select menu responses available');
             return null;
@@ -60,10 +66,10 @@ export class TestInputSimulator {
         return response;
     }
 
-    public getNextButtonResponse(): string | null {
+    public getNextButtonResponse(): TestInputSimulatorOptions | null {
         const responses = this.queue.buttonResponses;
         const index = this.currentIndex.buttonResponses;
-        
+
         if (index >= responses.length) {
             Logger.logTest('No more button responses available');
             return null;
@@ -75,10 +81,10 @@ export class TestInputSimulator {
         return response;
     }
 
-    public getNextConfirmationResponse(): boolean | null {
+    public getNextConfirmationResponse(): TestInputSimulatorOptions | null {
         const responses = this.queue.confirmationResponses;
         const index = this.currentIndex.confirmationResponses;
-        
+
         if (index >= responses.length) {
             Logger.logTest('No more confirmation responses available');
             return null;
@@ -90,10 +96,10 @@ export class TestInputSimulator {
         return response;
     }
 
-    public getNextSettingsResponse(): Games_Settings | null {
+    public getNextSettingsResponse(): TestInputSimulatorOptions | null {
         const responses = this.queue.settingsResponses;
         const index = this.currentIndex.settingsResponses;
-        
+
         if (index >= responses.length) {
             Logger.logTest('No more settings responses available');
             return null;
@@ -105,10 +111,10 @@ export class TestInputSimulator {
         return response;
     }
 
-    public getNextInputResponse(): string | null {
+    public getNextInputResponse(): TestInputSimulatorOptions | null {
         const responses = this.queue.inputResponses;
         const index = this.currentIndex.inputResponses;
-        
+
         if (index >= responses.length) {
             Logger.logTest('No more input responses available');
             return null;
@@ -116,7 +122,7 @@ export class TestInputSimulator {
 
         const response = responses[index];
         this.currentIndex.inputResponses++;
-        Logger.logTest(`Simulated input response: ${response}`);
+        Logger.logTest(`Simulated input response: ${response.value}`);
         return response;
     }
 
@@ -138,6 +144,10 @@ export class TestInputSimulator {
             confirmationResponses: [],
             settingsResponses: [],
             inputResponses: []
+        };
+        this.tracker = {
+            messages: [],
+            reactions: []
         };
         this.reset();
         Logger.logTest('Input simulator cleared');
@@ -164,24 +174,84 @@ export class TestInputSimulator {
     }
 
     // Convenience methods for chaining
-    public expectSelectMenu(value: string): TestInputSimulator {
-        return this.addSelectMenuResponse(value);
+    public expectSelectMenu(value: string, userId: string): TestInputSimulator {
+        return this.addSelectMenuResponse({ value, userId });
     }
 
-    public expectButton(value: string): TestInputSimulator {
-        return this.addButtonResponse(value);
+    public expectButton(value: string, userId: string): TestInputSimulator {
+        return this.addButtonResponse({ value, userId });
     }
 
-    public expectConfirmation(value: boolean): TestInputSimulator {
-        return this.addConfirmationResponse(value);
+    public expectConfirmation(value: boolean, userId: string): TestInputSimulator {
+        return this.addConfirmationResponse({ value: value, userId });
     }
 
-    public expectInput(value: string): TestInputSimulator {
-        return this.addInputResponse(value);
+    public expectInput(value: string, userId: string): TestInputSimulator {
+        return this.addInputResponse({ value, userId });
     }
 
-    public expectSettings(settings: Games_Settings): TestInputSimulator {
-        return this.addSettingsResponse(settings);
+    public expectSettings(settings: Games_Settings, userId: string): TestInputSimulator {
+        return this.addSettingsResponse({ value: settings, userId });
+    }
+
+    // Message and Reaction tracking methods
+    public trackMessage(id: string, channelId: string, content: Component[], isEdit: boolean = false): void {
+        const trackedMessage: TrackedMessage = {
+            id,
+            channelId,
+            content: [...content],
+            timestamp: Date.now(),
+            isEdit
+        };
+        this.tracker.messages.push(trackedMessage);
+        Logger.logTest(`Tracked ${isEdit ? 'edited' : 'new'} message ${id} in channel ${channelId} with ${content.length} components`);
+    }
+
+    public trackReaction(messageId: string, emoji: string, userId: string, isAdd: boolean = true): void {
+        const trackedReaction: TrackedReaction = {
+            messageId,
+            emoji,
+            userId,
+            timestamp: Date.now(),
+            isAdd
+        };
+        this.tracker.reactions.push(trackedReaction);
+        Logger.logTest(`Tracked ${isAdd ? 'added' : 'removed'} reaction ${emoji} on message ${messageId} by user ${userId}`);
+    }
+
+    public getTrackedMessages(): TrackedMessage[] {
+        return [...this.tracker.messages];
+    }
+
+    public getTrackedReactions(): TrackedReaction[] {
+        return [...this.tracker.reactions];
+    }
+
+    public getTracker(): MessageAndReactionTracker {
+        return {
+            messages: [...this.tracker.messages],
+            reactions: [...this.tracker.reactions]
+        };
+    }
+
+    public getMessagesByChannel(channelId: string): TrackedMessage[] {
+        return this.tracker.messages.filter(msg => msg.channelId === channelId);
+    }
+
+    public getReactionsByMessage(messageId: string): TrackedReaction[] {
+        return this.tracker.reactions.filter(reaction => reaction.messageId === messageId);
+    }
+
+    public getReactionsByEmoji(emoji: string): TrackedReaction[] {
+        return this.tracker.reactions.filter(reaction => reaction.emoji === emoji);
+    }
+
+    public clearTracker(): void {
+        this.tracker = {
+            messages: [],
+            reactions: []
+        };
+        Logger.logTest('Message and reaction tracker cleared');
     }
 }
 
