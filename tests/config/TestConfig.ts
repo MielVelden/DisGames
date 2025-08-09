@@ -13,7 +13,7 @@ export class TestConfig {
     private constructor() {
         this._environment = {
             isTestMode: true,
-            databaseUrl: process.env.DATABASE_URL || process.env.TEST_DATABASE_URL || '',
+            databaseUrl: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL || '',
             logLevel: (process.env.TEST_LOG_LEVEL as LogLevel) || LogLevel.ERROR,
             testTimeout: parseInt(process.env.TEST_TIMEOUT || '30000'),
             rollbackTransactions: process.env.TEST_ROLLBACK !== 'false'
