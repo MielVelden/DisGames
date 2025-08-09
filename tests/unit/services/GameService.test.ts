@@ -48,7 +48,7 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                         .withChannel({ id: testChannel });
                     
                     const event = eventBuilder.buildSlashCommandEvent(CommandEnum.GAMES, {
-                        game: 'anagram'
+                        game: GameTypeEnum[GameTypeEnum.ANAGRAM].toLowerCase()
                     });
                     
                     const gameData = await createTestGameAsync({
