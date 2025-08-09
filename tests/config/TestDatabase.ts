@@ -121,7 +121,7 @@ export class TestDatabase {
     public static async reset(): Promise<void> {
         if (TestDatabase._instance) {
             await TestDatabase._instance.closeAsync();
-            TestDatabase._instance = undefined as any;
+            TestDatabase._instance = null!;
         }
     }
 }
