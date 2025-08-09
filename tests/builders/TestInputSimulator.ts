@@ -1,8 +1,11 @@
-import { MultiLingualString } from '../../src/utils/i18n/MultiLangualString';
 import { Games_Settings } from '../../src/interfaces/domain/GameSettings';
 import Logger from '../../src/utils/Logger';
 import { InputQueue, TestInputSimulatorOptions, MessageAndReactionTracker, TrackedMessage, TrackedReaction } from '../interfaces/InputQueueInterface';
 import { Component } from '../../src/interfaces/application/Message';
+import { TestUser } from '../interfaces/UserTestInterface';
+import { TestServer } from '../interfaces/ServerTestInterface';
+import { TestChannel } from '../interfaces/ChannelTestInterface';
+import { TestMessage } from '../interfaces/MessageTestInterface';
 
 export class TestInputSimulator {
     private queue: InputQueue = {
@@ -25,6 +28,64 @@ export class TestInputSimulator {
         messages: [],
         reactions: []
     };
+
+    // State for building mock events
+    private user: TestUser = { id: '1', username: 'TestUser', bot: false };
+    private server: TestServer = { id: '1', name: 'TestServer', languageEnum: 0, points: 0 };
+    private channel: TestChannel = { id: '1', name: 'TestChannel', type: 0 };
+    private message: TestMessage = { id: '1', content: '', authorId: '1', channelId: '1', guildId: '1' };
+
+    public setUser(user: Partial<TestUser>): void {
+        this.user = {
+            id: user.id || this.user.id,
+            username: user.username || this.user.username,
+            bot: user.bot ?? this.user.bot
+        };
+    }
+
+    public getUser(): TestUser {
+        return this.user;
+    }
+
+    public setServer(server: Partial<TestServer>): void {
+        this.server = {
+            id: server.id || this.server.id,
+            name: server.name || this.server.name,
+            languageEnum: server.languageEnum ?? this.server.languageEnum,
+            points: server.points ?? this.server.points
+        };
+    }
+
+    public getServer(): TestServer {
+        return this.server;
+    }
+
+    public setChannel(channel: Partial<TestChannel>): void {
+        this.channel = {
+            id: channel.id || this.channel.id,
+            name: channel.name || this.channel.name,
+            type: channel.type ?? this.channel.type
+        };
+    }
+
+    public getChannel(): TestChannel {
+        return this.channel;
+    }
+
+    public setMessage(message: Partial<TestMessage>): void {
+        this.message = {
+            id: message.id || this.message.id,
+            content: message.content || this.message.content || '',
+            authorId: message.authorId || this.user.id,
+            channelId: message.channelId || this.channel.id,
+            guildId: message.guildId || this.server.id,
+            timestamp: message.timestamp || this.message.timestamp
+        };
+    }
+
+    public getMessage(): TestMessage {
+        return this.message;
+    }
 
     public addSelectMenuResponse(options: TestInputSimulatorOptions): TestInputSimulator {
         this.queue.selectMenuResponses.push(options);
@@ -201,10 +262,11 @@ export class TestInputSimulator {
             channelId,
             content: [...content],
             timestamp: Date.now(),
-            isEdit
+            isEdit,
+            isDeleted: false
         };
         this.tracker.messages.push(trackedMessage);
-        Logger.logTest(`Tracked ${isEdit ? 'edited' : 'new'} message ${id} in channel ${channelId} with ${content.length} components`);
+        Logger.logDebug(`Tracked ${isEdit ? 'edited' : 'new'} message ${id} in channel ${channelId} with ${content.length} components`);
     }
 
     public trackReaction(messageId: string, emoji: string, userId: string, isAdd: boolean = true): void {
@@ -216,7 +278,18 @@ export class TestInputSimulator {
             isAdd
         };
         this.tracker.reactions.push(trackedReaction);
-        Logger.logTest(`Tracked ${isAdd ? 'added' : 'removed'} reaction ${emoji} on message ${messageId} by user ${userId}`);
+        Logger.logDebug(`Tracked ${isAdd ? 'added' : 'removed'} reaction ${emoji} on message ${messageId} by user ${userId}`);
+    }
+
+    public trackDeletedMessage(messageId: string): void {
+        this.tracker.messages.push({
+            id: messageId,
+            channelId: this.channel.id,
+            content: [],
+            timestamp: Date.now(),
+            isEdit: false,
+            isDeleted: true
+        });
     }
 
     public getTrackedMessages(): TrackedMessage[] {

@@ -22,7 +22,7 @@ export class TestDatabase {
 
         await startTransactionAsync();
         this._isInTransaction = true;
-        Logger.logInfo('Test transaction started');
+        Logger.logDebug('Test transaction started');
     }
 
     public async rollbackTransactionAsync(): Promise<void> {
@@ -31,7 +31,7 @@ export class TestDatabase {
 
         await rollbackTransactionAsync();
         this._isInTransaction = false;
-        Logger.logInfo('Test transaction rolled back');
+        Logger.logDebug('Test transaction rolled back');
     }
 
     public async commitTransactionAsync(): Promise<void> {
@@ -40,14 +40,14 @@ export class TestDatabase {
 
         await commitTransactionAsync();
         this._isInTransaction = false;
-        Logger.logInfo('Test transaction committed');
+        Logger.logDebug('Test transaction committed');
     }
 
     public async runQueryAsync(query: string, params?: any[]): Promise<any[]> {
         await validateConnectionAsync();
 
         try {
-            Logger.logInfo(`Query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
+            Logger.logDebug(`Query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
             const rows = await runQueryAsync(query, params);
             
             // For non-SELECT queries (INSERT, UPDATE, DELETE), return empty array

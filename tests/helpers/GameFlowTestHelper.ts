@@ -27,7 +27,7 @@ export class GameFlowTestHelper {
 
     public async startGameAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
-            Logger.logInfo(`Starting game flow test for ${GameTypeEnum[config.gameType]}`);
+            Logger.logDebug(`Starting game flow test for ${GameTypeEnum[config.gameType]}`);
             // Arrange
             // Setup event builder with test data
             this.eventBuilder
@@ -76,7 +76,7 @@ export class GameFlowTestHelper {
             if (!startResult.success || !startResult.game)
                 return startResult;
 
-            Logger.logInfo(`Playing game with ${config.expectedAnswers?.length} answers`);
+            Logger.logDebug(`Playing game with ${config.expectedAnswers?.length} answers`);
 
             // Play through the game with provided answers
             for (let i = 0; i < config.expectedAnswers?.length; i++) {
@@ -95,7 +95,7 @@ export class GameFlowTestHelper {
                 this.results.messages.push(...sentMessages);
                 this.results.timeline.push(...answerEvent.timelineEntries);
 
-                Logger.logInfo(`Processed answer ${i + 1}: "${answer}"`);
+                Logger.logDebug(`Processed answer ${i + 1}: "${answer}"`);
             }
 
             // Get final game state
@@ -119,15 +119,6 @@ export class GameFlowTestHelper {
 
     public async completeGameFlowAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
-            // Get the game module to understand expected answers
-            const gameModule = GameService.getGameByType(config.gameType);
-            if (!gameModule)
-                throw new ComponentError({ message: ExceptionEnum.GAME_MODULE_NOT_FOUND });
-
-            // Use provided expected answers or generate them
-            if(!config.expectedAnswers)
-                config.expectedAnswers = this.generateTestAnswers(config.gameType);
-            
             // Play through with expected answers
             const playResult = await this.playGameAsync(config);
             
@@ -157,7 +148,7 @@ export class GameFlowTestHelper {
                 }
             }
 
-            Logger.logInfo(`Game state verification passed for game ${gameId}`);
+            Logger.logDebug(`Game state verification passed for game ${gameId}`);
             return true;
 
         } catch (error) {
@@ -169,26 +160,9 @@ export class GameFlowTestHelper {
     public async cleanupGameAsync(gameId: number): Promise<void> {
         try {
             await GameRepository.purgeAsync(gameId);
-            Logger.logInfo(`Cleaned up game ${gameId}`);
+            Logger.logDebug(`Cleaned up game ${gameId}`);
         } catch (error) {
-            Logger.logInfo(`Failed to cleanup game ${gameId}: ${(error as Error).message}`);
-        }
-    }
-
-    private generateTestAnswers(gameType: GameTypeEnum): string[] {
-        switch (gameType) {
-            case GameTypeEnum.ANAGRAM:
-                return ['test', 'word', 'game'];
-            case GameTypeEnum.COUNTING:
-                return ['1', '2', '3', '4', '5'];
-            case GameTypeEnum.NUMBER_GUESS:
-                return ['50', '75', '87', '92', '95'];
-            case GameTypeEnum.GUESS_THE_FLAG:
-                return ['netherlands', 'germany', 'france'];
-            case GameTypeEnum.WORD_SNAKE:
-                return ['apple', 'elephant', 'tree'];
-            default:
-                return ['test', 'answer'];
+            Logger.logDebug(`Failed to cleanup game ${gameId}: ${(error as Error).message}`);
         }
     }
 

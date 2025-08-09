@@ -20,6 +20,7 @@ export interface TrackedMessage {
     content: Component[];
     timestamp: number;
     isEdit: boolean;
+    isDeleted: boolean;
 }
 
 export interface TrackedReaction {

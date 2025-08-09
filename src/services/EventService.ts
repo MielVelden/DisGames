@@ -13,7 +13,7 @@ export class EventService {
   // #region Message Delete Tracking
   public static markMessageAsInternallyDeleted(messageId: string): void {
     EventService.internallyDeletedMessages.add(messageId);
-    
+
     // Auto cleanup after 30 seconds to prevent memory leaks
     setTimeout(() => {
       EventService.internallyDeletedMessages.delete(messageId);
@@ -93,13 +93,13 @@ export class EventService {
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
     } else {
-      Logger.logInfo(`No handler found for button: ${interaction.customId}`);
+      Logger.logDebug(`No handler found for button: ${interaction.customId}`);
     }
   }
 
   public static async handleSelectMenuInteraction(interaction: SelectMenuInteractionEvent): Promise<void> {
     const handler = EventService.selectMenuHandlers.get(interaction.customId);
-    Logger.logInfo(`Handling select menu interaction: ${interaction.customId}`);
+    Logger.logDebug(`Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.id) {
         return;
@@ -109,7 +109,7 @@ export class EventService {
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
     } else {
-      Logger.logInfo(`No handler found for select menu: ${interaction.customId}`);
+      Logger.logDebug(`No handler found for select menu: ${interaction.customId}`);
     }
   }
 

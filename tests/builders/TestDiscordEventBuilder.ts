@@ -75,7 +75,6 @@ export class MockDiscordEvent implements InteractionEvent {
     public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
         this.sentMessages.push([...components]);
         
-        // Track the message
         const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         this.inputSimulator.trackMessage(messageId, channelId, components, false);
         
@@ -86,7 +85,6 @@ export class MockDiscordEvent implements InteractionEvent {
         if (content)
             this.editedContent.push(content);
         
-        // Track the edit
         this.inputSimulator.trackMessage(this.messageId, this.channelId, this.components, true);
         
         Logger.logTest(`Edited message: ${content || 'with components'}`);
@@ -95,7 +93,6 @@ export class MockDiscordEvent implements InteractionEvent {
     public async editWithComponentAsync(component: Component): Promise<void> {
         this.components = [component];
         
-        // Track the edit
         this.inputSimulator.trackMessage(this.messageId, this.channelId, [component], true);
         
         Logger.logTest(`Edited message with component`);
@@ -137,23 +134,21 @@ export class MockDiscordEvent implements InteractionEvent {
     }
 
     public async deleteAsync(): Promise<void> {
+        this.inputSimulator.trackDeletedMessage(this.messageId);
         Logger.logTest(`Deleted message ${this.messageId}`);
     }
 
-    // MessageInteractionEvent methods
     public async sendAsync(): Promise<void> {
         Logger.logTest(`Sent message response`);
     }
 
     public async reactAsync(emoji: string): Promise<void> {
-        // Track the reaction
         this.inputSimulator.trackReaction(this.messageId, emoji, this.user.id, true);
         
         Logger.logTest(`Reacted with emoji: ${emoji}`);
     }
 
     public async unreactAsync(emoji: string): Promise<void> {
-        // Track the reaction removal
         this.inputSimulator.trackReaction(this.messageId, emoji, this.user.id, false);
         
         Logger.logTest(`Removed reaction emoji: ${emoji}`);
@@ -166,7 +161,6 @@ export class MockDiscordEvent implements InteractionEvent {
             Logger.logTest(`Replied with no content`);
     }
 
-    // MessageInteractionEvent properties
     public messageDeleted: boolean = false;
     public content: string = '';
 
@@ -179,7 +173,6 @@ export class MockDiscordEvent implements InteractionEvent {
         return event as SelectMenuInteractionEvent;
     }
 
-    // Test helper methods
     public getSentMessages(): Component[][] {
         return this.sentMessages;
     }
@@ -196,7 +189,6 @@ export class MockDiscordEvent implements InteractionEvent {
         this.inputSimulator = simulator;
     }
 
-    // Message and Reaction tracking helper methods
     public getTrackedMessages(): any[] {
         return this.inputSimulator.getTrackedMessages();
     }
@@ -223,57 +215,44 @@ export class MockDiscordEvent implements InteractionEvent {
 }
 
 export class TestDiscordEventBuilder {
-    private testUser: TestUser = {
-        id: '123456789',
-        username: 'testuser'
-    };
-
-    private testServer: TestServer = {
-        id: '987654321',
-        name: 'Test Server',
-        languageEnum: 1,
-        points: 0
-    };
-
-    private testChannel: TestChannel = {
-        id: '555666777',
-        name: 'test-channel',
-        type: 0
-    };
-
-    private testMessage: TestMessage = {
-        id: '111222333',
-        content: 'test message',
-        authorId: '123456789',
-        channelId: '555666777',
-        guildId: '987654321'
-    };
-
     private inputSimulator: TestInputSimulator = new TestInputSimulator();
+    private lastChannelId?: string;
 
     public withUser(user: Partial<TestUser>): TestDiscordEventBuilder {
-        this.testUser = { ...this.testUser, ...user };
+        this.inputSimulator.setUser(user);
         return this;
-    }
+    }   
 
     public withServer(server: Partial<TestServer>): TestDiscordEventBuilder {
-        this.testServer = { ...this.testServer, ...server };
+        this.inputSimulator.setServer(server);
         return this;
     }
 
     public withChannel(channel: Partial<TestChannel>): TestDiscordEventBuilder {
-        this.testChannel = { ...this.testChannel, ...channel };
+        if (channel.id) this.lastChannelId = channel.id;
+        this.inputSimulator.setChannel(channel);
         return this;
     }
 
     public withMessage(message: Partial<TestMessage>): TestDiscordEventBuilder {
-        this.testMessage = { ...this.testMessage, ...message };
+        this.inputSimulator.setMessage(message);
         return this;
     }
 
     public withInputSimulator(simulator: TestInputSimulator): TestDiscordEventBuilder {
+        const current = this.inputSimulator;
         this.inputSimulator = simulator;
+        this.inputSimulator.setUser(current.getUser());
+        this.inputSimulator.setServer(current.getServer());
+        this.inputSimulator.setChannel(current.getChannel());
+        this.inputSimulator.setMessage(current.getMessage());
+        this.lastChannelId = this.inputSimulator.getChannel().id;
         return this;
+    }
+
+    private resolveChannelId(): string {
+        const id = this.inputSimulator.getChannel().id;
+        return (id && id !== '1') ? id : (this.lastChannelId || id);
     }
 
     public buildSlashCommandEvent(commandName: CommandEnum, options: Record<string, any> = {}): MockDiscordEvent {
@@ -290,33 +269,37 @@ export class TestDiscordEventBuilder {
         };
 
         const user: User = {
-            id: this.testUser.id,
-            username: this.testUser.username,
-            displayName: this.testUser.username,
-            bot: this.testUser.bot || false,
+            id: this.inputSimulator.getUser().id,
+            username: this.inputSimulator.getUser().username,
+            displayName: this.inputSimulator.getUser().username,
+            bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
             sendMessageAsync: async () => {}
         };
 
         const server: ServersModel = {
-            Id: parseInt(this.testServer.id),
-            ServerId: this.testServer.id,
-            LanguageEnum: this.testServer.languageEnum,
-            Points: this.testServer.points || 0
+            Id: parseInt(this.inputSimulator.getServer().id),
+            ServerId: this.inputSimulator.getServer().id,
+            LanguageEnum: this.inputSimulator.getServer().languageEnum,
+            Points: this.inputSimulator.getServer().points || 0
         };
+
+        const channelId = this.resolveChannelId();
 
         const mockInteraction = {
             commandName,
             options: new Map(Object.entries(options)),
-            user: { id: this.testUser.id },
-            guild: { id: this.testServer.id },
-            channel: { id: this.testChannel.id },
-            id: this.testMessage.id,
+            user: { id: this.inputSimulator.getUser().id },
+            guild: { id: this.inputSimulator.getServer().id },
+            channel: { id: channelId },
+            id: this.inputSimulator.getMessage().id,
             reply: async () => {},
             editReply: async () => {},
             getOption: (name: string) => options[name]
         };
+
+        this.lastChannelId = channelId;
 
         const event = new MockDiscordEvent(
             EventTypeEnum.SLASH_COMMAND,
@@ -324,9 +307,9 @@ export class TestDiscordEventBuilder {
             mockInteraction,
             user,
             server,
-            this.testChannel.id,
-            this.testServer.id,
-            this.testMessage.id,
+            channelId,
+            this.inputSimulator.getServer().id,
+            this.inputSimulator.getMessage().id,
             this.inputSimulator
         ) as MockEventWithCommand;
 
@@ -336,33 +319,35 @@ export class TestDiscordEventBuilder {
         return event as MockDiscordEvent;
     }
 
-    public buildMessageEvent(content: string = this.testMessage.content, userId?: string): MockDiscordEvent {
+    public buildMessageEvent(content: string = this.inputSimulator.getMessage().content, userId?: string): MockDiscordEvent {
         const user: User = {
-            id: userId || this.testUser.id,
-            username: this.testUser.username,
-            displayName: this.testUser.username,
-            bot: this.testUser.bot || false,
+            id: userId || this.inputSimulator.getUser().id,
+            username: this.inputSimulator.getUser().username,
+            displayName: this.inputSimulator.getUser().username,
+            bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
             sendMessageAsync: async () => {}
         };
 
         const server: ServersModel = {
-            Id: parseInt(this.testServer.id),
-            ServerId: this.testServer.id,
-            LanguageEnum: this.testServer.languageEnum,
-            Points: this.testServer.points || 0
+            Id: parseInt(this.inputSimulator.getServer().id),
+            ServerId: this.inputSimulator.getServer().id,
+            LanguageEnum: this.inputSimulator.getServer().languageEnum,
+            Points: this.inputSimulator.getServer().points || 0
         };
+
+        const channelId = this.resolveChannelId();
 
         const mockMessage = {
             content,
             author: { 
-                id: userId || this.testUser.id,
-                bot: this.testUser.bot || false
+                id: userId || this.inputSimulator.getUser().id,
+                bot: this.inputSimulator.getUser().bot || false
             },
-            channel: { id: this.testChannel.id },
-            guild: { id: this.testServer.id },
-            id: this.testMessage.id,
+            channel: { id: channelId },
+            guild: { id: this.inputSimulator.getServer().id },
+            id: this.inputSimulator.getMessage().id,
             reply: async () => {},
             edit: async () => {},
             delete: async () => {}
@@ -374,9 +359,9 @@ export class TestDiscordEventBuilder {
             mockMessage,
             user,
             server,
-            this.testChannel.id,
-            this.testServer.id,
-            this.testMessage.id,
+            channelId,
+            this.inputSimulator.getServer().id,
+            this.inputSimulator.getMessage().id,
             this.inputSimulator
         );
 
@@ -387,28 +372,30 @@ export class TestDiscordEventBuilder {
 
     public buildButtonEvent(customId: string): MockDiscordEvent {
         const user: User = {
-            id: this.testUser.id,
-            username: this.testUser.username,
-            displayName: this.testUser.username,
-            bot: this.testUser.bot || false,
+            id: this.inputSimulator.getUser().id,
+            username: this.inputSimulator.getUser().username,
+            displayName: this.inputSimulator.getUser().username,
+            bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
             sendMessageAsync: async () => {}
         };
 
         const server: ServersModel = {
-            Id: parseInt(this.testServer.id),
-            ServerId: this.testServer.id,
-            LanguageEnum: this.testServer.languageEnum,
-            Points: this.testServer.points || 0
+            Id: parseInt(this.inputSimulator.getServer().id),
+            ServerId: this.inputSimulator.getServer().id,
+            LanguageEnum: this.inputSimulator.getServer().languageEnum,
+            Points: this.inputSimulator.getServer().points || 0
         };
+
+        const channelId = this.resolveChannelId();
 
         const mockInteraction = {
             customId,
-            user: { id: this.testUser.id },
-            guild: { id: this.testServer.id },
-            channel: { id: this.testChannel.id },
-            id: this.testMessage.id,
+            user: { id: this.inputSimulator.getUser().id },
+            guild: { id: this.inputSimulator.getServer().id },
+            channel: { id: channelId },
+            id: this.inputSimulator.getMessage().id,
             reply: async () => {},
             update: async () => {}
         };
@@ -419,9 +406,9 @@ export class TestDiscordEventBuilder {
             mockInteraction,
             user,
             server,
-            this.testChannel.id,
-            this.testServer.id,
-            this.testMessage.id,
+            channelId,
+            this.inputSimulator.getServer().id,
+            this.inputSimulator.getMessage().id,
             this.inputSimulator
         );
     }

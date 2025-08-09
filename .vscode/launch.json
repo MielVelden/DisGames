@@ -30,6 +30,7 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/tests/TestRunner.ts",
+      "args": ["--debug"],
       "runtimeArgs": ["-r", "ts-node/register"],
       "env": {
         "NODE_ENV": "test",

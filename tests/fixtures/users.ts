@@ -1,6 +1,5 @@
 import { UsersModel, UsersSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import Logger from '../../src/utils/Logger';
-import { DatabaseTestHelper } from '../helpers/DatabaseTestHelper';
 import { TableEnum } from '../../src/interfaces/enums';
 import TestDatabase from '../config/TestDatabase';
 
@@ -44,7 +43,7 @@ export async function createTestUserAsync(overrides: Partial<UsersSaveModel> = {
     // Save user to database
     await TestDatabase.insertAsync(TableEnum.USERS, user);
 
-    Logger.logInfo(`Created test user: ${user.UserId}`);
+    Logger.logDebug(`Created test user: ${user.UserId}`);
     return user;
 }
 

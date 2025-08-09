@@ -1,17 +1,10 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { LogLevel } from '../../src/utils/Logger';
+import { TestEnvironment } from '../interfaces/TestEnvironmentInterface';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.test') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
-
-export interface TestEnvironment {
-    isTestMode: boolean;
-    databaseUrl: string;
-    logLevel: LogLevel;
-    testTimeout: number;
-    rollbackTransactions: boolean;
-}
 
 export class TestConfig {
     private static _instance: TestConfig;

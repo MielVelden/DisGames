@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { InteractionEvent } from '../interfaces/application/Event';
 import { GameEvent } from '../interfaces/domain/Game';
-import { DISCORD_WEBHOOK_URL } from '../config';
+import { DEBUG_MODE, DISCORD_WEBHOOK_URL } from '../config';
 
 export enum LogLevel {
     INFO = 'INFO',
@@ -53,11 +53,14 @@ class Logger {
     }
 
     public static async logDebug(message: string, options?: LoggerOptions): Promise<void> {
-        await this.log(LogLevel.DEBUG, message, undefined, options);
+        if (DEBUG_MODE)
+            await this.log(LogLevel.DEBUG, message, undefined, options);
     }
 
     public static async logTest(message: string): Promise<void> {
-        await this.log(LogLevel.TEST, message);
+        // Only log when in debug mode
+        if (DEBUG_MODE)
+            await this.log(LogLevel.TEST, message);
     }
 
     public static async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {

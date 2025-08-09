@@ -1,7 +1,9 @@
+import { LogLevel } from "../../src/utils/Logger";
+
 export interface TestEnvironment {
     isTestMode: boolean;
-    testDatabaseUrl?: string;
+    databaseUrl: string;
+    logLevel: LogLevel;
+    testTimeout: number;
     rollbackTransactions: boolean;
-    mockDiscordEvents: boolean;
-    logLevel: 'debug' | 'info' | 'warn' | 'error';
 }

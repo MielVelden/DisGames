@@ -44,7 +44,7 @@ export async function createTestServerAsync(overrides: Partial<ServersSaveModel>
     // Save server to database
     await TestDatabase.insertAsync(TableEnum.SERVERS, server);
 
-    Logger.logInfo(`Created test server: ${server.ServerId}`);
+    Logger.logDebug(`Created test server: ${server.ServerId}`);
     return server;
 }
 

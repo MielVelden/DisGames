@@ -1,8 +1,10 @@
 export interface TestCase {
     name: string;
+    description?: string;
     testFunction: () => Promise<void>;
     timeout?: number;
     skip?: boolean;
+    only?: boolean;
 }
 
 export interface TestSuite {
@@ -20,14 +22,14 @@ export interface TestResult {
     test: string;
     success: boolean;
     duration: number;
-    error?: string;
+    error?: Error;
 }
 
 export interface TestRunResults {
-    results: TestResult[];
-    totalTests: number;
-    passedTests: number;
-    failedTests: number;
-    skippedTests: number;
+    total: number;
+    passed: number;
+    failed: number;
+    skipped: number;
     duration: number;
+    results: TestResult[];
 }

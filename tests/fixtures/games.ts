@@ -1,5 +1,4 @@
 import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableInterfaces';
-import { GameSettingType } from '../../src/interfaces/domain';
 import { TableEnum } from '../../src/interfaces/enums';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import Logger from '../../src/utils/Logger';
@@ -77,7 +76,7 @@ export async function createTestGameAsync(overrides: Partial<GamesSaveModel> = {
         game.Id = savedGame.Id;
     }
 
-    Logger.logInfo(`Created test game: ${game.GameTypeEnum} in server: ${game.ServerId}`);
+    Logger.logDebug(`Created test game: ${game.GameTypeEnum} in server: ${game.ServerId}`);
     return game as GamesModel;
 }
 

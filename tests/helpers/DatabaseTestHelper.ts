@@ -50,9 +50,9 @@ export class DatabaseTestHelper {
             const tableName = getTableName(tableEnum);
             try {
                 await TestDatabase.runQueryAsync(`DELETE FROM ${tableName} WHERE 1=1`);
-                Logger.logInfo(`Cleaned test data from table: ${tableName}`);
+                Logger.logDebug(`Cleaned test data from table: ${tableName}`);
             } catch (error) {
-                Logger.logInfo(`Could not clean table ${tableName}: ${(error as Error)?.message}`);
+                Logger.logDebug(`Could not clean table ${tableName}: ${(error as Error)?.message}`);
             }
         }
     }

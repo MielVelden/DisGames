@@ -66,7 +66,7 @@ export async function runQueryAsync(query: string, params?: any[]): Promise<any[
         if (!connection)
             throw new Error('Database connection not established');
 
-        Logger.logInfo(params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
+        Logger.logDebug(params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
         const [rows] = await pool!.query(query, params);
         return rows as any[];
     } catch (err) {
