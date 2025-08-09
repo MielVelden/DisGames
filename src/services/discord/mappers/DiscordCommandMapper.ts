@@ -6,7 +6,7 @@ import { getCommandName } from '../../../utils/Commands';
 class DiscordInteractionMapper {
     public mapCommandToSlashCommandBuilder(command: Command): SlashCommandBuilder {
         const builder = new SlashCommandBuilder()
-            .setName(command.name)
+            .setName(command.name.toString().toLowerCase())
             .setDescription(command.description.getMessage());
 
         if (command.options) {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { InteractionEvent } from '../interfaces/application/Event';
 import { GameEvent } from '../interfaces/domain/Game';
-import { DISCORD_WEBHOOK_URL } from '../config';
+import { DEBUG_MODE, DISCORD_WEBHOOK_URL } from '../config';
 
 export enum LogLevel {
     INFO = 'INFO',
@@ -9,7 +9,8 @@ export enum LogLevel {
     ERROR = 'ERROR',
     DEBUG = 'DEBUG',
     GAME = 'GAME',
-    EVENT = 'EVENT'
+    EVENT = 'EVENT',
+    TEST = 'TEST'
 }
 
 export interface LoggerOptions {
@@ -25,7 +26,8 @@ class Logger {
         [LogLevel.ERROR]: 0xFF0000,     // Red
         [LogLevel.DEBUG]: 0x808080,     // Gray
         [LogLevel.GAME]: 0x9932CC,      // Purple
-        [LogLevel.EVENT]: 0x1E90FF      // Blue
+        [LogLevel.EVENT]: 0x1E90FF,     // Blue
+        [LogLevel.TEST]: 0x00CED1       // DarkTurquoise
     };
 
     private static readonly emojis = {
@@ -34,7 +36,8 @@ class Logger {
         [LogLevel.ERROR]: '❌',
         [LogLevel.DEBUG]: '🔍',
         [LogLevel.GAME]: '🎮',
-        [LogLevel.EVENT]: '⚡'
+        [LogLevel.EVENT]: '⚡',
+        [LogLevel.TEST]: '🧪'
     };
 
     public static async logInfo(message: string, options?: LoggerOptions): Promise<void> {
@@ -50,7 +53,14 @@ class Logger {
     }
 
     public static async logDebug(message: string, options?: LoggerOptions): Promise<void> {
-        await this.log(LogLevel.DEBUG, message, undefined, options);
+        if (DEBUG_MODE)
+            await this.log(LogLevel.DEBUG, message, undefined, options);
+    }
+
+    public static async logTest(message: string): Promise<void> {
+        // Only log when in debug mode
+        if (DEBUG_MODE)
+            await this.log(LogLevel.TEST, message);
     }
 
     public static async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {

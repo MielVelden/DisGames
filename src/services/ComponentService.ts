@@ -59,7 +59,7 @@ class ComponentService {
             ...handlerConfig,
             id: crypto.randomUUID()
         };
-        Logger.logInfo(`Registering component (type: ${type}) with id: ${handler.id}`);
+        Logger.logDebug(`Registering component (type: ${type}) with id: ${handler.id}`);
         EventService.registerHandler(type, handler);
 
         return {

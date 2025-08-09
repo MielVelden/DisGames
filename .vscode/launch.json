@@ -24,6 +24,33 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/tests/TestRunner.ts",
+      "args": ["--debug"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "test",
+        "TS_NODE_PROJECT": "tests/tsconfig.json"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
+      "restart": true,
+      "stopOnEntry": false,
+      "breakOnException": false,
+      "uncaughtExceptionBreakpoints": "never",
+      "exceptionBreakpoints": {
+        "caught": false,
+        "uncaught": false
+      }
     }
   ]
 }

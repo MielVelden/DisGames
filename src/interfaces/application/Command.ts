@@ -1,11 +1,12 @@
 import { LanguageCommandOptionTranslations } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { CommandEnum } from "../enums/commands/CommandEnum";
 import { InteractionEvent, SlashCommandInteractionEvent } from "./Event";
 import { SelectMenu } from "./Message";
 import { Permission } from "./Permission";
 
 export interface Command {
-    name: string;
+    name: CommandEnum;
     description: MultiLingualString;
     
     isSlashCommand: boolean;

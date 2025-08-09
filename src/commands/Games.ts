@@ -12,9 +12,10 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
 import { Games_Settings } from "../interfaces/domain/GameSettings";
+import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 
 export class GamesCommand implements Command {
-    name = "games";
+    name = CommandEnum.GAMES;
     description = new MultiLingualString(i18n.commands.games.description);
     isSlashCommand = true;
     isMessageCommand = false;

@@ -7,6 +7,7 @@ import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../GameService";
 import TimelineBuilder from "../TimelineBuilder";
 import ComponentService from "../ComponentService";
+import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";
 
 export default {
     config: {
@@ -57,7 +58,7 @@ export default {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: "❌"
+                    component: DEFAULT_WRONG_ANSWER_EMOJI
                 });
                 
                 event.addAction({
