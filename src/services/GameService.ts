@@ -29,6 +29,7 @@ import Logger from "../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";
 import { DEBUG_MODE } from "../config";
 import { DEFAULT_ACCEPT_EMOJI } from "../utils/Emojis";
+import TestMode from "../utils/TestMode";
 
 class GameService {
     private games: GameModule[] = [];
@@ -329,7 +330,7 @@ class GameService {
                     break;
                 case GameOptionEnum.SAME_USER_DISABLED:
                     // Skip this option in debug mode
-                    if (DEBUG_MODE)
+                    if (DEBUG_MODE && !TestMode.isEnabled())
                         break;
 
                     if (gameEvent.gameData.LastUser === gameEvent.user.userId) {

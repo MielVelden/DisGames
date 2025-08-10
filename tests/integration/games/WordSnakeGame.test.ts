@@ -7,11 +7,12 @@ import AssertionHelpers from '../../helpers/AssertionHelpers';
 import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI } from '../../../src/utils/Emojis';
 import TestRunner from '../../TestRunner';
 import { TestSuite } from '../../interfaces/TestRunnerInterface';
+import { ExceptionEnum } from '../../../src/interfaces/enums';
 
-export default function registerAnagramGameTests(runner: TestRunner): void {
+export default function registerWordSnakeGameTests(runner: TestRunner): void {
     const suite: TestSuite = {
-        name: 'AnagramGame Integration',
-        description: 'Integration tests for complete Anagram game flows',
+        name: 'WordSnakeGame Integration',
+        description: 'Integration tests for complete WordSnake game flows',
 
         setup: async () => {
             // Setup any test data if needed
@@ -23,18 +24,20 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
 
         tests: [
             {
-                name: 'should complete full anagram game flow successfully',
+                name: 'should complete full word snake game flow successfully',
                 testFunction: async () => {
                     // Arrange
                     const testUser = await createTestUserAsync();
+                    const testUser2 = await createTestUserAsync();
 
                     const inputSimulator = TestInputSimulator.create()
+                        .setGameFirstAnswer('c')
                         .addConfirmation({ value: true, userId: testUser.UserId! }) // Confirm game start
                         .addInput({ value: 'cats', userId: testUser.UserId! }) // First answer
-                        .addCorrectInput({ value: 'star', userId: testUser.UserId! }) // Second answer
-                        .addCorrectInput({ value: 'listen', userId: testUser.UserId! }); // Final answer
+                        .addInput({ value: 'stone', userId: testUser2.UserId! }) // Second answer
+                        .addInput({ value: 'eating', userId: testUser.UserId! }); // Final answer
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
                     const helper = new GameFlowTestHelper();
 
                     // Act
@@ -44,24 +47,27 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                     AssertionHelpers.assertGameFlowSuccess(result, 'Game flow should complete successfully');
                     AssertionHelpers.assertNotNull(result.game, 'Game should exist after completion');
                     AssertionHelpers.assertNotNull(result.finalAnswer, 'Game should have a final answer');
-                    AssertionHelpers.assertNoReactionExists(result.trackedReactions, DEFAULT_WRONG_ANSWER_EMOJI);
+                    AssertionHelpers.assertReactionCount(result.trackedReactions, DEFAULT_ACCEPT_EMOJI, 3);
                     AssertionHelpers.assertNoMessageWasDeleted(result.trackedMessages, testGame.channelId);
                 }
             },
 
             {
-                name: 'should handle incorrect anagram answers',
+                name: 'should handle incorrect word snake answers',
                 testFunction: async () => {
                     // Arrange
                     const testUser = await createTestUserAsync();
+                    const testUser2 = await createTestUserAsync();
 
                     const inputSimulator = TestInputSimulator.create()
+                        .setGameFirstAnswer('c')
                         .addConfirmation({ value: true, userId: testUser.UserId! }) // Confirm game start
-                        .addInput({ value: 'wrong', userId: testUser.UserId! }) // First correct answer
-                        .addInput({ value: 'also_wrong', userId: testUser.UserId! }) // Wrong answer
-                        .addInput({ value: 'also_superwrong', userId: testUser.UserId! }); // Second wrong answer
+                        .addInput({ value: 'cats', userId: testUser.UserId! }) // First correct answer
+                        .addWrongInput({ value: 'wrong', userId: testUser2.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // First wrong answer
+                        .addWrongInput({ value: 'also_wrong', userId: testUser2.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // Second wrong answer
+                        .addWrongInput({ value: 'also_superwrong', userId: testUser.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Double wrong answer
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
                     const helper = new GameFlowTestHelper();
 
                     // Act
@@ -70,7 +76,7 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                     // Assert
                     AssertionHelpers.assertGameFlowSuccess(result, 'Game flow should handle wrong answers');
                     AssertionHelpers.assertNotNull(result.game, 'Game should exist');
-                    AssertionHelpers.assertAnyMessageWasDeleted(result.trackedMessages);
+                    AssertionHelpers.assertTrue(result.game?.Answer === 's', 'Game should end with the correct answer');
                     AssertionHelpers.assertReactionCount(result.trackedReactions, DEFAULT_ACCEPT_EMOJI, 1);
                 }
             }

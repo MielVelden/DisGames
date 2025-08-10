@@ -30,7 +30,7 @@ export type LanguageEnumTranslations<T extends string | number> = {
     }
 };
 
-export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
+type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
     [K in T]: {
         name: LanguageTranslations;
         description: LanguageTranslations;
@@ -41,7 +41,7 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
     }
 }
 
-export interface I18nTranslations {
+interface I18nTranslations {
     common: {
         success: LanguageTranslations;
         cancel: LanguageTranslations;

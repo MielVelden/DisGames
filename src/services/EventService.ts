@@ -2,7 +2,7 @@ import { ButtonHandler, SelectMenuHandler, InteractionEvent, EventTypeEnum, Sele
 import { calculateDuration, DurationEnum, durationToMilliseconds } from '../utils/Duration';
 import Logger from '../utils/Logger';
 
-export const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
+const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
 
 export class EventService {
   private static buttonHandlers: Map<string, ButtonHandler> = new Map();

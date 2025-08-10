@@ -157,45 +157,6 @@ export function createGameSetupConfirmationContainer(
     return baseContainer;
 }
 
-export function createGameSettingsContainer(
-    gameTypeEnum: GameTypeEnum,
-    currentSettings: GameSettingsValues,
-    languageEnum: LanguageEnum = LanguageEnum.NL
-): Container | null {
-    const gameModule = GameService.getGameByType(gameTypeEnum);
-    
-    if (!gameModule?.config.settings) {
-        return null;
-    }
-
-    const settingsComponents = GameService.createSettingsDisplayComponents(
-        gameModule.config.settings,
-        currentSettings,
-        languageEnum,
-        false
-    );
-
-    return {
-        type: ComponentType.CONTAINER,
-        components: [
-            {
-                type: ComponentType.TITLE,
-                content: new MultiLingualString(i18n.commands.games.settings.title)
-            },
-            {
-                type: ComponentType.TEXT_DISPLAY,
-                content: new MultiLingualString(i18n.commands.games.settings.description)
-            },
-            {
-                type: ComponentType.SEPARATOR,
-                divider: true,
-                spacing: 1
-            },
-            ...settingsComponents
-        ]
-    } as Container;
-}
-
 export function createProfileContainer(userId: string): Component[] {
     return [
         {

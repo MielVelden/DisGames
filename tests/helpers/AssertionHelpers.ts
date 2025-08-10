@@ -10,7 +10,7 @@ export class AssertionError extends Error {
     constructor(message: string, expected?: any, actual?: any) {
         super(message);
         this.name = 'AssertionError';
-        
+
         if (expected !== undefined && actual !== undefined) {
             this.message += `\nExpected: ${JSON.stringify(expected)}\n  Actual: ${JSON.stringify(actual)}`;
         }
@@ -23,7 +23,7 @@ export class AssertionHelpers {
             const msg = message || `Expected values to be equal`;
             throw new AssertionError(msg, expected, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'values are equal'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'values are equal'}`);
     }
 
     public static assertNotEqual<T>(actual: T, expected: T, message?: string): void {
@@ -31,7 +31,7 @@ export class AssertionHelpers {
             const msg = message || `Expected values to be different`;
             throw new AssertionError(msg, `not ${expected}`, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'values are different'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'values are different'}`);
     }
 
     public static assertTrue(actual: boolean, message?: string): void {
@@ -39,7 +39,7 @@ export class AssertionHelpers {
             const msg = message || `Expected value to be true`;
             throw new AssertionError(msg, true, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'value is true'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'value is true'}`);
     }
 
     public static assertFalse(actual: boolean, message?: string): void {
@@ -47,7 +47,7 @@ export class AssertionHelpers {
             const msg = message || `Expected value to be false`;
             throw new AssertionError(msg, false, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'value is false'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'value is false'}`);
     }
 
     public static assertNotNull<T>(actual: T | null | undefined, message?: string): void {
@@ -55,7 +55,7 @@ export class AssertionHelpers {
             const msg = message || `Expected value to not be null or undefined`;
             throw new AssertionError(msg, 'not null/undefined', actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'value is not null'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'value is not null'}`);
     }
 
     public static assertNull<T>(actual: T | null | undefined, message?: string): void {
@@ -63,7 +63,7 @@ export class AssertionHelpers {
             const msg = message || `Expected value to be null or undefined`;
             throw new AssertionError(msg, null, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'value is null'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'value is null'}`);
     }
 
     public static assertContains<T>(array: T[], item: T, message?: string): void {
@@ -71,7 +71,7 @@ export class AssertionHelpers {
             const msg = message || `Expected array to contain item`;
             throw new AssertionError(msg, `array containing ${item}`, array);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || 'array contains item'}`);
+        this.logAssertion(`✓ Assertion passed: ${message || 'array contains item'}`);
     }
 
     public static assertArrayLength<T>(array: T[], expectedLength: number, message?: string): void {
@@ -79,7 +79,7 @@ export class AssertionHelpers {
             const msg = message || `Expected array length to be ${expectedLength}`;
             throw new AssertionError(msg, expectedLength, array.length);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || `array length is ${expectedLength}`}`);
+        this.logAssertion(`✓ Assertion passed: ${message || `array length is ${expectedLength}`}`);
     }
 
     public static assertGreaterThan(actual: number, expected: number, message?: string): void {
@@ -87,7 +87,7 @@ export class AssertionHelpers {
             const msg = message || `Expected ${actual} to be greater than ${expected}`;
             throw new AssertionError(msg, `> ${expected}`, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || `${actual} > ${expected}`}`);
+        this.logAssertion(`✓ Assertion passed: ${message || `${actual} > ${expected}`}`);
     }
 
     public static assertLessThan(actual: number, expected: number, message?: string): void {
@@ -95,7 +95,11 @@ export class AssertionHelpers {
             const msg = message || `Expected ${actual} to be less than ${expected}`;
             throw new AssertionError(msg, `< ${expected}`, actual);
         }
-        Logger.logDebug(`✓ Assertion passed: ${message || `${actual} < ${expected}`}`);
+        this.logAssertion(`✓ Assertion passed: ${message || `${actual} < ${expected}`}`);
+    }
+
+    private static logAssertion(message: string): void {
+        Logger.logInfo(message);
     }
 
     // Game-specific assertions
@@ -105,7 +109,7 @@ export class AssertionHelpers {
 
     public static assertGameState(game: GamesModel, expectedState: Partial<GamesModel>, message?: string): void {
         this.assertNotNull(game, 'Game should exist');
-        
+
         for (const [key, expectedValue] of Object.entries(expectedState)) {
             const actualValue = (game as any)[key];
             this.assertEqual(actualValue, expectedValue, message || `Game property ${key} should match`);
@@ -137,8 +141,8 @@ export class AssertionHelpers {
     }
 
     public static assertMessagesContainText(messages: Component[][], searchText: string, message?: string): void {
-        const containsText = messages.some(messageGroup => 
-            messageGroup.some(component => 
+        const containsText = messages.some(messageGroup =>
+            messageGroup.some(component =>
                 JSON.stringify(component).toLowerCase().includes(searchText.toLowerCase())
             )
         );
@@ -157,10 +161,10 @@ export class AssertionHelpers {
             throw new AssertionError(message || 'Expected function to throw an error');
         } catch (error) {
             if (expectedErrorType && (!(error instanceof ComponentError) || error.errorKey !== expectedErrorType)) {
-                const actualErrorType = error instanceof ComponentError ? 
-                    error.errorKey : 
+                const actualErrorType = error instanceof ComponentError ?
+                    error.errorKey :
                     (error as Error).constructor.name;
-                    
+
                 throw new AssertionError(
                     message || `Expected error of type ${expectedErrorType}`,
                     expectedErrorType,
@@ -187,23 +191,23 @@ export class AssertionHelpers {
     }
 
     public static assertMessageWasDeleted(messages: TrackedMessage[] | undefined, channelId: string, messageId: string, message?: string): void {
-        if(!messages)
+        if (!messages)
             throw new AssertionError(message || `Expected messages to exist`);
 
         const wasDeleted = messages.some(msg => msg.channelId === channelId && msg.id === messageId && msg.isDeleted);
         this.assertTrue(wasDeleted, message || `Expected message ${messageId} to be deleted in channel ${channelId}`);
     }
 
-    public static assertNoMessageWasDeleted(messages: TrackedMessage[] | undefined, channelId: string, messageId: string, message?: string): void {
-        if(!messages)
+    public static assertNoMessageWasDeleted(messages: TrackedMessage[] | undefined, channelId: string, message?: string): void {
+        if (!messages)
             throw new AssertionError(message || `Expected messages to exist`);
 
-        const wasDeleted = messages.some(msg => msg.channelId === channelId && msg.id === messageId && msg.isDeleted);
-        this.assertFalse(wasDeleted, message || `Expected message ${messageId} not to be deleted in channel ${channelId}`);
+        const wasDeleted = messages.some(msg => msg.channelId === channelId && msg.isDeleted);
+        this.assertFalse(wasDeleted, message || `Expected message not to be deleted in channel ${channelId}`);
     }
 
     public static assertAnyMessageWasDeleted(messages: TrackedMessage[] | undefined, message?: string): void {
-        if(!messages)
+        if (!messages)
             throw new AssertionError(message || `Expected messages to exist`);
 
         const wasDeleted = messages.some(msg => msg.isDeleted);
@@ -211,7 +215,7 @@ export class AssertionHelpers {
     }
 
     public static assertMessageContainsText(messages: TrackedMessage[], searchText: string, message?: string): void {
-        const containsText = messages.some(msg => 
+        const containsText = messages.some(msg =>
             JSON.stringify(msg.content).toLowerCase().includes(searchText.toLowerCase())
         );
         this.assertTrue(containsText, message || `Expected messages to contain text: "${searchText}"`);
@@ -222,19 +226,19 @@ export class AssertionHelpers {
     }
 
     public static assertReactionExists(reactions: TrackedReaction[] | undefined, emoji: string, messageId?: string, message?: string): void {
-        if(!reactions)
+        if (!reactions)
             throw new AssertionError(message || `Expected reactions to exist`);
 
-        const reactionExists = reactions.some(reaction => 
-            reaction.emoji === emoji && 
-            reaction.isAdd && 
+        const reactionExists = reactions.some(reaction =>
+            reaction.emoji === emoji &&
+            reaction.isAdd &&
             (!messageId || reaction.messageId === messageId)
         );
         this.assertTrue(reactionExists, message || `Expected reaction ${emoji} to exist${messageId ? ` on message ${messageId}` : ''}`);
     }
 
     public static assertReactionCount(reactions: TrackedReaction[] | undefined, emoji: string, expectedCount: number, message?: string): void {
-        if(!reactions)
+        if (!reactions)
             throw new AssertionError(message || `Expected reactions to exist`);
 
         const reactionCount = reactions.filter(reaction => reaction.emoji === emoji && reaction.isAdd).length;
@@ -242,12 +246,12 @@ export class AssertionHelpers {
     }
 
     public static assertNoReactionExists(reactions: TrackedReaction[] | undefined, emoji: string, messageId?: string, message?: string): void {
-        if(!reactions)
+        if (!reactions)
             throw new AssertionError(message || `Expected reactions to exist`);
 
-        const reactionExists = reactions.some(reaction => 
-            reaction.emoji === emoji && 
-            reaction.isAdd && 
+        const reactionExists = reactions.some(reaction =>
+            reaction.emoji === emoji &&
+            reaction.isAdd &&
             (!messageId || reaction.messageId === messageId)
         );
         this.assertFalse(reactionExists, message || `Expected no reaction ${emoji}${messageId ? ` on message ${messageId}` : ''}`);

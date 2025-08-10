@@ -113,19 +113,7 @@ export const GAME_TEST_SETTINGS: Partial<Record<GameTypeEnum, any>> = {
     }
 };
 
-export async function createGameWithCorrectAnswerAsync(gameType: GameTypeEnum): Promise<GamesSaveModel> {
-    const answers = GAME_TEST_ANSWERS[gameType] || ['test'];
-    const settings = GAME_TEST_SETTINGS[gameType] || {};
-    
-    return await createTestGameAsync({
-        GameTypeEnum: gameType,
-        Answer: answers[0],
-        SettingsJSON: settings as any
-    });
-}
-
-export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimulator?: TestInputSimulator): Promise<GameFlowTestConfig> {
-    const answers = GAME_TEST_ANSWERS[gameType] || ['test'];
+export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimulator: TestInputSimulator): Promise<GameFlowTestConfig> {
     const settings = GAME_TEST_SETTINGS[gameType] || {};
     
     const testServer = await createTestServerAsync();
@@ -136,7 +124,6 @@ export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimu
         channelId: testChannelId,
         serverId: testServer.ServerId || TEST_SERVER_IDS.MAIN_SERVER,
         userId: TEST_USER_IDS.PLAYER1,
-        expectedAnswers: answers.slice(0, 3),
         settings: settings,
         inputSimulator: inputSimulator
     };
@@ -149,5 +136,5 @@ export default {
     GAME_TEST_SETTINGS,
     getTestGame,
     createTestGame: createTestGameAsync,
-    createGameWithCorrectAnswer: createGameWithCorrectAnswerAsync
+    createGameFlowTestConfig: createGameFlowTestConfig
 };

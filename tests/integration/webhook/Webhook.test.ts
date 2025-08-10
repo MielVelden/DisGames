@@ -7,11 +7,11 @@ export default function registerWebhookTests(runner: TestRunner): void {
 
     const suite: TestSuite = {
         name: 'Discord Webhook',
-        description: 'Verstuurt een testbericht naar een Discord test-webhook en verwacht een 2xx/204 respons',
+        description: 'sends a test message to a Discord test-webhook and expects a 2xx/204 response',
         tests: [
             {
                 name: 'should send a test webhook message successfully',
-                description: 'Stuurt een simpele content payload naar de test-webhook URL',
+                description: 'sends a simple content payload to the test-webhook URL',
                 skip: !testWebhookUrl,
                 timeout: 10000,
                 testFunction: async () => {

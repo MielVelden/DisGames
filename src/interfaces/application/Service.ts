@@ -1,3 +1,3 @@
-export interface IService {
-    initialize(): void;
-}
+// export interface IService {
+//     initialize(): void;
+// }

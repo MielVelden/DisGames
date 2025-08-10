@@ -19,9 +19,6 @@ const functionEnumFileName = 'FunctionEnum.ts';
 const storedProcedureEnumFilePath = databaseEnumLocation + storedProcedureEnumFileName;
 const functionEnumFilePath = databaseEnumLocation + functionEnumFileName;
 
-// Export utilities for other modules
-export const { isMultiLingualString, removeMultiLingualStringSuffix } = SchemaUtils;
-
 async function main() {
     try {
         await DatabaseConnection.createConnection();

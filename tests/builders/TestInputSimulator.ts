@@ -1,6 +1,5 @@
-import { Games_Settings } from '../../src/interfaces/domain/GameSettings';
 import Logger from '../../src/utils/Logger';
-import { InputQueue, TestInputSimulatorOptions, MessageAndReactionTracker, TrackedMessage, TrackedReaction } from '../interfaces/InputQueueInterface';
+import { InputQueue, TestInputSimulatorOptions, MessageAndReactionTracker, TrackedMessage, TrackedReaction, TestInputSimulatorType } from '../interfaces/InputQueueInterface';
 import { Component } from '../../src/interfaces/application/Message';
 import { TestUser } from '../interfaces/UserTestInterface';
 import { TestServer } from '../interfaces/ServerTestInterface';
@@ -8,6 +7,8 @@ import { TestChannel } from '../interfaces/ChannelTestInterface';
 import { TestMessage } from '../interfaces/MessageTestInterface';
 
 export class TestInputSimulator {
+
+    private gameFirstAnswer: string = '';
     private queue: InputQueue = {
         selectMenuResponses: [],
         buttonResponses: [],
@@ -183,7 +184,7 @@ export class TestInputSimulator {
 
         const response = responses[index];
         this.currentIndex.inputResponses++;
-        Logger.logTest(`Simulated input response: ${response.value}`);
+        Logger.logTest(`Simulated input response: ${response.value} (${response.type})`);
         return response;
     }
 
@@ -235,24 +236,37 @@ export class TestInputSimulator {
     }
 
     // Convenience methods for chaining
-    public expectSelectMenu(value: string, userId: string): TestInputSimulator {
-        return this.addSelectMenuResponse({ value, userId });
+    public setGameFirstAnswer(answer: string): TestInputSimulator {
+        this.gameFirstAnswer = answer;
+        return this;
     }
 
-    public expectButton(value: string, userId: string): TestInputSimulator {
-        return this.addButtonResponse({ value, userId });
+    public addSelectMenu(selectMenu: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addSelectMenuResponse({ ...selectMenu, type: TestInputSimulatorType.SELECT_MENU });
     }
 
-    public expectConfirmation(value: boolean, userId: string): TestInputSimulator {
-        return this.addConfirmationResponse({ value: value, userId });
+    public addButton(button: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addButtonResponse({ ...button, type: TestInputSimulatorType.BUTTON });
     }
 
-    public expectInput(value: string, userId: string): TestInputSimulator {
-        return this.addInputResponse({ value, userId });
+    public addConfirmation(confirmation: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addConfirmationResponse({ ...confirmation, type: TestInputSimulatorType.CONFIRMATION });
     }
 
-    public expectSettings(settings: Games_Settings, userId: string): TestInputSimulator {
-        return this.addSettingsResponse({ value: settings, userId });
+    public addInput(input: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addInputResponse({ ...input, type: TestInputSimulatorType.INPUT });
+    }
+
+    public addCorrectInput(input: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addInputResponse({ ...input, type: TestInputSimulatorType.CORRECT_INPUT });
+    }
+
+    public addWrongInput(input: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addInputResponse({ ...input, type: TestInputSimulatorType.WRONG_INPUT });
+    }
+
+    public addSettings(settings: Omit<TestInputSimulatorOptions, 'type'>): TestInputSimulator {
+        return this.addSettingsResponse({ ...settings, type: TestInputSimulatorType.SETTINGS });
     }
 
     // Message and Reaction tracking methods
@@ -317,6 +331,10 @@ export class TestInputSimulator {
 
     public getReactionsByEmoji(emoji: string): TrackedReaction[] {
         return this.tracker.reactions.filter(reaction => reaction.emoji === emoji);
+    }
+
+    public getGameFirstAnswer(): string {
+        return this.gameFirstAnswer;
     }
 
     public clearTracker(): void {

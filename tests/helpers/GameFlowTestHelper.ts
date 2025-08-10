@@ -9,6 +9,8 @@ import { GameFlowTestConfig, GameFlowTestResult } from '../interfaces/GameFlowIn
 import { ComponentError } from '../../src/utils/ErrorHelper';
 import { ExceptionEnum } from '../../src/interfaces/enums';
 import { createTestGameAsync } from '../fixtures/games';
+import { TestInputSimulatorType } from '../interfaces/InputQueueInterface';
+import AssertionHelpers from './AssertionHelpers';
 
 export class GameFlowTestHelper {
     private eventBuilder: TestDiscordEventBuilder;
@@ -25,7 +27,7 @@ export class GameFlowTestHelper {
         };
     }
 
-    public async startGameAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
+    public async startGameAsync(config: GameFlowTestConfig, firstAnswer?: string): Promise<GameFlowTestResult> {
         try {
             Logger.logDebug(`Starting game flow test for ${GameTypeEnum[config.gameType]}`);
             // Arrange
@@ -49,7 +51,7 @@ export class GameFlowTestHelper {
                 ServerId: config.serverId,
                 GameTypeEnum: config.gameType,
                 SettingsJSON: config.settings || {},
-                Answer: config.expectedAnswers?.[0] || ''
+                Answer: config.inputSimulator.getGameFirstAnswer() || firstAnswer || ''
             };
             const game = await createTestGameAsync(gameSaveModel);
             this.results.game = game;
@@ -71,31 +73,53 @@ export class GameFlowTestHelper {
 
     public async playGameAsync(config: GameFlowTestConfig): Promise<GameFlowTestResult> {
         try {
+            // Get the first answer from the input simulator
+            var input = config.inputSimulator.getNextInputResponse();
+            var firstAnswer = input?.value as string;
+
             // Start the game first
-            const startResult = await this.startGameAsync(config);
+            const startResult = await this.startGameAsync(config, firstAnswer);
             if (!startResult.success || !startResult.game)
                 return startResult;
 
-            Logger.logDebug(`Playing game with ${config.expectedAnswers?.length} answers`);
+            var remainingAnswers = config.inputSimulator.getRemainingResponseCounts().inputResponses + 1;
+            Logger.logDebug(`Playing game with ${remainingAnswers} answers`);
 
             // Play through the game with provided answers
-            for (let i = 0; i < config.expectedAnswers?.length; i++) {
-                const input = config.inputSimulator?.getNextInputResponse();
-                const answer = input?.value as string;
+            for (let i = 0; i < remainingAnswers; i++) {
+                if (!input)
+                    break;
+
+                var answer = input?.value as string;
                 const userId = input?.userId;
+
+                if (input.type === TestInputSimulatorType.CORRECT_INPUT) {
+                    var correctInput = await GameRepository.getByIDAsync(startResult.game.Id);
+                    if (correctInput)
+                        answer = correctInput.Answer;
+                }
 
                 // Create message event for player answer
                 const answerEvent = this.eventBuilder.buildMessageEvent(answer, userId);
-                
-                // Handle the game interaction
-                await GameService.handleGameAsync(answerEvent);
-                
+
+                if (input.type === TestInputSimulatorType.WRONG_INPUT) {
+                    AssertionHelpers.assertThrowsAsync(async () => {
+                        await GameService.handleGameAsync(answerEvent);
+                    }, input.expectedException, `Expected wrong answer ${answer} to throw ${input.expectedException} exception`);
+                } else {
+                    // Handle the game interaction
+                    await GameService.handleGameAsync(answerEvent);
+                }
+
                 // Collect results
                 const sentMessages = answerEvent.getSentMessages();
                 this.results.messages.push(...sentMessages);
                 this.results.timeline.push(...answerEvent.timelineEntries);
 
-                Logger.logDebug(`Processed answer ${i + 1}: "${answer}"`);
+                Logger.logDebug(`Processed answer ${i}: "${answer}"`);
+
+                // Get the next answer from the input simulator
+                input = config.inputSimulator.getNextInputResponse();
             }
 
             // Get final game state
@@ -121,7 +145,7 @@ export class GameFlowTestHelper {
         try {
             // Play through with expected answers
             const playResult = await this.playGameAsync(config);
-            
+
             return playResult;
         } catch (error) {
             Logger.logError('Complete game flow test failed', error as ComponentError);
@@ -178,44 +202,6 @@ export class GameFlowTestHelper {
             timeline: [],
             errors: []
         };
-    }
-
-    public static async createAndStartGame(
-        gameType: GameTypeEnum, 
-        options: Partial<GameFlowTestConfig> = {}
-    ): Promise<GameFlowTestHelper> {
-        const helper = new GameFlowTestHelper();
-        const config: GameFlowTestConfig = {
-            gameType,
-            channelId: options.channelId || '123456789',
-            serverId: options.serverId || '987654321',
-            userId: options.userId || '555666777',
-            expectedAnswers: options.expectedAnswers || [],
-            settings: options.settings,
-            inputSimulator: options.inputSimulator
-        };
-
-        await helper.startGameAsync(config);
-        return helper;
-    }
-
-    public static async testCompleteGameFlow(
-        gameType: GameTypeEnum,
-        expectedAnswers: string[],
-        options: Partial<GameFlowTestConfig> = {}
-    ): Promise<GameFlowTestResult> {
-        const helper = new GameFlowTestHelper();
-        const config: GameFlowTestConfig = {
-            gameType,
-            channelId: options.channelId || '123456789',
-            serverId: options.serverId || '987654321',
-            userId: options.userId || '555666777',
-            expectedAnswers,
-            settings: options.settings,
-            inputSimulator: options.inputSimulator
-        };
-
-        return await helper.completeGameFlowAsync(config);
     }
 }
 

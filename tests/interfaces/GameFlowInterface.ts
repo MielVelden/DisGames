@@ -10,9 +10,8 @@ export interface GameFlowTestConfig {
     channelId: string;
     serverId: string;
     userId: string;
-    expectedAnswers: string[];
     settings?: any;
-    inputSimulator?: TestInputSimulator;
+    inputSimulator: TestInputSimulator;
 }
 
 export interface GameFlowTestResult {

@@ -33,5 +33,9 @@
     "@types/node-schedule": "^2.1.7",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"
+  },
+  "findUnusedExports": {
+    "include": [ "./src/**/*.ts", "./tests/**/*.test.ts" ],
+    "exclude": [ "./node_modules/**/*", "./dist/**/*" ]
   }
 }

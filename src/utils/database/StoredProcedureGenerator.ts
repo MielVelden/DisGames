@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import mysql from 'mysql2/promise';
 import { DatabaseConnection } from './DatabaseConnection';
 import { SchemaUtils } from './SchemaUtils';
 import Logger from '../Logger';

@@ -3,6 +3,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import TestConfig from './config/TestConfig';
+import TestMode from '../src/utils/TestMode';
 import DatabaseTestHelper from './helpers/DatabaseTestHelper';
 import Logger from '../src/utils/Logger';
 import { TestSuite, TestResult, TestRunResults, TestCase } from './interfaces/TestRunnerInterface';
@@ -19,7 +20,7 @@ export class TestRunner {
 
     public async runAllAsync(): Promise<TestRunResults> {
         Logger.logTest('=====================================');
-        
+
         const startTime = Date.now();
         let totalTests = 0;
         let passedTests = 0;
@@ -65,7 +66,7 @@ export class TestRunner {
         }
 
         const totalDuration = Date.now() - startTime;
-        
+
         // Print final results
         this.printFinalResults({
             total: totalTests,
@@ -130,7 +131,7 @@ export class TestRunner {
 
     private async runTestAsync(suite: TestSuite, test: TestCase): Promise<TestResult> {
         const startTime = Date.now();
-        
+
         try {
             // Run beforeEach
             if (suite.beforeEach) {
@@ -140,7 +141,7 @@ export class TestRunner {
             // Start database transaction
             await DatabaseTestHelper.startTestCaseAsync();
 
-            if(this.debugMode) {
+            if (this.debugMode) {
                 // Run the actual test without timeout
                 await test.testFunction();
             } else {
@@ -150,7 +151,7 @@ export class TestRunner {
             }
 
             const duration = Date.now() - startTime;
-            Logger.logInfo(`  ✅ ${test.name} (${duration}ms)`);
+            Logger.logInfo(`✅ ${test.name} (${duration}ms)`);
 
             return {
                 suite: suite.name,
@@ -161,8 +162,8 @@ export class TestRunner {
 
         } catch (error) {
             const duration = Date.now() - startTime;
-            Logger.logInfo(`  ❌ ${test.name} (${duration}ms)`);
-            Logger.logInfo(`     Error: ${(error as Error).message}`);
+            Logger.logInfo(`❌ ${test.name} (${duration}ms)`);
+            Logger.logInfo(`   Error: ${(error as Error).message}`);
 
             return {
                 suite: suite.name,
@@ -182,7 +183,7 @@ export class TestRunner {
                     await suite.afterEach();
                 }
             } catch (error) {
-                Logger.logError(`⚠️  Test cleanup failed for ${test.name}:`, error as Error);
+                Logger.logError(`⚠️ Test cleanup failed for ${test.name}:`, error as Error);
             }
         }
     }
@@ -206,19 +207,19 @@ export class TestRunner {
 
     private async setupTestEnvironmentAsync(): Promise<void> {
         Logger.logTest('🔧 Setting up test environment...');
-        
+
         // Setup database for testing
         await DatabaseTestHelper.setupForTestAsync();
-        
+
         Logger.logTest('✅ Test environment ready');
     }
 
     private async teardownTestEnvironmentAsync(): Promise<void> {
         Logger.logTest('🧹 Cleaning up test environment...');
-        
+
         // Cleanup database
         await DatabaseTestHelper.teardownAsync();
-        
+
         Logger.logTest('✅ Test environment cleaned up');
     }
 
@@ -234,42 +235,45 @@ export class TestRunner {
     private printSuiteResults(suiteName: string, stats: { total: number; passed: number; failed: number; skipped: number }): void {
         const { total, passed, failed, skipped } = stats;
         const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-        
-        Logger.logInfo(`   📊 Results: ${passed}/${total} passed (${passRate}%)`);
-        if (failed > 0) Logger.logInfo(`      ❌ Failed: ${failed}`);
-        if (skipped > 0) Logger.logInfo(`      ⏭️  Skipped: ${skipped}`);
+
+        Logger.logInfo(`📊 Results: ${passed}/${total} passed (${passRate}%)`);
+        if (failed > 0)
+            Logger.logInfo(`❌ Failed: ${failed}`);
+
+        if (skipped > 0)
+            Logger.logInfo(`⏭️ Skipped: ${skipped}`);
     }
 
     private printFinalResults(results: TestRunResults): void {
         Logger.logInfo('=====================================');
         Logger.logInfo('📈 Final Test Results');
         Logger.logInfo('=====================================');
-        
+
         const { total, passed, failed, skipped, duration } = results;
         const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-        
+
         Logger.logInfo(`Total Tests: ${total}`);
         Logger.logInfo(`✅ Passed: ${passed} (${passRate}%)`);
         Logger.logInfo(`❌ Failed: ${failed}`);
-        Logger.logInfo(`⏭️  Skipped: ${skipped}`);
-        Logger.logInfo(`⏱️  Duration: ${duration}ms`);
-        
+        Logger.logInfo(`⏭️ Skipped: ${skipped}`);
+        Logger.logInfo(`⏱️ Duration: ${duration}ms`);
+
         if (failed > 0) {
             Logger.logInfo('💥 Failed Tests:');
             results.results
                 .filter(r => !r.success && r.error?.message !== 'Test skipped')
                 .forEach(result => {
-                    Logger.logInfo(`   ${result.suite} → ${result.test}`);
-                    Logger.logInfo(`      ${result.error?.message}`);
+                    Logger.logInfo(`${result.suite} → ${result.test}`);
+                    Logger.logInfo(`  ${result.error?.message}`);
                 });
         }
-        
+
         Logger.logInfo(failed === 0 ? '🎉 All tests passed!' : '💔 Some tests failed');
     }
 
     public async loadTestFiles(directory: string): Promise<void> {
         const testFiles = this.findTestFiles(directory);
-        
+
         for (const file of testFiles) {
             try {
                 const testModule = await import(file);
@@ -284,24 +288,24 @@ export class TestRunner {
 
     private findTestFiles(directory: string): string[] {
         const files: string[] = [];
-        
+
         if (!fs.existsSync(directory)) {
             return files;
         }
-        
+
         const items = fs.readdirSync(directory);
-        
+
         for (const item of items) {
             const fullPath = path.join(directory, item);
             const stat = fs.statSync(fullPath);
-            
+
             if (stat.isDirectory()) {
                 files.push(...this.findTestFiles(fullPath));
             } else if (item.endsWith('.test.ts') || item.endsWith('.spec.ts')) {
                 files.push(fullPath);
             }
         }
-        
+
         return files;
     }
 
@@ -313,8 +317,9 @@ export class TestRunner {
 // Main execution function
 async function main(): Promise<void> {
     const args = process.argv.slice(2);
+    TestMode.enable();
     const runner = new TestRunner();
-    
+
     try {
         // Load test files based on arguments
         if (args.includes('--unit')) {
@@ -328,20 +333,22 @@ async function main(): Promise<void> {
         }
 
         // Debug mode
-        if(args.includes('--debug')) {
+        if (args.includes('--debug')) {
             Logger.logTest('🐛 Debug mode enabled');
             runner.enableDebugMode();
         }
-        
+
         // Run all loaded tests
         const results = await runner.runAllAsync();
-        
+
         // Exit with appropriate code
         process.exit(results.failed > 0 ? 1 : 0);
-        
+
     } catch (error) {
         Logger.logError('❌ Test runner failed:', error as Error);
         process.exit(1);
+    } finally {
+        TestMode.disable();
     }
 }
 
