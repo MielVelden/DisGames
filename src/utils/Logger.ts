@@ -2,6 +2,10 @@ import axios from 'axios';
 import { InteractionEvent } from '../interfaces/application/Event';
 import { GameEvent } from '../interfaces/domain/Game';
 import { DEBUG_MODE, DISCORD_WEBHOOK_URL } from '../config';
+import { TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
+import { TableEnum } from '../interfaces/enums';
+import { RepositoryUtils } from '../repositories/BaseRepository';
+import { FunctionEnum } from '../interfaces/enums/database/FunctionEnum';
 
 export enum LogLevel {
     INFO = 'INFO',
@@ -66,7 +70,7 @@ class Logger {
     public static async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {
         const template = this.createEventTemplate(event, message);
         await this.sendDiscordEmbed(template, LogLevel.EVENT, options);
-        
+
         if (options?.sendToConsole !== false) {
             console.log(`[${LogLevel.EVENT}] ${message} - User: ${event.user.displayName}, Guild: ${event.guildId}`);
         }
@@ -75,7 +79,7 @@ class Logger {
     public static async logGameEvent(gameEvent: GameEvent, message: string, options?: LoggerOptions): Promise<void> {
         const template = this.createGameEventTemplate(gameEvent, message);
         await this.sendDiscordEmbed(template, LogLevel.GAME, options);
-        
+
         if (options?.sendToConsole !== false) {
             console.log(`[${LogLevel.GAME}] ${message} - Game: ${gameEvent.gameConfig.name.getMessage()}, User: ${gameEvent.user.displayName}`);
         }
@@ -84,7 +88,7 @@ class Logger {
     public static async logGameError(gameEvent: GameEvent, error: Error, options?: LoggerOptions): Promise<void> {
         const template = this.createGameErrorTemplate(gameEvent, error);
         await this.sendDiscordEmbed(template, LogLevel.ERROR, options);
-        
+
         if (options?.sendToConsole !== false) {
             console.error(`[${LogLevel.ERROR}] Game Error - ${error.message}`, error.stack);
         }
@@ -93,10 +97,18 @@ class Logger {
     public static async logEventError(event: InteractionEvent, error: Error, options?: LoggerOptions): Promise<void> {
         const template = this.createEventErrorTemplate(event, error);
         await this.sendDiscordEmbed(template, LogLevel.ERROR, options);
-        
+
         if (options?.sendToConsole !== false) {
             console.error(`[${LogLevel.ERROR}] Event Error - ${error.message}`, error.stack);
         }
+    }
+
+    public static async logTimeline(timeline: TimelineEntriesSaveModel, options?: LoggerOptions): Promise<void> {
+        const template = await this.createTimelineTemplate(timeline);
+        await this.sendDiscordEmbed(template, LogLevel.DEBUG, {
+            sendToDiscord: DEBUG_MODE,
+            ...options
+        });
     }
 
     private static async log(level: LogLevel, message: string, error?: Error, options?: LoggerOptions): Promise<void> {
@@ -108,10 +120,10 @@ class Logger {
         const finalOptions = { ...defaultOptions, ...options };
 
         if (finalOptions.sendToConsole) {
-            const logFunction = level === LogLevel.ERROR ? console.error : 
-                               level === LogLevel.WARNING ? console.warn : console.log;
+            const logFunction = level === LogLevel.ERROR ? console.error :
+                level === LogLevel.WARNING ? console.warn : console.log;
             logFunction(`[${level}] ${message}${error ? `: ${error.message}` : ''}`);
-            
+
             if (error && finalOptions.includeStackTrace) {
                 console.error(error.stack);
             }
@@ -137,7 +149,7 @@ class Logger {
                 },
                 {
                     name: 'User',
-                    value: `${event.user.displayName} (${event.user.id})`,
+                    value: `${event.user.displayName} (${event.user.userId})`,
                     inline: true
                 },
                 {
@@ -181,7 +193,7 @@ class Logger {
                 },
                 {
                     name: 'Player',
-                    value: `${gameEvent.user.displayName} (${gameEvent.user.id})`,
+                    value: `${gameEvent.user.displayName} (${gameEvent.user.userId})`,
                     inline: true
                 },
                 {
@@ -230,7 +242,7 @@ class Logger {
                 },
                 {
                     name: 'Player',
-                    value: `${gameEvent.user.displayName} (${gameEvent.user.id})`,
+                    value: `${gameEvent.user.displayName} (${gameEvent.user.userId})`,
                     inline: true
                 },
                 {
@@ -269,7 +281,7 @@ class Logger {
                 },
                 {
                     name: 'User',
-                    value: `${event.user.displayName} (${event.user.id})`,
+                    value: `${event.user.displayName} (${event.user.userId})`,
                     inline: true
                 },
                 {
@@ -295,6 +307,62 @@ class Logger {
             ],
             footer: {
                 text: 'DisGames Error Logger'
+            }
+        };
+    }
+
+    private static async createTimelineTemplate(timeline: TimelineEntriesSaveModel): Promise<any> {
+        const formatFieldValueAsync = async (value: unknown, table?: TableEnum): Promise<string> => {
+            if (value === null || value === undefined)
+                return 'N/A';
+
+            if (typeof value === 'object') {
+                const json = JSON.stringify(value, null, 2) ?? '{}';
+                const clipped = json.length > 1000 ? json.slice(0, 1000) + '…' : json;
+                return '```json\n' + clipped + '\n```';
+            }
+            const str = String(value);
+            if (table) {
+                const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.Getdisplayname, [table, value]);
+                return result;
+            }
+            return str.length > 1024 ? str.slice(0, 1021) + '…' : str;
+        };
+
+        return {
+            title: `${this.emojis[LogLevel.DEBUG]} Timeline`,
+            description: `New timeline entry`,
+            color: this.colors[LogLevel.DEBUG],
+            timestamp: new Date().toISOString(),
+            fields: [
+                {
+                    name: 'TableEnum-ObjectID',
+                    value: `${await formatFieldValueAsync(timeline.TableEnum)}-${await formatFieldValueAsync(timeline.ObjectId)}`,
+                    inline: false
+                },
+                {
+                    name: 'Timeline Type',
+                    value: await formatFieldValueAsync(timeline.TimelineType),
+                    inline: true
+                },
+                {
+                    name: 'Changes',
+                    value: await formatFieldValueAsync(timeline.ChangesJSON),
+                    inline: false
+                },
+                {
+                    name: 'User',
+                    value: await formatFieldValueAsync(timeline.UserId, TableEnum.USERS),
+                    inline: true
+                },
+                {
+                    name: 'Server',
+                    value: await formatFieldValueAsync(timeline.ServerId, TableEnum.SERVERS),
+                    inline: true
+                }
+            ],
+            footer: {
+                text: 'DisGames Timeline Logger'
             }
         };
     }

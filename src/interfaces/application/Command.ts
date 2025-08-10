@@ -41,6 +41,7 @@ export interface CommandOptionFollowUpConfig<TKey extends string = string> {
     type: CommandOptionFollowUpType;
     key: TKey;
     configAsync(event: SlashCommandInteractionEvent): Promise<SelectMenu>;
+    emptyReply?: MultiLingualString;
 }
 
 export interface CommandOption {

@@ -4,6 +4,15 @@ import ComponentService from "../services/ComponentService";
 import { i18n } from "./i18n/i18n";
 import { MultiLingualString } from "./i18n/MultiLangualString";
 
+export function isSelectMenuEmpty(selectMenu: SelectMenu): boolean {
+    switch(selectMenu.type) {
+        case ComponentType.STRING_SELECT:
+            return selectMenu.options.length === 0;
+        default:
+            return false;
+    }
+}
+
 export function createGamesSelectMenu(gameModules: GameModule[]): SelectMenu {
     return ComponentService.createSelectMenu({
         custom_id: "game",

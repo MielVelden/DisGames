@@ -143,13 +143,13 @@ export class MockDiscordEvent implements InteractionEvent {
     }
 
     public async reactAsync(emoji: string): Promise<void> {
-        this.inputSimulator.trackReaction(this.messageId, emoji, this.user.id, true);
+        this.inputSimulator.trackReaction(this.messageId, emoji, this.user.userId, true);
         
         Logger.logTest(`Reacted with emoji: ${emoji}`);
     }
 
     public async unreactAsync(emoji: string): Promise<void> {
-        this.inputSimulator.trackReaction(this.messageId, emoji, this.user.id, false);
+        this.inputSimulator.trackReaction(this.messageId, emoji, this.user.userId, false);
         
         Logger.logTest(`Removed reaction emoji: ${emoji}`);
     }
@@ -269,7 +269,8 @@ export class TestDiscordEventBuilder {
         };
 
         const user: User = {
-            id: this.inputSimulator.getUser().id,
+            id: null,
+            userId: this.inputSimulator.getUser().id,
             username: this.inputSimulator.getUser().username,
             displayName: this.inputSimulator.getUser().username,
             bot: this.inputSimulator.getUser().bot || false,
@@ -321,7 +322,8 @@ export class TestDiscordEventBuilder {
 
     public buildMessageEvent(content: string = this.inputSimulator.getMessage().content, userId?: string): MockDiscordEvent {
         const user: User = {
-            id: userId || this.inputSimulator.getUser().id,
+            id: null,
+            userId: userId || this.inputSimulator.getUser().id,
             username: this.inputSimulator.getUser().username,
             displayName: this.inputSimulator.getUser().username,
             bot: this.inputSimulator.getUser().bot || false,
@@ -372,7 +374,8 @@ export class TestDiscordEventBuilder {
 
     public buildButtonEvent(customId: string): MockDiscordEvent {
         const user: User = {
-            id: this.inputSimulator.getUser().id,
+            id: null,
+            userId: this.inputSimulator.getUser().id,
             username: this.inputSimulator.getUser().username,
             displayName: this.inputSimulator.getUser().username,
             bot: this.inputSimulator.getUser().bot || false,

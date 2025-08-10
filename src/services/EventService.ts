@@ -86,7 +86,7 @@ export class EventService {
   public static async handleButtonInteraction(interaction: InteractionEvent): Promise<void> {
     const handler = EventService.buttonHandlers.get(interaction.customId);
     if (handler) {
-      if (handler.userId && handler.userId !== interaction.user.id) {
+      if (handler.userId && handler.userId !== interaction.user.userId) {
         return;
       }
 
@@ -101,7 +101,7 @@ export class EventService {
     const handler = EventService.selectMenuHandlers.get(interaction.customId);
     Logger.logDebug(`Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
-      if (handler.userId && handler.userId !== interaction.user.id) {
+      if (handler.userId && handler.userId !== interaction.user.userId) {
         return;
       }
       await interaction.deferReplyAsync();

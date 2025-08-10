@@ -1,7 +1,8 @@
 import { Permission } from "../application/Permission";
 
 export interface User {
-    id: string;
+    id: number | null;
+    userId: string;
     username: string;
     displayName: string;
     bot: boolean;

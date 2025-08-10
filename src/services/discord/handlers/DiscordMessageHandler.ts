@@ -161,7 +161,7 @@ class DiscordMessageHandler {
         return new Promise(async (resolve) => {
             // Create select menu with handlers
             const selectMenuHandler = ComponentService.createSelectMenu(selectMenu, {
-                userId: event.user.id,
+                userId: event.user.userId,
                 onTimeout: async () => {
                     await this.handleSelectMenuTimeoutAsync(event, selectMenuHandler, resolve);
                 },
@@ -197,7 +197,7 @@ class DiscordMessageHandler {
                     label: button,
                     style: ButtonStyle.PRIMARY
                 } as ActionButton, {
-                    userId: event.user.id,
+                    userId: event.user.userId,
                     onTimeout: async () => {
                         resolve(null);
                     },
@@ -224,11 +224,11 @@ class DiscordMessageHandler {
 
     public async getConfirmationFromUser(event: InteractionEvent, container: Component): Promise<InteractionEvent | null> {
         return new Promise(async (resolve) => {
-            const acceptButton = createAcceptButton(event.user.id, async (btnEvent: InteractionEvent) => {
+            const acceptButton = createAcceptButton(event.user.userId, async (btnEvent: InteractionEvent) => {
                 resolve(btnEvent);
             });
 
-            const denyButton = createDenyButton(event.user.id, async (btnEvent: InteractionEvent) => {
+            const denyButton = createDenyButton(event.user.userId, async (btnEvent: InteractionEvent) => {
                 await btnEvent.editWithComponentAsync(ComponentService.createContainer({
                     description: new MultiLingualString(i18n.common.cancelled)
                 }));

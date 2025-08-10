@@ -1,5 +1,6 @@
 import { GameTypeEnum } from "../../interfaces/enums";
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
+import { ProfileCommandActionEnum } from "../../interfaces/enums/commands/Profile";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
 import { MultiLingualString } from "./MultiLangualString";
@@ -55,6 +56,7 @@ export interface I18nTranslations {
             description: LanguageTranslations;
             option: LanguageCommandOptionTranslations<GamesCommandActionEnum>;
             labels: {
+                noActiveGames: LanguageTranslations;
                 success: LanguageTranslations;
                 selectGame: LanguageTranslations;
                 deleteSuccess: LanguageTranslations;
@@ -99,6 +101,13 @@ export interface I18nTranslations {
             event: {
                 messageChanged: (user: string, message: string) => MultiLingualString;
             }
+        },
+        profile: {
+            description: LanguageTranslations;
+            option: LanguageCommandOptionTranslations<ProfileCommandActionEnum>;
+            labels: {
+                title: LanguageTranslations;
+            }
         }
     }
     exceptions: LanguageEnumTranslations<ExceptionEnum>;
@@ -133,7 +142,7 @@ export const i18n: I18nTranslations = {
         delete: {
             [LanguageEnum.EN]: "Remove",
             [LanguageEnum.NL]: "Verwijderen",
-        }        
+        }
     },
     commands: {
         games: {
@@ -168,8 +177,12 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Nieuwe spellen instellen",
                     }
                 }
-            },            
+            },
             labels: {
+                noActiveGames: {
+                    [LanguageEnum.EN]: "No active games",
+                    [LanguageEnum.NL]: "Geen actieve spellen",
+                },
                 success: {
                     [LanguageEnum.EN]: "Game setup complete",
                     [LanguageEnum.NL]: "Spel succesvol ingesteld",
@@ -487,14 +500,50 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Can you guess the flag?",
                         [LanguageEnum.NL]: "Kun jij de vlag raden?",
                     }, { nextAnswer }),
-                },                
+                },
             },
             event: {
                 messageChanged: (user: string, message: string) => new MultiLingualString({
                     [LanguageEnum.EN]: "{user}: {message}",
                     [LanguageEnum.NL]: "{user}: {message}",
                 }, { user, message }),
-            },                                    
+            },
+        },
+        profile: {
+            description: {
+                [LanguageEnum.EN]: "Manage your profile",
+                [LanguageEnum.NL]: "Beheer je profiel",
+            },
+            option: {
+                choices: {
+                    [ProfileCommandActionEnum.VIEW]: {
+                        [LanguageEnum.EN]: "View",
+                        [LanguageEnum.NL]: "Bekijk",
+                    },
+                    [ProfileCommandActionEnum.MANAGE]: {
+                        [LanguageEnum.EN]: "Manage",
+                        [LanguageEnum.NL]: "Beheer",
+                    },
+                },
+                action: {
+                    [LanguageEnum.EN]: "Action",
+                    [LanguageEnum.NL]: "Actie",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "What do you want to do?",
+                    [LanguageEnum.NL]: "Wat wil je doen?",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "No action",
+                    [LanguageEnum.NL]: "Geen actie",
+                },
+            },
+            labels: {
+                title: {
+                    [LanguageEnum.EN]: "Profile",
+                    [LanguageEnum.NL]: "Profiel",
+                },
+            }
         },
     },
     exceptions: {
@@ -562,5 +611,5 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Invalid value for this setting",
             [LanguageEnum.NL]: "Ongeldige waarde voor deze instelling",
         },
-    }    
+    }
 };

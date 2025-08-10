@@ -1,4 +1,4 @@
-import { ActionButton, ButtonStyle, Component, ComponentType, Container } from "../interfaces/application/Message";
+import { ActionButton, Component, ComponentType, Container } from "../interfaces/application/Message";
 import { GamesModel } from "../interfaces/database";
 import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import MediaService from "../services/MediaService";
@@ -194,4 +194,22 @@ export function createGameSettingsContainer(
             ...settingsComponents
         ]
     } as Container;
+}
+
+export function createProfileContainer(userId: string): Component[] {
+    return [
+        {
+            type: ComponentType.CONTAINER,
+            components: [
+                {
+                    type: ComponentType.TITLE,
+                    content: new MultiLingualString(i18n.commands.profile.labels.title)
+                },
+                {
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: new MultiLingualString(i18n.commands.profile.description)
+                }
+            ]
+        } as Container
+    ];
 }

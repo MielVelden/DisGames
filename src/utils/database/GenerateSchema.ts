@@ -12,10 +12,12 @@ const outputLocation = './src/interfaces/database/';
 const outputFileName = 'TableInterfaces.ts';
 const outputFilePath = outputLocation + outputFileName;
 
-// Stored procedure enum information
-const storedProcedureEnumLocation = './src/interfaces/enums/database/';
+// Stored procedure/function enum information
+const databaseEnumLocation = './src/interfaces/enums/database/';
 const storedProcedureEnumFileName = 'StoredProcedureEnum.ts';
-const storedProcedureEnumFilePath = storedProcedureEnumLocation + storedProcedureEnumFileName;
+const functionEnumFileName = 'FunctionEnum.ts';
+const storedProcedureEnumFilePath = databaseEnumLocation + storedProcedureEnumFileName;
+const functionEnumFilePath = databaseEnumLocation + functionEnumFileName;
 
 // Export utilities for other modules
 export const { isMultiLingualString, removeMultiLingualStringSuffix } = SchemaUtils;
@@ -30,8 +32,9 @@ async function main() {
             enumFile
         );
         
-        await StoredProcedureGenerator.generateStoredProcedureEnum(
-            storedProcedureEnumFilePath
+        await StoredProcedureGenerator.generateRoutineEnums(
+            storedProcedureEnumFilePath,
+            functionEnumFilePath
         );
         
         await DatabaseEnumManager.updateDatabaseWithEnums();

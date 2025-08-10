@@ -27,8 +27,6 @@ import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import MediaService from "./MediaService";
 import Logger from "../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";
-import UserRepository from "../repositories/UserRepository";
-import ServerRepository from "../repositories/ServerRepository";
 import { DEBUG_MODE } from "../config";
 import { DEFAULT_ACCEPT_EMOJI } from "../utils/Emojis";
 
@@ -170,8 +168,8 @@ class GameService {
         if (activeChannelGame) {
             throw ErrorHelper.throwErrorWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
-                [createMoveButton(event.user.id, (event: InteractionEvent) => handleReplace(activeChannelGame, event as MessageInteractionEvent)),
-                createCancelButton(event.user.id)]
+                [createMoveButton(event.user.userId, (event: InteractionEvent) => handleReplace(activeChannelGame, event as MessageInteractionEvent)),
+                createCancelButton(event.user.userId)]
             );
         }
 
@@ -179,8 +177,8 @@ class GameService {
         if (activeServerGame) {
             throw ErrorHelper.throwErrorWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_GAME,
-                [createMoveButton(event.user.id, (event: InteractionEvent) => handleReplace(activeServerGame, event as MessageInteractionEvent)),
-                createCancelButton(event.user.id)]
+                [createMoveButton(event.user.userId, (event: InteractionEvent) => handleReplace(activeServerGame, event as MessageInteractionEvent)),
+                createCancelButton(event.user.userId)]
             );
         }
 
@@ -243,7 +241,7 @@ class GameService {
             // Answer is correct
             await this.handleValidAnswerAsync(gameEvent);
             // Add points to the user
-            await PointService.saveAsync(gameEvent.user.id, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
+            await PointService.saveAsync(gameEvent.user.userId, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
 
             // Timeline for correct answer
             await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
@@ -315,7 +313,7 @@ class GameService {
                 case GameOptionEnum.IS_INACTIVE:
                     throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
-                    if (gameEvent.gameData.LastUser === gameEvent.user.id && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
+                    if (gameEvent.gameData.LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 
@@ -334,11 +332,11 @@ class GameService {
                     if (DEBUG_MODE)
                         break;
 
-                    if (gameEvent.gameData.LastUser === gameEvent.user.id) {
+                    if (gameEvent.gameData.LastUser === gameEvent.user.userId) {
                         gameEvent.deleteMessage();
                         throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
                     } else {
-                        gameEvent.gameData.LastUser = gameEvent.user.id;
+                        gameEvent.gameData.LastUser = gameEvent.user.userId;
                         gameEvent.gameData.MessageId = gameEvent.messageId;
                     }
                     break;

@@ -1,12 +1,13 @@
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums";
-import { TimelineChanges, TimelineChange } from "../interfaces/domain/Timeline";
+import { TimelineChanges } from "../interfaces/domain/Timeline";
 import TimelineRepository from "../repositories/TimelineRepository";
-import { GamesModel, TimelineEntriesSaveModel } from "../interfaces/database";
+import { TimelineEntriesSaveModel } from "../interfaces/database";
 import { InteractionEvent } from "../interfaces/application/Event";
 import UserRepository from "../repositories/UserRepository";
 import ServerRepository from "../repositories/ServerRepository";
-import { GameEvent } from "../interfaces/domain";
 import GameRepository from "../repositories/GameRepository";
+import Logger from "../utils/Logger";
+import { DEBUG_MODE } from "../config";
 
 interface TimelineContext {
    event: InteractionEvent;
@@ -81,8 +82,11 @@ class TimelineBuilder {
         changes: TimelineChanges,
         context: TimelineContext
     ): Promise<void> {
-        const user = await UserRepository.getByUserIdAsync(context.event.user.id);
+        const user = await UserRepository.getByUserIdAsync(context.event.user.userId);
         const server = await ServerRepository.getByServerIdAsync(context.event.server.ServerId);
+
+        if(!user || !server)
+            return;
 
         const timelineEntry: TimelineEntriesSaveModel = {
             TableEnum: table,
@@ -185,12 +189,14 @@ class TimelineBuilder {
     }
 
     async commitTimelineEntriesAsync(entries: TimelineEntriesSaveModel[]): Promise<void> {
-        if (entries.length === 0) {
+        if (entries.length === 0)
             return;
-        }
 
         try {
-            await Promise.all(entries.map(entry => TimelineRepository.saveAsync(entry)));
+            await Promise.all(entries.map(entry => {
+                TimelineRepository.saveAsync(entry);
+                Logger.logTimeline(entry);
+            }));
         } catch (error) {
             console.error('Failed to save timeline entries:', error);
             throw error;

@@ -18,6 +18,9 @@ import {
     ButtonDiscordEvent,
     SelectMenuDiscordEvent
 } from '../events';
+import DiscordPermissionService from '../DiscordPermissionService';
+import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
+import UserService from '../../UserService';
 
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
@@ -89,18 +92,18 @@ class DiscordInteractionMapper {
         );
     }
 
-    private async mapDiscordUserToUser(user: DiscordUser, member: DiscordGuildMember): Promise<User> {
-        const DiscordPermissionService = require("../DiscordPermissionService").default;
-        const DiscordMessageHandler = require("../handlers/DiscordMessageHandler").default;
-        
+    private async mapDiscordUserToUser(discordUser: DiscordUser, discordMember: DiscordGuildMember): Promise<User> {       
+        const user = await UserService.getByUserIdAsync(discordUser.id, true);
+
         return {
-            id: user.id,
-            username: user.username,
-            displayName: user.displayName || user.username,
-            bot: user.bot,
-            hasPermissions: (permissions) => DiscordPermissionService.checkUserHasPermissions(member, permissions),
-            hasPermission: (permission) => DiscordPermissionService.checkUserHasPermission(member, permission),
-            sendMessageAsync: async (message: string) => await DiscordMessageHandler.sendMessageAsync(user, message),
+            id: user.Id!,
+            userId: discordUser.id,
+            username: discordUser.username,
+            displayName: discordUser.displayName || discordUser.username,
+            bot: discordUser.bot,
+            hasPermissions: (permissions) => DiscordPermissionService.checkUserHasPermissions(discordMember, permissions),
+            hasPermission: (permission) => DiscordPermissionService.checkUserHasPermission(discordMember, permission),
+            sendMessageAsync: async (message: string) => await DiscordMessageHandler.sendMessageAsync(discordUser, message),
         };
     }
 

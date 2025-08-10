@@ -38,6 +38,10 @@ class GameDataRepository implements Repository<GameDataModel> {
         if (!result || result.length === 0)
             throw new Error('No game data found');
 
+        const errorMsg = (result.find((item: any) => item?.Errormsg) as any)?.Errormsg;
+        if (errorMsg)
+            throw new Error(errorMsg);
+
         return result[0];
     }
 }

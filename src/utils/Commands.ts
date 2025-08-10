@@ -10,6 +10,8 @@ import { MultiLingualString } from "./i18n/MultiLangualString";
 import { LanguageCommandOptionTranslations } from "./i18n/i18n";
 import Logger from "./Logger";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
+import { isSelectMenuEmpty } from "./SelectMenu";
+import ComponentService from "../services/ComponentService";
 
 const commands: Command[] = [];
 
@@ -37,7 +39,7 @@ export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
 }
 
 export function getCommandConfig(commandName: string): Command {
-    commandName = commandName.toUpperCase();
+    commandName = commandName.toLowerCase();
     const command = commands.find(c => c.name === commandName);
     if (!command)
         throw new Error(`Command ${commandName} not found!`);
@@ -68,6 +70,18 @@ export async function handleCommandOptions(event: SlashCommandInteractionEvent):
                         for (const followUp of choice.followUps) {
                             if (followUp.type === CommandOptionFollowUpType.SELECT_MENU) {
                                 const selectMenu = await followUp.configAsync(event);
+
+                                if(isSelectMenuEmpty(selectMenu)) {
+                                    if (followUp.emptyReply) {
+                                        await event.addComponentAsync(ComponentService.createContainer({
+                                            description: followUp.emptyReply,
+                                        }));
+                                        await event.replyAsync();
+                                    }
+
+                                    return;
+                                }
+
                                 const selectMenuEvent = await currentEvent.getUserInputBySelectMenuAsync(selectMenu);
                                 if (selectMenuEvent) {
                                     event.setFollowUpOption(followUp.key, selectMenuEvent.selected);

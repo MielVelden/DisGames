@@ -33,14 +33,15 @@ export class GamesCommand implements Command {
                         type: CommandOptionFollowUpType.SELECT_MENU,
                         configAsync: async (event: SlashCommandInteractionEvent): Promise<SelectMenu> => {
                             return createGamesSelectMenu(await GameService.getActiveGamesAsync(event.server.ServerId));
-                        }
+                        },
+                        emptyReply: new MultiLingualString(i18n.commands.games.labels.noActiveGames)
                     }],
                     handler: async (event: SlashCommandInteractionEvent) => {
                         const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
                         const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
                         
                         await event.addComponentsAsync(createActiveGameContainer(game, [
-                            createMoveButton(event.user.id, async (btnEvent) => {
+                            createMoveButton(event.user.userId, async (btnEvent) => {
                                 const channelSelectMenu = createChannelSelectMenu();
                                 const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);
                                 if(channelEvent) {
@@ -56,7 +57,7 @@ export class GamesCommand implements Command {
                                     await channelEvent.editAsync();
                                 }
                             }),
-                            createDeleteButton(event.user.id, async (btnEvent) => {
+                            createDeleteButton(event.user.userId, async (btnEvent) => {
                                 await GameService.deleteAsync(game.Id!);
                                 await btnEvent.clearComponentsAsync();
                                 await btnEvent.editWithComponentAsync(ComponentService.createContainer({

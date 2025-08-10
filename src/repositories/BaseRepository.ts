@@ -1,4 +1,5 @@
 import { TableEnum, StoredProcedureEnum } from "../interfaces/enums/index";
+import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
@@ -133,17 +134,8 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   }
 
   public async CallStoredProcedure(procedure: StoredProcedureEnum, params: any[] = []): Promise<Model[]> {
-    const procedureName = procedure.toString();
-    const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
-    const results = await runQueryAsync(query, params);
-    
-    if (!results || !results[0]) 
-      return [];
-    
-    // Transform database keys to PascalCase and deserialize MultiLingualString and JSON fields
-    const transformedResults = DatabaseHelper.processStoredProcedureResults(results);
-    
-    return transformedResults as Model[];
+    const results = await RepositoryUtils.CallStoredProcedureGeneric(procedure, params);
+    return results as Model[];
   }
 
   public async Save(entity: Partial<SaveModel>): Promise<Model> {
@@ -225,3 +217,36 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 }
 
 export default BaseRepository;
+
+export class RepositoryUtils {
+
+  public static async CallStoredProcedureGeneric(procedure: StoredProcedureEnum, params: any[] = []): Promise<any[]> {
+    const procedureName = procedure.toString();
+    const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
+    const results = await runQueryAsync(query, params);
+    
+    if (!results || !results[0]) 
+      return [];
+    
+    // Transform database keys to PascalCase and deserialize MultiLingualString and JSON fields
+    const transformedResults = DatabaseHelper.processStoredProcedureResults(results);
+    
+    return transformedResults;
+  }
+
+  public static async CallFunctionGeneric<T = any>(fn: FunctionEnum, params: any[] = []): Promise<T | undefined> {
+    const functionName = fn.toString();
+    const placeholders = params.map(() => '?').join(', ');
+    const query = `SELECT ${functionName}(${placeholders}) AS Result`;
+    const results = await runQueryAsync(query, params);
+
+    if (!results || results.length === 0) 
+      return undefined;
+
+    const row: any = results[0];
+    const result = row?.Result;
+    if(result)
+      return result.toString() as T;
+    throw new Error(`Function ${functionName} returned an invalid result`);
+  }
+}

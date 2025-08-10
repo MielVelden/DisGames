@@ -101,7 +101,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
                 settingsSchema,
                 currentSettings,
                 languageEnum: this.server.LanguageEnum,
-                userId: this.user.id,
+                userId: this.user.userId,
                 onSettingChange: (btnEvent, key, value) => {
                     if (!isResolved) {
                         (currentSettings as any)[key] = value;
