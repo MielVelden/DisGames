@@ -62,6 +62,13 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return this;
   }
 
+  public GroupBy<K extends keyof Model>(fields: K[]): this {
+    const conditions = fields.map((field) => `${String(field)}`).join(', ');
+
+    this.query += ` GROUP BY ${conditions}`;
+    return this;
+  }
+
   public OrderBy(field: keyof Model, direction: 'ASC' | 'DESC' = 'ASC'): BaseRepository<Model, SaveModel> {
     this.query += ` ORDER BY ${String(field)} ${direction}`;
     return this;

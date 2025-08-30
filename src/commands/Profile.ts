@@ -5,6 +5,7 @@ import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
 import { createProfileContainer } from "../utils/Container";
+import UserService from "../services/UserService";
 
 export class ProfileCommand implements Command {
     name = CommandEnum.PROFILE;
@@ -21,7 +22,8 @@ export class ProfileCommand implements Command {
                 {
                     enumValue: ProfileCommandActionEnum.VIEW,
                     handler: async (event: SlashCommandInteractionEvent) => {
-                        const profileComponents = createProfileContainer(event.user.userId);
+                        const userProfile = await UserService.getUserProfileAsync(event.user.userId);
+                        const profileComponents = createProfileContainer(userProfile);
                         await event.addComponentsAsync(profileComponents);
                         await event.replyAsync();
                     }
@@ -29,7 +31,8 @@ export class ProfileCommand implements Command {
                 {
                     enumValue: ProfileCommandActionEnum.MANAGE,
                     handler: async (event: SlashCommandInteractionEvent) => {
-                        const profileComponents = createProfileContainer(event.user.userId);
+                        const userProfile = await UserService.getUserProfileAsync(event.user.userId);
+                        const profileComponents = createProfileContainer(userProfile);
                         await event.addComponentsAsync(profileComponents);
                         await event.replyAsync();
                     }

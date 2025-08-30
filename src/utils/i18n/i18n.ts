@@ -611,5 +611,9 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Invalid value for this setting",
             [LanguageEnum.NL]: "Ongeldige waarde voor deze instelling",
         },
+        [ExceptionEnum.RECORD_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Record not found",
+            [LanguageEnum.NL]: "Record niet gevonden",
+        },
     }
 };

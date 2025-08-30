@@ -11,3 +11,4 @@ export * from './domain/ExpectionEnum';
 export * from './games/DifficultyEnum';
 export * from './games/GameSettingsEnum';
 export * from './commands/Games';
+export * from './commands/Profile';

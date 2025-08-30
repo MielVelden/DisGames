@@ -1,5 +1,10 @@
 import { UsersModel } from "../interfaces/database/TableInterfaces";
+import { BadgeEnum, GameTypeEnum } from "../interfaces/enums";
+import { ProfileView } from "../interfaces/view";
+import PointRepository from "../repositories/PointRepository";
 import UserRepository from "../repositories/UserRepository";
+import ServerService from "./ServerService";
+import { getEnumDefaultsByValue } from "../utils/Enum";
 
 class UserService {
     public async getByUserIdAsync(userId: string, createIfNotExists: boolean = false): Promise<UsersModel> {
@@ -12,6 +17,44 @@ class UserService {
         }
 
         return user;
+    }
+
+    public async getUserProfileAsync(userId: string): Promise<ProfileView> {
+        const user = await this.getByUserIdAsync(userId);
+        const gamePoints = await PointRepository.getPointsAsync(userId);
+        if (!gamePoints) {
+            return {
+                userId: user.UserId,
+                username: user.Username,
+                totalPoints: 0,
+                mostPlayedServerId: 0,
+                gamePoints: getEnumDefaultsByValue(GameTypeEnum, 0),
+                badges: getEnumDefaultsByValue(BadgeEnum, false),
+            };
+        }
+
+        const server = await ServerService.getServerAsync(gamePoints.ServerId);
+
+        return {
+            userId: user.UserId,
+            username: user.Username,
+            totalPoints: gamePoints?.Points ?? 0,
+            mostPlayedServerId: server.Id,
+            gamePoints: {
+                [GameTypeEnum.ANAGRAM]: gamePoints?.GameId === GameTypeEnum.ANAGRAM ? gamePoints?.Points : 0,
+                [GameTypeEnum.WORD_SNAKE]: gamePoints?.GameId === GameTypeEnum.WORD_SNAKE ? gamePoints?.Points : 0,
+                [GameTypeEnum.COUNTING]: 0,
+                [GameTypeEnum.NUMBER_GUESS]: 0,
+                [GameTypeEnum.TRIVIA_QUIZ]: 0,
+                [GameTypeEnum.GUESS_THE_PRICE]: 0,
+                [GameTypeEnum.MATH_QUIZ]: 0,
+                [GameTypeEnum.GUESS_THE_FLAG]: 0
+            },
+            badges: {
+                [BadgeEnum.EARLY_BIRD]: gamePoints?.GameId === GameTypeEnum.ANAGRAM ? true : false,
+                [BadgeEnum.TESTER]: gamePoints?.GameId === GameTypeEnum.WORD_SNAKE ? true : false,
+            },
+        };
     }
 }
 

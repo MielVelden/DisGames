@@ -8,6 +8,7 @@ import GameService from "../services/GameService";
 import ComponentService from "../services/ComponentService";
 import { GameSettingsValues } from "../interfaces/domain/GameSettings";
 import { GameSettingsContainer } from "./GameSettingsContainer";
+import { ProfileView } from "../interfaces/view";
 
 export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
     const gameModule = GameService.getGameByType(gameType);
@@ -157,7 +158,7 @@ export function createGameSetupConfirmationContainer(
     return baseContainer;
 }
 
-export function createProfileContainer(userId: string): Component[] {
+export function createProfileContainer(profile: ProfileView): Component[] {
     return [
         {
             type: ComponentType.CONTAINER,

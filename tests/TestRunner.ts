@@ -255,8 +255,8 @@ export class TestRunner {
         Logger.logInfo(`Total Tests: ${total}`);
         Logger.logInfo(`✅ Passed: ${passed} (${passRate}%)`);
         Logger.logInfo(`❌ Failed: ${failed}`);
-        Logger.logInfo(`⏭️ Skipped: ${skipped}`);
-        Logger.logInfo(`⏱️ Duration: ${duration}ms`);
+        Logger.logInfo(`⏭️  Skipped: ${skipped}`);
+        Logger.logInfo(`⏱️  Duration: ${duration}ms`);
 
         if (failed > 0) {
             Logger.logInfo('💥 Failed Tests:');

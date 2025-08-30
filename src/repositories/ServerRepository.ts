@@ -1,7 +1,8 @@
 import { ServersModel, ServersSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { TableEnum } from "../interfaces/enums/index";
+import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
+import { ComponentError } from "../utils/ErrorHelper";
 
 class ServerRepository implements Repository<ServersModel> {
     private baseRepository: BaseRepository<ServersModel, ServersSaveModel>;
@@ -28,6 +29,10 @@ class ServerRepository implements Repository<ServersModel> {
 
     async getByServerIdAsync(serverId: string): Promise<ServersModel> {
         const model = await this.baseRepository.Select().Where({ ServerId: serverId }).Limit(1).Execute();
+        if (!model || model.length === 0)
+            throw new ComponentError({
+                message: ExceptionEnum.RECORD_NOT_FOUND
+            });
         return model[0];
     }
 }
