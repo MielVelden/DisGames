@@ -27,9 +27,10 @@ import { MultiLingualString } from "../utils/i18n/MultiLangualString";
 import MediaService from "./MediaService";
 import Logger from "../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";
-import { DEBUG_MODE } from "../config";
+import { ARRAY_JOIN_DELIMITER, DEBUG_MODE } from "../config";
 import { DEFAULT_ACCEPT_EMOJI } from "../utils/Emojis";
 import TestMode from "../utils/TestMode";
+import ServerService from "./ServerService";
 
 class GameService {
     private games: GameModule[] = [];
@@ -86,28 +87,38 @@ class GameService {
         return game;
     }
 
-    public async getStartMessageAsync(game: GamesModel, languageEnum: LanguageEnum, gameData?: GameDataModel): Promise<Component[]> {
+    public async getStartMessageAsync(game: GamesModel, gameData?: GameDataModel | GameDataModel[]): Promise<Component[]> {
         const gameModule = this.getGameByType(game.GameTypeEnum);
         if (!gameModule)
             throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
         let components = ComponentService.createStartMessageAsync(game.GameTypeEnum as GameTypeEnum, game.Answer as string);
 
-        if (gameModule.functions.getStartComponents) {
-            const startComponents = gameModule.functions.getStartComponents(gameData!, languageEnum);
-            components[components.length - 1] = startComponents[startComponents.length - 1];
+        if (gameModule.functions.getStartComponentsAsync) {
+            const server = await ServerService.getServerAsync(game.ServerId);
+            const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
+            components.pop();
+            components = components.concat(startComponents);
         }
 
         if (gameModule.config.hasImages && gameData) {
-            const image = MediaService.getGameDataImage(game.GameTypeEnum, gameData.Id);
-            components.push(ComponentService.createImage(image));
+            // Loop through all gameData and get the image
+            if (Array.isArray(gameData)) {
+                for (const data of gameData) {
+                    const image = MediaService.getGameDataImage(game.GameTypeEnum, data.Id);
+                    components.push(ComponentService.createImage(image));
+                }
+            } else {
+                const image = MediaService.getGameDataImage(game.GameTypeEnum, gameData.Id);
+                components.push(ComponentService.createImage(image));
+            }
         }
 
         return components;
     }
 
     public async saveAsync(savable: GamesSaveModel, event: InteractionEvent): Promise<GamesModel> {
-        let gameData: GameDataModel | undefined;
+        let gameData: GameDataModel | GameDataModel[] | undefined;
 
         // Check if the savable is valid
         if (savable.Id) {
@@ -120,8 +131,9 @@ class GameService {
                 throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
             if (!gameModule.config.isCalculated) {
-                gameData = await GameDataRepository.getGameDataByGamesIdAsync(model.Id);
-                savable.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
+                const gameDataArray = await GameDataRepository.getGameDataByGamesIdAsync(model.Id);
+                gameData = gameDataArray;
+                savable.Answer = gameData.map(data => data.Response.getMessage(event.server.LanguageEnum)).join(ARRAY_JOIN_DELIMITER);
             }
 
             // Update
@@ -136,7 +148,7 @@ class GameService {
             });
 
             // Add start message
-            const startMessage = await this.getStartMessageAsync(savedModel, event.server.LanguageEnum, gameData);
+            const startMessage = await this.getStartMessageAsync(savedModel, gameData);
             await event.sendToChannelAsync(savedModel.ChannelId, startMessage);
 
             await event.commitTimelineAsync();
@@ -198,7 +210,12 @@ class GameService {
 
         if (!gameModule.config.firstAnswer) {
             gameData = await GameDataRepository.getGameDataByGamesIdAsync(model.Id!);
-            model.Answer = gameData.Response.getMessage(event.server.LanguageEnum);
+
+            if (gameModule.functions.prepareDataAsync)
+                model.Answer = await gameModule.functions.prepareDataAsync(gameData, event.server.LanguageEnum);
+            else
+                model.Answer = gameData[0].Response.getMessage(event.server.LanguageEnum);
+
             await GameRepository.saveAsync(model);
         }
 
@@ -211,7 +228,7 @@ class GameService {
         });
 
         // Add start message
-        const startMessage = await this.getStartMessageAsync(model, event.server.LanguageEnum, gameData);
+        const startMessage = await this.getStartMessageAsync(model, gameData);
         await event.addComponentsAsync(startMessage);
 
         await event.commitTimelineAsync();
@@ -275,16 +292,21 @@ class GameService {
 
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
         // Get the next answer
-        if (!gameEvent.gameConfig.isCalculated)
-            gameEvent.nextAnswer = await GameDataRepository.getGameDataByGamesIdAsync(gameEvent.gameData.Id);
+        if (!gameEvent.gameConfig.isCalculated) {
+            const gameDataArray = await GameDataRepository.getGameDataByGamesIdAsync(gameEvent.gameData.Id);
+            gameEvent.nextAnswer = gameDataArray;
+        }
 
         if (gameEvent.gameConfig.hasImages) {
-            const image = MediaService.getGameDataImage(gameEvent.gameId, gameEvent.nextAnswer!.Id);
-            gameEvent.addAction({
-                enum: GameActionEnum.COMPONENT,
-                priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createImage(image)
-            })
+            // Don't support games with multiple images for now
+            if (!Array.isArray(gameEvent.nextAnswer)) {
+                const image = MediaService.getGameDataImage(gameEvent.gameId, gameEvent.nextAnswer![0].Id);
+                gameEvent.addAction({
+                    enum: GameActionEnum.COMPONENT,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: ComponentService.createImage(image)
+                })
+            }
         }
 
         if (gameEvent.getNextAnswerAsync)
@@ -488,11 +510,11 @@ class GameService {
 
     public getSettingValue<T = any>(game: GamesModel, settingKey: GameSettingsEnum): T | undefined {
         const gameModule = this.getGameByType(game.GameTypeEnum);
-        if (!gameModule?.config.settings) 
+        if (!gameModule?.config.settings)
             return undefined;
 
         const setting = gameModule.config.settings.find(s => s.key === settingKey);
-        if (!setting) 
+        if (!setting)
             return undefined;
 
         if (game.Settings && game.Settings.hasOwnProperty(settingKey))

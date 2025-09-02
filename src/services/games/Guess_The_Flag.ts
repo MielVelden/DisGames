@@ -27,7 +27,7 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            const nextAnswer = event.nextAnswer!.Response.getMessage(event.server.LanguageEnum);
+            const nextAnswer = event.nextAnswer![0].Response.getMessage(event.server.LanguageEnum);
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,

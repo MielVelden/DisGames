@@ -2,7 +2,7 @@ import { GameDataModel } from "../interfaces/database/TableInterfaces";
 import GameDataRepository from "../repositories/GameDataRepository";
 
 class GameDataService {
-    public async getGameDataAsync(gamesId: number): Promise<GameDataModel> {
+    public async getGameDataAsync(gamesId: number): Promise<GameDataModel[]> {
         return await GameDataRepository.getGameDataByGamesIdAsync(gamesId);
     }
 }

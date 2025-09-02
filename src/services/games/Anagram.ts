@@ -5,8 +5,8 @@ import { DifficultyEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
-import { GameDataModel } from "../../interfaces/database/TableInterfaces";
-import { Container } from "../../interfaces/application/Message";
+import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
+import { Component, Container } from "../../interfaces/application/Message";
 import ComponentService from "../ComponentService";
 
 function scrambleWord(word: string): string {
@@ -70,7 +70,7 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            const nextAnswer = event.nextAnswer!.Response.getMessage(event.server.LanguageEnum);
+            const nextAnswer = event.nextAnswer![0].Response.getMessage(event.server.LanguageEnum);
             // Scramble the answer
             const scrambledMessage = scrambleWord(nextAnswer);
 
@@ -86,9 +86,9 @@ export default {
             event.gameData.Answer = nextAnswer;
         },
 
-        getStartComponents(gameData: GameDataModel, languageEnum?: LanguageEnum): Container[] {
+        async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
             return [ComponentService.createContainer({
-                description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambleWord(gameData.Response.getMessage(languageEnum)))
+                description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambleWord(gameData[0].Response.getMessage(server.LanguageEnum)))
             })];
         }
     } as GameFunctions

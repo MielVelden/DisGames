@@ -37,7 +37,10 @@ type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
         longDescription: LanguageTranslations;
         howToPlay: LanguageTranslations;
         startMessage: (firstAnswer: string) => MultiLingualString;
-        nextAnswer?: (nextAnswer?: string) => MultiLingualString;
+        nextAnswer?: (nextAnswer?: string | number) => MultiLingualString;
+        start?: () => MultiLingualString;
+        incorrectAnswer?: () => MultiLingualString;
+        gameComplete?: () => MultiLingualString;
     }
 }
 
@@ -382,10 +385,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "First letter: {firstAnswer}",
                         [LanguageEnum.NL]: "Eerste letter: {firstAnswer}",
                     }, { firstAnswer }),
-                    nextAnswer: (nextAnswer: string = "") => new MultiLingualString({
+                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
                         [LanguageEnum.EN]: "Next word: {nextAnswer}",
                         [LanguageEnum.NL]: "Volgend woord: {nextAnswer}",
-                    }, { nextAnswer }),
+                    }, { nextAnswer: nextAnswer || "" }),
                 },
                 [GameTypeEnum.NUMBER_GUESS]: {
                     name: {
@@ -496,10 +499,48 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Let’s start, the first flag is: {firstAnswer}",
                         [LanguageEnum.NL]: "We beginnen, de eerste vlag is: {firstAnswer}",
                     }, { firstAnswer }),
-                    nextAnswer: (nextAnswer: string = "") => new MultiLingualString({
+                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
                         [LanguageEnum.EN]: "Can you guess the flag?",
                         [LanguageEnum.NL]: "Kun jij de vlag raden?",
-                    }, { nextAnswer }),
+                    }),
+                },
+                [GameTypeEnum.CONNECTIONS]: {
+                    name: {
+                        [LanguageEnum.EN]: "Connections",
+                        [LanguageEnum.NL]: "Verbindingen",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Find groups of four related words",
+                        [LanguageEnum.NL]: "Vind groepen van vier gerelateerde woorden",
+                    },
+                    longDescription: {
+                        [LanguageEnum.EN]: "Challenge your word association skills by identifying groups of four words that share a common theme. Each puzzle contains exactly four categories, and you need to find all connections to complete the game.",
+                        [LanguageEnum.NL]: "Daag je woordassociatievaardigheden uit door groepen van vier woorden te identificeren die een gemeenschappelijk thema delen. Elke puzzle bevat precies vier categorieën, en je moet alle verbindingen vinden om het spel te voltooien.",
+                    },
+                    howToPlay: {
+                        [LanguageEnum.EN]: "You'll see 16 words arranged in a grid. Find groups of 4 words that belong together and submit them by typing the 4 words separated by commas or spaces. Each correct group will be highlighted. Find all 4 categories to win!",
+                        [LanguageEnum.NL]: "Je ziet 16 woorden in een raster. Vind groepen van 4 woorden die bij elkaar horen en dien ze in door de 4 woorden te typen gescheiden door komma's of spaties. Elke juiste groep wordt gemarkeerd. Vind alle 4 categorieën om te winnen!",
+                    },
+                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "Find groups of 4 related words. Type 4 words separated by commas to submit a group.",
+                        [LanguageEnum.NL]: "Vind groepen van 4 gerelateerde woorden. Typ 4 woorden gescheiden door komma's om een groep in te dienen.",
+                    }, { firstAnswer }),
+                    start: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "🔗 **Connections Game Started!** 🔗\n\nFind groups of 4 words that belong together. Type your guess as: `word1, word2, word3, word4`",
+                        [LanguageEnum.NL]: "🔗 **Verbindingen Spel Gestart!** 🔗\n\nVind groepen van 4 woorden die bij elkaar horen. Typ je gok als: `woord1, woord2, woord3, woord4`",
+                    }),
+                    nextAnswer: (remaining?: string | number) => new MultiLingualString({
+                        [LanguageEnum.EN]: `Great! You found a category! ${remaining} categories remaining. Keep looking for groups of 4 related words.`,
+                        [LanguageEnum.NL]: `Geweldig! Je hebt een categorie gevonden! Nog ${remaining} categorieën over. Blijf zoeken naar groepen van 4 gerelateerde woorden.`,
+                    }),
+                    incorrectAnswer: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "❌ That's not a valid group. Try again! Remember: you need exactly 4 words that belong to the same category.",
+                        [LanguageEnum.NL]: "❌ Dat is geen geldige groep. Probeer opnieuw! Onthoud: je hebt precies 4 woorden nodig die tot dezelfde categorie behoren.",
+                    }),
+                    gameComplete: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "🎉 **Congratulations!** 🎉\n\nYou found all 4 categories! Excellent word association skills!",
+                        [LanguageEnum.NL]: "🎉 **Gefeliciteerd!** 🎉\n\nJe hebt alle 4 categorieën gevonden! Uitstekende woordassociatievaardigheden!",
+                    }),
                 },
             },
             event: {

@@ -48,7 +48,8 @@ class UserService {
                 [GameTypeEnum.TRIVIA_QUIZ]: 0,
                 [GameTypeEnum.GUESS_THE_PRICE]: 0,
                 [GameTypeEnum.MATH_QUIZ]: 0,
-                [GameTypeEnum.GUESS_THE_FLAG]: 0
+                [GameTypeEnum.GUESS_THE_FLAG]: 0,
+                [GameTypeEnum.CONNECTIONS]: 0,
             },
             badges: {
                 [BadgeEnum.EARLY_BIRD]: gamePoints?.GameId === GameTypeEnum.ANAGRAM ? true : false,

@@ -32,7 +32,11 @@ export interface GameFunctions {
     getNextAnswerAsync?(event: GameEvent): Promise<void>;
     onIncorrectAnswerAsync?(event: GameEvent): Promise<void>;
 
-    getStartComponents?(gameData: GameDataModel, languageEnum?: LanguageEnum): Component[];
+    // Get the components for the start message
+    getStartComponentsAsync?(gameData: GameDataModel[], server: ServersModel): Promise<Component[]>;
+
+    // Prepare the data for the game
+    prepareDataAsync?(gameData: GameDataModel[], languageEnum: LanguageEnum): Promise<string>;
 }
 
 export interface GameModule {
@@ -79,7 +83,7 @@ export interface GameEvent extends GameFunctions {
     server: ServersModel;
     
     answer?: string | number | boolean;
-    nextAnswer?: GameDataModel;
+    nextAnswer?: GameDataModel[];
     gameData: GamesModel;
     
     actions: GameAction[];

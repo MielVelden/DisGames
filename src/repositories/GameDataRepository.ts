@@ -33,7 +33,7 @@ class GameDataRepository implements Repository<GameDataModel> {
        return result[0];
     }
 
-    async getGameDataByGamesIdAsync(gamesId: number): Promise<GameDataModel> {
+    async getGameDataByGamesIdAsync(gamesId: number): Promise<GameDataModel[]> {
         const result = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.Getrandomgamedata, [gamesId]);
         if (!result || result.length === 0)
             throw new Error('No game data found');
@@ -42,7 +42,7 @@ class GameDataRepository implements Repository<GameDataModel> {
         if (errorMsg)
             throw new Error(errorMsg);
 
-        return result[0];
+        return result;
     }
 }
 

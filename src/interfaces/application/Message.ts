@@ -1,5 +1,5 @@
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
-import { Media } from "./Image";
+import { Media } from "./Media";
 
 export interface MessageContainer {
     components: Component[];

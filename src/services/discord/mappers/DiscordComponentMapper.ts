@@ -432,7 +432,7 @@ class DiscordComponentMapper {
 
                                 // Read file as Buffer to prevent stream issues
                                 const fileBuffer = fs.readFileSync(item.media.url);
-                                Logger.logInfo(`Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                                Logger.logDebug(`Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
                                 files.push(new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` }));
                             } catch (error) {
                                 Logger.logError(`Error loading file: ${item.media.url}`, error as Error);

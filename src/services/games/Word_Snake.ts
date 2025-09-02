@@ -29,8 +29,10 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            if (!event.answer) return;
-            const lastLetter = event.answer.toString().toLowerCase().charAt(event.answer.toString().length - 1);
+            if (!event.answer) 
+                return;
+            const lastAnswer = event.answer.toString().toLowerCase();
+            const lastLetter = lastAnswer.charAt(lastAnswer.length - 1);
             event.gameData.Answer = lastLetter;
         }
     } as GameFunctions

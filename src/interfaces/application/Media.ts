@@ -10,3 +10,10 @@ export enum MediaType {
     GIF = 'gif',
     WEBP = 'webp',
 }
+
+export interface GeneratedMedia extends Media {
+    id: string;
+    createdAt: Date;
+    gameId?: number;
+    serverId?: string;
+}

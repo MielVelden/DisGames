@@ -1,4 +1,5 @@
-import { Media, MediaType } from "../interfaces/application/Image";
+import { Media, MediaType } from "../interfaces/application/Media";
+import { GeneratedMedia } from "../interfaces/application/Media";
 import * as fs from 'fs';
 import * as path from 'path';
 import { GameTypeEnum } from "../interfaces/enums";
@@ -60,7 +61,7 @@ class MediaService {
             };
         }
 
-        Logger.logInfo(`Game image not found: ${gameImagePath}, using NotFound.png`);
+        Logger.logDebug(`Game image not found: ${gameImagePath}, using NotFound.png`);
         return {
             url: this.notFoundImage,
             name: 'NotFound',
@@ -79,7 +80,7 @@ class MediaService {
             };
         }
 
-        Logger.logInfo(`Game image not found: ${gameImagePath}, using NotFound.png`);
+        Logger.logDebug(`Game image not found: ${gameImagePath}, using NotFound.png`);
         return {
             url: this.notFoundImage,
             name: 'NotFound',
@@ -90,6 +91,50 @@ class MediaService {
     public getGameImageBuffer(gameName: GameTypeEnum): Buffer {
         const media = this.getGameImage(gameName);
         return fs.readFileSync(media.url);
+    }
+
+    public getMediaByGameId(gameId: number): GeneratedMedia[] {
+        const gameDirectory = path.join(this.imagesPath, 'games', gameId.toString());
+        
+        if (!fs.existsSync(gameDirectory)) {
+            Logger.logInfo(`Game directory not found: ${gameDirectory}`);
+            return [];
+        }
+
+        try {
+            const files = fs.readdirSync(gameDirectory);
+            const mediaFiles: GeneratedMedia[] = [];
+
+            for (const file of files) {
+                if (file.endsWith('.png')) {
+                    const filePath = path.join(gameDirectory, file);
+                    const stats = fs.statSync(filePath);
+                    
+                    const nameWithoutExt = file.replace('.png', '');
+                    const parts = nameWithoutExt.split('-');
+                    
+                    if (parts.length >= 2) {
+                        const serverId = parts[0];
+                        const uniqueCode = parts.slice(1).join('-');
+                        
+                        mediaFiles.push({
+                            id: uniqueCode,
+                            url: filePath,
+                            name: nameWithoutExt,
+                            type: MediaType.PNG,
+                            createdAt: stats.birthtime,
+                            gameId: gameId,
+                            serverId: serverId
+                        });
+                    }
+                }
+            }
+
+            return mediaFiles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        } catch (error) {
+            Logger.logError(`Error reading game directory ${gameDirectory}: ${error}`);
+            return [];
+        }
     }
 }
 
