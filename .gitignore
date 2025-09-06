@@ -135,8 +135,6 @@ config.json
 package-lock.json
 enterLargeJsons.js
 
-TableInterfaces.ts
-StoredProcedureEnum.ts
 settings.json
 
 images/games/8/*
