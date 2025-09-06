@@ -1,10 +1,10 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
-import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
 import { EventTypeEnum } from "../application/Event";
 import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { LanguageEnum } from "../enums";
 import { GameSettingsSchema } from "./GameSettings";
+import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
 
 // Game configuration interface
 export interface GameConfig {

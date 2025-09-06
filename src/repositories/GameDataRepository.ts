@@ -1,4 +1,4 @@
-import { GameDataModel, GameDataSaveModel } from "../interfaces/database";
+import { GameDataModel, GameDataSaveModel } from "../interfaces/database/TableInterfaces";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";

@@ -1,5 +1,5 @@
-import { DebugModel, DebugSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { DebugModel, DebugSaveModel } from "../interfaces/database/TableInterfaces";
+import { Repository } from "../interfaces/database/Repository";
 import BaseRepository from "./BaseRepository";
 import { TableEnum } from "../interfaces/enums/index";
 
@@ -18,7 +18,7 @@ class DebugRepository implements Repository<DebugModel> {
         const model = await this.baseRepository.Select().Where({ UniqueCode: uniqueCode }).Limit(1).Execute();
         if (!model || model.length === 0)
             return null;
-        
+
         return model[0];
     }
 
