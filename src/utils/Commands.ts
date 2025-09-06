@@ -38,11 +38,11 @@ export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
     return loadedCommands;
 }
 
-export function getCommandConfig(commandName: string): Command {
+export function getCommandConfig(commandName: string): Command | null {
     commandName = commandName.toLowerCase();
     const command = commands.find(c => c.name === commandName);
     if (!command)
-        throw new Error(`Command ${commandName} not found!`);
+        return null;
     
     return command;
 }

@@ -313,7 +313,8 @@ class GameService {
             await gameEvent.getNextAnswerAsync(gameEvent);
 
         // Save the model
-        await GameRepository.saveAsync(gameEvent.gameData);
+        if (gameEvent.requireUpdateModel)
+            await GameRepository.saveAsync(gameEvent.gameData);
     }
 
     private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {
@@ -444,6 +445,11 @@ class GameService {
             getNextAnswerAsync: gameModule.functions.getNextAnswerAsync,
             deleteMessage: async () => {
                 await event.deleteAsync();
+            },
+            requireUpdateModel: false,
+            setAnswer: (answer: string | number | boolean) => {
+                gameEvent.answer = answer;
+                gameEvent.requireUpdateModel = true;
             }
         } as GameEvent;
 

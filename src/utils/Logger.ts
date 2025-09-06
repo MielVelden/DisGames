@@ -1,11 +1,8 @@
-import axios from 'axios';
 import { InteractionEvent } from '../interfaces/application/Event';
 import { GameEvent } from '../interfaces/domain/Game';
-import { DEBUG_MODE, DISCORD_WEBHOOK_URL } from '../config';
-import { TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
-import { TableEnum } from '../interfaces/enums';
-import { RepositoryUtils } from '../repositories/BaseRepository';
-import { FunctionEnum } from '../interfaces/enums/database/FunctionEnum';
+import { DEBUG_MODE } from '../config';
+import { DebugModel, TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
+import Webhook, { WebhookType } from './Webhook';
 
 export enum LogLevel {
     INFO = 'INFO',
@@ -21,29 +18,30 @@ export interface LoggerOptions {
     sendToDiscord?: boolean;
     sendToConsole?: boolean;
     includeStackTrace?: boolean;
+    webhookType?: WebhookType;
 }
 
+export const loggerColors = {
+    [LogLevel.INFO]: 0x00FF00,      // Green
+    [LogLevel.WARNING]: 0xFFA500,   // Orange
+    [LogLevel.ERROR]: 0xFF0000,     // Red
+    [LogLevel.DEBUG]: 0x808080,     // Gray
+    [LogLevel.GAME]: 0x9932CC,      // Purple
+    [LogLevel.EVENT]: 0x1E90FF,     // Blue
+    [LogLevel.TEST]: 0x00CED1       // DarkTurquoise
+};
+
+export const loggerEmojis = {
+    [LogLevel.INFO]: '✅',
+    [LogLevel.WARNING]: '⚠️',
+    [LogLevel.ERROR]: '❌',
+    [LogLevel.DEBUG]: '🔍',
+    [LogLevel.GAME]: '🎮',
+    [LogLevel.EVENT]: '⚡',
+    [LogLevel.TEST]: '🧪'
+};
+
 class Logger {
-    private static readonly colors = {
-        [LogLevel.INFO]: 0x00FF00,      // Green
-        [LogLevel.WARNING]: 0xFFA500,   // Orange
-        [LogLevel.ERROR]: 0xFF0000,     // Red
-        [LogLevel.DEBUG]: 0x808080,     // Gray
-        [LogLevel.GAME]: 0x9932CC,      // Purple
-        [LogLevel.EVENT]: 0x1E90FF,     // Blue
-        [LogLevel.TEST]: 0x00CED1       // DarkTurquoise
-    };
-
-    private static readonly emojis = {
-        [LogLevel.INFO]: '✅',
-        [LogLevel.WARNING]: '⚠️',
-        [LogLevel.ERROR]: '❌',
-        [LogLevel.DEBUG]: '🔍',
-        [LogLevel.GAME]: '🎮',
-        [LogLevel.EVENT]: '⚡',
-        [LogLevel.TEST]: '🧪'
-    };
-
     public static async logInfo(message: string, options?: LoggerOptions): Promise<void> {
         await this.log(LogLevel.INFO, message, undefined, options);
     }
@@ -68,8 +66,8 @@ class Logger {
     }
 
     public static async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {
-        const template = this.createEventTemplate(event, message);
-        await this.sendDiscordEmbed(template, LogLevel.EVENT, options);
+        const template = Webhook.createEventTemplate(event, message);
+        await Webhook.sendDiscordEmbed(template);
 
         if (options?.sendToConsole !== false) {
             console.log(`[${LogLevel.EVENT}] ${message} - User: ${event.user.displayName}, Guild: ${event.guildId}`);
@@ -77,8 +75,8 @@ class Logger {
     }
 
     public static async logGameEvent(gameEvent: GameEvent, message: string, options?: LoggerOptions): Promise<void> {
-        const template = this.createGameEventTemplate(gameEvent, message);
-        await this.sendDiscordEmbed(template, LogLevel.GAME, options);
+        const template = Webhook.createGameEventTemplate(gameEvent, message);
+        await Webhook.sendDiscordEmbed(template);
 
         if (options?.sendToConsole !== false) {
             console.log(`[${LogLevel.GAME}] ${message} - Game: ${gameEvent.gameConfig.name.getMessage()}, User: ${gameEvent.user.displayName}`);
@@ -86,8 +84,8 @@ class Logger {
     }
 
     public static async logGameError(gameEvent: GameEvent, error: Error, options?: LoggerOptions): Promise<void> {
-        const template = this.createGameErrorTemplate(gameEvent, error);
-        await this.sendDiscordEmbed(template, LogLevel.ERROR, options);
+        const template = Webhook.createGameErrorTemplate(gameEvent, error);
+        await Webhook.sendDiscordEmbed(template);
 
         if (options?.sendToConsole !== false) {
             console.error(`[${LogLevel.ERROR}] Game Error - ${error.message}`, error.stack);
@@ -95,8 +93,8 @@ class Logger {
     }
 
     public static async logEventError(event: InteractionEvent, error: Error, options?: LoggerOptions): Promise<void> {
-        const template = this.createEventErrorTemplate(event, error);
-        await this.sendDiscordEmbed(template, LogLevel.ERROR, options);
+        const template = Webhook.createEventErrorTemplate(event, error);
+        await Webhook.sendDiscordEmbed(template);
 
         if (options?.sendToConsole !== false) {
             console.error(`[${LogLevel.ERROR}] Event Error - ${error.message}`, error.stack);
@@ -104,18 +102,24 @@ class Logger {
     }
 
     public static async logTimeline(timeline: TimelineEntriesSaveModel, options?: LoggerOptions): Promise<void> {
-        const template = await this.createTimelineTemplate(timeline);
-        await this.sendDiscordEmbed(template, LogLevel.DEBUG, {
-            sendToDiscord: DEBUG_MODE,
-            ...options
-        });
+        const template = await Webhook.createTimelineTemplate(timeline);
+        await Webhook.sendDiscordEmbed(template);
+    }
+
+    public static async logDebugCommand(debugModel: DebugModel, message: string, options?: LoggerOptions): Promise<void> {
+        const debugTemplate = await Webhook.createDebugTemplate(debugModel);
+        await Webhook.sendDiscordEmbed(debugTemplate, options?.webhookType ?? WebhookType.DEBUG);
+
+        const template = await Webhook.createDebugCommandTemplate(debugModel, message);
+        await Webhook.sendDiscordEmbed(template, options?.webhookType ?? WebhookType.DEBUG);
     }
 
     private static async log(level: LogLevel, message: string, error?: Error, options?: LoggerOptions): Promise<void> {
         const defaultOptions: LoggerOptions = {
             sendToDiscord: false,
             sendToConsole: true,
-            includeStackTrace: level === LogLevel.ERROR
+            includeStackTrace: level === LogLevel.ERROR,
+            webhookType: options?.webhookType
         };
         const finalOptions = { ...defaultOptions, ...options };
 
@@ -130,285 +134,8 @@ class Logger {
         }
 
         if (finalOptions.sendToDiscord) {
-            const embed = this.createBasicEmbed(level, message, error);
-            await this.sendDiscordEmbed(embed, level, finalOptions);
-        }
-    }
-
-    private static createEventTemplate(event: InteractionEvent, message: string): any {
-        return {
-            title: `${this.emojis[LogLevel.EVENT]} Discord Event`,
-            description: message,
-            color: this.colors[LogLevel.EVENT],
-            timestamp: new Date().toISOString(),
-            fields: [
-                {
-                    name: 'Event Type',
-                    value: event.type,
-                    inline: true
-                },
-                {
-                    name: 'User',
-                    value: `${event.user.displayName} (${event.user.userId})`,
-                    inline: true
-                },
-                {
-                    name: 'Guild',
-                    value: event.guildId,
-                    inline: true
-                },
-                {
-                    name: 'Channel',
-                    value: event.channelId,
-                    inline: true
-                },
-                {
-                    name: 'Message ID',
-                    value: event.messageId,
-                    inline: true
-                },
-                {
-                    name: 'Custom ID',
-                    value: event.customId || 'N/A',
-                    inline: true
-                }
-            ],
-            footer: {
-                text: 'DisGames Event Logger'
-            }
-        };
-    }
-
-    private static createGameEventTemplate(gameEvent: GameEvent, message: string): any {
-        return {
-            title: `${this.emojis[LogLevel.GAME]} Game Event`,
-            description: message,
-            color: this.colors[LogLevel.GAME],
-            timestamp: new Date().toISOString(),
-            fields: [
-                {
-                    name: 'Game',
-                    value: `${gameEvent.gameConfig.emoji} ${gameEvent.gameConfig.name.getMessage()}`,
-                    inline: true
-                },
-                {
-                    name: 'Player',
-                    value: `${gameEvent.user.displayName} (${gameEvent.user.userId})`,
-                    inline: true
-                },
-                {
-                    name: 'Points',
-                    value: gameEvent.gameConfig.points.toString(),
-                    inline: true
-                },
-                {
-                    name: 'Answer',
-                    value: gameEvent.answer?.toString() || 'N/A',
-                    inline: true
-                },
-                {
-                    name: 'Guild',
-                    value: gameEvent.server.ServerId,
-                    inline: true
-                },
-                {
-                    name: 'Event Type',
-                    value: gameEvent.eventType,
-                    inline: true
-                }
-            ],
-            footer: {
-                text: 'DisGames Game Logger'
-            }
-        };
-    }
-
-    private static createGameErrorTemplate(gameEvent: GameEvent, error: Error): any {
-        return {
-            title: `${this.emojis[LogLevel.ERROR]} Game Error`,
-            description: `Error in game: ${gameEvent.gameConfig.name.getMessage()}`,
-            color: this.colors[LogLevel.ERROR],
-            timestamp: new Date().toISOString(),
-            fields: [
-                {
-                    name: 'Error Message',
-                    value: error.message,
-                    inline: false
-                },
-                {
-                    name: 'Game',
-                    value: `${gameEvent.gameConfig.emoji} ${gameEvent.gameConfig.name.getMessage()}`,
-                    inline: true
-                },
-                {
-                    name: 'Player',
-                    value: `${gameEvent.user.displayName} (${gameEvent.user.userId})`,
-                    inline: true
-                },
-                {
-                    name: 'Guild',
-                    value: gameEvent.server.ServerId,
-                    inline: true
-                },
-                {
-                    name: 'Stack Trace',
-                    value: `\`\`\`${error.stack?.substring(0, 1000) || 'No stack trace available'}\`\`\``,
-                    inline: false
-                }
-            ],
-            footer: {
-                text: 'DisGames Error Logger'
-            }
-        };
-    }
-
-    private static createEventErrorTemplate(event: InteractionEvent, error: Error): any {
-        return {
-            title: `${this.emojis[LogLevel.ERROR]} Event Error`,
-            description: `Error in Discord event: ${event.type}`,
-            color: this.colors[LogLevel.ERROR],
-            timestamp: new Date().toISOString(),
-            fields: [
-                {
-                    name: 'Error Message',
-                    value: error.message,
-                    inline: false
-                },
-                {
-                    name: 'Event Type',
-                    value: event.type,
-                    inline: true
-                },
-                {
-                    name: 'User',
-                    value: `${event.user.displayName} (${event.user.userId})`,
-                    inline: true
-                },
-                {
-                    name: 'Guild',
-                    value: event.guildId,
-                    inline: true
-                },
-                {
-                    name: 'Channel',
-                    value: event.channelId,
-                    inline: true
-                },
-                {
-                    name: 'Custom ID',
-                    value: event.customId || 'N/A',
-                    inline: true
-                },
-                {
-                    name: 'Stack Trace',
-                    value: `\`\`\`${error.stack?.substring(0, 1000) || 'No stack trace available'}\`\`\``,
-                    inline: false
-                }
-            ],
-            footer: {
-                text: 'DisGames Error Logger'
-            }
-        };
-    }
-
-    private static async createTimelineTemplate(timeline: TimelineEntriesSaveModel): Promise<any> {
-        const formatFieldValueAsync = async (value: unknown, table?: TableEnum): Promise<string> => {
-            if (value === null || value === undefined)
-                return 'N/A';
-
-            if (typeof value === 'object') {
-                const json = JSON.stringify(value, null, 2) ?? '{}';
-                const clipped = json.length > 1000 ? json.slice(0, 1000) + '…' : json;
-                return '```json\n' + clipped + '\n```';
-            }
-            const str = String(value);
-            if (table) {
-                const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.Getdisplayname, [table, value]);
-                return result;
-            }
-            return str.length > 1024 ? str.slice(0, 1021) + '…' : str;
-        };
-
-        return {
-            title: `${this.emojis[LogLevel.DEBUG]} Timeline`,
-            description: `New timeline entry`,
-            color: this.colors[LogLevel.DEBUG],
-            timestamp: new Date().toISOString(),
-            fields: [
-                {
-                    name: 'TableEnum-ObjectID',
-                    value: `${await formatFieldValueAsync(timeline.TableEnum)}-${await formatFieldValueAsync(timeline.ObjectId)}`,
-                    inline: false
-                },
-                {
-                    name: 'Timeline Type',
-                    value: await formatFieldValueAsync(timeline.TimelineType),
-                    inline: true
-                },
-                {
-                    name: 'Changes',
-                    value: await formatFieldValueAsync(timeline.ChangesJSON),
-                    inline: false
-                },
-                {
-                    name: 'User',
-                    value: await formatFieldValueAsync(timeline.UserId, TableEnum.USERS),
-                    inline: true
-                },
-                {
-                    name: 'Server',
-                    value: await formatFieldValueAsync(timeline.ServerId, TableEnum.SERVERS),
-                    inline: true
-                }
-            ],
-            footer: {
-                text: 'DisGames Timeline Logger'
-            }
-        };
-    }
-
-    private static createBasicEmbed(level: LogLevel, message: string, error?: Error): any {
-        const embed = {
-            title: `${this.emojis[level]} ${level}`,
-            description: message,
-            color: this.colors[level],
-            timestamp: new Date().toISOString(),
-            footer: {
-                text: 'DisGames Logger'
-            },
-            fields: [] as any[]
-        };
-
-        if (error) {
-            embed.fields.push({
-                name: 'Error Details',
-                value: error.message,
-                inline: false
-            });
-
-            if (error.stack) {
-                embed.fields.push({
-                    name: 'Stack Trace',
-                    value: `\`\`\`${error.stack.substring(0, 1000)}\`\`\``,
-                    inline: false
-                });
-            }
-        }
-
-        return embed;
-    }
-
-    private static async sendDiscordEmbed(embed: any, level: LogLevel, options?: LoggerOptions): Promise<void> {
-        if (!DISCORD_WEBHOOK_URL || options?.sendToDiscord === false) {
-            return;
-        }
-
-        try {
-            await axios.post(DISCORD_WEBHOOK_URL, {
-                embeds: [embed]
-            });
-        } catch (error) {
-            console.error('[Logger] Failed to send Discord webhook:', error);
+            const embed = Webhook.createBasicEmbed(level, message, error);
+            await Webhook.sendDiscordEmbed(embed, finalOptions.webhookType);
         }
     }
 }

@@ -63,11 +63,11 @@ export class DatabaseHelper {
     // Process JSON fields - serialize only from their non-JSON counterparts or if they're objects
     for (const [key, value] of Object.entries(serialized)) {
       if (SchemaUtils.isJsonField(key)) {
-        if (value === null) {
-          delete serialized[key];
-        } else if (jsonFieldsToProcess.has(key)) {
+        if (jsonFieldsToProcess.has(key)) {
           // Use the value from the non-JSON field (guaranteed to be an object)
           serialized[key] = JSON.stringify(jsonFieldsToProcess.get(key));
+        } else if (value === null) {
+          delete serialized[key];
         } else if (value !== undefined && typeof value !== 'string') {
           // Only serialize if it's not already a string
           serialized[key] = JSON.stringify(value);

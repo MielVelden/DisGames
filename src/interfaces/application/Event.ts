@@ -77,6 +77,8 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
 }
 
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    command?: Command;
+    
     sendAsync(): Promise<void>;
     reactAsync(emoji: string): Promise<void>;
 

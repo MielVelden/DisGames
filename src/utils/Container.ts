@@ -1,5 +1,5 @@
 import { ActionButton, Component, ComponentType, Container } from "../interfaces/application/Message";
-import { GamesModel } from "../interfaces/database";
+import { DebugModel, GamesModel } from "../interfaces/database";
 import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import MediaService from "../services/MediaService";
 import { i18n } from "./i18n/i18n";

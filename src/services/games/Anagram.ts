@@ -83,7 +83,7 @@ export default {
                 })
             });
 
-            event.gameData.Answer = nextAnswer;
+            event.setAnswer(nextAnswer);
         },
 
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {

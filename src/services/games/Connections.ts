@@ -129,7 +129,7 @@ export default {
             // Check if this category is already solved
             if (categoryIndex !== -1 && !gameState.solvedCategories.includes(categoryIndex)) {
                 gameState.solvedCategories.push(categoryIndex);
-                event.gameData.Answer = serializeGameState(gameState);
+                event.setAnswer(serializeGameState(gameState));
                 return true;
             }
 
@@ -158,7 +158,7 @@ export default {
                     }
                 }
                 
-                event.gameData.Answer = serializeGameState(gameState);
+                event.setAnswer(serializeGameState(gameState));
             }
             
             // Always send an updated image for a valid answer
@@ -172,7 +172,7 @@ export default {
                 // If all 4 categories are solved, start new game
                 if (gameState.solvedCategories.length === 4 && event.nextAnswer) {
                     const nextGameState = createGameState(event.nextAnswer);
-                    event.gameData.Answer = serializeGameState(nextGameState);
+                    event.setAnswer(serializeGameState(nextGameState));
 
                     // New game image
                     event.addAction({

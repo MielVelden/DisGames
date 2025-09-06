@@ -11,6 +11,7 @@ import { i18n } from '../utils/i18n/i18n';
 import { MultiLingualString } from '../utils/i18n/MultiLangualString';
 import ComponentService from '../services/ComponentService';
 import Logger from '../utils/Logger';
+import { handleCommand } from '../utils/Commands';
 
 export default {
     name: Events.MessageCreate,
@@ -26,8 +27,10 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
     try {
         if (message.author.bot)
             return;
-
-        await GameService.handleGameAsync(event);
+        if (event.command)
+            await handleCommand(event.command, event);
+        else
+            await GameService.handleGameAsync(event);
     }
     catch (error) {
         if (error instanceof ComponentError) {          

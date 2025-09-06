@@ -82,6 +82,8 @@ export interface GameEvent extends GameFunctions {
     user: User;
     server: ServersModel;
     
+    requireUpdateModel: boolean;
+    setAnswer(answer: string | number | boolean): void;
     answer?: string | number | boolean;
     nextAnswer?: GameDataModel[];
     gameData: GamesModel;

@@ -13,7 +13,6 @@ import { MultiLingualString } from '../utils/i18n/MultiLangualString';
 import { i18n } from '../utils/i18n/i18n';
 import Logger from '../utils/Logger';
 
-
 export default {
     name: Events.InteractionCreate,
 

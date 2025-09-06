@@ -4,11 +4,13 @@ import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { EventTypeEnum, MessageInteractionEvent } from "../../../interfaces/application/Event";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
+import { Command } from "../../../interfaces/application/Command";
 
 export class MessageDiscordEvent extends BaseReplyDiscordEvent implements MessageInteractionEvent {
     public messageDeleted: boolean = false;
     public readonly content: string;
-
+    public readonly command?: Command;
+    
     constructor(
         interaction: DiscordMessage,
         user: User,
@@ -17,10 +19,12 @@ export class MessageDiscordEvent extends BaseReplyDiscordEvent implements Messag
         guildId: string,
         messageId: string,
         eventType: EventTypeEnum,
-        content: string
+        content: string,
+        command?: Command
     ) {
         super(eventType, interaction.id, interaction, user, server, channelId, guildId, messageId);
         this.content = content;
+        this.command = command ?? undefined;
     }
 
     public async sendAsync(): Promise<void> {

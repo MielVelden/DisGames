@@ -55,6 +55,14 @@ interface I18nTranslations {
         delete: LanguageTranslations;
     }
     commands: {
+        debug: {
+            description: LanguageTranslations;
+            labels: {
+                title: LanguageTranslations;
+                thanks: LanguageTranslations;
+                description: (uniqueCode: string) => MultiLingualString;
+            }
+        },
         games: {
             description: LanguageTranslations;
             option: LanguageCommandOptionTranslations<GamesCommandActionEnum>;
@@ -148,6 +156,26 @@ export const i18n: I18nTranslations = {
         }
     },
     commands: {
+        debug: {
+            description: {
+                [LanguageEnum.EN]: "Debug",
+                [LanguageEnum.NL]: "Debug",
+            },
+            labels: {
+                title: {
+                    [LanguageEnum.EN]: "Debug",
+                    [LanguageEnum.NL]: "Debug",
+                },
+                description: (uniqueCode: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Please send the following command in any channel in the server that you need help with: 'debug {uniqueCode}'",
+                    [LanguageEnum.NL]: "Stuur het volgende commando in een kanaal in de server waar je hulp nodig hebt: 'debug {uniqueCode}'",
+                }, { uniqueCode }),
+                thanks: {
+                    [LanguageEnum.EN]: "Thank you for your help, the developer will be notified and will get back to you as soon as possible.",
+                    [LanguageEnum.NL]: "Bedankt voor je hulp, de ontwikkelaar wordt op de hoogte gebracht en zal zo snel mogelijk terugkomen.",
+                },
+            }
+        },
         games: {
             description: {
                 [LanguageEnum.EN]: "Easily configure and manage your games",

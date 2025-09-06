@@ -37,6 +37,9 @@ class DiscordInteractionMapper {
 
         if (interaction.isChatInputCommand()) {
             const command = getCommandConfig(interaction.commandName);
+            if(!command)
+                throw new Error(`Command not found: ${interaction.commandName}`);
+            
             return new SlashCommandDiscordEvent(
                 interaction,
                 baseParams.user,
@@ -80,6 +83,8 @@ class DiscordInteractionMapper {
         const user = await this.mapDiscordUserToUser(message.author, message.member as DiscordGuildMember);
         const server = await this.mapDiscordServerToServerAsync(message.guild as DiscordServer);
 
+        const command = getCommandConfig(message.content.split(' ')[0].toLowerCase()) ?? undefined;
+
         return new MessageDiscordEvent(
             message,
             user,
@@ -88,7 +93,8 @@ class DiscordInteractionMapper {
             message.guildId!,
             message.id,
             eventType,
-            message.content
+            message.content,
+            command
         );
     }
 

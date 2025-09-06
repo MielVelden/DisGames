@@ -20,7 +20,6 @@ export function getEnumDefaultsByValue<T extends { [key: string]: string | numbe
     const result: Partial<Record<T[keyof T], any>> = {};
     const enumValues = Object.values(enumObj);
 
-    // Maak voor elke enum waarde een default waarde
     enumValues.forEach(enumValue => {
         result[enumValue as T[keyof T]] = defaultValue;
     });

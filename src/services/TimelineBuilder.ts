@@ -7,7 +7,6 @@ import UserRepository from "../repositories/UserRepository";
 import ServerRepository from "../repositories/ServerRepository";
 import GameRepository from "../repositories/GameRepository";
 import Logger from "../utils/Logger";
-import { DEBUG_MODE } from "../config";
 
 interface TimelineContext {
    event: InteractionEvent;
@@ -56,21 +55,17 @@ class TimelineBuilder {
     }
 
     private hasChanged(oldValue: any, newValue: any): boolean {
-        if (oldValue === newValue) {
+        if (oldValue === newValue) 
             return false;
-        }
-        
-        if (oldValue === null || oldValue === undefined) {
+            
+        if (oldValue === null || oldValue === undefined) 
             return newValue !== null && newValue !== undefined;
-        }
-        
-        if (newValue === null || newValue === undefined) {
+                
+        if (newValue === null || newValue === undefined) 
             return true;
-        }
-        
-        if (typeof oldValue === 'object' && typeof newValue === 'object') {
+
+        if (typeof oldValue === 'object' && typeof newValue === 'object') 
             return JSON.stringify(oldValue) !== JSON.stringify(newValue);
-        }
         
         return oldValue !== newValue;
     }

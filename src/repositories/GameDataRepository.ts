@@ -1,9 +1,8 @@
 import { GameDataModel, GameDataSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { LanguageEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
+import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
-import { DEFAULT_LANGUAGE } from "../utils/i18n/MultiLangualString";
 
 class GameDataRepository implements Repository<GameDataModel> {
     private baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
