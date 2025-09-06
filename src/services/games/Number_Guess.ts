@@ -52,7 +52,7 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            event.setAnswer((Math.floor(Math.random() * MAX_NUMBER) + 1).toString());
+            event.answer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
         }
     }
 } as GameModule;

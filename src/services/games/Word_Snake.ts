@@ -33,7 +33,7 @@ export default {
                 return;
             const lastAnswer = event.answer.toString().toLowerCase();
             const lastLetter = lastAnswer.charAt(lastAnswer.length - 1);
-            event.setAnswer(lastLetter);
+            event.answer = lastLetter;
         }
     } as GameFunctions
 } as GameModule;
