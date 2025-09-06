@@ -37,7 +37,7 @@ export default {
                 })
             })
 
-            event.setAnswer(nextAnswer);
+            event.answer = nextAnswer;
         }
     } as GameFunctions
 } as GameModule;

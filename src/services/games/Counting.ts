@@ -44,7 +44,7 @@ export default {
         },
 
         async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            event.setAnswer((Number(event.gameData.Answer) + 1).toString());
+            event.answer = (Number(event.gameData.Answer) + 1).toString();
         },
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
@@ -53,7 +53,7 @@ export default {
             
             if (resetOnFail) {
                 // Reset the counter back to 0
-                event.setAnswer("0");
+                event.answer = "0";
 
                 event.addAction({
                     enum: GameActionEnum.REACTION,

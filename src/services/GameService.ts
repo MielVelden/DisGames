@@ -424,36 +424,22 @@ class GameService {
             answer = event.content.toLowerCase();
         }
 
-        const gameEvent: GameEvent = {
+        return new GameEvent({
             eventType: event.type,
+            messageId: event.messageId,
             gameId: gameModule.config.id,
             gameConfig: gameModule.config,
             user: event.user,
             server: event.server,
             answer: answer,
-            messageId: event.messageId,
-            addAction: (action: GameAction) => {
-                gameEvent.actions.push(action);
-            },
-            removeAction: (action: GameAction) => {
-                gameEvent.actions = gameEvent.actions.filter(a => a.enum !== action.enum);
-            },
             gameData: game,
-            actions: [],
             validateAnswer: gameModule.functions.validateAnswer,
-            addCorrectReaction: gameModule.config.addCorrectReaction,
             getNextAnswerAsync: gameModule.functions.getNextAnswerAsync,
+            onIncorrectAnswerAsync: gameModule.functions.onIncorrectAnswerAsync,
             deleteMessage: async () => {
                 await event.deleteAsync();
-            },
-            requireUpdateModel: false,
-            setAnswer: (answer: string | number | boolean) => {
-                gameEvent.answer = answer;
-                gameEvent.requireUpdateModel = true;
             }
-        } as GameEvent;
-
-        return gameEvent;
+        });
     }
 
     // #region Game Settings Management
