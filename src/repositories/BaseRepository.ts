@@ -4,9 +4,6 @@ import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 
-type Condition<T> = (x: T) => any;
-type QueryCondition = string | { [key: string]: any };
-
 interface BaseEntity {
   Id?: number;
 }

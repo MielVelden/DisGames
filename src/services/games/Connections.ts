@@ -12,14 +12,12 @@ import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];
     solvedCategories: number[];
-    currentGuess?: string[];
 }
 
 function createGameState(gameDataArray: GameDataModel[]): ConnectionsGameState {
     return {
         gameDataArray: gameDataArray,
         solvedCategories: [],
-        currentGuess: undefined
     };
 }
 
@@ -36,13 +34,11 @@ function parseGameState(answerString: string): ConnectionsGameState {
         return {
             gameDataArray,
             solvedCategories: parsed.solvedCategories || [],
-            currentGuess: parsed.currentGuess
         };
     } catch {
         return {
             gameDataArray: [],
             solvedCategories: [],
-            currentGuess: undefined
         };
     }
 }
@@ -122,34 +118,17 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            const gameState = parseGameState(event.gameData.Answer);
-            const words = parseWordsFromAnswer(event.answer as string);
+            const gameState = parseGameState(event.getGameDataAnswer());
+            const words = parseWordsFromAnswer(event.userInput as string);
             const categoryIndex = validateCategory(words, gameState.gameDataArray, event.server.LanguageEnum);
 
-            // Check if this category is already solved
+            // Check if this is a valid category that hasn't been solved yet
             if (categoryIndex !== -1 && !gameState.solvedCategories.includes(categoryIndex)) {
-                gameState.solvedCategories.push(categoryIndex);
-                event.answer = serializeGameState(gameState);
-                return true;
-            }
-
-            // Game is only fully solved if all 4 categories are found
-            return gameState.solvedCategories.length === 4;
-        },
-
-        async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            const gameState = parseGameState(event.gameData.Answer);
-            const words = parseWordsFromAnswer(event.answer as string);
-            const categoryIndex = validateCategory(words, gameState.gameDataArray, event.server.LanguageEnum);
-
-            // Check if this is a new category
-            if (categoryIndex !== -1 && !gameState.solvedCategories.includes(categoryIndex)) {
-                // Voeg de nieuwe categorie toe
+                // Update the solved categories
                 gameState.solvedCategories.push(categoryIndex);
                 
                 // If there are now 3 categories solved, automatically add the 4th one
                 if (gameState.solvedCategories.length === 3) {
-                    // Find the missing category (0, 1, 2, 3)
                     const allCategories = [0, 1, 2, 3];
                     const missingCategory = allCategories.find(cat => !gameState.solvedCategories.includes(cat));
                     
@@ -158,10 +137,22 @@ export default {
                     }
                 }
                 
-                event.answer = serializeGameState(gameState);
+                // Update the event with the new game state
+                event.setGameDataAnswer(serializeGameState(gameState));
+                return true;
             }
-            
-            // Always send an updated image for a valid answer
+
+            // Game is only fully solved if all 4 categories are found
+            return gameState.solvedCategories.length === 4;
+        },
+
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            const gameState = parseGameState(event.getGameDataAnswer());
+            const userInput = event.userInput as string;
+            const words = parseWordsFromAnswer(userInput);
+            const categoryIndex = validateCategory(words, gameState.gameDataArray, event.server.LanguageEnum);
+
+            // The game state is already updated in validateAnswer, so we just need to handle the UI
             if (categoryIndex !== -1) {
                 event.addAction({
                     enum: GameActionEnum.COMPONENT,
@@ -170,9 +161,10 @@ export default {
                 });
                 
                 // If all 4 categories are solved, start new game
-                if (gameState.solvedCategories.length === 4 && event.nextAnswer) {
-                    const nextGameState = createGameState(event.nextAnswer);
-                    event.answer = serializeGameState(nextGameState);
+                const nextAnswer = await event.getNextAnswerAsync();
+                if (gameState.solvedCategories.length === 4 && nextAnswer) {
+                    const nextGameState = createGameState(nextAnswer);
+                    event.setGameDataAnswer(serializeGameState(nextGameState));
 
                     // New game image
                     event.addAction({

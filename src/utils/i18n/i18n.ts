@@ -684,5 +684,13 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Record not found",
             [LanguageEnum.NL]: "Record niet gevonden",
         },
+        [ExceptionEnum.USER_NOT_FOUND]: {
+            [LanguageEnum.EN]: "User not found",
+            [LanguageEnum.NL]: "Gebruiker niet gevonden",
+        },
+        [ExceptionEnum.SERVER_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Server not found",
+            [LanguageEnum.NL]: "Server niet gevonden",
+        },
     }
 };

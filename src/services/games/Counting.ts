@@ -40,20 +40,20 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === Number(event.gameData.Answer);
+            return event.userInput === Number(event.getGameDataAnswer());
         },
 
-        async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            event.answer = (Number(event.gameData.Answer) + 1).toString();
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            event.setGameDataAnswer((Number(event.getGameDataAnswer()) + 1).toString());
         },
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
             // Get the resetOnFail setting value from GameService
-            const resetOnFail = GameService.getSettingValue<boolean>(event.gameData, GameSettingsEnum.RESET_ON_FAIL);
+            const resetOnFail = GameService.getSettingValue<boolean>(event.getGameData(), GameSettingsEnum.RESET_ON_FAIL);
             
             if (resetOnFail) {
                 // Reset the counter back to 0
-                event.answer = "0";
+                event.setGameDataAnswer("0");
 
                 event.addAction({
                     enum: GameActionEnum.REACTION,

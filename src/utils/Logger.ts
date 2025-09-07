@@ -1,7 +1,7 @@
 import { InteractionEvent } from '../interfaces/application/Event';
 import { GameEvent } from '../interfaces/domain/Game';
 import { DEBUG_MODE } from '../config';
-import { DebugModel, TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
+import { DebugModel, TimelineEntriesModel } from '../interfaces/database/TableInterfaces';
 import Webhook, { WebhookType } from './Webhook';
 
 export enum LogLevel {
@@ -101,7 +101,7 @@ class Logger {
         }
     }
 
-    public static async logTimeline(timeline: TimelineEntriesSaveModel, options?: LoggerOptions): Promise<void> {
+    public static async logTimeline(timeline: TimelineEntriesModel, options?: LoggerOptions): Promise<void> {
         const template = await Webhook.createTimelineTemplate(timeline);
         await Webhook.sendDiscordEmbed(template);
     }

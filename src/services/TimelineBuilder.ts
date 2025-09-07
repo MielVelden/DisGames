@@ -188,9 +188,9 @@ class TimelineBuilder {
             return;
 
         try {
-            await Promise.all(entries.map(entry => {
-                TimelineRepository.saveAsync(entry);
-                Logger.logTimeline(entry);
+            await Promise.all(entries.map(async entry => {
+                const timeline = await TimelineRepository.saveAsync(entry);
+                Logger.logTimeline(timeline);
             }));
         } catch (error) {
             console.error('Failed to save timeline entries:', error);

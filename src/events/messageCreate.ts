@@ -22,11 +22,11 @@ export default {
 };
 
 export async function handleMessageCreateAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
-    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
+    if (message.author.bot)
+        return;
 
+    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
     try {
-        if (message.author.bot)
-            return;
         if (event.command)
             await handleCommand(event.command, event);
         else

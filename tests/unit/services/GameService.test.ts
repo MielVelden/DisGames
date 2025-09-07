@@ -39,11 +39,11 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 testFunction: async () => {
                     // Arrange
                     const testServer = await createTestServerAsync();
-                    const testUser = await createTestUserAsync();
+                    const userAlice = await createTestUserAsync();
                     const testChannel = await createTestChannelAsync();
                     
                     const eventBuilder = TestDiscordEventBuilder.create()
-                        .withUser({ id: testUser.UserId })
+                        .withUser({ id: userAlice.UserId })
                         .withServer({ id: testServer.ServerId })
                         .withChannel({ id: testChannel });
                     
@@ -115,11 +115,11 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 testFunction: async () => {
                     // Arrange
                     const testServer = await createTestServerAsync();
-                    const testUser = await createTestUserAsync();
+                    const userAlice = await createTestUserAsync();
                     const testChannel = await createTestChannelAsync();
 
                     const eventBuilder = TestDiscordEventBuilder.create()
-                        .withUser({ id: testUser.UserId })
+                        .withUser({ id: userAlice.UserId })
                         .withServer({ id: testServer.ServerId })
                         .withChannel({ id: testChannel });
                     

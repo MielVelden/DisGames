@@ -25,8 +25,8 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            const answer = Number(event.gameData.Answer);
-            const userAnswer = Number(event.answer);
+            const answer = Number(event.getGameDataAnswer());
+            const userAnswer = Number(event.userInput);
 
             if(userAnswer === answer) {
                 return true;
@@ -51,8 +51,8 @@ export default {
             return false;
         },
 
-        async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            event.answer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            event.setGameDataAnswer((Math.floor(Math.random() * MAX_NUMBER) + 1).toString());
         }
     }
 } as GameModule;

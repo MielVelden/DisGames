@@ -5,6 +5,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
 import { LanguageEnum } from "../enums";
 import { GameSettingsSchema } from "./GameSettings";
 import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
+import GameDataRepository from "../../repositories/GameDataRepository";
 
 // Game configuration interface
 export interface GameConfig {
@@ -29,7 +30,7 @@ export interface GameFunctions {
     validateAnswer(event: GameEvent): boolean;
     
     // Get the next answer/prompt
-    getNextAnswerAsync?(event: GameEvent): Promise<void>;
+    getUpdatedGameAnswerAsync?(event: GameEvent): Promise<void>;
     onIncorrectAnswerAsync?(event: GameEvent): Promise<void>;
 
     // Get the components for the start message
@@ -83,14 +84,14 @@ export class GameEvent implements GameFunctions {
     public server: ServersModel;
 
     public requireUpdateModel: boolean;
-    public nextAnswer?: GameDataModel[];
-    public gameData: GamesModel;
-
-    private _answer?: string | number | boolean;
+  
+    private _gameData: GamesModel;
+    private _nextAnswer?: GameDataModel[];
+    private _userInput?: string | number | boolean;
     private _actions: GameAction[];
 
     public validateAnswer: (event: GameEvent) => boolean;
-    public getNextAnswerAsync?: (event: GameEvent) => Promise<void>;
+    public getUpdatedGameAnswerAsync?: (event: GameEvent) => Promise<void>;
     public onIncorrectAnswerAsync?: (event: GameEvent) => Promise<void>;
     public getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel) => Promise<Component[]>;
     public prepareDataAsync?: (gameData: GameDataModel[], languageEnum: LanguageEnum) => Promise<string>;
@@ -104,7 +105,7 @@ export class GameEvent implements GameFunctions {
         gameConfig: GameConfig;
         user: User;
         server: ServersModel;
-        answer: string | number | boolean;
+        userInput: string | number | boolean;
         gameData: GamesModel;
         validateAnswer: (event: GameEvent) => boolean;
         getNextAnswerAsync?: (event: GameEvent) => Promise<void>;
@@ -117,10 +118,10 @@ export class GameEvent implements GameFunctions {
         this.gameConfig = params.gameConfig;
         this.user = params.user;
         this.server = params.server;
-        this._answer = params.answer;
-        this.gameData = params.gameData;
+        this._userInput = params.userInput;
+        this._gameData = params.gameData;
         this.validateAnswer = params.validateAnswer;
-        this.getNextAnswerAsync = params.getNextAnswerAsync;
+        this.getUpdatedGameAnswerAsync = params.getNextAnswerAsync;
         this.onIncorrectAnswerAsync = params.onIncorrectAnswerAsync;
         this.deleteMessage = params.deleteMessage;
 
@@ -128,12 +129,12 @@ export class GameEvent implements GameFunctions {
         this._actions = [];
     }
 
-    public get answer(): string | number | boolean | undefined {
-        return this._answer;
+    public get userInput(): string | number | boolean | undefined {
+        return this._userInput;
     }
 
-    public set answer(value: string | number | boolean | undefined) {
-        this._answer = value;
+    public set userInput(value: string | number | boolean | undefined) {
+        this._userInput = value;
         this.requireUpdateModel = true;
     }
 
@@ -151,5 +152,36 @@ export class GameEvent implements GameFunctions {
 
     public removeAction(action: GameAction): void {
         this._actions = this._actions.filter(a => a.enum !== action.enum);
+    }
+
+    public async getNextAnswerAsync(): Promise<GameDataModel[]> {
+        if(!this._nextAnswer)
+            this._nextAnswer = await GameDataRepository.getGameDataByGamesIdAsync(this._gameData.Id);
+
+        if(!this._nextAnswer)
+            throw new Error('No next answer found');
+
+        return this._nextAnswer;
+    }
+
+    public setNextAnswer(nextAnswer: GameDataModel[] | undefined) {
+        this._nextAnswer = nextAnswer;
+    }
+
+    public getGameData(): GamesModel {
+        return this._gameData;
+    }
+
+    public setGameData(gameData: GamesModel) {
+        this._gameData = gameData;
+    }
+
+    public getGameDataAnswer(): string {
+        return this._gameData.Answer;
+    }
+
+    public setGameDataAnswer(answer: string) {
+        this._gameData.Answer = answer;
+        this.requireUpdateModel = true;
     }
 }

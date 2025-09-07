@@ -23,17 +23,17 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return typeof event.answer === 'string' && 
-                   typeof event.gameData.Answer === 'string' &&
-                   event.answer.toLowerCase().charAt(0) === event.gameData.Answer.toLowerCase();
+            return typeof event.userInput === 'string' && 
+                   typeof event.getGameDataAnswer() === 'string' &&
+                   event.userInput.toLowerCase().charAt(0) === event.getGameDataAnswer().toLowerCase();
         },
 
-        async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            if (!event.answer) 
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            if (!event.userInput) 
                 return;
-            const lastAnswer = event.answer.toString().toLowerCase();
+            const lastAnswer = event.userInput.toString().toLowerCase();
             const lastLetter = lastAnswer.charAt(lastAnswer.length - 1);
-            event.answer = lastLetter;
+            event.setGameDataAnswer(lastLetter);
         }
     } as GameFunctions
 } as GameModule;

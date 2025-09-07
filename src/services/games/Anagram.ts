@@ -66,13 +66,14 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === event.gameData.Answer;
+            return event.userInput === event.getGameDataAnswer();
         },
 
-        async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            const nextAnswer = event.nextAnswer![0].Response.getMessage(event.server.LanguageEnum);
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            const nextAnswer = await event.getNextAnswerAsync();
+            const nextAnswerMessage = nextAnswer[0].Response.getMessage(event.server.LanguageEnum);
             // Scramble the answer
-            const scrambledMessage = scrambleWord(nextAnswer);
+            const scrambledMessage = scrambleWord(nextAnswerMessage);
 
             // Add the scrambled message to the event
             event.addAction({
@@ -83,7 +84,7 @@ export default {
                 })
             });
 
-            event.answer = nextAnswer;
+            event.setGameDataAnswer(nextAnswerMessage);
         },
 
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {

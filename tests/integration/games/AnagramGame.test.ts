@@ -26,13 +26,13 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                 name: 'should complete full anagram game flow successfully',
                 testFunction: async () => {
                     // Arrange
-                    const testUser = await createTestUserAsync();
+                    const userAlice = await createTestUserAsync();
 
                     const inputSimulator = TestInputSimulator.create()
-                        .addConfirmation({ value: true, userId: testUser.UserId! }) // Confirm game start
-                        .addInput({ value: 'cats', userId: testUser.UserId! }) // First answer
-                        .addCorrectInput({ value: 'star', userId: testUser.UserId! }) // Second answer
-                        .addCorrectInput({ value: 'listen', userId: testUser.UserId! }); // Final answer
+                        .addConfirmation({ value: true, userId: userAlice.UserId! }) // Confirm game start
+                        .addInput({ value: 'cats', userId: userAlice.UserId! }) // First answer
+                        .addCorrectInput({ value: 'star', userId: userAlice.UserId! }) // Second answer
+                        .addCorrectInput({ value: 'listen', userId: userAlice.UserId! }); // Final answer
 
                     const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator);
                     const helper = new GameFlowTestHelper();
@@ -53,13 +53,13 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                 name: 'should handle incorrect anagram answers',
                 testFunction: async () => {
                     // Arrange
-                    const testUser = await createTestUserAsync();
+                    const userAlice = await createTestUserAsync();
 
                     const inputSimulator = TestInputSimulator.create()
-                        .addConfirmation({ value: true, userId: testUser.UserId! }) // Confirm game start
-                        .addInput({ value: 'wrong', userId: testUser.UserId! }) // First correct answer
-                        .addInput({ value: 'also_wrong', userId: testUser.UserId! }) // Wrong answer
-                        .addInput({ value: 'also_superwrong', userId: testUser.UserId! }); // Second wrong answer
+                        .addConfirmation({ value: true, userId: userAlice.UserId! }) // Confirm game start
+                        .addInput({ value: 'wrong', userId: userAlice.UserId! }) // First correct answer
+                        .addInput({ value: 'also_wrong', userId: userAlice.UserId! }) // Wrong answer
+                        .addInput({ value: 'also_superwrong', userId: userAlice.UserId! }); // Second wrong answer
 
                     const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator);
                     const helper = new GameFlowTestHelper();

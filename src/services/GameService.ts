@@ -265,12 +265,12 @@ class GameService {
             await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
                 event: event,
                 old: null,
-                new: gameEvent.gameData,
-                objectId: gameEvent.gameData.Id
+                new: gameEvent.getGameData(),
+                objectId: gameEvent.getGameData().Id
             });
         } else if (gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Answer is incorrect - handle via game module if available
-            const gameModule = this.getGameByType(gameEvent.gameData.GameTypeEnum);
+            const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
             if (gameModule && gameModule.functions && gameModule.functions.onIncorrectAnswerAsync) {
                 await gameModule.functions.onIncorrectAnswerAsync(gameEvent);
                 await this.handleValidAnswerAsync(gameEvent);
@@ -291,16 +291,11 @@ class GameService {
     }
 
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
-        // Get the next answer
-        if (!gameEvent.gameConfig.isCalculated) {
-            const gameDataArray = await GameDataRepository.getGameDataByGamesIdAsync(gameEvent.gameData.Id);
-            gameEvent.nextAnswer = gameDataArray;
-        }
-
         if (gameEvent.gameConfig.hasImages) {
+            const nextAnswer = await gameEvent.getNextAnswerAsync();
             // Don't support games with multiple images for now
-            if (!Array.isArray(gameEvent.nextAnswer)) {
-                const image = MediaService.getGameDataImage(gameEvent.gameId, gameEvent.nextAnswer![0].Id);
+            if (Array.isArray(nextAnswer) && nextAnswer.length > 0 && nextAnswer[0] && nextAnswer[0].Id) {
+                const image = MediaService.getGameDataImage(gameEvent.gameId, nextAnswer[0].Id);
                 gameEvent.addAction({
                     enum: GameActionEnum.COMPONENT,
                     priority: GameActionPriorityEnum.HIGH,
@@ -309,12 +304,12 @@ class GameService {
             }
         }
 
-        if (gameEvent.getNextAnswerAsync)
-            await gameEvent.getNextAnswerAsync(gameEvent);
+        if (gameEvent.getUpdatedGameAnswerAsync)
+            await gameEvent.getUpdatedGameAnswerAsync(gameEvent);
 
         // Save the model
         if (gameEvent.requireUpdateModel)
-            await GameRepository.saveAsync(gameEvent.gameData);
+            await GameRepository.saveAsync(gameEvent.getGameData());
     }
 
     private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {
@@ -325,7 +320,7 @@ class GameService {
     }
 
     private async handleGameOptionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
-        const gameModule = this.getGameByType(gameEvent.gameData.GameTypeEnum);
+        const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
         const options = Object.entries(gameEvent.gameConfig.options)
             .filter(([_, value]) => value === true)
             .map(([key]) => Number(key))
@@ -337,14 +332,14 @@ class GameService {
                 case GameOptionEnum.IS_INACTIVE:
                     throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
-                    if (gameEvent.gameData.LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
+                    if (gameEvent.getGameData().LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 
                         gameEvent.addAction({
                             enum: GameActionEnum.COMPONENT,
                             priority: GameActionPriorityEnum.HIGH,
-                            component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.answer as string))
+                            component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.userInput as string))
                         });
                         await this.handleGameActionsAsync(gameEvent, event);
                         await event.sendAsync();
@@ -356,12 +351,12 @@ class GameService {
                     if (DEBUG_MODE && !TestMode.isEnabled())
                         break;
 
-                    if (gameEvent.gameData.LastUser === gameEvent.user.userId) {
+                    if (gameEvent.getGameData().LastUser === gameEvent.user.userId) {
                         gameEvent.deleteMessage();
                         throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
                     } else {
-                        gameEvent.gameData.LastUser = gameEvent.user.userId;
-                        gameEvent.gameData.MessageId = gameEvent.messageId;
+                        gameEvent.getGameData().LastUser = gameEvent.user.userId;
+                        gameEvent.getGameData().MessageId = gameEvent.messageId;
                     }
                     break;
                 case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
@@ -371,7 +366,7 @@ class GameService {
                     }
                     break;
                 case GameOptionEnum.ALLOW_SKIPPING:
-                    if (gameEvent.answer === "?") {
+                    if (gameEvent.userInput === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
                         await this.handleGameActionsAsync(gameEvent, event);
                     }
@@ -411,17 +406,17 @@ class GameService {
 
         const expectedType = gameModule.config.expectedType;
 
-        var answer: string | number | boolean;
+        var userInput: string | number | boolean;
         if (expectedType === "number") {
-            answer = Number(event.content);
-            if (isNaN(answer)) {
+            userInput = Number(event.content);
+            if (isNaN(userInput)) {
                 await event.deleteAsync();
                 throw ErrorHelper.throwError(ExceptionEnum.INVALID_NUMBER);
             }
         } else if (expectedType === "boolean") {
-            answer = event.content.toLowerCase() === "true";
+            userInput = event.content.toLowerCase() === "true";
         } else {
-            answer = event.content.toLowerCase();
+            userInput = event.content.toLowerCase();
         }
 
         return new GameEvent({
@@ -431,10 +426,10 @@ class GameService {
             gameConfig: gameModule.config,
             user: event.user,
             server: event.server,
-            answer: answer,
+            userInput: userInput,
             gameData: game,
             validateAnswer: gameModule.functions.validateAnswer,
-            getNextAnswerAsync: gameModule.functions.getNextAnswerAsync,
+            getNextAnswerAsync: gameModule.functions.getUpdatedGameAnswerAsync,
             onIncorrectAnswerAsync: gameModule.functions.onIncorrectAnswerAsync,
             deleteMessage: async () => {
                 await event.deleteAsync();

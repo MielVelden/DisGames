@@ -3,11 +3,12 @@ import { DEBUG_DISCORD_WEBHOOK_URL, DISCORD_WEBHOOK_URL } from '../config';
 import { LogLevel, loggerColors, loggerEmojis } from './Logger';
 import { InteractionEvent } from '../interfaces/application/Event';
 import { GameEvent } from '../interfaces/domain/Game';
-import { DebugModel, TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
-import { TableEnum } from '../interfaces/enums';
+import { DebugModel, TimelineEntriesModel, TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
+import { TableEnum, TimelineTypeEnum } from '../interfaces/enums';
 import { RepositoryUtils } from '../repositories/BaseRepository';
 import { FunctionEnum } from '../interfaces/enums/database/FunctionEnum';
 import { i18n } from './i18n/i18n';
+import { getEnumValue, getEnumValueByIndex } from './Enum';
 
 export enum WebhookType {
     INFO = 'INFO',
@@ -106,7 +107,7 @@ class Webhook {
                 },
                 {
                     name: 'Answer',
-                    value: gameEvent.answer?.toString() || 'N/A',
+                    value: gameEvent.userInput?.toString() || 'N/A',
                     inline: true
                 },
                 {
@@ -214,7 +215,7 @@ class Webhook {
         };
     }
 
-    public static async createTimelineTemplate(timeline: TimelineEntriesSaveModel): Promise<any> {
+    public static async createTimelineTemplate(timeline: TimelineEntriesModel): Promise<any> {
         const formatFieldValueAsync = async (value: unknown, table?: TableEnum): Promise<string> => {
             if (value === null || value === undefined)
                 return 'N/A';
@@ -228,7 +229,7 @@ class Webhook {
             const str = String(value);
             if (table) {
                 const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.Getdisplayname, [table, value]);
-                return result;
+                return `${result} (${str})`;
             }
 
             return str.length > 1024 ? str.slice(0, 1021) + '…' : str;
@@ -242,17 +243,17 @@ class Webhook {
             fields: [
                 {
                     name: 'TableEnum-ObjectID',
-                    value: `${await formatFieldValueAsync(timeline.TableEnum)}-${await formatFieldValueAsync(timeline.ObjectId)}`,
+                    value: `${await formatFieldValueAsync(getEnumValueByIndex(TableEnum, timeline.TimelineType))} (${await formatFieldValueAsync(timeline.TableEnum)}), Row: ${await formatFieldValueAsync(timeline.ObjectId)}`,
                     inline: false
                 },
                 {
                     name: 'Timeline Type',
-                    value: await formatFieldValueAsync(timeline.TimelineType),
+                    value: await formatFieldValueAsync(getEnumValueByIndex(TimelineTypeEnum, timeline.TimelineType)),
                     inline: true
                 },
                 {
                     name: 'Changes',
-                    value: await formatFieldValueAsync(timeline.ChangesJSON),
+                    value: await formatFieldValueAsync(timeline.Changes),
                     inline: false
                 },
                 {

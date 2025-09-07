@@ -110,6 +110,9 @@ export const GAME_TEST_SETTINGS: Partial<Record<GameTypeEnum, any>> = {
     [GameTypeEnum.WORD_SNAKE]: {
         difficulty: 1, // medium
         allowRepeats: false
+    },
+    [GameTypeEnum.CONNECTIONS]: {
+        difficulty: 1 // medium
     }
 };
 
@@ -129,6 +132,56 @@ export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimu
     };
 }
 
+export function createConnectionsGameData(): string {
+    const gameData = {
+        gameDataArray: [
+            {
+                Response: {
+                    EN: "CAT;DOG;BIRD;FISH",
+                    NL: "KAT;HOND;VOGEL;VIS"
+                },
+                Message: {
+                    EN: "Animals",
+                    NL: "Dieren"
+                }
+            },
+            {
+                Response: {
+                    EN: "RED;BLUE;GREEN;YELLOW",
+                    NL: "ROOD;BLAUW;GROEN;GEEL"
+                },
+                Message: {
+                    EN: "Colors",
+                    NL: "Kleuren"
+                }
+            },
+            {
+                Response: {
+                    EN: "APPLE;BANANA;ORANGE;GRAPE",
+                    NL: "APPEL;BANAAN;SINAASAPPEL;DRUIF"
+                },
+                Message: {
+                    EN: "Fruits",
+                    NL: "Fruit"
+                }
+            },
+            {
+                Response: {
+                    EN: "CAR;BIKE;PLANE;BOAT",
+                    NL: "AUTO;FIETS;VLIEGTUIG;BOOT"
+                },
+                Message: {
+                    EN: "Vehicles",
+                    NL: "Voertuigen"
+                }
+            }
+        ],
+        solvedCategories: []
+    };
+    
+    return JSON.stringify(gameData);
+}
+
 export default {
     TEST_GAMES,
     MOCK_GAMES,
@@ -136,5 +189,6 @@ export default {
     GAME_TEST_SETTINGS,
     getTestGame,
     createTestGame: createTestGameAsync,
-    createGameFlowTestConfig: createGameFlowTestConfig
+    createGameFlowTestConfig: createGameFlowTestConfig,
+    createConnectionsGameData: createConnectionsGameData
 };

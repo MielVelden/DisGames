@@ -23,11 +23,12 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.answer === event.gameData.Answer;
+            return event.userInput === event.getGameDataAnswer();
         },
 
-        async getNextAnswerAsync(event: GameEvent): Promise<void> {
-            const nextAnswer = event.nextAnswer![0].Response.getMessage(event.server.LanguageEnum);
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            const nextAnswer = await event.getNextAnswerAsync();
+            const nextAnswerMessage = nextAnswer[0].Response.getMessage(event.server.LanguageEnum);
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
@@ -37,7 +38,7 @@ export default {
                 })
             })
 
-            event.answer = nextAnswer;
+            event.setGameDataAnswer(nextAnswerMessage);
         }
     } as GameFunctions
 } as GameModule;

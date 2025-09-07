@@ -164,6 +164,7 @@ export interface PointsSaveModel {
 export interface ServersModel {
   Id: number;
   ServerId: string;
+  Name: string;
   Points: number;
   LanguageEnum: enums.LanguageEnum;
 }
@@ -171,6 +172,7 @@ export interface ServersModel {
 export interface ServersSaveModel {
   Id?: number;
   ServerId?: string;
+  Name?: string;
   Points?: number;
   LanguageEnum?: enums.LanguageEnum;
 }

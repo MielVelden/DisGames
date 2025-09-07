@@ -1,10 +1,12 @@
 import { UsersModel } from "../interfaces/database/TableInterfaces";
-import { BadgeEnum, GameTypeEnum } from "../interfaces/enums";
+import { BadgeEnum, ExceptionEnum, GameTypeEnum } from "../interfaces/enums";
 import { ProfileView } from "../interfaces/view";
 import PointRepository from "../repositories/PointRepository";
 import UserRepository from "../repositories/UserRepository";
 import ServerService from "./ServerService";
 import { getEnumDefaultsByValue } from "../utils/Enum";
+import { ErrorHelper } from "../utils/ErrorHelper";
+import Logger from "../utils/Logger";
 
 class UserService {
     public async getByUserIdAsync(userId: string, createIfNotExists: boolean = false): Promise<UsersModel> {
@@ -17,6 +19,15 @@ class UserService {
         }
 
         return user;
+    }
+
+    public async updateUsernameAsync(userId: string, username: string): Promise<UsersModel> {
+        const user = await this.getByUserIdAsync(userId);
+        if (!user)
+            throw ErrorHelper.throwError(ExceptionEnum.USER_NOT_FOUND);
+        user.Username = username;
+        Logger.logDebug(`Updated username to ${username} for user ${userId}`);
+        return await UserRepository.saveAsync(user);
     }
 
     public async getUserProfileAsync(userId: string): Promise<ProfileView> {

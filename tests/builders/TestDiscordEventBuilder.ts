@@ -281,6 +281,7 @@ export class TestDiscordEventBuilder {
 
         const server: ServersModel = {
             Id: parseInt(this.inputSimulator.getServer().id),
+            Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
             Points: this.inputSimulator.getServer().points || 0
@@ -334,6 +335,7 @@ export class TestDiscordEventBuilder {
 
         const server: ServersModel = {
             Id: parseInt(this.inputSimulator.getServer().id),
+            Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
             Points: this.inputSimulator.getServer().points || 0
@@ -386,6 +388,7 @@ export class TestDiscordEventBuilder {
 
         const server: ServersModel = {
             Id: parseInt(this.inputSimulator.getServer().id),
+            Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
             Points: this.inputSimulator.getServer().points || 0

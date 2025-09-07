@@ -27,15 +27,15 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                 name: 'should complete full word snake game flow successfully',
                 testFunction: async () => {
                     // Arrange
-                    const testUser = await createTestUserAsync();
-                    const testUser2 = await createTestUserAsync();
+                    const userAlice = await createTestUserAsync();
+                    const userBob = await createTestUserAsync();
 
                     const inputSimulator = TestInputSimulator.create()
                         .setGameFirstAnswer('c')
-                        .addConfirmation({ value: true, userId: testUser.UserId! }) // Confirm game start
-                        .addInput({ value: 'cats', userId: testUser.UserId! }) // First answer
-                        .addInput({ value: 'stone', userId: testUser2.UserId! }) // Second answer
-                        .addInput({ value: 'eating', userId: testUser.UserId! }); // Final answer
+                        .addConfirmation({ value: true, userId: userAlice.UserId! }) // Confirm game start
+                        .addInput({ value: 'cats', userId: userAlice.UserId! }) // First answer
+                        .addInput({ value: 'stone', userId: userBob.UserId! }) // Second answer
+                        .addInput({ value: 'eating', userId: userAlice.UserId! }); // Final answer
 
                     const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
                     const helper = new GameFlowTestHelper();
@@ -56,16 +56,16 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                 name: 'should handle incorrect word snake answers',
                 testFunction: async () => {
                     // Arrange
-                    const testUser = await createTestUserAsync();
-                    const testUser2 = await createTestUserAsync();
+                    const userAlice = await createTestUserAsync();
+                    const userBob = await createTestUserAsync();
 
                     const inputSimulator = TestInputSimulator.create()
                         .setGameFirstAnswer('c')
-                        .addConfirmation({ value: true, userId: testUser.UserId! }) // Confirm game start
-                        .addInput({ value: 'cats', userId: testUser.UserId! }) // First correct answer
-                        .addWrongInput({ value: 'wrong', userId: testUser2.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // First wrong answer
-                        .addWrongInput({ value: 'also_wrong', userId: testUser2.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // Second wrong answer
-                        .addWrongInput({ value: 'also_superwrong', userId: testUser.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Double wrong answer
+                        .addConfirmation({ value: true, userId: userAlice.UserId! }) // Confirm game start
+                        .addInput({ value: 'cats', userId: userAlice.UserId! }) // First correct answer
+                        .addWrongInput({ value: 'wrong', userId: userBob.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // First wrong answer
+                        .addWrongInput({ value: 'also_wrong', userId: userBob.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // Second wrong answer
+                        .addWrongInput({ value: 'also_superwrong', userId: userAlice.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Double wrong answer
 
                     const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
                     const helper = new GameFlowTestHelper();
