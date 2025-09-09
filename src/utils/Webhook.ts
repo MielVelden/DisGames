@@ -39,6 +39,25 @@ class Webhook {
         }
     }
 
+    private static async formatFieldValueAsync(value: unknown, table?: TableEnum): Promise<string> {
+        if (value === null || value === undefined)
+            return 'N/A';
+
+        if (typeof value === 'object') {
+            const json = JSON.stringify(value, null, 2) ?? '{}';
+            const clipped = json.length > 1000 ? json.slice(0, 1000) + '…' : json;
+            return '```json\n' + clipped + '\n```';
+        }
+
+        const str = String(value);
+        if (table) {
+            const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.Getdisplayname, [table, value]);
+            return `${result} (${str})`;
+        }
+
+        return str.length > 1024 ? str.slice(0, 1021) + '…' : str;
+    };
+
     public static createEventTemplate(event: InteractionEvent, message: string): any {
         return {
             title: `${loggerEmojis[LogLevel.EVENT]} Discord Event`,
@@ -216,25 +235,6 @@ class Webhook {
     }
 
     public static async createTimelineTemplate(timeline: TimelineEntriesModel): Promise<any> {
-        const formatFieldValueAsync = async (value: unknown, table?: TableEnum): Promise<string> => {
-            if (value === null || value === undefined)
-                return 'N/A';
-
-            if (typeof value === 'object') {
-                const json = JSON.stringify(value, null, 2) ?? '{}';
-                const clipped = json.length > 1000 ? json.slice(0, 1000) + '…' : json;
-                return '```json\n' + clipped + '\n```';
-            }
-
-            const str = String(value);
-            if (table) {
-                const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.Getdisplayname, [table, value]);
-                return `${result} (${str})`;
-            }
-
-            return str.length > 1024 ? str.slice(0, 1021) + '…' : str;
-        };
-
         return {
             title: `${loggerEmojis[LogLevel.DEBUG]} Timeline`,
             description: `New timeline entry`,
@@ -243,27 +243,27 @@ class Webhook {
             fields: [
                 {
                     name: 'TableEnum-ObjectID',
-                    value: `${await formatFieldValueAsync(getEnumValueByIndex(TableEnum, timeline.TimelineType))} (${await formatFieldValueAsync(timeline.TableEnum)}), Row: ${await formatFieldValueAsync(timeline.ObjectId)}`,
+                    value: `${await Webhook.formatFieldValueAsync(getEnumValueByIndex(TableEnum, timeline.TimelineType))} (${await Webhook.formatFieldValueAsync(timeline.TableEnum)}), Row: ${await Webhook.formatFieldValueAsync(timeline.ObjectId)}`,
                     inline: false
                 },
                 {
                     name: 'Timeline Type',
-                    value: await formatFieldValueAsync(getEnumValueByIndex(TimelineTypeEnum, timeline.TimelineType)),
+                    value: await Webhook.formatFieldValueAsync(getEnumValueByIndex(TimelineTypeEnum, timeline.TimelineType)),
                     inline: true
                 },
                 {
                     name: 'Changes',
-                    value: await formatFieldValueAsync(timeline.Changes),
+                    value: await Webhook.formatFieldValueAsync(timeline.Changes),
                     inline: false
                 },
                 {
                     name: 'User',
-                    value: await formatFieldValueAsync(timeline.UserId, TableEnum.USERS),
+                    value: await Webhook.formatFieldValueAsync(timeline.UserId, TableEnum.USERS),
                     inline: true
                 },
                 {
                     name: 'Server',
-                    value: await formatFieldValueAsync(timeline.ServerId, TableEnum.SERVERS),
+                    value: await Webhook.formatFieldValueAsync(timeline.ServerId, TableEnum.SERVERS),
                     inline: true
                 }
             ],
@@ -273,7 +273,7 @@ class Webhook {
         };
     }
 
-    public static createDebugTemplate(debugModel: DebugModel): any {
+    public static async createDebugTemplateAsync(debugModel: DebugModel): Promise<any> {
         const dataJson = JSON.stringify(debugModel.Data ?? {}, null, 2);
         const clipped = dataJson.length > 1000 ? dataJson.slice(0, 1000) + '…' : dataJson;
 
@@ -285,17 +285,17 @@ class Webhook {
             fields: [
                 {
                     name: 'ID',
-                    value: String(debugModel.Id ?? 'N/A'),
+                    value: await Webhook.formatFieldValueAsync(debugModel.Id),
                     inline: true
                 },
                 {
                     name: 'Unique Code',
-                    value: debugModel.UniqueCode ?? 'N/A',
+                    value: await Webhook.formatFieldValueAsync(debugModel.UniqueCode),
                     inline: true
                 },
                 {
                     name: 'Server ID',
-                    value: String(debugModel.ServerId ?? 'N/A'),
+                    value: await Webhook.formatFieldValueAsync(debugModel.ServerId, TableEnum.SERVERS),
                     inline: true
                 },
                 {
@@ -326,6 +326,43 @@ class Webhook {
             },
             fields: [] as any[]
         };
+    }
+
+    public static createJobReportTemplate(successCount: number, failedCount: number, successfulJobs: string[], failedJobs: { jobId: string, error: string }[]): any {
+        const embed = {
+            title: `${loggerEmojis[LogLevel.DEBUG]} Job Execution Report`,
+            description: `**Job execution completed**`,
+            color: loggerColors[LogLevel.DEBUG],
+            timestamp: new Date().toISOString(),
+            footer: {
+                text: 'DisGames Job Scheduler'
+            },
+            fields: [
+                {
+                    name: 'Summary',
+                    value: `✅ **Successful:** ${successCount}\n❌ **Failed:** ${failedCount}`,
+                    inline: true
+                }
+            ] as any[]
+        };
+
+        if (successfulJobs.length > 0) {
+            embed.fields.push({
+                name: 'Successful Jobs',
+                value: successfulJobs.map(id => `• ${id}`).join('\n'),
+                inline: false
+            });
+        }
+
+        if (failedJobs.length > 0) {
+            embed.fields.push({
+                name: 'Failed Jobs',
+                value: failedJobs.map(f => `• ${f.jobId}: ${f.error}`).join('\n'),
+                inline: false
+            });
+        }
+
+        return embed;
     }
 
     public static createBasicEmbed(level: LogLevel, message: string, error?: Error): any {

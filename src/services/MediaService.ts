@@ -16,7 +16,7 @@ class MediaService {
 
     public getMedia(image: Media): string {
         const imagePath = path.join(this.imagesPath, `${image.name}.${image.type}`);
-        
+
         if (fs.existsSync(imagePath)) {
             return imagePath;
         }
@@ -31,7 +31,7 @@ class MediaService {
             name,
             type
         };
-        
+
         return this.getMedia(image);
     }
 
@@ -52,7 +52,7 @@ class MediaService {
 
     public getGameImage(gameName: GameTypeEnum): Media {
         const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameName}.${MediaType.PNG}`);
-        
+
         if (fs.existsSync(gameImagePath)) {
             return {
                 url: gameImagePath,
@@ -71,7 +71,7 @@ class MediaService {
 
     public getGameDataImage(gameId: GameTypeEnum, gameDataId: number): Media {
         const gameImagePath = path.join(process.cwd(), 'images', 'games', `${gameId}`, `${gameDataId}.${MediaType.GIF}`);
-        
+
         if (fs.existsSync(gameImagePath)) {
             return {
                 url: gameImagePath,
@@ -95,7 +95,7 @@ class MediaService {
 
     public getMediaByGameId(gameId: number): GeneratedMedia[] {
         const gameDirectory = path.join(this.imagesPath, 'games', gameId.toString());
-        
+
         if (!fs.existsSync(gameDirectory)) {
             Logger.logInfo(`Game directory not found: ${gameDirectory}`);
             return [];
@@ -109,14 +109,14 @@ class MediaService {
                 if (file.endsWith('.png')) {
                     const filePath = path.join(gameDirectory, file);
                     const stats = fs.statSync(filePath);
-                    
+
                     const nameWithoutExt = file.replace('.png', '');
                     const parts = nameWithoutExt.split('-');
-                    
+
                     if (parts.length >= 2) {
                         const serverId = parts[0];
                         const uniqueCode = parts.slice(1).join('-');
-                        
+
                         mediaFiles.push({
                             id: uniqueCode,
                             url: filePath,
@@ -134,6 +134,20 @@ class MediaService {
         } catch (error) {
             Logger.logError(`Error reading game directory ${gameDirectory}: ${error}`);
             return [];
+        }
+    }
+
+    public async cleanupGameImages(): Promise<void> {
+        // Delete all files in images\games\gameId
+        const gameIds: GameTypeEnum[] = [GameTypeEnum.CONNECTIONS];
+        for (const gameId of gameIds) {
+            const gameDirectory = path.join(this.imagesPath, 'games', gameId.toString());
+            const files = fs.readdirSync(gameDirectory);
+            const filesToDelete = files.filter(file => file.endsWith('.png'));
+            for (const fileToDelete of filesToDelete) {
+                fs.unlinkSync(path.join(gameDirectory, fileToDelete));
+                Logger.logInfo(`Deleted game image: ${path.join(gameDirectory, fileToDelete)}`);
+            }
         }
     }
 }

@@ -107,7 +107,7 @@ class Logger {
     }
 
     public static async logDebugCommand(debugModel: DebugModel, message: string, options?: LoggerOptions): Promise<void> {
-        const debugTemplate = await Webhook.createDebugTemplate(debugModel);
+        const debugTemplate = await Webhook.createDebugTemplateAsync(debugModel);
         await Webhook.sendDiscordEmbed(debugTemplate, options?.webhookType ?? WebhookType.DEBUG);
 
         const template = await Webhook.createDebugCommandTemplate(debugModel, message);

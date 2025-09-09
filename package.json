@@ -9,6 +9,7 @@
     "dev": "tsc && node dist/index.js",
     "watch": "tsc -w",
     "deploy": "npm run build && node dist/deploy-commands.js",
+    "job": "ts-node src/job-runner.ts",
     "db:down": "ts-node src/utils/database/GenerateSchema.ts",
     "test": "ts-node --project tests/tsconfig.json tests/TestRunner.ts",
     "test:unit": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --unit",

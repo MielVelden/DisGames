@@ -18,11 +18,12 @@ export class DebugCommand implements Command {
     options = [];
 
     async executeAsync(event: MessageInteractionEvent): Promise<void> {
-        const uniqueCode = event.content.split(' ')[1];
-        if (!uniqueCode)
+        const command = event.content.split(' ')[1];
+        if (!command)
             return;
-
-        const debugRecord = await DebugService.getDebugByUniqueCode(uniqueCode);
+        
+        // Handle debug record command
+        const debugRecord = await DebugService.getDebugByUniqueCode(command);
         if (!debugRecord)
             return;
 
