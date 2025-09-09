@@ -326,10 +326,13 @@ async function main(): Promise<void> {
             await runner.loadTestFiles(path.join(__dirname, 'unit'));
         } else if (args.includes('--integration')) {
             await runner.loadTestFiles(path.join(__dirname, 'integration'));
+        } else if (args.includes('--performance')) {
+            await runner.loadTestFiles(path.join(__dirname, 'performance'));
         } else {
             // Load all tests
             await runner.loadTestFiles(path.join(__dirname, 'unit'));
             await runner.loadTestFiles(path.join(__dirname, 'integration'));
+            await runner.loadTestFiles(path.join(__dirname, 'performance'));
         }
 
         // Debug mode
