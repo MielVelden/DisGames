@@ -1,9 +1,6 @@
 import { EventTypeEnum } from '../../src/interfaces/application/Event';
 import { PerformanceTestHelper } from '../helpers/PerformanceTestHelper';
 import { PERFORMANCE_BASELINES } from '../config/PerformanceBaselines';
-import { createTestUserAsync } from '../fixtures/users';
-import { createTestServerAsync } from '../fixtures/servers';
-import { createTestChannelAsync } from '../fixtures/channels';
 import AssertionHelpers from '../helpers/AssertionHelpers';
 import TestRunner from '../TestRunner';
 import { PerformanceTestSuite } from '../interfaces/PerformanceTestInterface';
@@ -47,6 +44,7 @@ export default function registerSingleEventPerformanceTests(runner: TestRunner):
                         'Single event performance should be within baseline'
                     );
                     AssertionHelpers.assertNoMemoryLeaks(result.metrics, 'No memory leaks should occur');
+                    helper.logPerformance(result);
                 }
             },
 
@@ -74,6 +72,7 @@ export default function registerSingleEventPerformanceTests(runner: TestRunner):
                         PERFORMANCE_BASELINES.SINGLE_EVENT,
                         'Single slash command performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             },
 
@@ -101,6 +100,7 @@ export default function registerSingleEventPerformanceTests(runner: TestRunner):
                         PERFORMANCE_BASELINES.SINGLE_EVENT,
                         'Single button event performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             },
 
@@ -128,6 +128,7 @@ export default function registerSingleEventPerformanceTests(runner: TestRunner):
                         PERFORMANCE_BASELINES.SINGLE_EVENT,
                         'Single mixed event performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             }
         ]

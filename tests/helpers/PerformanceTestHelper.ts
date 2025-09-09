@@ -5,26 +5,27 @@ import { createTestUserAsync } from '../fixtures/users';
 import { createTestServerAsync } from '../fixtures/servers';
 import { createTestChannelAsync } from '../fixtures/channels';
 import { createTestGameAsync } from '../fixtures/games';
-import Logger from '../../src/utils/Logger';
+import Logger, { loggerColors, loggerEmojis, LogLevel } from '../../src/utils/Logger';
 import GameService from '../../src/services/GameService';
 import { EventService } from '../../src/services/EventService';
 import { handleCommand } from '../../src/utils/Commands';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import { DifficultyEnum } from '../../src/interfaces/enums/games/DifficultyEnum';
+import Webhook, { WebhookType } from '../../src/utils/Webhook';
 
 export class PerformanceTestHelper {
-    private metrics: PerformanceMetrics[] = [];
-    private startTime: number = 0;
     private memorySnapshots: number[] = [];
     private gcCycles: number = 0;
+    private cpuStartTime: number = 0;
+    private cpuStartUsage: NodeJS.CpuUsage = { user: 0, system: 0 };
 
     public async runSingleEventTest(config: PerformanceTestConfig): Promise<PerformanceTestResult> {
         Logger.logDebug(`Starting single event performance test with ${config.eventCount} events`);
         
         const testStartTime = Date.now();
-        this.startTime = testStartTime;
         this.collectMemoryMetrics();
+        this.startCpuMonitoring();
 
         try {
             const events = await this.generateEvents(config);
@@ -62,7 +63,7 @@ export class PerformanceTestHelper {
                 metrics: aggregatedMetrics,
                 eventBreakdown: new Map(),
                 resourceUsage: {
-                    cpuUsage: 0, // Would need external monitoring
+                    cpuUsage: this.getCpuUsage(),
                     memoryLeaks: this.detectMemoryLeaks(),
                     gcCycles: this.gcCycles
                 }
@@ -91,8 +92,8 @@ export class PerformanceTestHelper {
         Logger.logDebug(`Starting parallel event performance test with ${config.eventCount} events, concurrency: ${config.concurrency}`);
         
         const testStartTime = Date.now();
-        this.startTime = testStartTime;
         this.collectMemoryMetrics();
+        this.startCpuMonitoring();
 
         try {
             const events = await this.generateEvents(config);
@@ -139,7 +140,7 @@ export class PerformanceTestHelper {
                 metrics: aggregatedMetrics,
                 eventBreakdown: new Map(),
                 resourceUsage: {
-                    cpuUsage: 0,
+                    cpuUsage: this.getCpuUsage(),
                     memoryLeaks: this.detectMemoryLeaks(),
                     gcCycles: this.gcCycles
                 }
@@ -168,8 +169,8 @@ export class PerformanceTestHelper {
         Logger.logDebug(`Starting load test with ${config.eventCount} events, concurrency: ${config.concurrency}`);
         
         const testStartTime = Date.now();
-        this.startTime = testStartTime;
         this.collectMemoryMetrics();
+        this.startCpuMonitoring();
 
         try {
             // Warmup phase
@@ -237,7 +238,7 @@ export class PerformanceTestHelper {
                 metrics: aggregatedMetrics,
                 eventBreakdown: new Map(),
                 resourceUsage: {
-                    cpuUsage: 0,
+                    cpuUsage: this.getCpuUsage(),
                     memoryLeaks: this.detectMemoryLeaks(),
                     gcCycles: this.gcCycles
                 }
@@ -408,6 +409,22 @@ export class PerformanceTestHelper {
         return usage.heapUsed / 1024 / 1024; // Convert to MB
     }
 
+    private startCpuMonitoring(): void {
+        this.cpuStartTime = Date.now();
+        this.cpuStartUsage = process.cpuUsage();
+    }
+
+    private getCpuUsage(): number {
+        const currentUsage = process.cpuUsage(this.cpuStartUsage);
+        const currentTime = Date.now();
+        const elapsedTime = (currentTime - this.cpuStartTime) * 1000; // Convert to microseconds
+        
+        const totalCpuTime = currentUsage.user + currentUsage.system;
+        const cpuPercentage = (totalCpuTime / elapsedTime) * 100;
+        
+        return Math.min(cpuPercentage, 100); // Cap at 100%
+    }
+
     private detectMemoryLeaks(): boolean {
         if (this.memorySnapshots.length < 2) return false;
         
@@ -437,10 +454,92 @@ export class PerformanceTestHelper {
     }
 
     public reset(): void {
-        this.metrics = [];
         this.memorySnapshots = [];
         this.gcCycles = 0;
-        this.startTime = 0;
+    }
+
+    public logPerformance(metrics: PerformanceTestResult): void {
+        Logger.logDebug(`Performance test metrics: ${JSON.stringify(metrics)}`);
+        Webhook.sendDiscordEmbed(this.createPerformanceTemplateAsync(metrics), WebhookType.DEBUG);
+    }
+
+    private createPerformanceTemplateAsync(metrics: PerformanceTestResult): any {
+        return {
+            title: `${loggerEmojis[LogLevel.TEST]} Performance Test`,
+            description: `Performance test completed: ${metrics.suite} - ${metrics.test}`,
+            color: loggerColors[LogLevel.TEST],
+            timestamp: new Date().toISOString(),
+            fields: [
+                {
+                    name: 'Suite',
+                    value: metrics.suite,
+                    inline: true
+                },
+                {
+                    name: 'Test',
+                    value: metrics.test,
+                    inline: true
+                },
+                {
+                    name: 'Duration',
+                    value: `${metrics.duration}ms`,
+                    inline: true
+                },
+                {
+                    name: 'Total Duration',
+                    value: `${metrics.metrics.totalDuration}ms`,
+                    inline: true
+                },
+                {
+                    name: 'Average Response Time',
+                    value: `${metrics.metrics.averageResponseTime}ms`,
+                    inline: true
+                },
+                {
+                    name: 'Min Response Time',
+                    value: `${metrics.metrics.minResponseTime}ms`,
+                    inline: true
+                },
+                {
+                    name: 'Max Response Time',
+                    value: `${metrics.metrics.maxResponseTime}ms`,
+                    inline: true
+                },
+                {
+                    name: 'Throughput',
+                    value: `${metrics.metrics.throughput.toFixed(2)} events/sec`,
+                    inline: true
+                },
+                {
+                    name: 'Success Rate',
+                    value: `${(metrics.metrics.successRate * 100).toFixed(1)}%`,
+                    inline: true
+                },
+                {
+                    name: 'Memory Usage',
+                    value: `Peak: ${(metrics.metrics.memoryUsage.peak / 1024 / 1024).toFixed(2)}MB\nFinal: ${(metrics.metrics.memoryUsage.final / 1024 / 1024).toFixed(2)}MB`,
+                    inline: false
+                },
+                {
+                    name: 'CPU Usage',
+                    value: `${metrics.resourceUsage.cpuUsage.toFixed(2)}%`,
+                    inline: true
+                },
+                {
+                    name: 'GC Cycles',
+                    value: `${metrics.resourceUsage.gcCycles}`,
+                    inline: true
+                },
+                {
+                    name: 'Memory Leaks',
+                    value: metrics.resourceUsage.memoryLeaks ? '⚠️ Detected' : '✅ None',
+                    inline: true
+                }
+            ],
+            footer: {
+                text: 'DisGames Performance Logger'
+            }
+        };
     }
 }
 

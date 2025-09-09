@@ -44,6 +44,7 @@ export default function registerParallelEventPerformanceTests(runner: TestRunner
                         'Parallel message events performance should be within baseline'
                     );
                     AssertionHelpers.assertNoMemoryLeaks(result.metrics, 'No memory leaks should occur');
+                    helper.logPerformance(result);
                 }
             },
 
@@ -71,6 +72,7 @@ export default function registerParallelEventPerformanceTests(runner: TestRunner
                         PERFORMANCE_BASELINES.PARALLEL_EVENTS,
                         'Parallel mixed events performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             },
 
@@ -98,6 +100,7 @@ export default function registerParallelEventPerformanceTests(runner: TestRunner
                         PERFORMANCE_BASELINES.PARALLEL_EVENTS,
                         'Parallel slash commands performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             },
 
@@ -125,6 +128,7 @@ export default function registerParallelEventPerformanceTests(runner: TestRunner
                         PERFORMANCE_BASELINES.PARALLEL_EVENTS,
                         'Parallel button events performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             }
         ]

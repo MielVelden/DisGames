@@ -75,6 +75,7 @@ export default function registerHighLoadPerformanceTests(runner: TestRunner): vo
                         PERFORMANCE_BASELINES.HIGH_LOAD,
                         'High load 5000 events performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             },
 
@@ -105,6 +106,7 @@ export default function registerHighLoadPerformanceTests(runner: TestRunner): vo
                         'High load 10000 events performance should be within baseline'
                     );
                     AssertionHelpers.assertNoMemoryLeaks(result.metrics, 'No memory leaks should occur');
+                    helper.logPerformance(result);
                 }
             },
 
@@ -134,6 +136,7 @@ export default function registerHighLoadPerformanceTests(runner: TestRunner): vo
                         PERFORMANCE_BASELINES.HIGH_LOAD,
                         'High load mixed events performance should be within baseline'
                     );
+                    helper.logPerformance(result);
                 }
             },
 
@@ -164,6 +167,7 @@ export default function registerHighLoadPerformanceTests(runner: TestRunner): vo
                         'Extreme load performance should be within baseline'
                     );
                     AssertionHelpers.assertNoMemoryLeaks(result.metrics, 'No memory leaks should occur');
+                    helper.logPerformance(result);
                 }
             }
         ]
