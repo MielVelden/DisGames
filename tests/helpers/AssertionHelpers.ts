@@ -266,6 +266,42 @@ export class AssertionHelpers {
         const wasEdited = messages.some(msg => msg.id === messageId && msg.isEdit);
         this.assertFalse(wasEdited, message || `Expected message ${messageId} not to be edited`);
     }
+
+    // Performance-specific assertions
+    public static assertPerformanceWithinBaseline(metrics: any, baseline: any, message?: string): void {
+        this.assertLessThan(metrics.averageResponseTime, baseline.maxResponseTime, 
+            message || `Average response time ${metrics.averageResponseTime}ms should be less than ${baseline.maxResponseTime}ms`);
+        
+        this.assertGreaterThan(metrics.throughput, baseline.minThroughput, 
+            message || `Throughput ${metrics.throughput} events/sec should be greater than ${baseline.minThroughput} events/sec`);
+        
+        this.assertLessThan(metrics.memoryUsage.final, baseline.maxMemoryUsage, 
+            message || `Final memory usage ${metrics.memoryUsage.final}MB should be less than ${baseline.maxMemoryUsage}MB`);
+        
+        this.assertLessThan(metrics.errorRate, baseline.maxErrorRate, 
+            message || `Error rate ${metrics.errorRate} should be less than ${baseline.maxErrorRate}`);
+    }
+
+    public static assertNoMemoryLeaks(metrics: any, message?: string): void {
+        const memoryGrowth = metrics.memoryUsage.final - metrics.memoryUsage.initial;
+        this.assertLessThan(memoryGrowth, 100, 
+            message || `Memory growth ${memoryGrowth}MB should be less than 100MB (potential memory leak)`);
+    }
+
+    public static assertResponseTimeWithinLimit(responseTime: number, maxTime: number, message?: string): void {
+        this.assertLessThan(responseTime, maxTime, 
+            message || `Response time ${responseTime}ms should be less than ${maxTime}ms`);
+    }
+
+    public static assertThroughputAboveMinimum(throughput: number, minThroughput: number, message?: string): void {
+        this.assertGreaterThan(throughput, minThroughput, 
+            message || `Throughput ${throughput} events/sec should be greater than ${minThroughput} events/sec`);
+    }
+
+    public static assertErrorRateBelowThreshold(errorRate: number, maxErrorRate: number, message?: string): void {
+        this.assertLessThan(errorRate, maxErrorRate, 
+            message || `Error rate ${errorRate} should be less than ${maxErrorRate}`);
+    }
 }
 
 // Export individual assertion functions for convenience
@@ -298,6 +334,11 @@ export const {
     assertNoReactionExists,
     assertMessageWasEdited,
     assertMessageWasNotEdited,
+    assertPerformanceWithinBaseline,
+    assertNoMemoryLeaks,
+    assertResponseTimeWithinLimit,
+    assertThroughputAboveMinimum,
+    assertErrorRateBelowThreshold,
 } = AssertionHelpers;
 
 export default AssertionHelpers;

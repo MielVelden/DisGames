@@ -14,6 +14,7 @@
     "test": "ts-node --project tests/tsconfig.json tests/TestRunner.ts",
     "test:unit": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --unit",
     "test:integration": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --integration",
+    "test:performance": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --performance",
     "test:coverage": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --coverage",
     "test:watch": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --watch"
   },
