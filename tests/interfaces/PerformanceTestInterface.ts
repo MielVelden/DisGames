@@ -22,7 +22,7 @@ export interface PerformanceTestConfig {
     warmupEvents?: number;
     testDuration?: number; // in ms
     eventTypes: EventTypeEnum[];
-    testScenario: 'single' | 'parallel' | 'mixed';
+    testScenario: 'single' | 'parallel' | 'mixed' | 'stress' | 'stress_mixed' | 'burst';
 }
 
 export interface PerformanceTestResult extends TestResult {
