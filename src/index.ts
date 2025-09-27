@@ -5,6 +5,7 @@ import { loadEvents } from './utils/Events';
 import { loadCommands } from './utils/Commands';
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
 import Logger from './utils/Logger';
+import { startHttpServer } from './server';
 
 const token = TOKEN;
 if (!token) {
@@ -27,6 +28,8 @@ client.once('ready', async () => {
     if (success) {
       await loadCommands(client);
       await loadEvents(client);
+      const port = Number(process.env.DISGAMES_API_PORT || 3600);
+      startHttpServer(port);
     } else {
       Logger.logError(`Failed to connect to database`);
     }

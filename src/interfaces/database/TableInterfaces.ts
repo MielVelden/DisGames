@@ -227,11 +227,13 @@ export interface UsersModel {
   Id: number;
   UserId: string;
   Username: string;
+  OAuth2AccessToken: string;
 }
 
 export interface UsersSaveModel {
   Id?: number;
   UserId?: string;
   Username?: string;
+  OAuth2AccessToken?: string;
 }
 
