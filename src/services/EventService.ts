@@ -1,5 +1,6 @@
 import { ButtonHandler, SelectMenuHandler, InteractionEvent, EventTypeEnum, SelectMenuInteractionEvent } from '../interfaces/application/Event';
-import { calculateDuration, DurationEnum, durationToMilliseconds } from '../utils/Duration';
+import { calculateDuration, durationToMilliseconds } from '../utils/Duration';
+import { DurationEnum } from '../interfaces/application/Duration';
 import Logger from '../utils/Logger';
 
 const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);

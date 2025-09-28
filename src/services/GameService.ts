@@ -23,7 +23,7 @@ import ComponentService from "./ComponentService";
 import { createCancelButton, createMoveButton } from "../utils/Button";
 import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../interfaces/application/MultiLangualString";
 import MediaService from "./MediaService";
 import Logger from "../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";

@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { Duration, DurationEnum, calculateDuration } from './utils/Duration';
+import { calculateDuration } from './utils/Duration';
+import { Duration, DurationEnum } from './interfaces/application/Duration';
 
 export const TOKEN = process.env.TOKEN;
 export const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;

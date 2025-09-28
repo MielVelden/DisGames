@@ -1,4 +1,4 @@
-import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../application/MultiLangualString";
 import { GameSettingsEnum } from "../enums/games/GameSettingsEnum";
 import { DifficultyEnum } from "../enums/games/DifficultyEnum";
 

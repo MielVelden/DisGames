@@ -2,7 +2,7 @@ import { ComponentType, SelectMenu } from "../interfaces/application/Message";
 import { GameModule } from "../interfaces/domain/Game";
 import ComponentService from "../services/ComponentService";
 import { i18n } from "./i18n/i18n";
-import { MultiLingualString } from "./i18n/MultiLangualString";
+import { MultiLingualString } from "../interfaces/application/MultiLangualString";
 
 export function isSelectMenuEmpty(selectMenu: SelectMenu): boolean {
     switch(selectMenu.type) {

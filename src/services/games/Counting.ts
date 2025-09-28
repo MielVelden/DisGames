@@ -2,7 +2,7 @@ import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOpti
 import { GameTypeEnum } from "../../interfaces/enums";
 import { GameSettingsEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../../interfaces/application/MultiLangualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../GameService";
 import TimelineBuilder from "../TimelineBuilder";

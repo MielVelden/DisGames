@@ -3,7 +3,7 @@ import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
 import { GameSettingsEnum } from "../../interfaces/enums";
 import { DifficultyEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../../interfaces/application/MultiLangualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component, Container } from "../../interfaces/application/Message";

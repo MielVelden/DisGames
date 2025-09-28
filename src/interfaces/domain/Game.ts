@@ -1,7 +1,7 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
 import { EventTypeEnum } from "../application/Event";
-import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../application/MultiLangualString";
 import { LanguageEnum } from "../enums";
 import { GameSettingsSchema } from "./GameSettings";
 import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";

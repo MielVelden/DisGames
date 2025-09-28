@@ -8,7 +8,7 @@ import { MessageInteractionEvent, EventTypeEnum } from '../interfaces/applicatio
 import GameService from '../services/GameService';
 import { ComponentError } from '../utils/ErrorHelper';
 import { i18n } from '../utils/i18n/i18n';
-import { MultiLingualString } from '../utils/i18n/MultiLangualString';
+import { MultiLingualString } from '../interfaces/application/MultiLangualString';
 import ComponentService from '../services/ComponentService';
 import Logger from '../utils/Logger';
 import { handleCommand } from '../utils/Commands';
