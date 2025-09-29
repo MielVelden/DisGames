@@ -1,7 +1,8 @@
-import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 const MAX_NUMBER = 100;
 

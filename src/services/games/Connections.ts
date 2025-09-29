@@ -1,7 +1,8 @@
-import { GameActionEnum, GameActionPriorityEnum, GameEvent, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameActionEnum, GameActionPriorityEnum, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../ComponentService";

@@ -4,8 +4,8 @@ import { User } from "../interfaces/domain";
 import UserRepository from "../repositories/UserRepository";
 
 class UserController implements Controller {
-    async getByIdAsync(id: string, identity: User): Promise<UsersModel> {
-        const user = await UserRepository.getByUserIdAsync(id);
+    async getByIdAsync(discordUserId: string, identity: User): Promise<UsersModel> {
+        const user = await UserRepository.getByUserIdAsync(discordUserId);
         return user;
     }
 

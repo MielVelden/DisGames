@@ -2,7 +2,7 @@ import { ComponentErrorOptions } from "../interfaces/application/Error";
 import { Component } from "../interfaces/application/Message";
 import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
 import { i18n } from "./i18n/i18n";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "./i18n/MultiLingualString";
 
 export class ErrorHelper {
     static throwErrorWithComponents(message: ExceptionEnum, components: Component[]): never {

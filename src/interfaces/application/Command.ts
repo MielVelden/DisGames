@@ -1,5 +1,5 @@
 import { LanguageCommandOptionTranslations } from "./i18n";
-import { MultiLingualString } from "./MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../enums/commands/CommandEnum";
 import { InteractionEvent, SlashCommandInteractionEvent } from "./Event";
 import { SelectMenu } from "./Message";

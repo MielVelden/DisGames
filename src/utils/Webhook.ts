@@ -2,13 +2,13 @@ import axios from 'axios';
 import { DEBUG_DISCORD_WEBHOOK_URL, DISCORD_WEBHOOK_URL } from '../config';
 import { LogLevel, loggerColors, loggerEmojis } from './Logger';
 import { InteractionEvent } from '../interfaces/application/Event';
-import { GameEvent } from '../interfaces/domain/Game';
-import { DebugModel, TimelineEntriesModel, TimelineEntriesSaveModel } from '../interfaces/database/TableInterfaces';
+import { GameEvent } from '../services/events/GameEvent';
+import { DebugModel, TimelineEntriesModel } from '../interfaces/database/TableInterfaces';
 import { TableEnum, TimelineTypeEnum } from '../interfaces/enums';
 import { RepositoryUtils } from '../repositories/BaseRepository';
 import { FunctionEnum } from '../interfaces/enums/database/FunctionEnum';
 import { i18n } from './i18n/i18n';
-import { getEnumValue, getEnumValueByIndex } from './Enum';
+import { getEnumValueByIndex } from './Enum';
 
 export enum WebhookType {
     INFO = 'INFO',

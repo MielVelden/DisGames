@@ -6,7 +6,7 @@ import { Routes } from 'discord-api-types/v10';
 import { Command, CommandOptionFollowUpType } from "../interfaces/application/Command";
 import discordService from "../services/discord/DiscordService";
 import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "./i18n/MultiLingualString";
 import { LanguageCommandOptionTranslations } from "./i18n/i18n";
 import Logger from "./Logger";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";

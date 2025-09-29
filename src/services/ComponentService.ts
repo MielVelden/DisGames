@@ -4,7 +4,7 @@ import { Media, MediaType } from "../interfaces/application/Media";
 import { ActionButton, Component, ComponentType, Container, ContainerBuilder, Content, MediaGallery, SelectMenu, TextDisplay } from "../interfaces/application/Message";
 import { GameTypeEnum } from "../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { EventService } from "./EventService";
 import MediaService from "./MediaService";
 import Logger from "../utils/Logger";

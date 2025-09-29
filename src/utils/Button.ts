@@ -2,7 +2,7 @@ import { InteractionEvent } from "../interfaces/application/Event";
 import { ActionButton, ButtonStyle } from "../interfaces/application/Message";
 import ComponentService from "../services/ComponentService";
 import { i18n } from "./i18n/i18n";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "./i18n/MultiLingualString";
 
 export function createCancelButton(userId: string): ActionButton {
     return ComponentService.createButton(

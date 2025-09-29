@@ -30,25 +30,47 @@ export class TypeScriptGenerator {
         output += '  return res.json() as T;\n';
         output += '}\n\n';
 
-        // Generate all interfaces first (without namespaces to avoid conflicts)
-        output += '// ===== INTERFACES =====\n';
+        // Generate exported interfaces first (for global access)
+        output += '// ===== GLOBAL EXPORTS =====\n';
         const interfacesByCategory = this.groupInterfacesByCategory(interfaces);
+        const endpointsByController = this.groupEndpointsByController(endpoints);
 
         for (const [category, categoryInterfaces] of interfacesByCategory.entries()) {
             output += `// ${category} Interfaces\n`;
             for (const interfaceInfo of categoryInterfaces) {
                 // Clean up the interface content to remove namespace conflicts
                 const cleanContent = this.cleanInterfaceContent(interfaceInfo.content);
+                // No export keyword - these are just local models
                 output += `${cleanContent}\n\n`;
             }
         }
 
-        // Generate API wrapper
-        output += '// ===== API WRAPPER =====\n';
-        output += 'export const DisGames = {\n';
-        output += '  Api: {\n';
+        // Generate namespace definitions for type checking and API wrapper
+        output += '// ===== DISGAMES NAMESPACE WITH EXPORTS AND API =====\n';
 
-        const endpointsByController = this.groupEndpointsByController(endpoints);
+        // Generate namespace definitions for type checking
+        output += '// ===== NAMESPACE DEFINITIONS FOR TYPE CHECKING =====\n';
+        output += 'declare namespace DisGames {\n\n';
+
+        // Interfaces namespace (for type checking - contains all interfaces with exports)
+        output += '  namespace Interfaces {\n';
+        for (const [category, categoryInterfaces] of interfacesByCategory.entries()) {
+            output += `    namespace ${category} {\n`;
+            for (const interfaceInfo of categoryInterfaces) {
+                const cleanContent = this.cleanInterfaceContent(interfaceInfo.content);
+                // Add export keyword to the content
+                const exportedContent = cleanContent.replace(/^(interface|type|enum|class)\s/, 'export $1 ');
+                output += `      ${exportedContent}\n\n`;
+            }
+            output += '    }\n\n';
+        }
+        output += '  }\n\n';
+
+        output += '}\n\n';
+
+        // API implementation outside declare namespace (to avoid ambient context error)
+        output += '// ===== API IMPLEMENTATION =====\n';
+        output += 'export const DisGamesApi = {\n';
 
         for (const [controllerName, controllerEndpoints] of endpointsByController.entries()) {
             const urlNs = MethodNameUtils.toUrlNamespace(controllerName);
@@ -59,52 +81,22 @@ export class TypeScriptGenerator {
                 const params = endpoint.parameters;
 
                 if (params.length === 0) {
-                    output += `      ${pathFn}: () => getJson<any>(\`/api/${urlNs}/${pathFn}\`),\n`;
+                    output += `      ${pathFn}: () => getJson<${endpoint.returnType}>(\`/api/${urlNs}/${pathFn}\`),\n`;
                 } else if (params.length === 1) {
                     const p = params[0];
-                    output += `      ${pathFn}: (${p.name}: any) => getJson<any>(\`/api/${urlNs}/${pathFn}/\${encodeURIComponent(String(${p.name}))}\`),\n`;
+                    output += `      ${pathFn}: (${p.name}: ${p.type}) => getJson<${endpoint.returnType}>(\`/api/${urlNs}/${pathFn}/\${encodeURIComponent(String(${p.name}))}\`),\n`;
                 } else {
                     // Multiple params -> use query string
                     const qs = params.map(p => `${p.name}=\${encodeURIComponent(String(${p.name}))}`).join("&");
-                    const sig = params.map(p => `${p.name}: any`).join(", ");
-                    output += `      ${pathFn}: (${sig}) => getJson<any>(\`/api/${urlNs}/${pathFn}?${qs}\`),\n`;
+                    const sig = params.map(p => `${p.name}: ${p.type}`).join(", ");
+                    output += `      ${pathFn}: (${sig}) => getJson<${endpoint.returnType}>(\`/api/${urlNs}/${pathFn}?${qs}\`),\n`;
                 }
             }
 
             output += '    },\n';
         }
 
-        output += '  },\n';
-        output += '} as const;\n\n';
-
-        // Generate namespace definitions for type checking
-        output += '// ===== NAMESPACE DEFINITIONS FOR TYPE CHECKING =====\n';
-        output += 'declare namespace DisGames {\n\n';
-
-        // Interfaces namespace
-        output += '  namespace Interfaces {\n';
-        for (const [category, categoryInterfaces] of interfacesByCategory.entries()) {
-            output += `    namespace ${category} {\n`;
-            for (const interfaceInfo of categoryInterfaces) {
-                const cleanContent = this.cleanInterfaceContent(interfaceInfo.content);
-                output += `      ${cleanContent}\n\n`;
-            }
-            output += '    }\n\n';
-        }
-        output += '  }\n\n';
-
-        // API namespace
-        output += '  namespace Api {\n';
-        for (const [controllerName, controllerEndpoints] of endpointsByController.entries()) {
-            output += `    namespace ${controllerName} {\n`;
-            for (const endpoint of controllerEndpoints) {
-                const params = endpoint.parameters.map(p => `${p.name}: ${p.type}`).join(', ');
-                output += `      function ${endpoint.methodName}(${params}): Promise<${endpoint.returnType}>;\n`;
-            }
-            output += '    }\n\n';
-        }
-        output += '  }\n';
-        output += '}\n';
+        output += '} as const;\n';
 
         return output;
     }
@@ -144,6 +136,9 @@ export class TypeScriptGenerator {
 
         // Replace Discord types with any
         cleaned = cleaned.replace(/(?<!\b(?:interface|class)\s)Discord\w+/g, 'any');
+
+        // Remove MultiLingualString implementations
+        cleaned = cleaned.replace(/MultiLingualString/g, 'any');
 
         // Remove constructor implementations completely
         cleaned = cleaned.replace(/constructor\([^)]*\)\s*\{[^}]*\}/g, '');
@@ -303,8 +298,15 @@ export class TypeScriptGenerator {
 
     private static groupInterfacesByCategory(interfaces: InterfaceInfo[]): Map<string, InterfaceInfo[]> {
         const grouped = new Map<string, InterfaceInfo[]>();
+        const seenInterfaces = new Set<string>();
 
         for (const interfaceInfo of interfaces) {
+            // Skip duplicates based on name only
+            if (seenInterfaces.has(interfaceInfo.name)) {
+                continue;
+            }
+            seenInterfaces.add(interfaceInfo.name);
+
             if (!grouped.has(interfaceInfo.category)) {
                 grouped.set(interfaceInfo.category, []);
             }

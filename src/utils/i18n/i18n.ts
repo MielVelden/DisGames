@@ -1,7 +1,7 @@
 import { ExceptionEnum, GameTypeEnum, ProfileCommandActionEnum } from "../../interfaces/enums";
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
-import { MultiLingualString } from "../../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations, LanguageEnumTranslations, LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
 
 export const i18n: I18nTranslations = {

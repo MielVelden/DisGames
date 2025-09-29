@@ -1,11 +1,36 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
 import { EventTypeEnum } from "../application/Event";
-import { MultiLingualString } from "../application/MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { LanguageEnum } from "../enums";
 import { GameSettingsSchema } from "./GameSettings";
 import { GameDataModel, GamesModel, ServersModel } from "../database/TableInterfaces";
-import GameDataRepository from "../../repositories/GameDataRepository";
+
+export interface IGameEvent {
+    eventType: EventTypeEnum;
+    messageId: string;
+    gameId: number;
+    gameConfig: GameConfig;
+    user: User;
+    server: ServersModel;
+    requireUpdateModel: boolean;
+    userInput: string | number | boolean | undefined;
+    actions: GameAction[];
+    validateAnswer: (event: IGameEvent) => boolean;
+    getUpdatedGameAnswerAsync?: (event: IGameEvent) => Promise<void>;
+    onIncorrectAnswerAsync?: (event: IGameEvent) => Promise<void>;
+    getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel) => Promise<Component[]>;
+    prepareDataAsync?: (gameData: GameDataModel[], languageEnum: LanguageEnum) => Promise<string>;
+    deleteMessage: () => Promise<void>;
+    getNextAnswerAsync(): Promise<GameDataModel[]>;
+    setNextAnswer(nextAnswer: GameDataModel[] | undefined): void;
+    getGameData(): GamesModel;
+    setGameData(gameData: GamesModel): void;
+    getGameDataAnswer(): string;
+    setGameDataAnswer(answer: string): void;
+    addAction(action: GameAction): void;
+    removeAction(action: GameAction): void;
+}
 
 // Game configuration interface
 export interface GameConfig {
@@ -27,11 +52,11 @@ export interface GameConfig {
 
 export interface GameFunctions {
     // Validate the answer
-    validateAnswer(event: GameEvent): boolean;
+    validateAnswer(event: IGameEvent): boolean;
     
     // Get the next answer/prompt
-    getUpdatedGameAnswerAsync?(event: GameEvent): Promise<void>;
-    onIncorrectAnswerAsync?(event: GameEvent): Promise<void>;
+    getUpdatedGameAnswerAsync?(event: IGameEvent): Promise<void>;
+    onIncorrectAnswerAsync?(event: IGameEvent): Promise<void>;
 
     // Get the components for the start message
     getStartComponentsAsync?(gameData: GameDataModel[], server: ServersModel): Promise<Component[]>;
@@ -72,116 +97,4 @@ export enum GameActionPriorityEnum {
     MEDIUM = 1,
     HIGH = 2,
     CRITICAL = 3,
-}
-
-export class GameEvent implements GameFunctions {
-    public eventType: EventTypeEnum;
-    public messageId: string;
-    public gameId: number;
-    public gameConfig: GameConfig;
-
-    public user: User;
-    public server: ServersModel;
-
-    public requireUpdateModel: boolean;
-  
-    private _gameData: GamesModel;
-    private _nextAnswer?: GameDataModel[];
-    private _userInput?: string | number | boolean;
-    private _actions: GameAction[];
-
-    public validateAnswer: (event: GameEvent) => boolean;
-    public getUpdatedGameAnswerAsync?: (event: GameEvent) => Promise<void>;
-    public onIncorrectAnswerAsync?: (event: GameEvent) => Promise<void>;
-    public getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel) => Promise<Component[]>;
-    public prepareDataAsync?: (gameData: GameDataModel[], languageEnum: LanguageEnum) => Promise<string>;
-
-    public deleteMessage: () => Promise<void>;
-
-    public constructor(params: {
-        eventType: EventTypeEnum;
-        messageId: string;
-        gameId: number;
-        gameConfig: GameConfig;
-        user: User;
-        server: ServersModel;
-        userInput: string | number | boolean;
-        gameData: GamesModel;
-        validateAnswer: (event: GameEvent) => boolean;
-        getNextAnswerAsync?: (event: GameEvent) => Promise<void>;
-        onIncorrectAnswerAsync?: (event: GameEvent) => Promise<void>;
-        deleteMessage: () => Promise<void>;
-    }) {
-        this.eventType = params.eventType;
-        this.messageId = params.messageId;
-        this.gameId = params.gameId;
-        this.gameConfig = params.gameConfig;
-        this.user = params.user;
-        this.server = params.server;
-        this._userInput = params.userInput;
-        this._gameData = params.gameData;
-        this.validateAnswer = params.validateAnswer;
-        this.getUpdatedGameAnswerAsync = params.getNextAnswerAsync;
-        this.onIncorrectAnswerAsync = params.onIncorrectAnswerAsync;
-        this.deleteMessage = params.deleteMessage;
-
-        this.requireUpdateModel = false;
-        this._actions = [];
-    }
-
-    public get userInput(): string | number | boolean | undefined {
-        return this._userInput;
-    }
-
-    public set userInput(value: string | number | boolean | undefined) {
-        this._userInput = value;
-        this.requireUpdateModel = true;
-    }
-
-    public get actions(): GameAction[] {
-        return this._actions;
-    }
-
-    public set actions(actions: GameAction[]) {
-        this._actions = actions;
-    }
-
-    public addAction(action: GameAction): void {
-        this._actions.push(action);
-    }
-
-    public removeAction(action: GameAction): void {
-        this._actions = this._actions.filter(a => a.enum !== action.enum);
-    }
-
-    public async getNextAnswerAsync(): Promise<GameDataModel[]> {
-        if(!this._nextAnswer)
-            this._nextAnswer = await GameDataRepository.getGameDataByGamesIdAsync(this._gameData.Id);
-
-        if(!this._nextAnswer)
-            throw new Error('No next answer found');
-
-        return this._nextAnswer;
-    }
-
-    public setNextAnswer(nextAnswer: GameDataModel[] | undefined) {
-        this._nextAnswer = nextAnswer;
-    }
-
-    public getGameData(): GamesModel {
-        return this._gameData;
-    }
-
-    public setGameData(gameData: GamesModel) {
-        this._gameData = gameData;
-    }
-
-    public getGameDataAnswer(): string {
-        return this._gameData.Answer;
-    }
-
-    public setGameDataAnswer(answer: string) {
-        this._gameData.Answer = answer;
-        this.requireUpdateModel = true;
-    }
 }

@@ -15,7 +15,7 @@ import {
     GameSettingsDisplayConfig 
 } from "../interfaces/application/GameSetting";
 import ComponentService from "../services/ComponentService";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "./i18n/MultiLingualString";
 import { i18n } from "./i18n/i18n";
 import { ButtonInteractionEvent } from "../interfaces/application/Event";
 

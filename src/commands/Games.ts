@@ -9,7 +9,7 @@ import GameService from "../services/GameService";
 import { createDeleteButton, createMoveButton } from "../utils/Button";
 import { createActiveGameContainer, createGameHelpContainer, createGameSetupConfirmationContainer } from "../utils/Container";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
 import { Games_Settings } from "../interfaces/domain/GameSettings";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";

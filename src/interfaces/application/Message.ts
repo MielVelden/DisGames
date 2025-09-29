@@ -1,4 +1,4 @@
-import { MultiLingualString } from "./MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Media } from "./Media";
 
 export interface MessageContainer {

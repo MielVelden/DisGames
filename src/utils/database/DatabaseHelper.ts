@@ -1,4 +1,4 @@
-import { MultiLingualString } from "../../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../i18n/MultiLingualString";
 import { SchemaUtils } from "./SchemaUtils";
 
 export class DatabaseHelper {

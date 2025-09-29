@@ -1,7 +1,7 @@
 import { Command, CommandOptionType } from "../interfaces/application/Command";
 import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
 import { createProfileContainer } from "../utils/Container";

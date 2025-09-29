@@ -3,7 +3,7 @@ import { GamesCommandActionEnum } from "../enums/commands/Games";
 import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
-import { MultiLingualString } from "./MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export type LanguageTranslations = {
     [LanguageEnum.EN]: string;
@@ -30,7 +30,7 @@ export type LanguageEnumTranslations<T extends string | number> = {
     }
 };
 
-type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
+export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
     [K in T]: {
         name: LanguageTranslations;
         description: LanguageTranslations;

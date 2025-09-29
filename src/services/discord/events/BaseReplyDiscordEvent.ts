@@ -1,4 +1,4 @@
-import { MultiLingualString } from "../../../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
 import { ReplyInteractionEvent } from "../../../interfaces/application/Event";
 import { BaseDiscordEvent } from "./BaseDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";

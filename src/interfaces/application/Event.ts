@@ -2,7 +2,7 @@ import { User } from "../domain/User";
 import { Component, BaseSelectMenu } from "./Message";
 import { ServersModel, TimelineEntriesSaveModel } from "../database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
-import { MultiLingualString } from "./MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";

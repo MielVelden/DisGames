@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command, CommandOptionType } from '../../../interfaces/application/Command';
-import { MultiLingualString } from '../../../interfaces/application/MultiLangualString';
+import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { getCommandName } from '../../../utils/Commands';
 
 class DiscordInteractionMapper {

@@ -9,7 +9,7 @@ import { handleCommand } from '../utils/Commands';
 import { EventService } from '../services/EventService';
 import ComponentService from '../services/ComponentService';
 import { ComponentError } from '../utils/ErrorHelper';
-import { MultiLingualString } from '../interfaces/application/MultiLangualString';
+import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import { i18n } from '../utils/i18n/i18n';
 import Logger from '../utils/Logger';
 

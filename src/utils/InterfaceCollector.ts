@@ -48,6 +48,15 @@ export class InterfaceCollector {
         const interfaces: InterfaceInfo[] = [];
         const content = fs.readFileSync(filePath, 'utf-8');
         
+        // Skip files that only contain imports/re-exports (like utils files)
+        // Also skip files that are in utils directory as they typically only import and re-export
+        const isUtilsFile = filePath.includes('/utils/');
+        const hasOwnDefinitions = /export\s+(interface|type|enum|class)\s+(\w+)/.test(content);
+        
+        if (isUtilsFile || !hasOwnDefinitions) {
+            return interfaces;
+        }
+        
         // Extract interface names and their content
         const interfaceRegex = /export\s+(interface|type|enum|class)\s+(\w+)/g;
         let match;
@@ -56,7 +65,7 @@ export class InterfaceCollector {
             const type = match[1];
             const name = match[2];
             
-            // Extract the full interface/enum/type definition
+            // Extract only the specific interface/enum/type definition
             const startIndex = match.index;
             const endIndex = this.findEndOfDefinition(content, startIndex);
             const definition = content.substring(startIndex, endIndex);
@@ -68,17 +77,6 @@ export class InterfaceCollector {
             });
         }
 
-        // Also extract export * statements for re-exports
-        const exportStarRegex = /export\s+\*\s+from\s+['"]([^'"]+)['"]/g;
-        while ((match = exportStarRegex.exec(content)) !== null) {
-            const exportPath = match[1];
-            interfaces.push({
-                name: 'ReExport',
-                category: MethodNameUtils.capitalize(category),
-                content: `// Re-export from ${exportPath}`
-            });
-        }
-
         return interfaces;
     }
 
@@ -86,6 +84,7 @@ export class InterfaceCollector {
         let braceCount = 0;
         let inString = false;
         let stringChar = '';
+        let foundFirstBrace = false;
         
         for (let i = startIndex; i < content.length; i++) {
             const char = content[i];
@@ -98,11 +97,15 @@ export class InterfaceCollector {
             } else if (!inString) {
                 if (char === '{') {
                     braceCount++;
+                    foundFirstBrace = true;
                 } else if (char === '}') {
                     braceCount--;
-                    if (braceCount === 0) {
+                    if (braceCount === 0 && foundFirstBrace) {
                         return i + 1;
                     }
+                } else if (!foundFirstBrace && char === ';') {
+                    // For type definitions without braces, end at semicolon
+                    return i + 1;
                 }
             }
         }

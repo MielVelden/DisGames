@@ -1,6 +1,6 @@
-import { LanguageEnum } from "../enums/database/LanguageEnum";
-import Logger from "../../utils/Logger";
-import { LanguageTranslations } from "./i18n";
+import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
+import Logger from "../Logger";
+import { LanguageTranslations } from "../../interfaces/application/i18n";
 
 export const DEFAULT_LANGUAGE = LanguageEnum.EN;
 

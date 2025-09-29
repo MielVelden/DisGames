@@ -3,7 +3,7 @@ import { GamesModel } from "../interfaces/database/TableInterfaces";
 import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
 import MediaService from "../services/MediaService";
 import { i18n } from "./i18n/i18n";
-import { createMultiLingualString, MultiLingualString } from "../interfaces/application/MultiLangualString";
+import { createMultiLingualString, MultiLingualString } from "./i18n/MultiLingualString";
 import GameService from "../services/GameService";
 import ComponentService from "../services/ComponentService";
 import { GameSettingsValues } from "../interfaces/domain/GameSettings";

@@ -20,7 +20,7 @@ import {
     ChannelSelect,
     Component
 } from '../../../interfaces/application/Message';
-import { createMultiLingualString, MultiLingualString } from '../../../interfaces/application/MultiLangualString';
+import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../ComponentService';

@@ -2,7 +2,7 @@ import { User } from "../../../interfaces/domain/User";
 import { Component, BaseSelectMenu } from "../../../interfaces/application/Message";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
-import { MultiLingualString } from "../../../interfaces/application/MultiLangualString";
+import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
 import { EventTypeEnum, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
