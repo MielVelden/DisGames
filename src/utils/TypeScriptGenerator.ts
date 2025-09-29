@@ -252,8 +252,10 @@ export class TypeScriptGenerator {
                         inStr = null;
 
                     else if (inStr === "`" && ch === "$" && nx === "{") {
-                        depth++; i++;
+                        depth++;
+                        i++;
                     }
+                    
                     continue;
                 } else if (ch === `"` || ch === `'` || ch === "`") {
                     inStr = ch as any;

@@ -48,14 +48,13 @@ export class InterfaceCollector {
         const interfaces: InterfaceInfo[] = [];
         const content = fs.readFileSync(filePath, 'utf-8');
         
-        // Skip files that only contain imports/re-exports (like utils files)
-        // Also skip files that are in utils directory as they typically only import and re-export
-        const isUtilsFile = filePath.includes('/utils/');
+        // Skip files that only contain imports/re-exports
+        const utilsDir = [path.sep, 'utils', path.sep].join('');
+        const isUtilsFile = filePath.includes(utilsDir) || filePath.split(path.sep).includes('utils');
         const hasOwnDefinitions = /export\s+(interface|type|enum|class)\s+(\w+)/.test(content);
-        
-        if (isUtilsFile || !hasOwnDefinitions) {
+
+        if (isUtilsFile || !hasOwnDefinitions)
             return interfaces;
-        }
         
         // Extract interface names and their content
         const interfaceRegex = /export\s+(interface|type|enum|class)\s+(\w+)/g;

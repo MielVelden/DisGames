@@ -1,4 +1,3 @@
-import UserRepository from "../repositories/UserRepository";
 import type { UsersModel } from "../interfaces/database";
 import express from "express";
 import Logger from "../utils/Logger";
@@ -6,6 +5,7 @@ import TimelineController from "./TimelineController";
 import UserController from "./UserController";
 import { TypeGeneratorController } from "./TypeGeneratorController";
 import { MethodNameUtils } from "../utils/MethodNameUtils";
+import UserService from "../services/UserService";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();
@@ -16,6 +16,7 @@ export class ApiController {
 
 	private initializeControllers(): void {
 		// Statically register all controllers
+		// TODO: Dynamically register controllers
 		this.controllers.set('api', this);
 		this.controllers.set('timeline', new TimelineController());
 		this.controllers.set('user', new UserController());
@@ -33,7 +34,7 @@ export class ApiController {
 		if (!userId) 
 			return null;
 		
-		const user = await UserRepository.getByUserIdAsync(userId);
+		const user = await UserService.getByUserIdAsync(userId);
 		if (!user) 
 			return null;
 
