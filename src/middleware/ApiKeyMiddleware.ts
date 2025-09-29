@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 
-const VALID_KEYS = (process.env.DISGAMES_DASHBOARD_API_KEYS || "")
+if (!process.env.DISGAMES_DASHBOARD_API_KEYS)
+	throw new Error("DISGAMES_DASHBOARD_API_KEYS environment variable must be set");
+
+const VALID_KEYS = process.env.DISGAMES_DASHBOARD_API_KEYS
 	.split(",")
 	.map((x) => x.trim())
 	.filter(Boolean);

@@ -1,5 +1,5 @@
 import { InteractionEvent } from '../interfaces/application/Event';
-import { GameEvent } from '../interfaces/domain/Game';
+import { GameEvent } from '../services/events/GameEvent';
 import { DEBUG_MODE } from '../config';
 import { DebugModel, TimelineEntriesModel } from '../interfaces/database/TableInterfaces';
 import Webhook, { WebhookType } from './Webhook';

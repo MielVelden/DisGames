@@ -1,6 +1,7 @@
 import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { GameDataModel, GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
-import { GameAction, GameActionEnum, GameActionPriorityEnum, GameEvent, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
+import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
+import { GameEvent } from "./events/GameEvent";
 import {
     GameSettingsSchema,
     GameSettingsValues,
@@ -23,7 +24,7 @@ import ComponentService from "./ComponentService";
 import { createCancelButton, createMoveButton } from "../utils/Button";
 import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import MediaService from "./MediaService";
 import Logger from "../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";

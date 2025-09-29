@@ -1,12 +1,4 @@
-export type Duration = number;
-
-export enum DurationEnum {
-    SECOND = 1,
-    MINUTE = 60,
-    HOUR = 3600,
-    DAY = 86400,
-    WEEK = 604800,
-}
+import { Duration, DurationEnum } from "../interfaces/application/Duration";
 
 export function calculateDuration(value: number, duration: DurationEnum): Duration {
     return value * duration;

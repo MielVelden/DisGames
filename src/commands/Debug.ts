@@ -1,7 +1,7 @@
 import { Command } from "../interfaces/application/Command";
 import { Permission } from "../interfaces/application/Permission";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { MessageInteractionEvent } from "../interfaces/application/Event";
 import Logger from "../utils/Logger";

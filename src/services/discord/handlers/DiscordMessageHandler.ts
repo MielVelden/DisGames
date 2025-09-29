@@ -14,7 +14,7 @@ import {
     Component
 } from '../../../interfaces/application/Message';
 import ComponentService from '../../ComponentService';
-import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLangualString';
+import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { EventService } from '../../EventService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';

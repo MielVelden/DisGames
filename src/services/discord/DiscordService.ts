@@ -20,7 +20,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
 import { Component, ComponentType, SelectMenu } from '../../interfaces/application/Message';
-import { MultiLingualString } from '../../utils/i18n/MultiLangualString';
+import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';

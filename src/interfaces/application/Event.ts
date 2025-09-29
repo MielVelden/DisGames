@@ -1,11 +1,11 @@
 import { User } from "../domain/User";
 import { Component, BaseSelectMenu } from "./Message";
-import { Duration } from "../../utils/Duration";
 import { ServersModel, TimelineEntriesSaveModel } from "../database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
-import { MultiLingualString } from "../../utils/i18n/MultiLangualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
+import { Duration } from "./Duration";
 
 export enum EventTypeEnum {
     SLASH_COMMAND = "SLASH_COMMAND",
