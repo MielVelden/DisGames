@@ -7,6 +7,7 @@ import ServerService from "./ServerService";
 import { getEnumDefaultsByValue } from "../utils/Enum";
 import { ErrorHelper } from "../utils/ErrorHelper";
 import Logger from "../utils/Logger";
+import { User } from "../interfaces/domain";
 
 class UserService {
     public async getByUserIdAsync(userId: string, createIfNotExists: boolean = false): Promise<UsersModel> {
@@ -19,6 +20,11 @@ class UserService {
         }
 
         return user;
+    }
+
+    public async getAllAsync(identity: User): Promise<UsersModel[]> {
+        // TODO: Check permissions
+        return await UserRepository.getAllAsync();
     }
 
     public async updateUsernameAsync(userId: string, username: string): Promise<UsersModel> {

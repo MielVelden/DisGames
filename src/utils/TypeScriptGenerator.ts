@@ -50,7 +50,7 @@ export class TypeScriptGenerator {
 
         // Generate namespace definitions for type checking
         output += '// ===== NAMESPACE DEFINITIONS FOR TYPE CHECKING =====\n';
-        output += 'declare namespace DisGames {\n\n';
+        output += 'export declare namespace DisGames {\n\n';
 
         // Interfaces namespace (for type checking - contains all interfaces with exports)
         output += '  namespace Interfaces {\n';
@@ -97,7 +97,6 @@ export class TypeScriptGenerator {
         }
 
         output += '} as const;\n';
-
         return output;
     }
 
@@ -202,7 +201,7 @@ export class TypeScriptGenerator {
         let m;
 
         while ((m = re.exec(src)) !== null) {
-            const open = re.lastIndex - 1; // index van '{'
+            const open = re.lastIndex - 1;
             let i = open;
             let depth = 0;
             let inStr: '"' | "'" | "`" | null = null;
@@ -214,20 +213,46 @@ export class TypeScriptGenerator {
                 const nx = src[i + 1];
 
                 // comments
-                if (inLineComment) { if (ch === "\n") inLineComment = false; continue; }
-                if (inBlockComment) { if (ch === "*" && nx === "/") { inBlockComment = false; i++; } continue; }
+                if (inLineComment) {
+                    if (ch === "\n")
+                        inLineComment = false;
+
+                    continue;
+                }
+
+                if (inBlockComment) {
+                    if (ch === "*" && nx === "/")
+                        inBlockComment = false; i++;
+
+                    continue;
+                }
+
                 if (!inStr) {
-                    if (ch === "/" && nx === "/") { inLineComment = true; i++; continue; }
-                    if (ch === "/" && nx === "*") { inBlockComment = true; i++; continue; }
+                    if (ch === "/" && nx === "/") {
+                        inLineComment = true;
+                        i++;
+                        continue;
+                    }
+
+                    if (ch === "/" && nx === "*") {
+                        inBlockComment = true;
+                        i++;
+                        continue;
+                    }
                 }
 
                 // strings (incl. escapes)
                 if (inStr) {
-                    if (ch === "\\") { i++; continue; }
-                    if (ch === inStr) { inStr = null; }
+                    if (ch === "\\") {
+                        i++;
+                        continue;
+                    }
+
+                    if (ch === inStr)
+                        inStr = null;
+
                     else if (inStr === "`" && ch === "$" && nx === "{") {
-                        // template literal expressie: braces tellen gewoon mee
-                        depth++; i++; // consume "${"
+                        depth++; i++;
                     }
                     continue;
                 } else if (ch === `"` || ch === `'` || ch === "`") {
@@ -236,19 +261,25 @@ export class TypeScriptGenerator {
                 }
 
                 // brace balans
-                if (ch === "{") { depth++; continue; }
+                if (ch === "{") { 
+                    depth++; 
+                    continue; 
+                }
+
                 if (ch === "}") {
                     depth--;
                     if (depth === 0) {
-                        // vervang van 'class ... {' t/m deze '}'
                         out += src.slice(last, m.index) + src.slice(m.index, open).replace(/\s*$/, "") + " " + newBody;
                         last = i + 1;
                         break;
                     }
                 }
             }
-            if (i >= src.length) break; // safety
-            re.lastIndex = last; // ga verder na de vervanging
+
+            if (i >= src.length) 
+                break; // safety
+
+            re.lastIndex = last;
         }
         return out + src.slice(last);
     }

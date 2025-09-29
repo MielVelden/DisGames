@@ -50,7 +50,8 @@ export class EndpointCollector {
     }
 
     private static parseParameters(parameterString: string): ParameterInfo[] {
-        if (!parameterString.trim()) return [];
+        if (!parameterString.trim()) 
+            return [];
 
         return parameterString.split(',')
             .map(param => param.trim())
