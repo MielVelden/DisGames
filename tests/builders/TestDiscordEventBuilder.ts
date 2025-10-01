@@ -9,7 +9,6 @@ import { Command } from '../../src/interfaces/application/Command';
 import { Component } from '../../src/interfaces/application/Message';
 import { TestInputSimulator } from './TestInputSimulator';
 import { TimelineEntriesSaveModel } from '../../src/interfaces/database/TableInterfaces';
-import { MultiLingualString } from '../../src/utils/i18n/MultiLangualString';
 import { GameSettingsSchema, GameSettingsValues } from '../../src/interfaces/domain/GameSettings';
 import { Games_Settings } from '../../src/interfaces/domain/GameSettings';
 import { LanguageEnum } from '../../src/interfaces/enums/database/LanguageEnum';
@@ -21,6 +20,7 @@ import { TestMessage } from '../interfaces/MessageTestInterface';
 import { TestServer } from '../interfaces/ServerTestInterface';
 import { TestUser } from '../interfaces/UserTestInterface';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
+import { MultiLingualString } from '../../src/utils/i18n/MultiLingualString';
 
 export class MockDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;

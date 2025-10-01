@@ -1,7 +1,7 @@
-import { TypeScriptGenerator } from "../utils/TypeScriptGenerator";
+import { generateDisGamesTypes } from "../utils/frontendapi/GenerateDisGamesTypes";
 
 export class TypeGeneratorController {
 	async generateApiTypes(): Promise<string> {
-		return await TypeScriptGenerator.generateApiTypes();
+		return await generateDisGamesTypes();
 	}
 }

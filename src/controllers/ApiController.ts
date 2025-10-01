@@ -3,6 +3,7 @@ import express from "express";
 import Logger from "../utils/Logger";
 import TimelineController from "./TimelineController";
 import UserController from "./UserController";
+import DashboardController from "./DashboardController";
 import { TypeGeneratorController } from "./TypeGeneratorController";
 import { MethodNameUtils } from "../utils/MethodNameUtils";
 import UserService from "../services/UserService";
@@ -20,6 +21,7 @@ export class ApiController {
 		this.controllers.set('api', this);
 		this.controllers.set('timeline', new TimelineController());
 		this.controllers.set('user', new UserController());
+		this.controllers.set('dashboard', new DashboardController());
 		this.controllers.set('typegenerator', new TypeGeneratorController());
 		
 		Logger.logInfo(`Loaded ${this.controllers.size} controllers`);
@@ -80,7 +82,7 @@ export class ApiController {
 			}
 
 			// Parameter validation and authorization happens here
-			const validatedParams = await this.validateAndExtractParameters(req, controllerName, methodName);
+			const validatedParams = await this.validateAndExtractParameters(req, controllerName, methodName, pathParts);
 			const result = await controller[methodName](...validatedParams);
 			
 			res.json(result);
@@ -99,14 +101,16 @@ export class ApiController {
 			.filter(name => name !== 'constructor' && typeof controller[name] === 'function');
 
 		// Try to find method by removing Async suffix and matching path
-		const pathMethod = pathParts.slice(1).join('');
-		const methodWithoutAsync = availableMethods.find(method => {
-			const cleanMethod = MethodNameUtils.removeAsyncSuffix(method).toLowerCase();
-			return cleanMethod === pathMethod.toLowerCase();
-		});
-		
-		if (methodWithoutAsync)
-			return methodWithoutAsync;
+		const methodNameFromPath = pathParts[1];
+		if (methodNameFromPath) {
+			const methodWithoutAsync = availableMethods.find(method => {
+				const cleanMethod = MethodNameUtils.removeAsyncSuffix(method).toLowerCase();
+				return cleanMethod === methodNameFromPath.toLowerCase();
+			});
+			
+			if (methodWithoutAsync)
+				return methodWithoutAsync;
+		}
 
 		// Look for methods based on path structure
 		if (pathParts.length === 1) {
@@ -133,7 +137,7 @@ export class ApiController {
 		return availableMethods.length > 0 ? availableMethods[0] : null;
 	}
 
-	private async validateAndExtractParameters(req: express.Request, controllerName: string, methodName: string): Promise<any[]> {
+	private async validateAndExtractParameters(req: express.Request, controllerName: string, methodName: string, pathParts: string[]): Promise<any[]> {
 		const controller = this.controllers.get(controllerName);
 		if (!controller) 
 			return [];
@@ -156,7 +160,11 @@ export class ApiController {
 
 		const params: any[] = [];
 		
-		for (const paramName of paramNames) {
+		let pathParamIndex = 2; // Start after controller and method name
+		
+		for (let i = 0; i < paramNames.length; i++) {
+			const paramName = paramNames[i];
+			
 			// Check if parameter is identity: User
 			if (paramName.includes('identity') && paramName.includes('User')) {
 				const identity = await this.getAuthorizedIdentity(req);
@@ -168,6 +176,15 @@ export class ApiController {
 			}
 
 			const cleanParamName = paramName.split(':')[0].trim();
+			
+			// Try to get parameter from URL path first (for path parameters)
+			if (pathParamIndex < pathParts.length) {
+				const pathParam = pathParts[pathParamIndex];
+				params.push(pathParam);
+				pathParamIndex++;
+				continue;
+			}
+			
 			if (req.params[cleanParamName]) {
 				params.push(req.params[cleanParamName]);
 				continue;

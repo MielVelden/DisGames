@@ -25,7 +25,8 @@ export const TEST_USERS: UsersSaveModel[] = [
 export const MOCK_USERS: UsersModel[] = TEST_USERS.map((user, index) => ({
     Id: index + 1,
     UserId: user.UserId!,
-    Username: user.Username!
+    Username: user.Username!,
+    OAuth2AccessToken: undefined!
 }));
 
 export function getTestUser(userId: string): UsersModel | undefined {
