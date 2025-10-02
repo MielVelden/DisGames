@@ -1,4 +1,4 @@
-import { GameDataModel, GameDataSaveModel } from "../interfaces/database/TableInterfaces";
+import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel } from "../interfaces/database/TableInterfaces";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
@@ -8,7 +8,7 @@ class GameDataRepository implements Repository<GameDataModel> {
     private baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel>(TableEnum.GAME_DATA);
+        this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel>(TableEnum.GAME_DATA, GameDataModelFieldEnum);
     }
 
     async getByIDAsync(id: number): Promise<GameDataModel | null> {

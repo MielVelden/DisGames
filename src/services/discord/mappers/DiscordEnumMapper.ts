@@ -2,7 +2,7 @@ import {
     Interaction as DiscordInteraction,
     PermissionResolvable, PermissionsBitField,
     ButtonStyle as DiscordButtonStyle} from 'discord.js';
-import { EventTypeEnum } from '../../../interfaces/application/Event';
+import { EventTypeEnum } from '../../../interfaces/enums';
 import { Permission } from '../../../interfaces/application/Permission';
 import { ButtonStyle, Component, ComponentType } from '../../../interfaces/application/Message';
 

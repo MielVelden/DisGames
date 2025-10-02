@@ -1,4 +1,4 @@
-import { ServersModel, ServersSaveModel } from "../interfaces/database";
+import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
@@ -8,7 +8,7 @@ class ServerRepository implements Repository<ServersModel> {
     private baseRepository: BaseRepository<ServersModel, ServersSaveModel>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel>(TableEnum.SERVERS);
+        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel>(TableEnum.SERVERS, ServersModelFieldEnum);
     }
 
     async getByIDAsync(id: number): Promise<ServersModel | null> {

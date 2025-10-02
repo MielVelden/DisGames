@@ -6,16 +6,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
-
-export enum EventTypeEnum {
-    SLASH_COMMAND = "SLASH_COMMAND",
-    BUTTON = "BUTTON",
-    SELECT_MENU = "SELECT_MENU",
-    MODAL_SUBMIT = "MODAL_SUBMIT",
-    MESSAGE = "MESSAGE",
-    MESSAGE_UPDATE = "MESSAGE_UPDATE",
-    MESSAGE_DELETE = "MESSAGE_DELETE",
-}
+import { EventTypeEnum } from "../enums";
 
 export interface InteractionEvent {
     // Event type and identifiers

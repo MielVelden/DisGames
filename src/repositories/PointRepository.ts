@@ -1,14 +1,13 @@
-import { PointsModel, PointsSaveModel } from "../interfaces/database";
+import { PointsModel, PointsModelFieldEnum, PointsSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
-import { ComponentError } from "../utils/ErrorHelper";
+import { TableEnum } from "../interfaces/enums/index";
 
 class PointRepository implements Repository<PointsModel> {
     private baseRepository: BaseRepository<PointsModel, PointsSaveModel>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel>(TableEnum.POINTS);
+        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel>(TableEnum.POINTS, PointsModelFieldEnum);
     }
 
     async getByIDAsync(id: number): Promise<PointsModel | null> {

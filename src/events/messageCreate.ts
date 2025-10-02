@@ -4,7 +4,7 @@ import {
     Message,
 } from 'discord.js';
 import DiscordService from '../services/discord/DiscordService';
-import { MessageInteractionEvent, EventTypeEnum } from '../interfaces/application/Event';
+import { MessageInteractionEvent } from '../interfaces/application/Event';
 import GameService from '../services/GameService';
 import { ComponentError } from '../utils/ErrorHelper';
 import { i18n } from '../utils/i18n/i18n';
@@ -12,6 +12,8 @@ import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import ComponentService from '../services/ComponentService';
 import Logger from '../utils/Logger';
 import { handleCommand } from '../utils/Commands';
+import EventsService from '../services/EventsService';
+import { EventTypeEnum } from '../interfaces/enums';
 
 export default {
     name: Events.MessageCreate,
@@ -26,6 +28,20 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
         return;
 
     const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
+
+    // Save the event to the database
+    EventsService.saveAsync({
+        UserId: event.user.id,
+        ServerId: event.server.Id,
+        EventTypeEnum: event.type,
+        PayloadJSON: {
+            messageId: event.messageId,
+            channelId: event.channelId,
+            guildId: event.guildId,
+            content: event.content
+        }
+    });
+
     try {
         if (event.command)
             await handleCommand(event.command, event);

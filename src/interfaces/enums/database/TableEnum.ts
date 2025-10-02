@@ -8,4 +8,5 @@ export enum TableEnum {
     GAMESXDATASHEETS,
     TIMELINE_ENTRIES,
     DEBUG,
+    EVENTS,
 }

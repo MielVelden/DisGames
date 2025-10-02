@@ -1,6 +1,5 @@
 import { 
     InteractionEvent,
-    EventTypeEnum,
     SelectMenuInteractionEvent
 } from '../../src/interfaces/application/Event';
 import { User } from '../../src/interfaces/domain/User';
@@ -21,6 +20,7 @@ import { TestServer } from '../interfaces/ServerTestInterface';
 import { TestUser } from '../interfaces/UserTestInterface';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { MultiLingualString } from '../../src/utils/i18n/MultiLingualString';
+import { EventTypeEnum } from '../../src/interfaces/enums';
 
 export class MockDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
@@ -269,7 +269,7 @@ export class TestDiscordEventBuilder {
         };
 
         const user: User = {
-            id: null,
+            id: undefined,
             userId: this.inputSimulator.getUser().id,
             username: this.inputSimulator.getUser().username,
             displayName: this.inputSimulator.getUser().username,
@@ -323,7 +323,7 @@ export class TestDiscordEventBuilder {
 
     public buildMessageEvent(content: string = this.inputSimulator.getMessage().content, userId?: string): MockDiscordEvent {
         const user: User = {
-            id: null,
+            id: undefined,
             userId: userId || this.inputSimulator.getUser().id,
             username: this.inputSimulator.getUser().username,
             displayName: this.inputSimulator.getUser().username,
@@ -376,7 +376,7 @@ export class TestDiscordEventBuilder {
 
     public buildButtonEvent(customId: string): MockDiscordEvent {
         const user: User = {
-            id: null,
+            id: undefined,
             userId: this.inputSimulator.getUser().id,
             username: this.inputSimulator.getUser().username,
             displayName: this.inputSimulator.getUser().username,

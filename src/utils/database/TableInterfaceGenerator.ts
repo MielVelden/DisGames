@@ -8,6 +8,21 @@ import Logger from '../Logger';
 export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;
   private static readonly saveSuffix = 'SaveModel' as string;
+  private static readonly fieldEnumSuffix = 'ModelFieldEnum' as string;
+
+  private static generateFieldEnum(tableName: string, columns: any[]): string {
+    let enumContent = `export enum ${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix} {\n`;
+
+    columns.forEach((column: any, index: number) => {
+      const fieldName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
+      enumContent += `  ${fieldName} = "${fieldName}"`;
+      if (index < columns.length - 1) enumContent += ',';
+      enumContent += '\n';
+    });
+
+    enumContent += `}\n\n`;
+    return enumContent;
+  }
 
   private static filterDuplicateColumns(columns: any[]): any[] {
     const jsonColumns = new Set<string>();
@@ -93,7 +108,8 @@ export class TableInterfaceGenerator {
 
       interfaceContent += `}\n\n`;
 
-      // Generate save models
+      interfaceContent += this.generateFieldEnum(tableName, filteredColumns);
+
       interfaceContent += `export interface ${SchemaUtils.capitalize(tableName)}${this.saveSuffix} {\n`;
 
       // Use same filtered columns for SaveModel

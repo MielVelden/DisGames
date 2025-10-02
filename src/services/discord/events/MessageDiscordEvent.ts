@@ -1,7 +1,8 @@
 import { Message as DiscordMessage } from "discord.js";
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
-import { EventTypeEnum, MessageInteractionEvent } from "../../../interfaces/application/Event";
+import { MessageInteractionEvent } from "../../../interfaces/application/Event";
+import { EventTypeEnum } from "../../../interfaces/enums";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { Command } from "../../../interfaces/application/Command";

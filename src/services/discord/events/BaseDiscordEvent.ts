@@ -3,7 +3,8 @@ import { Component, BaseSelectMenu } from "../../../interfaces/application/Messa
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
-import { EventTypeEnum, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
+import { InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
+import { EventTypeEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../../interfaces/domain/GameSettings";

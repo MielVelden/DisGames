@@ -1,4 +1,4 @@
-import { TimelineEntriesModel, TimelineEntriesSaveModel } from "../interfaces/database";
+import { TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums/index";
@@ -7,7 +7,7 @@ class TimelineRepository implements Repository<TimelineEntriesModel> {
     private baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>(TableEnum.TIMELINE_ENTRIES);
+        this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>(TableEnum.TIMELINE_ENTRIES, TimelineEntriesModelFieldEnum);
     }
 
     async getByIDAsync(id: number): Promise<TimelineEntriesModel | null> {

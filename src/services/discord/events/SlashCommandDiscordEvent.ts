@@ -1,7 +1,8 @@
 import { Interaction as DiscordInteraction } from "discord.js";
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
-import { EventTypeEnum, SlashCommandInteractionEvent } from "../../../interfaces/application/Event";
+import { SlashCommandInteractionEvent } from "../../../interfaces/application/Event";
+import { EventTypeEnum } from "../../../interfaces/enums";
 import { Command } from "../../../interfaces/application/Command";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 

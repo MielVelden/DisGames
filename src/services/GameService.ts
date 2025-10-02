@@ -1,4 +1,4 @@
-import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
+import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { GameDataModel, GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
 import { GameEvent } from "./events/GameEvent";
@@ -32,6 +32,7 @@ import { ARRAY_JOIN_DELIMITER, DEBUG_MODE } from "../config";
 import { DEFAULT_ACCEPT_EMOJI } from "../utils/Emojis";
 import TestMode from "../utils/TestMode";
 import ServerService from "./ServerService";
+import { EventTypeEnum } from "../interfaces/enums";
 
 class GameService {
     private games: GameModule[] = [];

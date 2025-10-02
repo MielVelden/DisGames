@@ -101,6 +101,10 @@ function qualifyTypeReferences(content: string, currentCategory: string, allInte
             if (isPropertyName)
                 return match;
 
+            const isEnumKey = /^\s*=\s*["']/.test(after);
+            if (isEnumKey)
+                return match;
+
             const afterChar = result.charAt(offset + match.length);
             if (afterChar && /[a-zA-Z0-9_]/.test(afterChar))
                 return match;

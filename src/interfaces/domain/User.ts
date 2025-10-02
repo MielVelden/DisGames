@@ -1,7 +1,7 @@
 import { Permission } from "../application/Permission";
 
 export interface User {
-    id: number | null;
+    id: number | undefined;
     userId: string;
     username: string;
     displayName: string;

@@ -17,10 +17,11 @@ import {
 } from 'discord.js';
 import { SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { EventTypeEnum, InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
+import { InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
-import { Component, ComponentType, SelectMenu } from '../../interfaces/application/Message';
+import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
+import { EventTypeEnum } from '../../interfaces/enums';
 
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';

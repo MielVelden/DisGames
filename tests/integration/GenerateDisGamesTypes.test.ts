@@ -5,6 +5,7 @@ import { TestSuite } from '../interfaces/TestRunnerInterface';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
+import { ESLint } from 'eslint';
 
 export default function registerTypeGeneratorTests(runner: TestRunner): void {
     const suite: TestSuite = {
@@ -89,6 +90,51 @@ export default function registerTypeGeneratorTests(runner: TestRunner): void {
                         generatedCode.includes('export const DisGamesApi'),
                         'Generated code should contain DisGamesApi wrapper'
                     );
+                }
+            },
+
+            {
+                name: 'should pass ESLint validation',
+                testFunction: async () => {
+                    const tempDir = path.join(__dirname, '..', '..', 'temp');
+                    const tempFile = path.join(tempDir, 'generated-types.ts');
+
+                    try {
+                        if (!fs.existsSync(tempDir)) {
+                            fs.mkdirSync(tempDir, { recursive: true });
+                        }
+
+                        const generatedCode = await generateDisGamesTypes();
+                        fs.writeFileSync(tempFile, generatedCode, 'utf-8');
+
+                        const eslint = new ESLint({
+                            overrideConfigFile: path.join(__dirname, '..', '..', 'eslint.config.mjs'),
+                            warnIgnored: false
+                        });
+
+                        const results = await eslint.lintFiles([tempFile]);
+                        const errorCount = results.reduce((sum, result) => sum + result.errorCount, 0);
+                        const warningCount = results.reduce((sum, result) => sum + result.warningCount, 0);
+
+                        const formatter = await eslint.loadFormatter('stylish');
+                        const formattedResults = await formatter.format(results);
+
+                        AssertionHelpers.assertEqual(
+                            errorCount,
+                            0,
+                            `Generated code should have no ESLint errors. Results:\n${formattedResults}`
+                        );
+
+                        AssertionHelpers.assertEqual(
+                            warningCount,
+                            0,
+                            `Generated code should have no ESLint warnings. Results:\n${formattedResults}`
+                        );
+                    } finally {
+                        if (fs.existsSync(tempFile)) {
+                            fs.unlinkSync(tempFile);
+                        }
+                    }
                 }
             }
         ]

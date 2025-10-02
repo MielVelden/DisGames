@@ -4,7 +4,7 @@ import {
 } from 'discord.js';
 import DiscordService from '../services/discord/DiscordService';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
-import { EventTypeEnum, SlashCommandInteractionEvent } from '../interfaces/application/Event';
+import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommand } from '../utils/Commands';
 import { EventService } from '../services/EventService';
 import ComponentService from '../services/ComponentService';
@@ -12,6 +12,8 @@ import { ComponentError } from '../utils/ErrorHelper';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import { i18n } from '../utils/i18n/i18n';
 import Logger from '../utils/Logger';
+import EventsService from '../services/EventsService';
+import { EventTypeEnum } from '../interfaces/enums';
 
 export default {
     name: Events.InteractionCreate,
@@ -20,6 +22,19 @@ export default {
         // Map the interaction to the InteractionEvent interface
         const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction) as SlashCommandInteractionEvent;
 
+        // Save the event to the database
+        EventsService.saveAsync({
+            UserId: event.user.id,
+            ServerId: event.server.Id,
+            EventTypeEnum: event.type,
+            PayloadJSON: {
+                messageId: event.messageId,
+                channelId: event.channelId,
+                guildId: event.guildId,
+                commandName: event.command.name
+            }
+        });
+        
         try {
             if (event.type === EventTypeEnum.SLASH_COMMAND)
                 await handleCommand(event.command, event);

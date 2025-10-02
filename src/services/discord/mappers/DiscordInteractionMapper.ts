@@ -5,10 +5,7 @@ import {
     Guild as DiscordServer,
     Message as DiscordMessage
 } from 'discord.js';
-import {
-    EventTypeEnum,
-    InteractionEvent
-} from '../../../interfaces/application/Event';
+import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
 import { ServersModel } from '../../../interfaces/database/TableInterfaces';
 import ServerService from '../../ServerService';
@@ -22,6 +19,7 @@ import {
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
 import UserService from '../../UserService';
+import { EventTypeEnum } from '../../../interfaces/enums';
 
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {

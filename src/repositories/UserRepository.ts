@@ -1,4 +1,4 @@
-import { Repository, UsersModel, UsersSaveModel } from "../interfaces/database";
+import { Repository, UsersModel, UsersModelFieldEnum, UsersSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum } from "../interfaces/enums/index";
 
@@ -6,7 +6,7 @@ class UserRepository implements Repository<UsersModel> {
     private baseRepository: BaseRepository<UsersModel, UsersSaveModel>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel>(TableEnum.USERS);
+        this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel>(TableEnum.USERS, UsersModelFieldEnum);
     }
 
     async getByIDAsync(id: number): Promise<UsersModel | null> {

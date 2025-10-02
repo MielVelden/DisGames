@@ -1,6 +1,6 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
-import { EventTypeEnum } from "../application/Event";
+import { EventTypeEnum } from "../enums";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { LanguageEnum } from "../enums";
 import { GameSettingsSchema } from "./GameSettings";

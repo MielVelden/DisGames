@@ -1,8 +1,8 @@
-import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig, CommandOptionType } from "../interfaces/application/Command";
-import { ButtonHandler, EventTypeEnum, HandlerConfig, SelectMenuHandler, SlashCommandInteractionEvent } from "../interfaces/application/Event";
-import { Media, MediaType } from "../interfaces/application/Media";
-import { ActionButton, Component, ComponentType, Container, ContainerBuilder, Content, MediaGallery, SelectMenu, TextDisplay } from "../interfaces/application/Message";
-import { GameTypeEnum } from "../interfaces/enums";
+import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig } from "../interfaces/application/Command";
+import { ButtonHandler, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
+import { Media } from "../interfaces/application/Media";
+import { ActionButton, Component, ComponentType, Container, ContainerBuilder, SelectMenu, TextDisplay } from "../interfaces/application/Message";
+import { EventTypeEnum, GameTypeEnum } from "../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { EventService } from "./EventService";

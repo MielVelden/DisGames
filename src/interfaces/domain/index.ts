@@ -5,3 +5,4 @@ export * from './GameSettings';
 export * from './Timeline';
 export * from './TimelineChanges';
 export * from './User'; 
+export * from './Events_Payload';

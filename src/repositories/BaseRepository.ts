@@ -3,6 +3,7 @@ import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
+import { isValidEnumValue } from "../utils/Enum";
 
 interface BaseEntity {
   Id?: number;
@@ -10,14 +11,16 @@ interface BaseEntity {
 
 class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   protected tableEnum: TableEnum;
+  protected fieldEnum: Record<string, string>;
   protected table: string;
   protected query: string = '';
   protected params: any[] = [];
   protected cacheManager: CacheManager<Model>;
   protected hasLimit1: boolean = false;
 
-  constructor(table: TableEnum) {
+  constructor(table: TableEnum, fieldEnum: Record<string, string>) {
     this.tableEnum = table;
+    this.fieldEnum = fieldEnum;
     this.table = getTableName(table);
     this.cacheManager = new CacheManager<Model>(this.table);
   }
@@ -32,12 +35,12 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     // Fetch from database
     const results = await this.Select().Where({ Id: id }).Limit(1).Execute();
     const result = results?.[0] || null;
-    
+
     // Cache the result if found
     if (result) {
       this.cacheManager.setCacheEntry(id, result);
     }
-    
+
     return result;
   }
 
@@ -66,29 +69,28 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return this;
   }
 
-  public OrderBy(field: keyof Model, direction: 'ASC' | 'DESC' = 'ASC'): BaseRepository<Model, SaveModel> {
+  public OrderBy<K extends keyof Model>(field: K, direction: 'ASC' | 'DESC' = 'ASC'): this {
     this.query += ` ORDER BY ${String(field)} ${direction}`;
     return this;
   }
 
-  public OrderByRandom(): BaseRepository<Model, SaveModel> {
+  public OrderByRandom(): this {
     this.query += ` ORDER BY RAND()`;
     return this;
   }
 
-  public Limit(count: number): BaseRepository<Model, SaveModel> {
+  public Limit(count: number): this {
     this.query += ` LIMIT ?`;
     this.params.push(count);
-    
-    // Track if this is a LIMIT 1 query for caching
+
     if (count === 1) {
       this.hasLimit1 = true;
     }
-    
+
     return this;
   }
 
-  public Offset(count: number): BaseRepository<Model, SaveModel> {
+  public Offset(count: number): this {
     this.query += ` OFFSET ?`;
     this.params.push(count);
     return this;
@@ -108,32 +110,32 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     }
 
     const results = await runQueryAsync(this.query, this.params);
-    
+
     // Store original state for caching
     const wasLimit1 = this.hasLimit1;
     const queryHash = wasLimit1 ? this.cacheManager.generateQueryHash(this.query, this.params) : '';
-    
+
     // Reset query state
     this.params = [];
     this.hasLimit1 = false;
-    
-    if (!results) 
+
+    if (!results)
       return [];
-    
+
     // Deserialize MultiLingualString and JSON fields
     const deserializedResults = DatabaseHelper.processResultsFromDatabase(results);
-    
+
     // Cache LIMIT 1 query results
     if (wasLimit1 && deserializedResults.length > 0) {
       this.cacheManager.setQueryCacheEntry(queryHash, deserializedResults);
-      
+
       // Also cache by ID if the result has an ID
       const firstResult = deserializedResults[0] as Model;
       if (firstResult.Id) {
         this.cacheManager.setCacheEntry(firstResult.Id, firstResult);
       }
     }
-    
+
     return deserializedResults as Model[];
   }
 
@@ -145,12 +147,15 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   public async Save(entity: Partial<SaveModel>): Promise<Model> {
     // Serialize MultiLingualString and JSON fields before saving
     const serializedEntity = DatabaseHelper.processEntityForDatabase(entity);
-    
+
     if (serializedEntity.Id) {
       // UPDATE - invalidate cache for this ID and all query cache
       this.cacheManager.invalidateCache(serializedEntity.Id);
       this.cacheManager.invalidateAllQueryCache();
-      
+
+      if (isValidEnumValue(this.fieldEnum, 'UpdatedAt'))
+        serializedEntity.UpdatedAt = new Date();
+
       // UPDATE
       const setClause = Object.keys(serializedEntity)
         .filter(key => key !== 'Id')
@@ -166,7 +171,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       const result = await this.Select().Where({ Id: serializedEntity.Id }).Execute();
       if (result?.length === 0)
         throw new Error('Record not found');
-      
+
       const savedRecord = result?.[0] as Model;
       // Update cache with fresh data
       this.cacheManager.setCacheEntry(serializedEntity.Id, savedRecord);
@@ -174,7 +179,10 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     } else {
       // INSERT - invalidate all query cache
       this.cacheManager.invalidateAllQueryCache();
-      
+
+      if (isValidEnumValue(this.fieldEnum, 'CreatedAt'))
+        serializedEntity.CreatedAt = new Date();
+
       // INSERT
       const keys = Object.keys(serializedEntity).join(', ');
       const values = Object.values(serializedEntity)
@@ -185,11 +193,11 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       const params = Object.values(serializedEntity);
 
       await runQueryAsync(query, params);
-      
+
       const result = await this.Select().OrderBy('Id', 'DESC').Limit(1).Execute();
       if (result?.length === 0)
         throw new Error('Record not found');
-      
+
       const savedRecord = result?.[0] as Model;
       // Cache the new record
       if (savedRecord.Id) {
@@ -203,7 +211,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     // Invalidate cache before deletion
     this.cacheManager.invalidateCache(id);
     this.cacheManager.invalidateAllQueryCache();
-    
+
     const query = `DELETE FROM ${this.table} WHERE Id = ?`;
     const params = [id];
     await runQueryAsync(query, params);
@@ -228,13 +236,13 @@ export class RepositoryUtils {
     const procedureName = procedure.toString();
     const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
     const results = await runQueryAsync(query, params);
-    
-    if (!results || !results[0]) 
+
+    if (!results || !results[0])
       return [];
-    
+
     // Transform database keys to PascalCase and deserialize MultiLingualString and JSON fields
     const transformedResults = DatabaseHelper.processStoredProcedureResults(results);
-    
+
     return transformedResults;
   }
 
@@ -244,12 +252,12 @@ export class RepositoryUtils {
     const query = `SELECT ${functionName}(${placeholders}) AS Result`;
     const results = await runQueryAsync(query, params);
 
-    if (!results || results.length === 0) 
+    if (!results || results.length === 0)
       return undefined;
 
     const row: any = results[0];
     const result = row?.Result;
-    if(result)
+    if (result)
       return result.toString() as T;
     throw new Error(`Function ${functionName} returned an invalid result`);
   }

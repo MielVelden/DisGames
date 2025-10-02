@@ -3,7 +3,7 @@ import {
     Events,
     Message,
 } from 'discord.js';
-import { EventTypeEnum as EventTypeEnum } from '../interfaces/application/Event';
+import { EventTypeEnum } from '../interfaces/enums';
 import { handleMessageCreateAsync } from './messageCreate';
 
 export default {

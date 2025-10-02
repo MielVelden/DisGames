@@ -1,6 +1,6 @@
 import { Component } from "../../interfaces/application/Message";
 import { User } from "../../interfaces/domain/User";
-import { EventTypeEnum } from "../../interfaces/application/Event";
+import { EventTypeEnum } from "../../interfaces/enums";
 import { LanguageEnum } from "../../interfaces/enums";
 import { GameDataModel, GamesModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import GameDataRepository from "../../repositories/GameDataRepository";
