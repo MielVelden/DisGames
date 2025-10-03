@@ -5,7 +5,7 @@ import {
 } from 'discord.js';
 import { EventTypeEnum } from '../interfaces/enums';
 import { handleMessageCreateAsync } from './messageCreate';
-import { EventService } from '../services/EventService';
+import { EventService } from '../services/application/EventService';
 import Logger from '../utils/Logger';
 
 export default {

@@ -1,7 +1,7 @@
 import { EventsModel, EventsModelFieldEnum, EventsSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { TableEnum } from "../interfaces/enums/index";
+import { EventTypeEnum, TableEnum } from "../interfaces/enums/index";
 
 class EventsRepository implements Repository<EventsModel> {
     private baseRepository: BaseRepository<EventsModel, EventsSaveModel>;
@@ -24,6 +24,10 @@ class EventsRepository implements Repository<EventsModel> {
 
     async purgeAsync(id: number): Promise<void> {
         await this.baseRepository.Delete(id);
+    }
+
+    async getTotalMessagesSentAsync(): Promise<number> {
+        return await this.baseRepository.Select().Where({ EventTypeEnum: EventTypeEnum.MESSAGE }).Count();
     }
 }
 

@@ -1,5 +1,5 @@
-import { PointsModel } from "../interfaces/database/TableInterfaces";
-import PointRepository from "../repositories/PointRepository";
+import { PointsModel } from "../../interfaces/database/TableInterfaces";
+import PointRepository from "../../repositories/PointRepository";
 
 class PointService {
     public async saveAsync(userId: string, gameId: number, serverId: string, points: number): Promise<PointsModel> {

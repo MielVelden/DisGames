@@ -6,7 +6,7 @@ import UserController from "./UserController";
 import DashboardController from "./DashboardController";
 import { TypeGeneratorController } from "./TypeGeneratorController";
 import { MethodNameUtils } from "../utils/MethodNameUtils";
-import UserService from "../services/UserService";
+import UserService from "../services/domain/UserService";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();

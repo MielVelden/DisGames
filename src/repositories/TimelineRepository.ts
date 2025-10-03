@@ -25,6 +25,10 @@ class TimelineRepository implements Repository<TimelineEntriesModel> {
     async purgeAsync(id: number): Promise<void> {
         await this.baseRepository.Delete(id);
     }
+
+    async getGamesPlayedAsync(): Promise<number> {
+        return await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.GAME_PLAYED }).Count();
+    }
 }
 
 export default new TimelineRepository(); 

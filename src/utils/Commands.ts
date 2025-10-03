@@ -11,7 +11,7 @@ import { LanguageCommandOptionTranslations } from "./i18n/i18n";
 import Logger from "./Logger";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { isSelectMenuEmpty } from "./SelectMenu";
-import ComponentService from "../services/ComponentService";
+import ComponentService from "../services/application/ComponentService";
 
 const commands: Command[] = [];
 

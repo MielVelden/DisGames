@@ -1,13 +1,13 @@
-import { UsersModel } from "../interfaces/database/TableInterfaces";
-import { BadgeEnum, ExceptionEnum, GameTypeEnum } from "../interfaces/enums";
-import { ProfileView } from "../interfaces/view";
-import PointRepository from "../repositories/PointRepository";
-import UserRepository from "../repositories/UserRepository";
+import { UsersModel } from "../../interfaces/database/TableInterfaces";
+import { BadgeEnum, ExceptionEnum, GameTypeEnum } from "../../interfaces/enums";
+import { ProfileView } from "../../interfaces/view";
+import PointRepository from "../../repositories/PointRepository";
+import UserRepository from "../../repositories/UserRepository";
 import ServerService from "./ServerService";
-import { getEnumDefaultsByValue } from "../utils/Enum";
-import { ErrorHelper } from "../utils/ErrorHelper";
-import Logger from "../utils/Logger";
-import { User } from "../interfaces/domain";
+import { getEnumDefaultsByValue } from "../../utils/Enum";
+import { ErrorHelper } from "../../utils/ErrorHelper";
+import Logger from "../../utils/Logger";
+import { User } from "../../interfaces/domain";
 
 class UserService {
     public async getByUserIdAsync(userId: string, createIfNotExists: boolean = false): Promise<UsersModel> {

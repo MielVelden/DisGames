@@ -1,6 +1,6 @@
 import { ComponentType, SelectMenu } from "../interfaces/application/Message";
 import { GameModule } from "../interfaces/domain/Game";
-import ComponentService from "../services/ComponentService";
+import ComponentService from "../services/application/ComponentService";
 import { i18n } from "./i18n/i18n";
 import { MultiLingualString } from "./i18n/MultiLingualString";
 

@@ -1,9 +1,9 @@
-import { ServersModel } from "../interfaces/database/TableInterfaces";
-import { ExceptionEnum } from "../interfaces/enums";
-import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
-import ServerRepository from "../repositories/ServerRepository";
-import { ErrorHelper } from "../utils/ErrorHelper";
-import Logger from "../utils/Logger";
+import { ServersModel } from "../../interfaces/database/TableInterfaces";
+import { ExceptionEnum } from "../../interfaces/enums";
+import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
+import ServerRepository from "../../repositories/ServerRepository";
+import { ErrorHelper } from "../../utils/ErrorHelper";
+import Logger from "../../utils/Logger";
 
 class ServerService {
     public async getServerAsync(serverId: string, createIfNotExists: boolean = false): Promise<ServersModel> {

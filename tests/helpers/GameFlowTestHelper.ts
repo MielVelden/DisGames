@@ -1,13 +1,12 @@
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableInterfaces';
-import GameService from '../../src/services/GameService';
+import GameService from '../../src/services/domain/GameService';
 import GameRepository from '../../src/repositories/GameRepository';
-import { TestDiscordEventBuilder, MockDiscordEvent } from '../builders/TestDiscordEventBuilder';
+import { TestDiscordEventBuilder } from '../builders/TestDiscordEventBuilder';
 import Logger from '../../src/utils/Logger';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameFlowTestConfig, GameFlowTestResult } from '../interfaces/GameFlowInterface';
 import { ComponentError } from '../../src/utils/ErrorHelper';
-import { ExceptionEnum } from '../../src/interfaces/enums';
 import { createTestGameAsync } from '../fixtures/games';
 import { TestInputSimulatorType } from '../interfaces/InputQueueInterface';
 import AssertionHelpers from './AssertionHelpers';

@@ -1,13 +1,13 @@
-import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig } from "../interfaces/application/Command";
-import { ButtonHandler, HandlerConfig, SelectMenuHandler } from "../interfaces/application/Event";
-import { Media } from "../interfaces/application/Media";
-import { ActionButton, Component, ComponentType, Container, ContainerBuilder, SelectMenu, TextDisplay } from "../interfaces/application/Message";
-import { EventTypeEnum, GameTypeEnum } from "../interfaces/enums";
-import { i18n, LanguageEnumTranslations } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLingualString";
+import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig } from "../../interfaces/application/Command";
+import { ButtonHandler, HandlerConfig, SelectMenuHandler } from "../../interfaces/application/Event";
+import { Media } from "../../interfaces/application/Media";
+import { ActionButton, Component, ComponentType, Container, ContainerBuilder, SelectMenu, TextDisplay } from "../../interfaces/application/Message";
+import { EventTypeEnum, GameTypeEnum } from "../../interfaces/enums";
+import { i18n, LanguageEnumTranslations } from "../../utils/i18n/i18n";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { EventService } from "./EventService";
 import MediaService from "./MediaService";
-import Logger from "../utils/Logger";
+import Logger from "../../utils/Logger";
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {

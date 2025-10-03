@@ -8,7 +8,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component, Container } from "../../interfaces/application/Message";
-import ComponentService from "../ComponentService";
+import ComponentService from "../application/ComponentService";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");

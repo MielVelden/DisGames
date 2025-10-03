@@ -1,5 +1,5 @@
 import { JobModule } from "../interfaces/application/JobModule";
-import MediaService from "../services/MediaService";
+import MediaService from "../services/application/MediaService";
 
 export default {
     id: 'cleanup-game-images',

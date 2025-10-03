@@ -79,6 +79,18 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return this;
   }
 
+  public async Count(): Promise<number> {
+    this.query = this.query.replace(/^SELECT .+ FROM/, 'SELECT COUNT(*) as Total FROM');
+    this.hasLimit1 = true;
+    
+    const results = await this.Execute();
+    
+    if (!results || results.length === 0)
+      return 0;
+    
+    return (results[0] as unknown as { Total: number }).Total as number;
+  }
+
   public Limit(count: number): this {
     this.query += ` LIMIT ?`;
     this.params.push(count);

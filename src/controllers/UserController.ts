@@ -1,7 +1,7 @@
 import { Controller } from "../interfaces/application/Controller";
 import { UsersModel } from "../interfaces/database";
 import { User } from "../interfaces/domain";
-import UserService from "../services/UserService";
+import UserService from "../services/domain/UserService";
 
 class UserController implements Controller {
     async getByIdAsync(discordUserId: string, identity: User): Promise<UsersModel> {

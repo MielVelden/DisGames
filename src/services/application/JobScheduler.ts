@@ -1,9 +1,9 @@
 import * as schedule from 'node-schedule';
 import * as fs from 'fs';
 import * as path from 'path';
-import { JobModule } from '../interfaces/application/JobModule';
-import Logger from '../utils/Logger';
-import Webhook, { WebhookType } from '../utils/Webhook';
+import { JobModule } from '../../interfaces/application/JobModule';
+import Logger from '../../utils/Logger';
+import Webhook, { WebhookType } from '../../utils/Webhook';
 
 export class JobScheduler {
     private static instance: JobScheduler;

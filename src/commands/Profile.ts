@@ -5,7 +5,7 @@ import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
 import { createProfileContainer } from "../utils/Container";
-import UserService from "../services/UserService";
+import UserService from "../services/domain/UserService";
 
 export class ProfileCommand implements Command {
     name = CommandEnum.PROFILE;

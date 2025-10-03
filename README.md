@@ -5,59 +5,70 @@
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 
-> **🌟 Trusted by 1000+ Discord servers** - A dynamic Discord bot designed to bring fun, interactive games directly into your Discord community, enhancing engagement and providing endless entertainment.
+> **🌟 Trusted by 1250+ Discord servers** - A dynamic Discord bot featuring engaging word puzzles, logic games, and community challenges that enhance server interaction and provide endless entertainment.
 
 ## ✨ Features
 
-### 🎯 Interactive Games
-- **🔢 Number Guessing** - Challenge your intuition with number prediction games
-- **🔤 Anagram Solver** - Test your word skills with scrambled letter puzzles  
-- **📊 Counting Game** - Community-based counting challenges
+### 🎮 Game Variety
+Six unique game types with interactive components, real-time scoring, and multi-language support:
+- Word games with scrambled puzzles and word chains
+- Logic challenges including pattern recognition and flag identification
+- Community-driven games with collaborative gameplay
+- Progressive difficulty and customizable settings per server
 
-### 🛠️ Advanced Bot Features
-- **⚡ Slash Commands** - Modern Discord interaction system
-- **🔧 Server Management** - Admin controls for game setup and configuration
-- **🌐 Multi-language Support** - Internationalization (i18n) system
-- **📊 Database Integration** - Persistent game data and user statistics
-- **🎛️ Interactive Components** - Select menus, buttons, and rich embeds
-- **⚙️ Event-Driven Architecture** - Robust message and interaction handling
+### 🛠️ Platform Features
+- **⚡ Modern Discord Integration** - Slash commands, buttons, select menus, and rich embeds
+- **🌐 Multi-language Support** - Full i18n system with server-specific language settings
+- **📊 Statistics & Leaderboards** - Track player progress and competition
+- **🎨 Dynamic Image Generation** - Canvas-based visuals for enhanced gameplay
+- **🔧 Flexible Configuration** - Per-channel game setup with customizable rules
+- **📡 REST API & WebSocket** - Dashboard integration and real-time updates
+- **⏰ Job Scheduling** - Automated maintenance tasks and cleanup
 
 ## 🏗️ Architecture
 
-DisGames follows **clean architecture principles** with a well-structured TypeScript codebase:
+DisGames follows **Domain-Driven Design** and **clean architecture principles** with clear separation of concerns:
 
 ```
 src/
-├── commands/         # Slash command implementations
-├── events/           # Discord event handlers
-├── services/         # Business logic layer
-│   └── games/        # Individual game implementations
-├── repositories/     # Data access layer
-├── interfaces/       # Type definitions and contracts
-└── utils/            # Helper functions and utilities
+├── commands/            # Command definitions
+├── events/              # Event handlers (messages, interactions)
+├── services/
+│   ├── application/     # Application layer (Components, Media, WebSocket, Jobs)
+│   ├── domain/          # Domain layer (Game, User, Server, Points business logic)
+│   ├── discord/         # Discord integration layer (Events, Handlers, Mappers)
+│   └── games/           # Game implementations (Anagram, Connections, Counting, etc.)
+├── repositories/        # Data access layer with BaseRepository pattern
+├── controllers/         # API controllers (Dashboard, Timeline, User)
+├── jobs/                # Scheduled background tasks
+├── interfaces/          # TypeScript types (application, domain, database, enums, view)
+└── utils/               # Helpers (i18n, Logger)
 ```
 
 ### 🔧 Key Technologies
 
-- **TypeScript** - Type-safe development with modern ES features
-- **Discord.js v14** - Latest Discord API wrapper with full feature support
-- **MySQL** - Robust database ORM with type safety
-- **Event-Driven Design** - Scalable architecture for handling Discord interactions
-- **Dependency Injection** - Clean separation of concerns
+- **TypeScript 5.3+** - Strict type safety with modern ES features
+- **Discord.js v14** - Full-featured Discord API integration
+- **MySQL2** - Efficient database operations with connection pooling
+- **Express 5** - REST API for dashboard integration
+- **WebSocket (ws)** - Real-time communication for live updates
+- **Canvas** - Dynamic image generation for game visuals
+- **node-schedule** - Cron-based job scheduling
+- **Custom Test Framework** - Unit, integration, and performance testing
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+ 
-- MySQL Database
-- Discord Bot Token
+- MySQL 8.0+
+- Discord Bot Token with required permissions
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/disgames.git
-   cd disgames
+   git clone https://github.com/MielVelden/DisGames.git
+   cd DisGames
    ```
 
 2. **Install dependencies**
@@ -67,16 +78,16 @@ src/
 
 3. **Environment Setup**
    ```bash
-   cp .env.example .env
+   cp .example.env .env
    # Add your Discord bot token and database credentials
    ```
 
 4. **Database Setup**
    ```bash
-   npm run schema:up
+   npm run db:down
    ```
 
-5. **Deploy Commands**
+5. **Deploy Commands to Discord**
    ```bash
    npm run deploy
    ```
@@ -91,29 +102,37 @@ src/
    npm start
    ```
 
+### Running Jobs
+For scheduled maintenance tasks:
+```bash
+npm run job
+```
+
+### Testing
+```bash
+npm run test
+```
+
 ## 🎮 Usage
 
-### Setting Up Games
+Configure games through slash commands in your Discord server:
 
-1. Use `/games setup` in your Discord server
-2. Select the game type from the interactive menu
-3. Configure game settings for your channel
-4. Players can start participating immediately!
+- `/games` - Browse and setup available games
+- `/profile` - View personal statistics and achievements
+- `/debug` - Admin utilities for debugging (requires permissions)
 
-### Available Commands
-
-- `/games setup` - Configure games for your server
-- `/games manage` - Admin panel for game management  
-- `/games help` - Display help information
+Games automatically respond to messages in configured channels with real-time validation and scoring.
 
 ## 🏆 Key Highlights
 
-- **🔥 Production Ready** - Currently serving 1000+ Discord servers
-- **📈 Scalable Architecture** - Clean code structure built for growth
-- **🛡️ Type Safety** - Full TypeScript implementation with strict typing
-- **⚡ Performance Optimized** - Efficient database queries and caching
-- **🌍 International** - Multi-language support system
-- **🔧 Maintainable** - Well-documented code with clear separation of concerns
+- **🔥 Battle-Tested** - Currently serving 1000+ Discord servers in production
+- **🏗️ Domain-Driven Design** - Clear separation between application, domain, and infrastructure layers
+- **🛡️ Type Safety** - Strict TypeScript with comprehensive interface definitions
+- **⚡ Performance** - Connection pooling, efficient queries, and optimized image generation
+- **🌍 Multi-Language** - Complete i18n system with server-specific language preferences
+- **🧪 Well-Tested** - Custom test framework with unit, integration, and performance tests
+- **📡 API Ready** - REST endpoints and WebSocket support for external dashboards
+- **🔧 Maintainable** - Repository pattern, dependency injection, and clean architecture
 
 ## 🤝 Contributing
 
@@ -126,7 +145,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support & Contact
 
 - **Discord Support Server**: [Join Here](https://discord.gg/beKZbQ9vxe)
-- **Issues**: [GitHub Issues](https://github.com/MisterMiel/DisGames/issues)
+- **Issues**: [GitHub Issues](https://github.com/MielVelden/DisGames/issues)
 
 ---
 
@@ -135,5 +154,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </p>
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/MisterMiel">Miel</a>
+  Made with ❤️ by <a href="https://github.com/MielVelden">Miel</a>
 </p>

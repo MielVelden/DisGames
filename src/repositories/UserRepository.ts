@@ -29,6 +29,11 @@ class UserRepository implements Repository<UsersModel> {
         const model = await this.baseRepository.Select().Where({ UserId: userId }).Limit(1).Execute();
         return model[0];
     }
+
+    async getTotalUsersAsync(): Promise<number> {
+        const total = await this.baseRepository.Select().Count();
+        return total;
+    }
 }
 
 export default new UserRepository();

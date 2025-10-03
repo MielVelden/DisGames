@@ -1,6 +1,6 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { TableEnum } from "../interfaces/enums";
-import { WebSocketEvent, WebSocketMessage } from "../interfaces/application/WebSocket";
+import { TableEnum } from "../../interfaces/enums";
+import { WebSocketEvent, WebSocketMessage } from "../../interfaces/application/WebSocket";
 
 type Subscription = { table: TableEnum; objectId?: number };
 

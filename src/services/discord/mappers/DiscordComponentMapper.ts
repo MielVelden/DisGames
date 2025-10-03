@@ -23,7 +23,7 @@ import {
 import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
-import ComponentService from '../../ComponentService';
+import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/Colors';
 import * as fs from 'fs';
 import Logger from '../../../utils/Logger';

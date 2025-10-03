@@ -1,7 +1,7 @@
-import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
-import { GameDataModel, GamesModel, GamesSaveModel } from "../interfaces/database/TableInterfaces";
-import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../interfaces/domain/Game";
-import { GameEvent } from "./events/GameEvent";
+import { InteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
+import { GameDataModel, GamesModel, GamesSaveModel } from "../../interfaces/database/TableInterfaces";
+import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { GameEvent } from "../events/GameEvent";
 import {
     GameSettingsSchema,
     GameSettingsValues,
@@ -9,30 +9,30 @@ import {
     BooleanGameSetting,
     EnumGameSetting,
     GameSettingsValidationResult
-} from "../interfaces/domain/GameSettings";
-import { GameSettingsEnum } from "../interfaces/enums/games/GameSettingsEnum";
-import { Component, ComponentType, Container, TextDisplay, Title, Separator, ButtonStyle } from "../interfaces/application/Message";
-import GameRepository from "../repositories/GameRepository";
+} from "../../interfaces/domain/GameSettings";
+import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
+import { Component, ComponentType, Container, TextDisplay, Title, Separator, ButtonStyle } from "../../interfaces/application/Message";
+import GameRepository from "../../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
-import { GameTypeEnum, LanguageEnum } from "../interfaces/enums";
+import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
-import { isValidEnumValue } from "../utils/Enum";
-import GameDataRepository from "../repositories/GameDataRepository";
-import { ErrorHelper } from "../utils/ErrorHelper";
-import ComponentService from "./ComponentService";
-import { createCancelButton, createMoveButton } from "../utils/Button";
-import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
-import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLingualString";
-import MediaService from "./MediaService";
-import Logger from "../utils/Logger";
+import { isValidEnumValue } from "../../utils/Enum";
+import GameDataRepository from "../../repositories/GameDataRepository";
+import { ErrorHelper } from "../../utils/ErrorHelper";
+import ComponentService from "../application/ComponentService";
+import { createCancelButton, createMoveButton } from "../../utils/Button";
+import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
+import { i18n } from "../../utils/i18n/i18n";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import MediaService from "../application/MediaService";
+import Logger from "../../utils/Logger";
 import TimelineBuilder from "./TimelineBuilder";
-import { ARRAY_JOIN_DELIMITER, DEBUG_MODE } from "../config";
-import { DEFAULT_ACCEPT_EMOJI } from "../utils/Emojis";
-import TestMode from "../utils/TestMode";
+import { ARRAY_JOIN_DELIMITER, DEBUG_MODE } from "../../config";
+import { DEFAULT_ACCEPT_EMOJI } from "../../utils/Emojis";
+import TestMode from "../../utils/TestMode";
 import ServerService from "./ServerService";
-import { EventTypeEnum } from "../interfaces/enums";
+import { EventTypeEnum } from "../../interfaces/enums";
 
 class GameService {
     private games: GameModule[] = [];
@@ -42,7 +42,7 @@ class GameService {
     }
 
     private loadGames(): void {
-        const gamesPath = path.join(__dirname, 'games');
+        const gamesPath = path.join(__dirname, '..', 'games');
 
         try {
             const gameFiles = fs.readdirSync(gamesPath).filter(file =>
@@ -58,11 +58,11 @@ class GameService {
                         this.games.push(gameModule);
                     }
                 } catch (error) {
-                    Logger.logError(`Fout bij laden van game bestand ${file}:`, error as Error);
+                    Logger.logError(`Error loading game file ${file}:`, error as Error);
                 }
             }
         } catch (error) {
-            Logger.logError('Fout bij laden van games map:', error as Error);
+            Logger.logError('Error loading games directory:', error as Error);
         }
     }
 

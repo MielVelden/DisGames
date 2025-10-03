@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import JobScheduler from './services/JobScheduler';
+import JobScheduler from './services/application/JobScheduler';
 import Logger from './utils/Logger';
 import { WebhookType } from './utils/Webhook';
 

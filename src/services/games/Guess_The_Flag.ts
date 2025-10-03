@@ -3,7 +3,7 @@ import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import ComponentService from "../ComponentService";
+import ComponentService from "../application/ComponentService";
 
 export default {
     config: {

@@ -8,7 +8,7 @@ import {
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
 import { ServersModel } from '../../../interfaces/database/TableInterfaces';
-import ServerService from '../../ServerService';
+import ServerService from '../../domain/ServerService';
 import { getCommandConfig } from '../../../utils/Commands';
 import {
     SlashCommandDiscordEvent,
@@ -18,7 +18,7 @@ import {
 } from '../events';
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
-import UserService from '../../UserService';
+import UserService from '../../domain/UserService';
 import { EventTypeEnum } from '../../../interfaces/enums';
 
 class DiscordInteractionMapper {

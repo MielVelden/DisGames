@@ -1,12 +1,12 @@
-import { TableEnum, TimelineTypeEnum } from "../interfaces/enums";
-import { TimelineChanges } from "../interfaces/domain/Timeline";
-import TimelineRepository from "../repositories/TimelineRepository";
-import { TimelineEntriesSaveModel } from "../interfaces/database";
-import { InteractionEvent } from "../interfaces/application/Event";
-import UserRepository from "../repositories/UserRepository";
-import ServerRepository from "../repositories/ServerRepository";
-import GameRepository from "../repositories/GameRepository";
-import Logger from "../utils/Logger";
+import { TableEnum, TimelineTypeEnum } from "../../interfaces/enums";
+import { TimelineChanges } from "../../interfaces/domain/Timeline";
+import TimelineRepository from "../../repositories/TimelineRepository";
+import { TimelineEntriesSaveModel } from "../../interfaces/database";
+import { InteractionEvent } from "../../interfaces/application/Event";
+import UserRepository from "../../repositories/UserRepository";
+import ServerRepository from "../../repositories/ServerRepository";
+import GameRepository from "../../repositories/GameRepository";
+import Logger from "../../utils/Logger";
 
 interface TimelineContext {
    event: InteractionEvent;

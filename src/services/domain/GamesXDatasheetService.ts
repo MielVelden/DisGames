@@ -1,5 +1,5 @@
-import { GamesXDatasheetsModel, GamesXDatasheetsSaveModel } from "../interfaces/database/TableInterfaces";
-import GamesXDatasheetRepository from "../repositories/GamesXDatasheetRepository";
+import { GamesXDatasheetsModel, GamesXDatasheetsSaveModel } from "../../interfaces/database/TableInterfaces";
+import GamesXDatasheetRepository from "../../repositories/GamesXDatasheetRepository";
 
 class GamesXDatasheetService {
     public async getGamesXDatasheetsByGameIdAsync(gameId: number): Promise<GamesXDatasheetsModel[]> {

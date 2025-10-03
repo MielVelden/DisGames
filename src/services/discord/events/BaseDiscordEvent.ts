@@ -10,10 +10,10 @@ import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../../interfaces/domain/GameSettings";
 import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSetting";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
-import GameService from "../../GameService";
+import GameService from "../../domain/GameService";
 import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
-import TimelineBuilder from "../../TimelineBuilder";
+import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 
 export abstract class BaseDiscordEvent implements InteractionEvent {

@@ -1,5 +1,5 @@
-import { DatasheetsModel } from "../interfaces/database/TableInterfaces";
-import DataSheetRepository from "../repositories/DataSheetRepository";
+import { DatasheetsModel } from "../../interfaces/database/TableInterfaces";
+import DataSheetRepository from "../../repositories/DataSheetRepository";
 
 class DataSheetService {
     public async getDataSheetById(id: number): Promise<DatasheetsModel> {

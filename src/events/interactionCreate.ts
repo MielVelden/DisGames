@@ -6,13 +6,13 @@ import DiscordService from '../services/discord/DiscordService';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
 import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommand } from '../utils/Commands';
-import { EventService } from '../services/EventService';
-import ComponentService from '../services/ComponentService';
+import { EventService } from '../services/application/EventService';
+import ComponentService from '../services/application/ComponentService';
 import { ComponentError } from '../utils/ErrorHelper';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import { i18n } from '../utils/i18n/i18n';
 import Logger from '../utils/Logger';
-import EventsService from '../services/EventsService';
+import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
 
 export default {

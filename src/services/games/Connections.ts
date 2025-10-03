@@ -5,7 +5,7 @@ import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
-import ComponentService from "../ComponentService";
+import ComponentService from "../application/ComponentService";
 import GameImageService from "../image/GameImageService";
 import { STRING_DELIMITER } from "../../config";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";

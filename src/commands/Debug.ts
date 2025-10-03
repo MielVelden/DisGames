@@ -6,7 +6,7 @@ import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { MessageInteractionEvent } from "../interfaces/application/Event";
 import Logger from "../utils/Logger";
 import { WebhookType } from "../utils/Webhook";
-import DebugService from "../services/DebugService";
+import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
 
 export class DebugCommand implements Command {

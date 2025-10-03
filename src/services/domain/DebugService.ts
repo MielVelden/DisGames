@@ -1,7 +1,7 @@
-import { DebugModel } from "../interfaces/database/TableInterfaces";
-import DebugRepository from "../repositories/DebugRepository";
-import Logger from "../utils/Logger";
-import { UniqueCodeGenerator } from "../utils/UniqueCodeGenerator";
+import { DebugModel } from "../../interfaces/database/TableInterfaces";
+import DebugRepository from "../../repositories/DebugRepository";
+import Logger from "../../utils/Logger";
+import { UniqueCodeGenerator } from "../../utils/UniqueCodeGenerator";
 
 class DebugService {
     public async getDebugById(id: number): Promise<DebugModel> {

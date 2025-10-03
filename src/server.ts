@@ -24,7 +24,7 @@ const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
 wss.on("connection", () => Logger.logInfo("WS connected"));
 
-import { WebSocketService } from "./services/WebSocketService";
+import { WebSocketService } from "./services/application/WebSocketService";
 export const wsService = new WebSocketService(wss);
 
 export function startHttpServer(port: number) {

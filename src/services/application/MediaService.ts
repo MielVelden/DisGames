@@ -1,9 +1,9 @@
-import { Media, MediaType } from "../interfaces/application/Media";
-import { GeneratedMedia } from "../interfaces/application/Media";
+import { Media, MediaType } from "../../interfaces/application/Media";
+import { GeneratedMedia } from "../../interfaces/application/Media";
 import * as fs from 'fs';
 import * as path from 'path';
-import { GameTypeEnum } from "../interfaces/enums";
-import Logger from "../utils/Logger";
+import { GameTypeEnum } from "../../interfaces/enums";
+import Logger from "../../utils/Logger";
 
 class MediaService {
     private readonly imagesPath: string;

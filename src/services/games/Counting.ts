@@ -5,9 +5,9 @@ import { GameSettingsEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
-import GameService from "../GameService";
-import TimelineBuilder from "../TimelineBuilder";
-import ComponentService from "../ComponentService";
+import GameService from "../domain/GameService";
+import TimelineBuilder from "../domain/TimelineBuilder";
+import ComponentService from "../application/ComponentService";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";
 
 export default {
