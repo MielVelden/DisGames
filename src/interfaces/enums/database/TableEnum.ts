@@ -9,4 +9,5 @@ export enum TableEnum {
     TIMELINE_ENTRIES,
     DEBUG,
     EVENTS,
+    METRICS,
 }

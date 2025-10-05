@@ -136,20 +136,6 @@ class MediaService {
             return [];
         }
     }
-
-    public async cleanupGameImages(): Promise<void> {
-        // Delete all files in images\games\gameId
-        const gameIds: GameTypeEnum[] = [GameTypeEnum.CONNECTIONS];
-        for (const gameId of gameIds) {
-            const gameDirectory = path.join(this.imagesPath, 'games', gameId.toString());
-            const files = fs.readdirSync(gameDirectory);
-            const filesToDelete = files.filter(file => file.endsWith('.png'));
-            for (const fileToDelete of filesToDelete) {
-                fs.unlinkSync(path.join(gameDirectory, fileToDelete));
-                Logger.logInfo(`Deleted game image: ${path.join(gameDirectory, fileToDelete)}`);
-            }
-        }
-    }
 }
 
 export default new MediaService(); 

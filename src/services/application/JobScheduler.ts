@@ -1,17 +1,15 @@
 import * as schedule from 'node-schedule';
-import * as fs from 'fs';
-import * as path from 'path';
-import { JobModule } from '../../interfaces/application/JobModule';
+import { JobModule } from '../../interfaces/application/Job';
+import JobService from './JobService';
 import Logger from '../../utils/Logger';
 import Webhook, { WebhookType } from '../../utils/Webhook';
 
 export class JobScheduler {
     private static instance: JobScheduler;
     private jobs: Map<string, schedule.Job> = new Map();
-    private jobModules: JobModule[] = [];
 
     private constructor() {
-        this.loadJobs();
+        this.scheduleJobs();
     }
 
     public static getInstance(): JobScheduler {
@@ -21,35 +19,15 @@ export class JobScheduler {
         return JobScheduler.instance;
     }
 
-    private loadJobs(): void {
-        const jobsPath = path.join(__dirname, '..', 'jobs');
+    private scheduleJobs(): void {
+        const jobModules = JobService.getJobModules();
 
-        try {
-            const jobFiles = fs.readdirSync(jobsPath).filter(file =>
-                file.endsWith('.ts') || file.endsWith('.js')
-            );
-
-            for (const file of jobFiles) {
-                try {
-                    const jobPath = path.join(jobsPath, file);
-                    const jobModule = require(jobPath).default as JobModule;
-
-                    if (jobModule && jobModule.id) {
-                        this.jobModules.push(jobModule);
-                        
-                        if (jobModule.isEnabled) {
-                            this.scheduleJob(jobModule);
-                        }
-                    }
-                } catch (error) {
-                    Logger.logError(`Failed to load job file ${file}:`, error as Error);
-                }
+        for (const jobModule of jobModules) {
+            if (jobModule.isEnabled) {
+                this.scheduleJob(jobModule);
             }
-        } catch (error) {
-            Logger.logError('Failed to load jobs directory:', error as Error);
         }
     }
-
 
     public async runAllJobs(): Promise<{ success: string[], failed: { jobId: string, error: string }[] }> {
         const results = {
@@ -57,7 +35,9 @@ export class JobScheduler {
             failed: [] as { jobId: string, error: string }[]
         };
 
-        for (const jobModule of this.jobModules) {
+        const jobModules = JobService.getJobModules();
+
+        for (const jobModule of jobModules) {
             try {
                 await this.executeJob(jobModule);
                 results.success.push(jobModule.id);
@@ -70,14 +50,13 @@ export class JobScheduler {
             }
         }
 
-        // Send webhook report
         const successCount = results.success.length;
         const failedCount = results.failed.length;
-        
+
         const webhookEmbed = Webhook.createJobReportTemplate(
-            successCount, 
-            failedCount, 
-            results.success, 
+            successCount,
+            failedCount,
+            results.success,
             results.failed
         );
 
@@ -86,17 +65,30 @@ export class JobScheduler {
         return results;
     }
 
+    public async runJobById(jobId: string): Promise<void> {
+        const job = JobService.getJobById(jobId);
+
+        if (!job) {
+            throw new Error(`Job with id '${jobId}' not found`);
+        }
+
+        await this.executeJob(job);
+    }
+
 
     private scheduleJob(jobModule: JobModule): void {
         try {
+            if (!jobModule.cronExpression)
+                return;
+
             const job = schedule.scheduleJob(jobModule.cronExpression, async () => {
                 try {
                     await this.executeJob(jobModule);
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                    await Logger.logError(`Scheduled job '${jobModule.id}' failed: ${errorMessage}`, error as Error, { 
-                        webhookType: WebhookType.DEBUG, 
-                        sendToDiscord: true 
+                    await Logger.logError(`Scheduled job '${jobModule.id}' failed: ${errorMessage}`, error as Error, {
+                        webhookType: WebhookType.DEBUG,
+                        sendToDiscord: true
                     });
                 }
             });
@@ -106,33 +98,34 @@ export class JobScheduler {
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            Logger.logError(`Failed to schedule job '${jobModule.id}': ${errorMessage}`, error as Error, { 
-                webhookType: WebhookType.DEBUG, 
-                sendToDiscord: true 
+            Logger.logError(`Failed to schedule job '${jobModule.id}': ${errorMessage}`, error as Error, {
+                webhookType: WebhookType.DEBUG,
+                sendToDiscord: true
             });
         }
     }
 
     private async executeJob(jobModule: JobModule): Promise<void> {
         const startTime = Date.now();
-        
+
         try {
-            await jobModule.handler();
+            const noOpProgress = (current: number, total: number, message?: string) => {};
+            await jobModule.handler(noOpProgress);
 
             const duration = Date.now() - startTime;
-            await Logger.logDebug(`Job '${jobModule.name}' completed in ${duration}ms`, { 
-                webhookType: WebhookType.DEBUG, 
-                sendToDiscord: false 
+            await Logger.logDebug(`Job '${jobModule.name}' completed in ${duration}ms`, {
+                webhookType: WebhookType.DEBUG,
+                sendToDiscord: false
             });
         } catch (error) {
             const duration = Date.now() - startTime;
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            
-            await Logger.logError(`Job '${jobModule.name}' failed after ${duration}ms: ${errorMessage}`, error as Error, { 
-                webhookType: WebhookType.DEBUG, 
-                sendToDiscord: true 
+
+            await Logger.logError(`Job '${jobModule.name}' failed after ${duration}ms: ${errorMessage}`, error as Error, {
+                webhookType: WebhookType.DEBUG,
+                sendToDiscord: true
             });
-            
+
             throw error;
         }
     }

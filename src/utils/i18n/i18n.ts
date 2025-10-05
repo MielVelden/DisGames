@@ -572,6 +572,10 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Server not found",
             [LanguageEnum.NL]: "Server niet gevonden",
         },
+        [ExceptionEnum.RECORD_ALREADY_EXISTS]: {
+            [LanguageEnum.EN]: "Record already exists",
+            [LanguageEnum.NL]: "Record bestaat al",
+        }
     }
 };
 

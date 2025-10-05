@@ -1,4 +1,5 @@
 import { Permission } from "../application/Permission";
+import { UserRoleEnum } from "../enums/domain/UserRoleEnum";
 
 export interface User {
     id: number | undefined;
@@ -6,6 +7,7 @@ export interface User {
     username: string;
     displayName: string;
     bot: boolean;
+    role: UserRoleEnum;
 
     hasPermissions(permissions: Permission[]): boolean;
     hasPermission(permission: Permission): boolean;

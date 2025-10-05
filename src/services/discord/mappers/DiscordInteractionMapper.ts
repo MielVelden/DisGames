@@ -110,6 +110,7 @@ class DiscordInteractionMapper {
             username: discordUser.username,
             displayName: discordUser.displayName || discordUser.username,
             bot: discordUser.bot,
+            role: user.UserRoleEnum,
             hasPermissions: (permissions) => DiscordPermissionService.checkUserHasPermissions(discordMember, permissions),
             hasPermission: (permission) => DiscordPermissionService.checkUserHasPermission(discordMember, permission),
             sendMessageAsync: async (message: string) => await DiscordMessageHandler.sendMessageAsync(discordUser, message),

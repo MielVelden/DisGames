@@ -1,16 +1,23 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { TableEnum } from "../../interfaces/enums";
-import { WebSocketEvent, WebSocketMessage } from "../../interfaces/application/WebSocket";
+import { WebSocketEvent, WebSocketMessage, JobProgressData } from "../../interfaces/application/WebSocket";
 
 type Subscription = { table: TableEnum; objectId?: number };
+type JobSubscription = { executionId: string };
 
 export class WebSocketService {
-	private clients: Map<string, { socket: WebSocket; subs: Subscription[] }> = new Map();
+	private clients: Map<string, { socket: WebSocket; subs: Subscription[]; jobSubs: JobSubscription[] }> = new Map();
 
 	constructor(private wss: WebSocketServer) {
 		wss.on("connection", (socket) => {
 			const id = Math.random().toString(36).slice(2);
-			this.clients.set(id, { socket, subs: [] });
+			this.clients.set(id, { socket, subs: [], jobSubs: [] });
+			
+			socket.send(JSON.stringify({
+				event: 'CLIENT_ID',
+				data: { clientId: id }
+			}));
+
 			socket.on("message", (raw) => {
 				try {
 					const msg = JSON.parse(raw.toString()) as WebSocketMessage;
@@ -21,6 +28,8 @@ export class WebSocketService {
 							break;
 						case WebSocketEvent.UPDATE_RECORD:
 						case WebSocketEvent.DELETE_RECORD:
+						case WebSocketEvent.JOB_PROGRESS:
+						case WebSocketEvent.CLIENT_ID:
 							break;
 						default: {
 							const exhaustiveCheck: never = msg.event;
@@ -50,6 +59,43 @@ export class WebSocketService {
 			return;
 	
 		client.subs = client.subs.filter((s) => !(s.table === table && s.objectId === objectId));
+	}
+
+	async subscribeToJob(clientId: string, executionId: string): Promise<void> {
+		const client = this.clients.get(clientId);
+		if (!client) 
+			return;
+
+		const alreadySubscribed = client.jobSubs.some((sub) => sub.executionId === executionId);
+		if (!alreadySubscribed) {
+			client.jobSubs.push({ executionId });
+		}
+	}
+
+	async unsubscribeFromJob(clientId: string, executionId: string): Promise<void> {
+		const client = this.clients.get(clientId);
+		if (!client) 
+			return;
+
+		client.jobSubs = client.jobSubs.filter((sub) => sub.executionId !== executionId);
+	}
+
+	async broadcastJobProgress(progressData: JobProgressData): Promise<void> {
+		const message: WebSocketMessage = {
+			event: WebSocketEvent.JOB_PROGRESS,
+			data: progressData
+		};
+
+		for (const [clientId, client] of this.clients.entries()) {
+			const isSubscribed = client.jobSubs.some((sub) => sub.executionId === progressData.executionId);
+			if (isSubscribed) {
+				try {
+					client.socket.send(JSON.stringify(message));
+				} catch {
+					
+				}
+			}
+		}
 	}
 
 	private async handlePing(clientId: string): Promise<void> {

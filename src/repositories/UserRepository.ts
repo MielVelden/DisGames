@@ -1,6 +1,6 @@
 import { Repository, UsersModel, UsersModelFieldEnum, UsersSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { TableEnum } from "../interfaces/enums/index";
+import { TableEnum, UserRoleEnum } from "../interfaces/enums/index";
 
 class UserRepository implements Repository<UsersModel> {
     private baseRepository: BaseRepository<UsersModel, UsersSaveModel>;
@@ -33,6 +33,11 @@ class UserRepository implements Repository<UsersModel> {
     async getTotalUsersAsync(): Promise<number> {
         const total = await this.baseRepository.Select().Count();
         return total;
+    }
+
+    async getSystemUserAsync(): Promise<UsersModel> {
+        const model = await this.baseRepository.Select().Where({ UserRoleEnum: UserRoleEnum.SYSTEM }).Limit(1).Execute();
+        return model[0];
     }
 }
 

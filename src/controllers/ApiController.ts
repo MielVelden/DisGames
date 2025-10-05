@@ -1,12 +1,10 @@
 import type { UsersModel } from "../interfaces/database";
 import express from "express";
 import Logger from "../utils/Logger";
-import TimelineController from "./TimelineController";
-import UserController from "./UserController";
-import DashboardController from "./DashboardController";
-import { TypeGeneratorController } from "./TypeGeneratorController";
 import { MethodNameUtils } from "../utils/MethodNameUtils";
 import UserService from "../services/domain/UserService";
+import * as fs from "fs";
+import * as path from "path";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();
@@ -16,13 +14,21 @@ export class ApiController {
 	}
 
 	private initializeControllers(): void {
-		// Statically register all controllers
-		// TODO: Dynamically register controllers
 		this.controllers.set('api', this);
-		this.controllers.set('timeline', new TimelineController());
-		this.controllers.set('user', new UserController());
-		this.controllers.set('dashboard', new DashboardController());
-		this.controllers.set('typegenerator', new TypeGeneratorController());
+		
+		const controllersPath = path.join(__dirname);
+		const controllerFiles = fs.readdirSync(controllersPath)
+			.filter(file => (file.endsWith('.js') || file.endsWith('.ts')) && !file.startsWith('ApiController.'));
+
+		for (const file of controllerFiles) {
+			const controllerModule = require(path.join(controllersPath, file));
+			const ControllerClass = controllerModule.default || controllerModule[Object.keys(controllerModule)[0]];
+			
+			if (ControllerClass) {
+				const controllerName = file.replace(/Controller\.(js|ts)$/, '').toLowerCase();
+				this.controllers.set(controllerName, new ControllerClass());
+			}
+		}
 		
 		Logger.logInfo(`Loaded ${this.controllers.size} controllers`);
 		Logger.logInfo(`Controllers: ${Array.from(this.controllers.keys()).join(', ')}`);

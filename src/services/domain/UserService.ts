@@ -1,5 +1,5 @@
 import { UsersModel } from "../../interfaces/database/TableInterfaces";
-import { BadgeEnum, ExceptionEnum, GameTypeEnum } from "../../interfaces/enums";
+import { BadgeEnum, ExceptionEnum, GameTypeEnum, UserRoleEnum } from "../../interfaces/enums";
 import { ProfileView } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
@@ -72,6 +72,25 @@ class UserService {
                 [BadgeEnum.EARLY_BIRD]: gamePoints?.GameId === GameTypeEnum.ANAGRAM ? true : false,
                 [BadgeEnum.TESTER]: gamePoints?.GameId === GameTypeEnum.WORD_SNAKE ? true : false,
             },
+        };
+    }
+
+    public async getSystemUserAsync(): Promise<User> {
+        const user = await UserRepository.getSystemUserAsync();
+        return await this.toModelAsync(user);
+    }
+
+    public async toModelAsync(user: UsersModel): Promise<User> {
+        return {
+            id: user.Id,
+            userId: user.UserId,
+            username: user.Username,
+            displayName: user.Username,
+            bot: user.UserRoleEnum === UserRoleEnum.SYSTEM,
+            role: user.UserRoleEnum,
+            hasPermissions: () => true,
+            hasPermission: () => true,
+            sendMessageAsync: async () => {},
         };
     }
 }

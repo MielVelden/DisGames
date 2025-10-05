@@ -119,10 +119,12 @@ function qualifyTypeReferences(content: string, currentCategory: string, allInte
 function generateApiWrapper(endpoints: any[], allInterfaces: any[]): string {
     let output = '';
 
+    output += `// ===== DISGAMES API WRAPPER =====\n`;
+    output += `import { apiClient } from "./api-client";\n\n`;
+
     output += `async function getJson<T = unknown>(path: string): Promise<T> {\n`;
-    output += `  const res = await fetch(path);\n`;
-    output += `  if (!res.ok) throw new Error(\`HTTP \${res.status}: \${res.statusText}\`);\n`;
-    output += `  return res.json() as T;\n`;
+    output += `  const response = await apiClient.get(path);\n`;
+    output += `  return response.data as T;\n`;
     output += `}\n\n`;
 
     const groupedEndpoints = groupEndpointsByController(endpoints);
@@ -152,7 +154,7 @@ function generateApiWrapper(endpoints: any[], allInterfaces: any[]): string {
 
             const qualifiedReturnType = qualifyTypeInString(method.returnType, allInterfaces);
 
-            let urlPath = `/api/${controller.toLowerCase()}/${methodName}`;
+            let urlPath = `/${controller.toLowerCase()}/${methodName}`;
             if (params.length > 0) {
                 urlPath += `/${paramsInUrl}`;
             }

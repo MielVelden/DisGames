@@ -7,7 +7,6 @@ import UserRepository from "../../repositories/UserRepository";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardView> {
-
         switch (dashboardEnum) {
             case DashboardEnum.HOME:
                 return this.getHomeDashboardAsync(identity);
