@@ -20,7 +20,7 @@ import { TestServer } from '../interfaces/ServerTestInterface';
 import { TestUser } from '../interfaces/UserTestInterface';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { MultiLingualString } from '../../src/utils/i18n/MultiLingualString';
-import { EventTypeEnum } from '../../src/interfaces/enums';
+import { EventTypeEnum, UserRoleEnum } from '../../src/interfaces/enums';
 
 export class MockDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
@@ -276,7 +276,8 @@ export class TestDiscordEventBuilder {
             bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {}
+            sendMessageAsync: async () => {},
+            role: UserRoleEnum.USER
         };
 
         const server: ServersModel = {
@@ -330,7 +331,8 @@ export class TestDiscordEventBuilder {
             bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {}
+            sendMessageAsync: async () => {},
+            role: UserRoleEnum.USER
         };
 
         const server: ServersModel = {
@@ -383,7 +385,8 @@ export class TestDiscordEventBuilder {
             bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {}
+            sendMessageAsync: async () => {},
+            role: UserRoleEnum.USER
         };
 
         const server: ServersModel = {

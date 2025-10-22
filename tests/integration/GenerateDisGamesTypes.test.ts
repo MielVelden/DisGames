@@ -24,6 +24,7 @@ export default function registerTypeGeneratorTests(runner: TestRunner): void {
                 testFunction: async () => {
                     const tempDir = path.join(__dirname, '..', '..', 'temp');
                     const tempFile = path.join(tempDir, 'generated-types.ts');
+                    const tempApiClientFile = path.join(tempDir, 'api-client.ts');
 
                     try {
                         if (!fs.existsSync(tempDir)) {
@@ -36,6 +37,7 @@ export default function registerTypeGeneratorTests(runner: TestRunner): void {
                         AssertionHelpers.assertGreaterThan(generatedCode.length, 0, 'Generated code should not be empty');
 
                         fs.writeFileSync(tempFile, generatedCode, 'utf-8');
+                        fs.writeFileSync(tempApiClientFile, `export const apiClient = {} as any;`);
 
                         const tscCommand = `npx tsc --noEmit --skipLibCheck ${tempFile}`;
                         let compilationSuccess = true;

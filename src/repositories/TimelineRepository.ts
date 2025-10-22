@@ -2,6 +2,8 @@ import { TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSav
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums/index";
+import { subtractDurationFromDate } from "../utils/Duration";
+import { Duration } from "../interfaces/application";
 
 class TimelineRepository implements Repository<TimelineEntriesModel> {
     private baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>;
@@ -26,8 +28,14 @@ class TimelineRepository implements Repository<TimelineEntriesModel> {
         await this.baseRepository.Delete(id);
     }
 
-    async getGamesPlayedAsync(): Promise<number> {
-        return await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.GAME_PLAYED }).Count();
+    async getGamesPlayedAsync(duration: Duration): Promise<number> {
+        const startDate = subtractDurationFromDate(duration, new Date());
+        return await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.GAME_PLAYED, CreatedAt: { operator: '>=', value: startDate } }).Count();
+    }
+
+    async getTotalUsersCreatedAsync(duration: Duration): Promise<number> {
+        const startDate = subtractDurationFromDate(duration, new Date());
+        return await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.USER_CREATED, CreatedAt: { operator: '>=', value: startDate } }).Count();
     }
 }
 

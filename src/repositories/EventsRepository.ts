@@ -2,6 +2,8 @@ import { EventsModel, EventsModelFieldEnum, EventsSaveModel } from "../interface
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { EventTypeEnum, TableEnum } from "../interfaces/enums/index";
+import { Duration } from "../interfaces/application";
+import { subtractDurationFromDate } from "../utils/Duration";
 
 class EventsRepository implements Repository<EventsModel> {
     private baseRepository: BaseRepository<EventsModel, EventsSaveModel>;
@@ -26,8 +28,9 @@ class EventsRepository implements Repository<EventsModel> {
         await this.baseRepository.Delete(id);
     }
 
-    async getTotalMessagesSentAsync(): Promise<number> {
-        return await this.baseRepository.Select().Where({ EventTypeEnum: EventTypeEnum.MESSAGE }).Count();
+    async getTotalMessagesSentAsync(duration: Duration): Promise<number> {
+        const startDate = subtractDurationFromDate(duration, new Date());
+        return await this.baseRepository.Select().Where({ EventTypeEnum: EventTypeEnum.MESSAGE, CreatedAt: { operator: '>=', value: startDate } }).Count();
     }
 }
 

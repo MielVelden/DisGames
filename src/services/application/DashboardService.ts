@@ -1,9 +1,11 @@
+import { DurationEnum } from "../../interfaces/application";
 import { User } from "../../interfaces/domain";
 import { DashboardEnum } from "../../interfaces/enums/view/DashboardEnum";
 import { DashboardSectionCardData, DashboardView, TrendDirection } from "../../interfaces/view/Dashboard";
 import EventsRepository from "../../repositories/EventsRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
+import { calculateDuration } from "../../utils/Duration";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardView> {
@@ -110,16 +112,18 @@ class DashboardService {
     }
 
     private async getUsersDashboardAsync(identity: User): Promise<DashboardView> {
+        const timeFrame = calculateDuration(7, DurationEnum.DAY);
         const users = await UserRepository.getTotalUsersAsync();
-        const getTotalMessagesSent = await EventsRepository.getTotalMessagesSentAsync();
-        const gamesPlayed = await TimelineRepository.getGamesPlayedAsync();
+        const newUsers = await TimelineRepository.getTotalUsersCreatedAsync(timeFrame);
+        const getTotalMessagesSent = await EventsRepository.getTotalMessagesSentAsync(timeFrame);
+        const gamesPlayed = await TimelineRepository.getGamesPlayedAsync(timeFrame);
         const averageGamesPlayedPerUser = gamesPlayed / users;
 
         return {
             cards: [
                 this.createDashboardCard(
                     "Total Users",
-                    users,
+                    newUsers,
                     "up",
                     {
                         primaryText: "User base is growing",

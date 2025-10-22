@@ -1,4 +1,4 @@
-import { EventTypeEnum } from '../../src/interfaces/application/Event';
+import { EventTypeEnum } from '../../src/interfaces/enums';
 import { PerformanceTestHelper } from '../helpers/PerformanceTestHelper';
 import AssertionHelpers from '../helpers/AssertionHelpers';
 import TestRunner from '../TestRunner';

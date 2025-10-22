@@ -1,6 +1,6 @@
 import TestRunner from '../../TestRunner';
 import { TestSuite } from '../../interfaces/TestRunnerInterface';
-import GameService from '../../../src/services/GameService';
+import GameService from '../../../src/services/domain/GameService';
 import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnum';
 import { TestDiscordEventBuilder } from '../../builders/TestDiscordEventBuilder';
 import { createTestGameAsync } from '../../fixtures/games';

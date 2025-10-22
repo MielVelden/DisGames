@@ -9,6 +9,15 @@ interface BaseEntity {
   Id?: number;
 }
 
+type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE';
+
+type WhereCondition<T> = {
+  [K in keyof T]?: {
+    operator: ComparisonOperator;
+    value: T[K];
+  } | T[K];
+};
+
 class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   protected tableEnum: TableEnum;
   protected fieldEnum: Record<string, string>;
@@ -51,13 +60,22 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return this;
   }
 
-  public Where<K extends keyof Model>(condition: Partial<Record<K, Model[K]>>): this {
-    const conditions = Object.entries(condition)
-      .map(([key]) => `${key} = ?`)
-      .join(' AND ');
+  public Where<K extends keyof Model>(condition: Partial<Record<K, Model[K]>> | WhereCondition<Model>): this {
+    const conditions: string[] = [];
+    const values: any[] = [];
 
-    this.query += ` WHERE ${conditions}`;
-    this.params.push(...Object.values(condition));
+    Object.entries(condition).forEach(([key, value]) => {
+      if (value && typeof value === 'object' && 'operator' in value && 'value' in value) {
+        conditions.push(`${key} ${value.operator} ?`);
+        values.push(value.value);
+      } else {
+        conditions.push(`${key} = ?`);
+        values.push(value);
+      }
+    });
+
+    this.query += ` WHERE ${conditions.join(' AND ')}`;
+    this.params.push(...values);
 
     return this;
   }
@@ -241,6 +259,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 }
 
 export default BaseRepository;
+export type { ComparisonOperator, WhereCondition, BaseEntity };
 
 export class RepositoryUtils {
 

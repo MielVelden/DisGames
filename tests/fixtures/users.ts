@@ -1,24 +1,32 @@
 import { UsersModel, UsersSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import Logger from '../../src/utils/Logger';
-import { TableEnum } from '../../src/interfaces/enums';
+import { TableEnum, UserRoleEnum } from '../../src/interfaces/enums';
 import TestDatabase from '../config/TestDatabase';
 
 export const TEST_USERS: UsersSaveModel[] = [
     {
         UserId: '123456789',
-        Username: 'TestPlayer1'
+        Username: 'TestPlayer1',
+        UserRoleEnum: UserRoleEnum.USER,
+        CreatedAt: new Date()
     },
     {
         UserId: '987654321',
-        Username: 'TestPlayer2'
+        Username: 'TestPlayer2',
+        UserRoleEnum: UserRoleEnum.USER,
+        CreatedAt: new Date()
     },
     {
         UserId: '555666777',
-        Username: 'TestAdmin'
+        Username: 'TestAdmin',
+        UserRoleEnum: UserRoleEnum.ADMIN,
+        CreatedAt: new Date()
     },
     {
         UserId: '111222333',
-        Username: 'TestBot'
+        Username: 'TestBot',
+        UserRoleEnum: UserRoleEnum.SYSTEM,
+        CreatedAt: new Date()
     }
 ];
 
@@ -26,7 +34,9 @@ export const MOCK_USERS: UsersModel[] = TEST_USERS.map((user, index) => ({
     Id: index + 1,
     UserId: user.UserId!,
     Username: user.Username!,
-    OAuth2AccessToken: undefined!
+    OAuth2AccessToken: undefined!,
+    UserRoleEnum: UserRoleEnum.USER,
+    CreatedAt: new Date()
 }));
 
 export function getTestUser(userId: string): UsersModel | undefined {

@@ -1,4 +1,5 @@
-import { InteractionEvent, EventTypeEnum } from '../../src/interfaces/application/Event';
+import { InteractionEvent } from '../../src/interfaces/application/Event';
+import { EventTypeEnum } from '../../src/interfaces/enums';
 import { PerformanceTestConfig, PerformanceTestResult, PerformanceMetrics, PerformanceBaseline } from '../interfaces/PerformanceTestInterface';
 import { TestDiscordEventBuilder } from '../builders/TestDiscordEventBuilder';
 import { createTestUserAsync } from '../fixtures/users';
@@ -6,8 +7,8 @@ import { createTestServerAsync } from '../fixtures/servers';
 import { createTestChannelAsync } from '../fixtures/channels';
 import { createTestGameAsync } from '../fixtures/games';
 import Logger, { loggerColors, loggerEmojis, LogLevel } from '../../src/utils/Logger';
-import GameService from '../../src/services/GameService';
-import { EventService } from '../../src/services/EventService';
+import GameService from '../../src/services/domain/GameService';
+import { EventService } from '../../src/services/application/EventService';
 import { handleCommand } from '../../src/utils/Commands';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
