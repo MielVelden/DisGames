@@ -5,22 +5,13 @@ import { LanguageTranslations } from "../../interfaces/application/i18n";
 export const DEFAULT_LANGUAGE = LanguageEnum.EN;
 
 export class MultiLingualString {
-    private readonly translations: LanguageTranslations;
+    private translations: LanguageTranslations;
 
     constructor(translations: LanguageTranslations, params?: Record<string, string | number>) {
-        let processedTranslations = { ...translations };
+        this.translations = { ...translations };
         
-        if (params) {
-            for (const [language, translation] of Object.entries(processedTranslations)) {
-                let processedTranslation = translation;
-                for (const [key, value] of Object.entries(params)) {
-                    processedTranslation = processedTranslation.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
-                }
-                processedTranslations[language as unknown as keyof LanguageTranslations] = processedTranslation;
-            }
-        }
-        
-        this.translations = processedTranslations;
+        if (params)
+            this.replaceParameters(params);
     }
 
     public getMessage(language: LanguageEnum = DEFAULT_LANGUAGE): string {
@@ -38,6 +29,18 @@ export class MultiLingualString {
         }
         
         return result;
+    }
+
+    public replaceParameters(parameters: { [key: string]: string | number }): void {
+        if(!parameters)
+            return;
+
+        const processedTranslations = { ...this.translations };
+        for (const [key, value] of Object.entries(parameters)) {
+            processedTranslations[key as unknown as keyof LanguageTranslations] = processedTranslations[key as unknown as keyof LanguageTranslations]?.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value)) || '';
+        }
+
+        this.translations = processedTranslations;
     }
 
     public static fromJSON(json: string | Record<number, string> | null): MultiLingualString | null {

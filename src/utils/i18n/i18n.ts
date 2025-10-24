@@ -5,35 +5,45 @@ import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations, LanguageEnumTranslations, LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
 
 export const i18n: I18nTranslations = {
-    common: {
-        success: {
-            [LanguageEnum.EN]: "All set",
-            [LanguageEnum.NL]: "Klaar",
+    labels: {
+        common: {
+            success: {
+                [LanguageEnum.EN]: "All set",
+                [LanguageEnum.NL]: "Klaar",
+            },
+            cancel: {
+                [LanguageEnum.EN]: "Dismiss",
+                [LanguageEnum.NL]: "Annuleer",
+            },
+            accept: {
+                [LanguageEnum.EN]: "Accept",
+                [LanguageEnum.NL]: "Accepteren",
+            },
+            deny: {
+                [LanguageEnum.EN]: "Deny",
+                [LanguageEnum.NL]: "Weigeren",
+            },
+            cancelled: {
+                [LanguageEnum.EN]: "This request has been cancelled",
+                [LanguageEnum.NL]: "Dit verzoek is geannuleerd",
+            },
+            timedOut: {
+                [LanguageEnum.EN]: "Something went wrong, please try again",
+                [LanguageEnum.NL]: "Er ging iets mis, probeer het opnieuw",
+            },
+            delete: {
+                [LanguageEnum.EN]: "Remove",
+                [LanguageEnum.NL]: "Verwijderen",
+            },
+            askQuestion: {
+                [LanguageEnum.EN]: "Please answer the question",
+                [LanguageEnum.NL]: "Vul een antwoord in",
+            },
         },
-        cancel: {
-            [LanguageEnum.EN]: "Dismiss",
-            [LanguageEnum.NL]: "Annuleer",
-        },
-        accept: {
-            [LanguageEnum.EN]: "Accept",
-            [LanguageEnum.NL]: "Accepteren",
-        },
-        deny: {
-            [LanguageEnum.EN]: "Deny",
-            [LanguageEnum.NL]: "Weigeren",
-        },
-        cancelled: {
-            [LanguageEnum.EN]: "This request has been cancelled",
-            [LanguageEnum.NL]: "Dit verzoek is geannuleerd",
-        },
-        timedOut: {
-            [LanguageEnum.EN]: "Something went wrong, please try again",
-            [LanguageEnum.NL]: "Er ging iets mis, probeer het opnieuw",
-        },
-        delete: {
-            [LanguageEnum.EN]: "Remove",
-            [LanguageEnum.NL]: "Verwijderen",
-        }
+        handleNever: (uniqueCase: string, origin: string) => new MultiLingualString({
+            [LanguageEnum.EN]: "Unhandled case {uniqueCase} in {origin}",
+            [LanguageEnum.NL]: "Niet afgehandelde case {uniqueCase} in {origin}"
+        }, { uniqueCase, origin })
     },
     commands: {
         debug: {
@@ -575,7 +585,79 @@ export const i18n: I18nTranslations = {
         [ExceptionEnum.RECORD_ALREADY_EXISTS]: {
             [LanguageEnum.EN]: "Record already exists",
             [LanguageEnum.NL]: "Record bestaat al",
-        }
+        },
+        [ExceptionEnum.GAME_CHANNEL_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Game channel not found",
+            [LanguageEnum.NL]: "Spelkanaal niet gevonden",
+        },
+        [ExceptionEnum.UNAUTHORIZED]: {
+            [LanguageEnum.EN]: "Unauthorized",
+            [LanguageEnum.NL]: "Niet geautoriseerd",
+        },
+        [ExceptionEnum.METHOD_NOT_IMPLEMENTED]: {
+            [LanguageEnum.EN]: "Method not implemented",
+            [LanguageEnum.NL]: "Methode niet geïmplementeerd",
+        },
+        [ExceptionEnum.DATABASE_CONNECTION_FAILED]: {
+            [LanguageEnum.EN]: "Database connection failed",
+            [LanguageEnum.NL]: "Database verbinding mislukt",
+        },
+        [ExceptionEnum.TABLE_ENUM_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Table enum {tableEnumValue} not found",
+            [LanguageEnum.NL]: "Tabelenum {tableEnumValue} niet gevonden",
+        },
+        [ExceptionEnum.ENV_VARIABLE_NOT_SET]: {
+            [LanguageEnum.EN]: "Environment variable {environmentVariable} is not set",
+            [LanguageEnum.NL]: "Omgevingsvariabele {environmentVariable} is niet ingesteld",
+        },
+        [ExceptionEnum.FUNCTION_RETURNED_INVALID_RESULT]: {
+            [LanguageEnum.EN]: "Function {functionName} returned an invalid result",
+            [LanguageEnum.NL]: "Functie {functionName} heeft een ongeldig resultaat teruggegeven",
+        },
+        [ExceptionEnum.JOB_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Job with id {jobId} not found",
+            [LanguageEnum.NL]: "Taak met id {jobId} niet gevonden",
+        },
+        [ExceptionEnum.JOB_FAILED]: {
+            [LanguageEnum.EN]: "Job failed",
+            [LanguageEnum.NL]: "Taak mislukt",
+        },
+        [ExceptionEnum.CLIENT_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Client with id {clientId} not found",
+            [LanguageEnum.NL]: "Client met id {clientId} niet gevonden",
+        },
+        [ExceptionEnum.COMMAND_REGISTRATION_FAILED]: {
+            [LanguageEnum.EN]: "Failed to register commands",
+            [LanguageEnum.NL]: "Commands kunnen niet worden geregistreerd",
+        },
+        [ExceptionEnum.DISCORD_GUILD_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Discord guild not found",
+            [LanguageEnum.NL]: "Discord server niet gevonden",
+        },
+        [ExceptionEnum.DISCORD_CHANNEL_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Discord channel not found",
+            [LanguageEnum.NL]: "Discord kanaal niet gevonden",
+        },
+        [ExceptionEnum.JSON_INTERFACE_VALIDATION_FAILED]: {
+            [LanguageEnum.EN]: "JSON interface validation failed",
+            [LanguageEnum.NL]: "JSON interface validatie mislukt",
+        },
+        [ExceptionEnum.GAME_IMAGE_GENERATION_FAILED]: {
+            [LanguageEnum.EN]: "Game image generation failed",
+            [LanguageEnum.NL]: "Spelafbeelding generatie mislukt",
+        },
+        [ExceptionEnum.GAME_STATE_NOT_VALID]: {
+            [LanguageEnum.EN]: "Game state is not valid",
+            [LanguageEnum.NL]: "Spelstatus is ongeldig",
+        },
+        [ExceptionEnum.NO_NEXT_ANSWER_FOUND]: {
+            [LanguageEnum.EN]: "No next answer found",
+            [LanguageEnum.NL]: "Geen volgende antwoord gevonden",
+        },
+        [ExceptionEnum.SAVE_FAILED]: {
+            [LanguageEnum.EN]: "Save failed",
+            [LanguageEnum.NL]: "Opslaan mislukt",
+        },
     }
 };
 

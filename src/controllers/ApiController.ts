@@ -5,6 +5,8 @@ import { MethodNameUtils } from "../utils/MethodNameUtils";
 import UserService from "../services/domain/UserService";
 import * as fs from "fs";
 import * as path from "path";
+import { ExceptionEnum } from "../interfaces/enums";
+import { ErrorHelper } from "../utils/Error";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();
@@ -175,7 +177,7 @@ export class ApiController {
 			if (paramName.includes('identity') && paramName.includes('User')) {
 				const identity = await this.getAuthorizedIdentity(req);
 				if (!identity) 
-					throw new Error('Unauthorized: No valid identity found');
+					ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
 				
 				params.push(identity);
 				continue;

@@ -9,9 +9,10 @@ import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/ap
 import { MultiLingualString } from "./i18n/MultiLingualString";
 import { LanguageCommandOptionTranslations } from "./i18n/i18n";
 import Logger from "./Logger";
-import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { isSelectMenuEmpty } from "./SelectMenu";
 import ComponentService from "../services/application/ComponentService";
+import { ExceptionEnum } from "../interfaces/enums";
+import { ErrorHelper } from "./Error";
 
 const commands: Command[] = [];
 
@@ -142,6 +143,6 @@ export async function deployCommands(): Promise<void> {
         Logger.logInfo(`Successfully registered ${data.length} application (/) commands.`);
     } catch (error) {
         Logger.logError(`Error registering commands: ${error as Error}`);
-        throw error;
+        ErrorHelper.wrap(error, ExceptionEnum.COMMAND_REGISTRATION_FAILED);
     }
 }

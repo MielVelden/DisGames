@@ -6,7 +6,7 @@ import {
 import DiscordService from '../services/discord/DiscordService';
 import { MessageInteractionEvent } from '../interfaces/application/Event';
 import GameService from '../services/domain/GameService';
-import { ComponentError } from '../utils/ErrorHelper';
+import { ComponentError } from '../utils/Error';
 import { i18n } from '../utils/i18n/i18n';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import ComponentService from '../services/application/ComponentService';

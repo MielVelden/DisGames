@@ -29,9 +29,8 @@ export default {
             const answer = Number(event.getGameDataAnswer());
             const userAnswer = Number(event.userInput);
 
-            if(userAnswer === answer) {
+            if(userAnswer === answer)
                 return true;
-            }
 
             // If the user answer is lower than the answer, add higher icon
             if(userAnswer < answer)

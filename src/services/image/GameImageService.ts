@@ -5,9 +5,10 @@ import { GameDataModel } from '../../interfaces/database/TableInterfaces';
 import { GeneratedMedia } from '../../interfaces/application/Media';
 import { MediaType } from '../../interfaces/application/Media';
 import { UniqueCodeGenerator } from '../../utils/UniqueCodeGenerator';
-import { GameTypeEnum, LanguageEnum } from '../../interfaces/enums';
+import { ExceptionEnum, GameTypeEnum, LanguageEnum } from '../../interfaces/enums';
 import Logger from '../../utils/Logger';
 import { STRING_DELIMITER } from '../../config';
+import { ErrorHelper } from '../../utils/Error';
 
 interface CategoryData {
     categoryName: string;
@@ -99,7 +100,7 @@ class GameImageService {
 
         } catch (error) {
             Logger.logError(`Error generating game image: ${error}`);
-            throw error;
+            ErrorHelper.wrap(error, ExceptionEnum.GAME_IMAGE_GENERATION_FAILED);
         }
     }
 
@@ -111,22 +112,19 @@ class GameImageService {
                 const gameData = gameDataArray[i];
                 
                 const categoryName = gameData.Message.getMessage(language);
-                if (!categoryName) {
+                if (!categoryName)
                     throw new Error(`No category name found for language: ${language} at index ${i}`);
-                }
 
                 const responseString = gameData.Response.getMessage(language);
-                if (!responseString) {
+                if (!responseString)
                     throw new Error(`No response found for language: ${language} at index ${i}`);
-                }
 
                 const words = responseString.split(STRING_DELIMITER)
                     .map((word: string) => word.trim().toUpperCase())
                     .slice(0, 4);
 
-                if (words.length !== 4) {
+                if (words.length !== 4)
                     throw new Error(`Expected 4 words for category ${i}, got ${words.length}`);
-                }
 
                 categoriesData.push({
                     categoryName: categoryName.toUpperCase(),

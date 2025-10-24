@@ -1,11 +1,12 @@
 import { Component } from "../../interfaces/application/Message";
 import { User } from "../../interfaces/domain/User";
-import { EventTypeEnum } from "../../interfaces/enums";
+import { EventTypeEnum, ExceptionEnum } from "../../interfaces/enums";
 import { LanguageEnum } from "../../interfaces/enums";
 import { GameDataModel, GamesModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import GameDataRepository from "../../repositories/GameDataRepository";
 import { GameConfig, IGameEvent } from "../../interfaces/domain/Game";
 import { GameAction } from "../../interfaces/domain/Game";
+import { ErrorHelper } from "../../utils/Error";
 
 export class GameEvent implements IGameEvent {
     public eventType: EventTypeEnum;
@@ -92,7 +93,7 @@ export class GameEvent implements IGameEvent {
             this._nextAnswer = await GameDataRepository.getGameDataByGamesIdAsync(this._gameData.Id);
 
         if(!this._nextAnswer)
-            throw new Error('No next answer found');
+            ErrorHelper.throw(ExceptionEnum.NO_NEXT_ANSWER_FOUND);
 
         return this._nextAnswer;
     }

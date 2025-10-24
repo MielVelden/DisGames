@@ -3,6 +3,8 @@ import { JobModule } from '../../interfaces/application/Job';
 import JobService from './JobService';
 import Logger from '../../utils/Logger';
 import Webhook, { WebhookType } from '../../utils/Webhook';
+import { ExceptionEnum } from '../../interfaces/enums';
+import { ErrorHelper } from '../../utils/Error';
 
 export class JobScheduler {
     private static instance: JobScheduler;
@@ -68,9 +70,8 @@ export class JobScheduler {
     public async runJobById(jobId: string): Promise<void> {
         const job = JobService.getJobById(jobId);
 
-        if (!job) {
-            throw new Error(`Job with id '${jobId}' not found`);
-        }
+        if (!job)
+            ErrorHelper.throwWithParameters(ExceptionEnum.JOB_NOT_FOUND, { jobId: jobId });
 
         await this.executeJob(job);
     }
@@ -90,6 +91,7 @@ export class JobScheduler {
                         webhookType: WebhookType.DEBUG,
                         sendToDiscord: true
                     });
+                    ErrorHelper.wrap(error, ExceptionEnum.JOB_FAILED);
                 }
             });
 
@@ -126,7 +128,7 @@ export class JobScheduler {
                 sendToDiscord: true
             });
 
-            throw error;
+            ErrorHelper.wrap(error, ExceptionEnum.JOB_FAILED);
         }
     }
 

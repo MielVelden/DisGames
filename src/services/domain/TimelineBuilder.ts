@@ -1,4 +1,4 @@
-import { TableEnum, TimelineTypeEnum } from "../../interfaces/enums";
+import { ExceptionEnum, TableEnum, TimelineTypeEnum } from "../../interfaces/enums";
 import { TimelineChanges } from "../../interfaces/domain/Timeline";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import { TimelineEntriesSaveModel } from "../../interfaces/database";
@@ -7,6 +7,7 @@ import UserRepository from "../../repositories/UserRepository";
 import ServerRepository from "../../repositories/ServerRepository";
 import GameRepository from "../../repositories/GameRepository";
 import Logger from "../../utils/Logger";
+import { ErrorHelper } from "../../utils/Error";
 
 interface TimelineContext {
    event: InteractionEvent;
@@ -112,7 +113,7 @@ class TimelineBuilder {
     async forGameResetAsync(gameId: number, context: TimelineContext): Promise<void> {
         const game = await GameRepository.getByIDAsync(gameId);
         if (!game) 
-            throw new Error('Game not found');
+            ErrorHelper.throw(ExceptionEnum.GAME_NOT_FOUND);
 
         const changes = this.detectChanges(game, context.new);
         
@@ -193,8 +194,7 @@ class TimelineBuilder {
                 Logger.logTimeline(timeline);
             }));
         } catch (error) {
-            console.error('Failed to save timeline entries:', error);
-            throw error;
+            ErrorHelper.wrap(error, ExceptionEnum.SAVE_FAILED);
         }
     }
 }

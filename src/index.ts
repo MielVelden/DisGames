@@ -1,7 +1,7 @@
 import { GatewayIntentBits } from 'discord.js';
 import { TOKEN } from './config';
 import { DiscordClient } from './interfaces/application/DiscordClient';
-import { loadEvents } from './utils/Events';
+import { loadEvents } from './utils/Event';
 import { loadCommands } from './utils/Commands';
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
 import Logger from './utils/Logger';

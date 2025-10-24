@@ -104,7 +104,7 @@ export class GameSettingsContainer {
         if (config.onAccept || handlers?.onAcceptClick) {
             components.push(ComponentService.createButton({
                 style: ButtonStyle.SUCCESS,
-                label: new MultiLingualString(i18n.common.accept),
+                label: new MultiLingualString(i18n.labels.common.accept),
             }, {
                 userId: config.userId,
                 handle: async (btnEvent) => {
@@ -121,7 +121,7 @@ export class GameSettingsContainer {
         if (config.onCancel || handlers?.onCancelClick) {
             components.push(ComponentService.createButton({
                 style: ButtonStyle.SECONDARY,
-                label: new MultiLingualString(i18n.common.cancel),
+                label: new MultiLingualString(i18n.labels.common.cancel),
             }, {
                 userId: config.userId,
                 handle: async (btnEvent) => {

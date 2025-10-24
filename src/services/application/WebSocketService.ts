@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { TableEnum } from "../../interfaces/enums";
+import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { WebSocketEvent, WebSocketMessage, JobProgressData } from "../../interfaces/application/WebSocket";
+import { assertNever, ErrorHelper } from "../../utils/Error";
 
 type Subscription = { table: TableEnum; objectId?: number };
 type JobSubscription = { executionId: string };
@@ -30,11 +31,10 @@ export class WebSocketService {
 						case WebSocketEvent.DELETE_RECORD:
 						case WebSocketEvent.JOB_PROGRESS:
 						case WebSocketEvent.CLIENT_ID:
+							// Explicitly ignored events
 							break;
-						default: {
-							const exhaustiveCheck: never = msg.event;
-							throw new Error(`Unhandled web socket event: ${exhaustiveCheck}`);
-						}
+						default: 
+							assertNever(msg.event, WebSocketEvent)
 					}
 
 				} catch {
@@ -105,7 +105,7 @@ export class WebSocketService {
 	private async sendMessage(clientId: string, type: WebSocketEvent, data?: any): Promise<void> {
 		const client = this.clients.get(clientId);
 		if (!client) 
-			throw new Error(`Client not found: ${clientId}`);
+			ErrorHelper.throwWithParameters(ExceptionEnum.CLIENT_NOT_FOUND, { clientId: clientId });
 
 		client.socket.send(JSON.stringify({ event: type, data } as WebSocketMessage));
 	}

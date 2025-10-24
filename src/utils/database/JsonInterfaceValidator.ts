@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import Logger from '../Logger';
+import { ErrorHelper } from '../Error';
+import { ExceptionEnum } from '../../interfaces/enums';
 
 export class JsonInterfaceValidator {
   private static readonly DOMAIN_PATH = './src/interfaces/domain';
@@ -16,7 +18,7 @@ export class JsonInterfaceValidator {
 
     if (missingInterfaces.length > 0) {
       const errorMessage = this.createErrorMessage(missingInterfaces);
-      throw new Error(errorMessage);
+      ErrorHelper.throw(ExceptionEnum.JSON_INTERFACE_VALIDATION_FAILED);
     }
   }
 

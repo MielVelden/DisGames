@@ -1,6 +1,6 @@
 import { GameActionEnum, GameActionPriorityEnum, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
-import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
+import { ExceptionEnum, GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
@@ -9,6 +9,7 @@ import ComponentService from "../application/ComponentService";
 import GameImageService from "../image/GameImageService";
 import { STRING_DELIMITER } from "../../config";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";
+import { ErrorHelper } from "../../utils/Error";
 
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];
@@ -94,7 +95,7 @@ async function createGameImage(gameState: ConnectionsGameState, serverId: string
 
         return ComponentService.createImage(media);
     } else
-        throw new Error("Game state is not valid");
+        ErrorHelper.throw(ExceptionEnum.GAME_STATE_NOT_VALID);
 }
 
 export default {

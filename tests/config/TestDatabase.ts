@@ -1,7 +1,8 @@
 import Logger from '../../src/utils/Logger';
 import { DatabaseHelper } from '../../src/utils/database/DatabaseHelper';
-import { TableEnum } from '../../src/interfaces/enums';
+import { ExceptionEnum, TableEnum } from '../../src/interfaces/enums';
 import { closeConnectionAsync, commitTransactionAsync, getTableName, rollbackTransactionAsync, runQueryAsync, startTransactionAsync, validateConnectionAsync } from '../../src/repositories/util/ConnectionHandler';
+import { ErrorHelper } from '../../src/utils/Error';
 
 export class TestDatabase {
     private static _instance: TestDatabase;
@@ -60,7 +61,7 @@ export class TestDatabase {
             return DatabaseHelper.processResultsFromDatabase(rows as any[]);
         } catch (error) {
             Logger.logError('Test database query failed', error as Error);
-            throw error;
+            ErrorHelper.wrap(error, ExceptionEnum.DATABASE_CONNECTION_FAILED);
         }
     }
 

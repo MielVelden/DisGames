@@ -8,13 +8,13 @@ export function createCancelButton(userId: string): ActionButton {
     return ComponentService.createButton(
         {
             style: ButtonStyle.DANGER,
-            label: new MultiLingualString(i18n.common.cancel),
+            label: new MultiLingualString(i18n.labels.common.cancel),
             emoji: "❌"
         },
         {
             userId: userId,
             handle: async (event: InteractionEvent) => {
-                await event.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.common.cancel)));
+                await event.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.labels.common.cancel)));
             }
         })
 }
@@ -37,7 +37,7 @@ export function createMoveButton(userId: string, handle: (event: InteractionEven
 export function createDeleteButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
     return ComponentService.createButton(
         {
-            label: new MultiLingualString(i18n.common.delete),
+            label: new MultiLingualString(i18n.labels.common.delete),
             style: ButtonStyle.DANGER,
             emoji: "🗑️"
         },
@@ -53,7 +53,7 @@ export function createDeleteButton(userId: string, handle: (event: InteractionEv
 export function createAcceptButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
     return ComponentService.createButton(
         {
-            label: new MultiLingualString(i18n.common.accept),
+            label: new MultiLingualString(i18n.labels.common.accept),
             style: ButtonStyle.SUCCESS,
             emoji: "✅"
         },
@@ -69,7 +69,7 @@ export function createAcceptButton(userId: string, handle: (event: InteractionEv
 export function createDenyButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
     return ComponentService.createButton(
         {
-            label: new MultiLingualString(i18n.common.deny),
+            label: new MultiLingualString(i18n.labels.common.deny),
             style: ButtonStyle.SECONDARY,
             emoji: "❌"
         },

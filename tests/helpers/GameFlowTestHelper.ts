@@ -6,7 +6,7 @@ import { TestDiscordEventBuilder } from '../builders/TestDiscordEventBuilder';
 import Logger from '../../src/utils/Logger';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameFlowTestConfig, GameFlowTestResult } from '../interfaces/GameFlowInterface';
-import { ComponentError } from '../../src/utils/ErrorHelper';
+import { ComponentError } from '../../src/utils/Error';
 import { createTestGameAsync } from '../fixtures/games';
 import { TestInputSimulatorType } from '../interfaces/InputQueueInterface';
 import AssertionHelpers from './AssertionHelpers';

@@ -45,15 +45,19 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
 }
 
 export interface I18nTranslations {
-    common: {
-        success: LanguageTranslations;
-        cancel: LanguageTranslations;
-        accept: LanguageTranslations;
-        deny: LanguageTranslations;
-        cancelled: LanguageTranslations;
-        timedOut: LanguageTranslations;
-        delete: LanguageTranslations;
-    }
+    labels: {
+        common: {
+            success: LanguageTranslations;
+            cancel: LanguageTranslations;
+            accept: LanguageTranslations;
+            deny: LanguageTranslations;
+            cancelled: LanguageTranslations;
+            timedOut: LanguageTranslations;
+            delete: LanguageTranslations;
+            askQuestion: LanguageTranslations;
+        },
+        handleNever: (uniqueCase: string, origin: string) => MultiLingualString;
+    },
     commands: {
         debug: {
             description: LanguageTranslations;

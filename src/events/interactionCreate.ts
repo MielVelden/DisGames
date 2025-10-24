@@ -8,7 +8,7 @@ import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommand } from '../utils/Commands';
 import { EventService } from '../services/application/EventService';
 import ComponentService from '../services/application/ComponentService';
-import { ComponentError } from '../utils/ErrorHelper';
+import { ComponentError } from '../utils/Error';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import { i18n } from '../utils/i18n/i18n';
 import Logger from '../utils/Logger';

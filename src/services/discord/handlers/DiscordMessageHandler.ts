@@ -20,6 +20,8 @@ import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
 import { createAcceptButton, createDenyButton } from '../../../utils/Button';
+import { ExceptionEnum } from '../../../interfaces/enums';
+import { ErrorHelper } from '../../../utils/Error';
 
 class DiscordMessageHandler {
     public async sendMessageAsync(user: DiscordUser, message: string): Promise<void> {
@@ -148,8 +150,9 @@ class DiscordMessageHandler {
         // Clear the components and add the select menu back to the components
         await event.clearComponentsAsync();
         await event.addComponentAsync(ComponentService.createContainer({
-            description: new MultiLingualString(i18n.common.timedOut)
+            description: new MultiLingualString(i18n.labels.common.timedOut)
         }));
+
         await event.addComponentAsync(selectMenu);
 
         // Edit the message to show the timeout
@@ -170,10 +173,10 @@ class DiscordMessageHandler {
 
             // Map and send select menu
             const message = ComponentService.createContainer({
-                description: selectMenu.question ?? createMultiLingualString("test?")
+                description: selectMenu.question ?? new MultiLingualString(i18n.labels.common.askQuestion)
             });
-            const discordMessage = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(message);
 
+            const discordMessage = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(message);
             const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
 
@@ -185,7 +188,7 @@ class DiscordMessageHandler {
             } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
                 await event.currentInteraction.update(replyOptions);
             } else
-                throw new Error("Not implemented yet");
+                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         });
     }
 
@@ -209,16 +212,14 @@ class DiscordMessageHandler {
             }));
 
             const discordMessage = ComponentService.createContent(question);
-
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordButtons)], []);
 
-            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
+            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction)
                 await event.currentInteraction.reply(replyOptions);
-            } else if (event.currentInteraction instanceof DiscordMessage) {
+            else if (event.currentInteraction instanceof DiscordMessage)
                 await event.currentInteraction.reply(replyOptions);
-            } else {
-                throw new Error("Not implemented yet");
-            }
+            else 
+                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         });
     }
 
@@ -230,7 +231,7 @@ class DiscordMessageHandler {
 
             const denyButton = createDenyButton(event.user.userId, async (btnEvent: InteractionEvent) => {
                 await btnEvent.editWithComponentAsync(ComponentService.createContainer({
-                    description: new MultiLingualString(i18n.common.cancelled)
+                    description: new MultiLingualString(i18n.labels.common.cancelled)
                 }));
                 resolve(null);
             });
@@ -257,7 +258,7 @@ class DiscordMessageHandler {
             } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
                 await event.currentInteraction.update(replyOptions);
             } else {
-                throw new Error("Not implemented yet");
+                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
             }
         });
     }
@@ -265,11 +266,11 @@ class DiscordMessageHandler {
     public async sendToChannelAsync(event: InteractionEvent, channelId: string, components: Component[]): Promise<void> {
         const guild = event.currentInteraction.guild;
         if (!guild)
-            throw new Error("Guild not found");
+            ErrorHelper.throw(ExceptionEnum.DISCORD_GUILD_NOT_FOUND);
 
         const channel = await guild.channels.fetch(channelId);
         if (!channel || !channel.isTextBased())
-            throw new Error("Channel not found or not text-based");
+            ErrorHelper.throw(ExceptionEnum.DISCORD_CHANNEL_NOT_FOUND);
 
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
         if (!content)

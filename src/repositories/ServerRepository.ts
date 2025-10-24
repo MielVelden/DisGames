@@ -2,7 +2,7 @@ import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../interf
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
-import { ComponentError } from "../utils/ErrorHelper";
+import { ComponentError } from "../utils/Error";
 
 class ServerRepository implements Repository<ServersModel> {
     private baseRepository: BaseRepository<ServersModel, ServersSaveModel>;

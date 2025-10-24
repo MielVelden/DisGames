@@ -1,9 +1,10 @@
-import { TableEnum, StoredProcedureEnum } from "../interfaces/enums/index";
+import { TableEnum, StoredProcedureEnum, ExceptionEnum } from "../interfaces/enums/index";
 import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 import { isValidEnumValue } from "../utils/Enum";
+import { ErrorHelper } from "../utils/Error";
 
 interface BaseEntity {
   Id?: number;
@@ -200,7 +201,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 
       const result = await this.Select().Where({ Id: serializedEntity.Id }).Execute();
       if (result?.length === 0)
-        throw new Error('Record not found');
+        ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
       const savedRecord = result?.[0] as Model;
       // Update cache with fresh data
@@ -226,7 +227,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 
       const result = await this.Select().OrderBy('Id', 'DESC').Limit(1).Execute();
       if (result?.length === 0)
-        throw new Error('Record not found');
+        ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
       const savedRecord = result?.[0] as Model;
       // Cache the new record
@@ -290,6 +291,6 @@ export class RepositoryUtils {
     const result = row?.Result;
     if (result)
       return result.toString() as T;
-    throw new Error(`Function ${functionName} returned an invalid result`);
+    ErrorHelper.throwWithParameters(ExceptionEnum.FUNCTION_RETURNED_INVALID_RESULT, { functionName: functionName.toString() });
   }
 }

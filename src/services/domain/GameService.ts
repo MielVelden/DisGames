@@ -19,7 +19,7 @@ import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/Enum";
 import GameDataRepository from "../../repositories/GameDataRepository";
-import { ErrorHelper } from "../../utils/ErrorHelper";
+import { assertNever, ErrorHelper } from "../../utils/Error";
 import ComponentService from "../application/ComponentService";
 import { createCancelButton, createMoveButton } from "../../utils/Button";
 import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
@@ -92,7 +92,7 @@ class GameService {
     public async getStartMessageAsync(game: GamesModel, gameData?: GameDataModel | GameDataModel[]): Promise<Component[]> {
         const gameModule = this.getGameByType(game.GameTypeEnum);
         if (!gameModule)
-            throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
         let components = ComponentService.createStartMessageAsync(game.GameTypeEnum as GameTypeEnum, game.Answer as string);
 
@@ -126,11 +126,11 @@ class GameService {
         if (savable.Id) {
             const model = await GameRepository.getByIDAsync(savable.Id);
             if (!model)
-                throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_FOUND);
+                ErrorHelper.throw(ExceptionEnum.GAME_NOT_FOUND);
 
             const gameModule = this.getGameByType(model.GameTypeEnum as GameTypeEnum);
             if (!gameModule)
-                throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+                ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
             if (!gameModule.config.isCalculated) {
                 const gameDataArray = await GameDataRepository.getGameDataByGamesIdAsync(model.Id);
@@ -159,13 +159,13 @@ class GameService {
         }
 
         if (!savable.ChannelId || !savable.ServerId)
-            throw ErrorHelper.throwError(ExceptionEnum.CHANNEL_OR_SERVER_NOT_FOUND);
+            ErrorHelper.throw(ExceptionEnum.CHANNEL_OR_SERVER_NOT_FOUND);
 
         if (savable.Answer)
-            throw ErrorHelper.throwError(ExceptionEnum.ANSWER_ALREADY_EXISTS);
+            ErrorHelper.throw(ExceptionEnum.ANSWER_ALREADY_EXISTS);
 
         if (!isValidEnumValue(GameTypeEnum, savable.GameTypeEnum as GameTypeEnum))
-            throw ErrorHelper.throwError(ExceptionEnum.INVALID_GAME_TYPE);
+            ErrorHelper.throw(ExceptionEnum.INVALID_GAME_TYPE);
 
         // Check if game exists in channel or server
         const [activeChannelGame, activeServerGame] = await Promise.all([
@@ -181,7 +181,7 @@ class GameService {
 
         // Check if any game exists in the channel
         if (activeChannelGame) {
-            throw ErrorHelper.throwErrorWithComponents(
+            ErrorHelper.throwWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
                 [createMoveButton(event.user.userId, (event: InteractionEvent) => handleReplace(activeChannelGame, event as MessageInteractionEvent)),
                 createCancelButton(event.user.userId)]
@@ -190,7 +190,7 @@ class GameService {
 
         // Check if the game exists in the server
         if (activeServerGame) {
-            throw ErrorHelper.throwErrorWithComponents(
+            ErrorHelper.throwWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_GAME,
                 [createMoveButton(event.user.userId, (event: InteractionEvent) => handleReplace(activeServerGame, event as MessageInteractionEvent)),
                 createCancelButton(event.user.userId)]
@@ -200,7 +200,7 @@ class GameService {
         // Get the game module
         const gameModule = this.getGameByType(savable.GameTypeEnum as GameTypeEnum);
         if (!gameModule)
-            throw ErrorHelper.throwError(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
         // Set the answer
         if (gameModule.config.firstAnswer)
@@ -332,7 +332,7 @@ class GameService {
             switch (option as GameOptionEnum) {
                 // Sort by run order
                 case GameOptionEnum.IS_INACTIVE:
-                    throw ErrorHelper.throwError(ExceptionEnum.GAME_NOT_ACTIVE);
+                    ErrorHelper.throw(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
@@ -345,7 +345,7 @@ class GameService {
                         });
                         await this.handleGameActionsAsync(gameEvent, event);
                         await event.sendAsync();
-                        throw ErrorHelper.throwError(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
+                        ErrorHelper.throw(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                     }
                     break;
                 case GameOptionEnum.SAME_USER_DISABLED:
@@ -355,7 +355,7 @@ class GameService {
 
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId) {
                         gameEvent.deleteMessage();
-                        throw ErrorHelper.throwError(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
+                        ErrorHelper.throw(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
                     } else {
                         gameEvent.getGameData().LastUser = gameEvent.user.userId;
                         gameEvent.getGameData().MessageId = gameEvent.messageId;
@@ -364,7 +364,7 @@ class GameService {
                 case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
                     if (!gameEvent.validateAnswer(gameEvent) && !gameModule?.functions.onIncorrectAnswerAsync) {
                         gameEvent.deleteMessage();
-                        throw ErrorHelper.throwError(ExceptionEnum.WRONG_ANSWER);
+                        ErrorHelper.throw(ExceptionEnum.WRONG_ANSWER);
                     }
                     break;
                 case GameOptionEnum.ALLOW_SKIPPING:
@@ -374,9 +374,7 @@ class GameService {
                     }
                     break;
                 default:
-                    // Cast to unknown first, then never to handle the exhaustive check properly
-                    const exhaustiveCheck: never = (option as unknown) as never;
-                    throw new Error(`Unhandled game option: ${exhaustiveCheck}`);
+                    assertNever(option as never, GameOptionEnum)
             }
         }
     }
@@ -390,8 +388,7 @@ class GameService {
                 event.addComponentAsync(action.component as Component);
                 break;
             default:
-                const exhaustiveCheck: never = action.enum;
-                throw new Error(`Unhandled game action type: ${exhaustiveCheck}`);
+                assertNever(action.enum, GameActionEnum)
         }
     }
 
@@ -400,11 +397,11 @@ class GameService {
 
         // If no game is found, return
         if (!game)
-            throw new Error(`Game not found for channel ${event.channelId}`);
+            ErrorHelper.throw(ExceptionEnum.GAME_CHANNEL_NOT_FOUND);
 
         const gameModule = this.getGameByType(game.GameTypeEnum);
         if (!gameModule)
-            throw new Error(`Game module not found for game type ${game.GameTypeEnum}`);
+            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
         const expectedType = gameModule.config.expectedType;
 
@@ -413,7 +410,7 @@ class GameService {
             userInput = Number(event.content);
             if (isNaN(userInput)) {
                 await event.deleteAsync();
-                throw ErrorHelper.throwError(ExceptionEnum.INVALID_NUMBER);
+                ErrorHelper.throw(ExceptionEnum.INVALID_NUMBER);
             }
         } else if (expectedType === "boolean") {
             userInput = event.content.toLowerCase() === "true";

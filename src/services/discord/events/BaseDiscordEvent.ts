@@ -4,7 +4,7 @@ import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
 import { InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
-import { EventTypeEnum } from "../../../interfaces/enums";
+import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../../interfaces/domain/GameSettings";
@@ -15,6 +15,7 @@ import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
+import { ErrorHelper } from "../../../utils/Error";
 
 export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
@@ -170,10 +171,13 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
     public async getChannelNameAsync(channelId: string): Promise<string> {
         const guild = this.currentInteraction.guild;
         if (!guild)
-            throw new Error("Guild not found");
+            ErrorHelper.throw(ExceptionEnum.DISCORD_GUILD_NOT_FOUND);
 
         const channel = await guild.channels.fetch(channelId);
-        return channel?.name || channelId;
+        if (!channel)
+            ErrorHelper.throw(ExceptionEnum.DISCORD_CHANNEL_NOT_FOUND);
+
+        return channel.name;
     }
 
     public addTimelineEntry(entry: TimelineEntriesSaveModel): void {

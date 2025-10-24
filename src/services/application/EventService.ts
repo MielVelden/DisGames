@@ -2,7 +2,8 @@ import { ButtonHandler, SelectMenuHandler, InteractionEvent, SelectMenuInteracti
 import { calculateDuration, durationToMilliseconds } from '../../utils/Duration';
 import { DurationEnum } from '../../interfaces/application/Duration';
 import Logger from '../../utils/Logger';
-import { EventTypeEnum } from '../../interfaces/enums';
+import { EventTypeEnum, ExceptionEnum } from '../../interfaces/enums';
+import { assertNever, ErrorHelper } from '../../utils/Error';
 
 const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
 
@@ -54,10 +55,9 @@ export class EventService {
       case EventTypeEnum.MESSAGE_DELETE:
       case EventTypeEnum.SLASH_COMMAND:
       case EventTypeEnum.MODAL_SUBMIT:
-        throw new Error("Event type not implemented");
+        ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
       default:
-        const exhaustiveCheck: never = type;
-        throw new Error(`Unhandled event type: ${exhaustiveCheck}`);
+        assertNever(type, EventTypeEnum)
     }
   }
 
@@ -110,9 +110,8 @@ export class EventService {
 
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
-    } else {
+    } else
       Logger.logDebug(`No handler found for select menu: ${interaction.customId}`);
-    }
   }
 
   public static handleEventAsync(event: InteractionEvent) {
@@ -126,10 +125,9 @@ export class EventService {
       case EventTypeEnum.MESSAGE_DELETE:
       case EventTypeEnum.SLASH_COMMAND:
       case EventTypeEnum.MODAL_SUBMIT:
-        throw new Error("Event type not implemented");
+        ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
       default:
-        const exhaustiveCheck: never = event.type;
-        throw new Error(`Unhandled event type: ${exhaustiveCheck}`);
+        assertNever(event.type, ExceptionEnum)
     }
   }
 } 

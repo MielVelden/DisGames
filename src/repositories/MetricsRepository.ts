@@ -2,7 +2,7 @@ import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel } from "../interf
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
-import { ComponentError } from "../utils/ErrorHelper";
+import { ErrorHelper } from "../utils/Error";
 
 class MetricsRepository implements Repository<MetricsModel> {
     private baseRepository: BaseRepository<MetricsModel, MetricsSaveModel>;
@@ -30,9 +30,7 @@ class MetricsRepository implements Repository<MetricsModel> {
     async getByDateAsync(date: Date): Promise<MetricsModel> {
         const model = await this.baseRepository.Select().Where({ Date: date }).Limit(1).Execute();
         if (!model || model.length === 0)
-            throw new ComponentError({
-                message: ExceptionEnum.RECORD_NOT_FOUND
-            });
+            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
         return model[0];
     }
 }

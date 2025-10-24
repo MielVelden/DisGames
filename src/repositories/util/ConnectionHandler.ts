@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { URL } from 'url';
 import Logger from '../../utils/Logger';
+import { ExceptionEnum } from '../../interfaces/enums';
+import { ErrorHelper } from '../../utils/Error';
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ export async function createConnectionAsync(): Promise<boolean> {
         const dbUrl = process.env.DATABASE_URL as string;
 
         if (!dbUrl)
-            throw new Error('DATABASE_URL environment variable is not set');
+            ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { environmentVariable: 'DATABASE_URL' });
 
         const url = new URL(dbUrl);
         const dbName = url.pathname.replace(/^\//, '');
@@ -35,7 +37,7 @@ export async function createConnectionAsync(): Promise<boolean> {
         return true;
     } catch (err) {
         Logger.logError(`Failed to connect to database`, err as Error);
-        throw new Error(`Failed to connect to database`);
+        ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
     }
 }
 
@@ -53,7 +55,7 @@ export async function closeConnectionAsync(): Promise<void> {
 
 export async function validateConnectionAsync(): Promise<boolean> {
     if (!connection)
-        throw new Error('Database connection not established');
+        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
     return true;
 }
 
@@ -64,14 +66,14 @@ export async function validateConnectionAsync(): Promise<boolean> {
 export async function runQueryAsync(query: string, params?: any[]): Promise<any[] | undefined> {
     try {
         if (!connection)
-            throw new Error('Database connection not established');
+            ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
 
         Logger.logDebug(params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
         const [rows] = await pool!.query(query, params);
         return rows as any[];
     } catch (err) {
         Logger.logError(`Error while running database query`, err as Error);
-        throw err;
+        ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
     }
 }
 
@@ -79,19 +81,19 @@ export async function runQueryAsync(query: string, params?: any[]): Promise<any[
 
 export async function startTransactionAsync(): Promise<void> {
     if (!connection)
-        throw new Error('Database connection not established');
+        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
     await connection.beginTransaction();
 }
 
 export async function rollbackTransactionAsync(): Promise<void> {
     if (!connection)
-        throw new Error('Database connection not established');
+        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
     await connection.rollback();
 }
 
 export async function commitTransactionAsync(): Promise<void> {
     if (!connection)
-        throw new Error('Database connection not established');
+        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
     await connection.commit();
 }
 
@@ -113,7 +115,7 @@ export function getTableName(tableEnumValue: TableEnum): string {
         if (enumValue)
             return enumValue;
         else
-            throw new Error(`Table enum ${tableEnumValue} not found`);
+            ErrorHelper.throwWithParameters(ExceptionEnum.TABLE_ENUM_NOT_FOUND, { tableEnumValue: tableEnumValue.toString() });
     }
     return enumValue;
 }

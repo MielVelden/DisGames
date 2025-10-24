@@ -1,5 +1,7 @@
 import mysql from 'mysql2/promise';
 import * as dotenv from 'dotenv';
+import { ExceptionEnum } from '../../interfaces/enums';
+import { ErrorHelper } from '../Error';
 
 dotenv.config();
 
@@ -25,9 +27,9 @@ export class DatabaseConnection {
   }
 
   static getConnection(): mysql.PoolConnection {
-    if (!this.connection) {
-      throw new Error('Database connection not established. Call createConnection() first.');
-    }
+    if (!this.connection)
+      ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
+
     return this.connection;
   }
 } 

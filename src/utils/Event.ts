@@ -11,11 +11,10 @@ export async function loadEvents(client: DiscordClient): Promise<void> {
         const filePath = path.join(eventsPath, file);
         const event = require(filePath).default;
 
-        if (event.once) {
+        if (event.once)
             client.once(event.name, (...args) => event.execute(...args, client));
-        } else {
+        else
             client.on(event.name, (...args) => event.execute(...args, client));
-        }
 
         Logger.logInfo(`Event loaded: ${event.name}`);
     }

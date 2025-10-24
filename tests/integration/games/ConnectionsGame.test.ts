@@ -4,10 +4,8 @@ import { TestInputSimulator } from '../../builders/TestInputSimulator';
 import { createGameFlowTestConfig, createConnectionsGameData } from '../../fixtures/games';
 import { createTestUserAsync } from '../../fixtures/users';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
-import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI } from '../../../src/utils/Emojis';
 import TestRunner from '../../TestRunner';
 import { TestSuite } from '../../interfaces/TestRunnerInterface';
-import { ExceptionEnum } from '../../../src/interfaces/enums';
 
 export default function registerConnectionsGameTests(runner: TestRunner): void {
     const suite: TestSuite = {
