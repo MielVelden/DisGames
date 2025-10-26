@@ -3,6 +3,11 @@ import { GameEvent } from '../../services/events/GameEvent';
 import { DEBUG_MODE } from '../../config';
 import { DebugModel, TimelineEntriesModel } from '../../interfaces/database/TableInterfaces';
 import Webhook, { WebhookType } from './Webhook';
+import { createEventEmbed, createEventErrorEmbed } from '../../builders/embeds/EventEmbed';
+import { createGameEventEmbed, createGameErrorEmbed } from '../../builders/embeds/GameEmbed';
+import { createDebugEmbed, createDebugCommandEmbed } from '../../builders/embeds/DebugEmbed';
+import { createTimelineEmbed } from '../../builders/embeds/TimelineEmbed';
+import { createBasicEmbed } from '../../builders/embeds/BasicEmbed';
 
 export enum LogLevel {
     INFO = 'INFO',
@@ -66,8 +71,8 @@ class Logger {
     }
 
     public async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {
-        const template = Webhook.createEventTemplate(event, message);
-        await Webhook.sendDiscordEmbed(template);
+        const embed = createEventEmbed(event, message);
+        await Webhook.sendDiscordEmbed(embed);
 
         if (options?.sendToConsole !== false) {
             console.log(`[${LogLevel.EVENT}] ${message} - User: ${event.user.displayName}, Guild: ${event.guildId}`);
@@ -75,8 +80,8 @@ class Logger {
     }
 
     public async logGameEvent(gameEvent: GameEvent, message: string, options?: LoggerOptions): Promise<void> {
-        const template = Webhook.createGameEventTemplate(gameEvent, message);
-        await Webhook.sendDiscordEmbed(template);
+        const embed = createGameEventEmbed(gameEvent, message);
+        await Webhook.sendDiscordEmbed(embed);
 
         if (options?.sendToConsole !== false) {
             console.log(`[${LogLevel.GAME}] ${message} - Game: ${gameEvent.gameConfig.name.getMessage()}, User: ${gameEvent.user.displayName}`);
@@ -84,8 +89,8 @@ class Logger {
     }
 
     public async logGameError(gameEvent: GameEvent, error: Error, options?: LoggerOptions): Promise<void> {
-        const template = Webhook.createGameErrorTemplate(gameEvent, error);
-        await Webhook.sendDiscordEmbed(template);
+        const embed = createGameErrorEmbed(gameEvent, error);
+        await Webhook.sendDiscordEmbed(embed);
 
         if (options?.sendToConsole !== false) {
             console.error(`[${LogLevel.ERROR}] Game Error - ${error.message}`, error.stack);
@@ -93,8 +98,8 @@ class Logger {
     }
 
     public async logEventError(event: InteractionEvent, error: Error, options?: LoggerOptions): Promise<void> {
-        const template = Webhook.createEventErrorTemplate(event, error);
-        await Webhook.sendDiscordEmbed(template);
+        const embed = createEventErrorEmbed(event, error);
+        await Webhook.sendDiscordEmbed(embed);
 
         if (options?.sendToConsole !== false) {
             console.error(`[${LogLevel.ERROR}] Event Error - ${error.message}`, error.stack);
@@ -102,16 +107,16 @@ class Logger {
     }
 
     public async logTimeline(timeline: TimelineEntriesModel, options?: LoggerOptions): Promise<void> {
-        const template = await Webhook.createTimelineTemplate(timeline);
-        await Webhook.sendDiscordEmbed(template);
+        const embed = await createTimelineEmbed(timeline);
+        await Webhook.sendDiscordEmbed(embed);
     }
 
     public async logDebugCommand(debugModel: DebugModel, message: string, options?: LoggerOptions): Promise<void> {
-        const debugTemplate = await Webhook.createDebugTemplateAsync(debugModel);
-        await Webhook.sendDiscordEmbed(debugTemplate, options?.webhookType ?? WebhookType.DEBUG);
+        const debugEmbed = await createDebugEmbed(debugModel);
+        await Webhook.sendDiscordEmbed(debugEmbed, options?.webhookType ?? WebhookType.DEBUG);
 
-        const template = await Webhook.createDebugCommandTemplate(debugModel, message);
-        await Webhook.sendDiscordEmbed(template, options?.webhookType ?? WebhookType.DEBUG);
+        const commandEmbed = createDebugCommandEmbed(debugModel, message);
+        await Webhook.sendDiscordEmbed(commandEmbed, options?.webhookType ?? WebhookType.DEBUG);
     }
 
     private async log(level: LogLevel, message: string, error?: Error, options?: LoggerOptions): Promise<void> {
@@ -134,7 +139,7 @@ class Logger {
         }
 
         if (finalOptions.sendToDiscord) {
-            const embed = Webhook.createBasicEmbed(level, message, error);
+            const embed = createBasicEmbed(level, message, error);
             await Webhook.sendDiscordEmbed(embed, finalOptions.webhookType);
         }
     }

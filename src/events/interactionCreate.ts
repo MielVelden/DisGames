@@ -51,7 +51,7 @@ export default {
                     error.components!.forEach(async (component) => {
                         await event.addComponentAsync(component);
                     });
-                } else {
+                } else if(error.shouldAnnounceError()) {
                     await event.addComponentAsync(ComponentService.createContent(errorMessage));
                 }
             }

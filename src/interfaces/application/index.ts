@@ -11,3 +11,4 @@ export * from './Media';
 export * from './Message';
 export * from './Permission';
 export * from './WebSocket';
+export * from './DiscordEmbed';

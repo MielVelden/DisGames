@@ -28,6 +28,15 @@ export class ComponentError extends Error {
     public hasComponents(): boolean {
         return Array.isArray(this.components) && this.components.length > 0;
     }
+
+    public shouldAnnounceError(): boolean {
+        switch(this.errorKey) {
+            case ExceptionEnum.RECORD_NOT_FOUND:
+                return false;
+            default:
+                return true;
+        }
+    }
 }
 
 export class ErrorHelper {

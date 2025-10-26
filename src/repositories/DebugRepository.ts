@@ -14,9 +14,9 @@ class DebugRepository implements Repository<DebugModel> {
         return this.baseRepository.getById(id);
     }
 
-    async getByUniqueCode(uniqueCode: string): Promise<DebugModel | null> {
+    async getByUniqueCodeAsync(uniqueCode: string, isEmpty: boolean = false): Promise<DebugModel | null> {
         const model = await this.baseRepository.Select().Where({ UniqueCode: uniqueCode }).Limit(1).Execute();
-        if (!model || model.length === 0)
+        if (!model || model.length === 0 || (isEmpty && model[0].UpdatedAt !== undefined))
             return null;
 
         return model[0];

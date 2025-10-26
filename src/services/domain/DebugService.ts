@@ -1,5 +1,7 @@
 import { DebugModel } from "../../interfaces/database/TableInterfaces";
+import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
 import DebugRepository from "../../repositories/DebugRepository";
+import { ErrorHelper } from "../../utils/application/Error";
 import Logger from "../../utils/application/Logger";
 import { UniqueCodes } from "../../utils/helpers/UniqueCodes";
 
@@ -12,7 +14,7 @@ class DebugService {
         return debugRecord;
     }
 
-    public async createNewDebugRecord(): Promise<DebugModel> {
+    public async createEmptyRecordAsync(): Promise<DebugModel> {
         const debugRecord = await DebugRepository.saveAsync({
             UniqueCode: UniqueCodes.generateUUID(),
             CreatedAt: new Date(),
@@ -22,10 +24,10 @@ class DebugService {
         return debugRecord;
     }
 
-    public async getDebugByUniqueCode(uniqueCode: string): Promise<DebugModel> {
-        const debugRecord = await DebugRepository.getByUniqueCode(uniqueCode);
+    public async getDebugByUniqueCodeAsync(uniqueCode: string, isEmpty: boolean = false): Promise<DebugModel> {
+        const debugRecord = await DebugRepository.getByUniqueCodeAsync(uniqueCode, isEmpty);
         if (!debugRecord)
-            throw new Error("Debug not found");
+            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
         return debugRecord;
     }
 

@@ -5,12 +5,12 @@ import fs from "fs";
 import Logger from "../application/Logger";
 import { MultiLingualString } from "../i18n/MultiLingualString";
 import { LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
-import { resolveSrcPath } from "../helpers/PathResolver";
+import { resolvePath } from "../helpers/PathResolver";
 
 const commands: Command[] = [];
 
 export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
-    const commandsPath = resolveSrcPath('commands');
+    const commandsPath = resolvePath('commands');
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
     const loadedCommands: Command[] = [];
 

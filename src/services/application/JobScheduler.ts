@@ -5,6 +5,7 @@ import Logger from '../../utils/application/Logger';
 import Webhook, { WebhookType } from '../../utils/application/Webhook';
 import { ExceptionEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
+import { createJobReportEmbed } from '../../builders/embeds/JobEmbed';
 
 export class JobScheduler {
     private static instance: JobScheduler;
@@ -55,7 +56,7 @@ export class JobScheduler {
         const successCount = results.success.length;
         const failedCount = results.failed.length;
 
-        const webhookEmbed = Webhook.createJobReportTemplate(
+        const webhookEmbed = createJobReportEmbed(
             successCount,
             failedCount,
             results.success,

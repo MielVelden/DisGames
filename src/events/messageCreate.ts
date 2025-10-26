@@ -57,7 +57,7 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
                 for (const component of error.components!) {
                     await event.addComponentAsync(component);
                 }
-            } else {
+            } else if(error.shouldAnnounceError()) {
                 const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
                 await event.addComponentAsync(ComponentService.createContent(errorMessage));
             }

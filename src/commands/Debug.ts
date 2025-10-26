@@ -1,5 +1,3 @@
-import { Command } from "../interfaces/application/Command";
-import { Permission } from "../interfaces/application/Permission";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
@@ -8,6 +6,8 @@ import Logger from "../utils/application/Logger";
 import { WebhookType } from "../utils/application/Webhook";
 import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
+import { Command } from "../interfaces/application/Command";
+import { Permission } from "../interfaces/application/Permission";
 
 export class DebugCommand implements Command {
     name = CommandEnum.DEBUG;
@@ -23,9 +23,7 @@ export class DebugCommand implements Command {
             return;
         
         // Handle debug record command
-        const debugRecord = await DebugService.getDebugByUniqueCode(command);
-        if (!debugRecord)
-            return;
+        const debugRecord = await DebugService.getDebugByUniqueCodeAsync(command, true);
 
         // Collect data from the server
         debugRecord.ServerId = event.server.Id;
@@ -48,7 +46,7 @@ export class DebugCommand implements Command {
         await DebugService.saveAsync(debugRecord);
 
         // Create a new debug record
-        const newDebugEvent = await DebugService.createNewDebugRecord();
+        const newDebugEvent = await DebugService.createEmptyRecordAsync();
         await Logger.logDebugCommand(debugRecord, newDebugEvent.UniqueCode, { webhookType: WebhookType.DEBUG, sendToDiscord: true });
         await event.replyAsync(new MultiLingualString(i18n.commands.debug.labels.thanks));
     }

@@ -36,8 +36,19 @@ export class MultiLingualString {
             return;
 
         const processedTranslations = { ...this.translations };
-        for (const [key, value] of Object.entries(parameters)) {
-            processedTranslations[key as unknown as keyof LanguageTranslations] = processedTranslations[key as unknown as keyof LanguageTranslations]?.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value)) || '';
+        for (const [langKey, translation] of Object.entries(processedTranslations)) {
+            if (translation) {
+                let processedTranslation = translation;
+                
+                for (const [paramKey, paramValue] of Object.entries(parameters)) {
+                    processedTranslation = processedTranslation.replace(
+                        new RegExp(`\\{${paramKey}\\}`, 'g'), 
+                        String(paramValue)
+                    );
+                }
+                
+                processedTranslations[parseInt(langKey) as keyof LanguageTranslations] = processedTranslation;
+            }
         }
 
         this.translations = processedTranslations;

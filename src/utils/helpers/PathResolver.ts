@@ -3,6 +3,7 @@ import * as fs from 'fs';
 
 export class PathResolver {
     private static projectRoot: string | null = null;
+    private static isDevelopmentMode: boolean | null = null;
 
     static getProjectRoot(): string {
         if (this.projectRoot) {
@@ -32,6 +33,15 @@ export class PathResolver {
         throw new Error('Could not find project root (package.json not found)');
     }
 
+    static isDev(): boolean {
+        if (this.isDevelopmentMode !== null) {
+            return this.isDevelopmentMode;
+        }
+        
+        this.isDevelopmentMode = __dirname.includes('/src/');
+        return this.isDevelopmentMode;
+    }
+
     static resolve(...pathSegments: string[]): string {
         const root = this.getProjectRoot();
         return path.join(root, ...pathSegments);
@@ -45,8 +55,10 @@ export class PathResolver {
         return this.resolve('dist', ...pathSegments);
     }
 
-    static resolveTests(...pathSegments: string[]): string {
-        return this.resolve('tests', ...pathSegments);
+    static resolvePath(...pathSegments: string[]): string {
+        return this.isDev() 
+            ? this.resolveSrc(...pathSegments)
+            : this.resolveDist(...pathSegments);
     }
 
     static relative(from: string, to: string): string {
@@ -58,18 +70,6 @@ export class PathResolver {
     }
 }
 
-export function resolveProjectPath(...pathSegments: string[]): string {
-    return PathResolver.resolve(...pathSegments);
-}
-
-export function resolveSrcPath(...pathSegments: string[]): string {
-    return PathResolver.resolveSrc(...pathSegments);
-}
-
-export function resolveDistPath(...pathSegments: string[]): string {
-    return PathResolver.resolveDist(...pathSegments);
-}
-
-export function resolveTestsPath(...pathSegments: string[]): string {
-    return PathResolver.resolveTests(...pathSegments);
+export function resolvePath(...pathSegments: string[]): string {
+    return PathResolver.resolvePath(...pathSegments);
 }
