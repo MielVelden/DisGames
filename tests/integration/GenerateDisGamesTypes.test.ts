@@ -1,4 +1,4 @@
-import { generateDisGamesTypes } from '../../src/utils/frontendapi/GenerateDisGamesTypes';
+import { generateDisGamesTypes } from '../../src/utils/api/GenerateApiTypes';
 import AssertionHelpers from '../helpers/AssertionHelpers';
 import TestRunner from '../TestRunner';
 import { TestSuite } from '../interfaces/TestRunnerInterface';

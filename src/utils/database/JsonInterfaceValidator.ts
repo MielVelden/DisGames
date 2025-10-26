@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import Logger from '../Logger';
-import { ErrorHelper } from '../Error';
+import Logger from '../application/Logger';
+import { ErrorHelper } from '../application/Error';
 import { ExceptionEnum } from '../../interfaces/enums';
 
 export class JsonInterfaceValidator {

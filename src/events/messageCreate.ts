@@ -6,12 +6,12 @@ import {
 import DiscordService from '../services/discord/DiscordService';
 import { MessageInteractionEvent } from '../interfaces/application/Event';
 import GameService from '../services/domain/GameService';
-import { ComponentError } from '../utils/Error';
+import { ComponentError } from '../utils/application/Error';
 import { i18n } from '../utils/i18n/i18n';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import ComponentService from '../services/application/ComponentService';
-import Logger from '../utils/Logger';
-import { handleCommand } from '../utils/Commands';
+import Logger from '../utils/application/Logger';
+import { handleCommand } from '../utils/handlers/CommandHandler';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
 

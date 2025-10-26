@@ -1,4 +1,4 @@
-import Logger from "../../src/utils/Logger";
+import Logger from "../../src/utils/application/Logger";
 
 export const TEST_CHANNELS = [
     '123456789',

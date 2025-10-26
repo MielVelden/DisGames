@@ -1,7 +1,7 @@
-import { InteractionEvent } from '../interfaces/application/Event';
-import { GameEvent } from '../services/events/GameEvent';
-import { DEBUG_MODE } from '../config';
-import { DebugModel, TimelineEntriesModel } from '../interfaces/database/TableInterfaces';
+import { InteractionEvent } from '../../interfaces/application/Event';
+import { GameEvent } from '../../services/events/GameEvent';
+import { DEBUG_MODE } from '../../config';
+import { DebugModel, TimelineEntriesModel } from '../../interfaces/database/TableInterfaces';
 import Webhook, { WebhookType } from './Webhook';
 
 export enum LogLevel {
@@ -42,30 +42,30 @@ export const loggerEmojis = {
 };
 
 class Logger {
-    public static async logInfo(message: string, options?: LoggerOptions): Promise<void> {
+    public async logInfo(message: string, options?: LoggerOptions): Promise<void> {
         await this.log(LogLevel.INFO, message, undefined, options);
     }
 
-    public static async logWarning(message: string, options?: LoggerOptions): Promise<void> {
+    public async logWarning(message: string, options?: LoggerOptions): Promise<void> {
         await this.log(LogLevel.WARNING, message, undefined, options);
     }
 
-    public static async logError(message: string, error?: Error, options?: LoggerOptions): Promise<void> {
+    public async logError(message: string, error?: Error, options?: LoggerOptions): Promise<void> {
         await this.log(LogLevel.ERROR, message, error, options);
     }
 
-    public static async logDebug(message: string, options?: LoggerOptions): Promise<void> {
+    public async logDebug(message: string, options?: LoggerOptions): Promise<void> {
         if (DEBUG_MODE)
             await this.log(LogLevel.DEBUG, message, undefined, options);
     }
 
-    public static async logTest(message: string): Promise<void> {
+    public async logTest(message: string): Promise<void> {
         // Only log when in debug mode
         if (DEBUG_MODE)
             await this.log(LogLevel.TEST, message);
     }
 
-    public static async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {
+    public async logEvent(event: InteractionEvent, message: string, options?: LoggerOptions): Promise<void> {
         const template = Webhook.createEventTemplate(event, message);
         await Webhook.sendDiscordEmbed(template);
 
@@ -74,7 +74,7 @@ class Logger {
         }
     }
 
-    public static async logGameEvent(gameEvent: GameEvent, message: string, options?: LoggerOptions): Promise<void> {
+    public async logGameEvent(gameEvent: GameEvent, message: string, options?: LoggerOptions): Promise<void> {
         const template = Webhook.createGameEventTemplate(gameEvent, message);
         await Webhook.sendDiscordEmbed(template);
 
@@ -83,7 +83,7 @@ class Logger {
         }
     }
 
-    public static async logGameError(gameEvent: GameEvent, error: Error, options?: LoggerOptions): Promise<void> {
+    public async logGameError(gameEvent: GameEvent, error: Error, options?: LoggerOptions): Promise<void> {
         const template = Webhook.createGameErrorTemplate(gameEvent, error);
         await Webhook.sendDiscordEmbed(template);
 
@@ -92,7 +92,7 @@ class Logger {
         }
     }
 
-    public static async logEventError(event: InteractionEvent, error: Error, options?: LoggerOptions): Promise<void> {
+    public async logEventError(event: InteractionEvent, error: Error, options?: LoggerOptions): Promise<void> {
         const template = Webhook.createEventErrorTemplate(event, error);
         await Webhook.sendDiscordEmbed(template);
 
@@ -101,12 +101,12 @@ class Logger {
         }
     }
 
-    public static async logTimeline(timeline: TimelineEntriesModel, options?: LoggerOptions): Promise<void> {
+    public async logTimeline(timeline: TimelineEntriesModel, options?: LoggerOptions): Promise<void> {
         const template = await Webhook.createTimelineTemplate(timeline);
         await Webhook.sendDiscordEmbed(template);
     }
 
-    public static async logDebugCommand(debugModel: DebugModel, message: string, options?: LoggerOptions): Promise<void> {
+    public async logDebugCommand(debugModel: DebugModel, message: string, options?: LoggerOptions): Promise<void> {
         const debugTemplate = await Webhook.createDebugTemplateAsync(debugModel);
         await Webhook.sendDiscordEmbed(debugTemplate, options?.webhookType ?? WebhookType.DEBUG);
 
@@ -114,7 +114,7 @@ class Logger {
         await Webhook.sendDiscordEmbed(template, options?.webhookType ?? WebhookType.DEBUG);
     }
 
-    private static async log(level: LogLevel, message: string, error?: Error, options?: LoggerOptions): Promise<void> {
+    private async log(level: LogLevel, message: string, error?: Error, options?: LoggerOptions): Promise<void> {
         const defaultOptions: LoggerOptions = {
             sendToDiscord: false,
             sendToConsole: true,
@@ -140,4 +140,4 @@ class Logger {
     }
 }
 
-export default Logger;
+export default new Logger();

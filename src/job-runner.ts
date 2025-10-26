@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import JobScheduler from './services/application/JobScheduler';
-import Logger from './utils/Logger';
-import { WebhookType } from './utils/Webhook';
+import Logger from './utils/application/Logger';
+import { WebhookType } from './utils/application/Webhook';
 
 // Load environment variables
 dotenv.config();

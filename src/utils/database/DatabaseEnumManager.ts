@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
-import { TableEnum } from '../../interfaces/enums/index';
+import { TableEnum } from '../../interfaces/enums';
 import { DatabaseConnection } from './DatabaseConnection';
-import Logger from '../Logger';
+import Logger from '../application/Logger';
 
 export class DatabaseEnumManager {
   static async updateDatabaseWithEnums(): Promise<void> {

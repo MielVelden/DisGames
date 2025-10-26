@@ -1,23 +1,23 @@
-import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../interfaces/application/Message";
-import { ButtonStyle } from "../interfaces/application/Message";
+import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../../interfaces/application/Message";
+import { ButtonStyle } from "../../interfaces/application/Message";
 import { 
     GameSettingsSchema, 
     GameSettingsValues, 
     GameSettingType,
     BooleanGameSetting,
     EnumGameSetting
-} from "../interfaces/domain/GameSettings";
-import { GameSettingsEnum } from "../interfaces/enums/games/GameSettingsEnum";
-import { LanguageEnum } from "../interfaces/enums";
+} from "../../interfaces/domain/GameSettings";
+import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
+import { LanguageEnum } from "../../interfaces/enums";
 import { 
     GameSettingsContainerConfig, 
     GameSettingsHandler, 
     GameSettingsDisplayConfig 
-} from "../interfaces/application/GameSetting";
-import ComponentService from "../services/application/ComponentService";
-import { MultiLingualString } from "./i18n/MultiLingualString";
-import { i18n } from "./i18n/i18n";
-import { ButtonInteractionEvent } from "../interfaces/application/Event";
+} from "../../interfaces/application/GameSetting";
+import ComponentService from "../../services/application/ComponentService";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { i18n } from "../../utils/i18n/i18n";
+import { ButtonInteractionEvent } from "../../interfaces/application/Event";
 
 export class GameSettingsContainer {
     

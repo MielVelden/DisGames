@@ -1,7 +1,7 @@
 import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import { TableEnum } from '../../src/interfaces/enums';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import TestInputSimulator from '../builders/TestInputSimulator';
 import TestDatabase from '../config/TestDatabase';
 import { GameFlowTestConfig } from '../interfaces/GameFlowInterface';

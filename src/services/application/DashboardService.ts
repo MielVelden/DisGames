@@ -5,8 +5,8 @@ import { DashboardSectionCardData, DashboardView, TrendDirection } from "../../i
 import EventsRepository from "../../repositories/EventsRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
-import { calculateDuration } from "../../utils/Duration";
-import { assertNever } from "../../utils/Error";
+import { calculateDuration } from "../../utils/helpers/Duration";
+import { assertNever } from "../../utils/application/Error";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardView> {

@@ -1,10 +1,10 @@
 import * as schedule from 'node-schedule';
 import { JobModule } from '../../interfaces/application/Job';
 import JobService from './JobService';
-import Logger from '../../utils/Logger';
-import Webhook, { WebhookType } from '../../utils/Webhook';
+import Logger from '../../utils/application/Logger';
+import Webhook, { WebhookType } from '../../utils/application/Webhook';
 import { ExceptionEnum } from '../../interfaces/enums';
-import { ErrorHelper } from '../../utils/Error';
+import { ErrorHelper } from '../../utils/application/Error';
 
 export class JobScheduler {
     private static instance: JobScheduler;

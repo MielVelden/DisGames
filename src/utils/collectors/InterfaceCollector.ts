@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { InterfaceInfo } from '../interfaces/application/Controller';
-import { MethodNameUtils } from './MethodNameUtils';
+import { InterfaceInfo } from '../../interfaces/application/Controller';
+import { MethodNameUtils } from '../helpers/MethodNames';
+import { resolveSrcPath } from '../helpers/PathResolver';
 
 export class InterfaceCollector {
-    private static readonly INTERFACES_PATH = path.join(__dirname, '../../src/interfaces');
+    private static readonly INTERFACES_PATH = resolveSrcPath('interfaces');
 
     static async collectAllInterfaces(): Promise<InterfaceInfo[]> {
         const interfaces: InterfaceInfo[] = [];

@@ -6,8 +6,8 @@ import { InteractionEvent } from "../../interfaces/application/Event";
 import UserRepository from "../../repositories/UserRepository";
 import ServerRepository from "../../repositories/ServerRepository";
 import GameRepository from "../../repositories/GameRepository";
-import Logger from "../../utils/Logger";
-import { ErrorHelper } from "../../utils/Error";
+import Logger from "../../utils/application/Logger";
+import { ErrorHelper } from "../../utils/application/Error";
 
 interface TimelineContext {
    event: InteractionEvent;

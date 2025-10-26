@@ -1,4 +1,4 @@
-import { Duration, DurationEnum } from "../interfaces/application/Duration";
+import { Duration, DurationEnum } from "../../interfaces/application/Duration";
 
 export function calculateDuration(value: number, duration: DurationEnum): Duration {
     return value * duration;

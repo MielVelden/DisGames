@@ -1,4 +1,4 @@
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import { InputQueue, TestInputSimulatorOptions, MessageAndReactionTracker, TrackedMessage, TrackedReaction, TestInputSimulatorType } from '../interfaces/InputQueueInterface';
 import { Component } from '../../src/interfaces/application/Message';
 import { TestUser } from '../interfaces/UserTestInterface';

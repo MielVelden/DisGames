@@ -3,7 +3,7 @@ import { MetricsInfo, User } from "../../interfaces/domain";
 import { ExceptionEnum } from "../../interfaces/enums";
 import { DashboardEnum } from "../../interfaces/enums/view/DashboardEnum";
 import MetricsRepository from "../../repositories/MetricsRepository";
-import { ErrorHelper } from "../../utils/Error";
+import { ErrorHelper } from "../../utils/application/Error";
 import DashboardService from "../application/DashboardService";
 
 class MetricsService {

@@ -3,7 +3,7 @@ import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { EventTypeEnum, TableEnum } from "../interfaces/enums/index";
 import { Duration } from "../interfaces/application";
-import { subtractDurationFromDate } from "../utils/Duration";
+import { subtractDurationFromDate } from "../utils/helpers/Duration";
 
 class EventsRepository implements Repository<EventsModel> {
     private baseRepository: BaseRepository<EventsModel, EventsSaveModel>;

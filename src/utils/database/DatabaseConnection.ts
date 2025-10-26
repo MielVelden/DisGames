@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import * as dotenv from 'dotenv';
 import { ExceptionEnum } from '../../interfaces/enums';
-import { ErrorHelper } from '../Error';
+import { ErrorHelper } from '../application/Error';
 
 dotenv.config();
 

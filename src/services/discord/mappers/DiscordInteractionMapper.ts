@@ -9,7 +9,7 @@ import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
 import { ServersModel } from '../../../interfaces/database/TableInterfaces';
 import ServerService from '../../domain/ServerService';
-import { getCommandConfig } from '../../../utils/Commands';
+import { getCommandConfig } from '../../../utils/collectors/CommandCollector';
 import {
     SlashCommandDiscordEvent,
     MessageDiscordEvent,

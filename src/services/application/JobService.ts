@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { JobModule, JobItem, JobExecutionResult, JobStatus, JobProgressCallback } from '../../interfaces/application/Job';
-import { UniqueCodeGenerator } from '../../utils/UniqueCodeGenerator';
-import Logger from '../../utils/Logger';
+import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
+import Logger from '../../utils/application/Logger';
 
 class JobService {
     private jobModules: JobModule[] = [];
@@ -57,7 +57,7 @@ class JobService {
         const job = this.jobModules.find(j => j.id === jobId);
         
         if (!job) {
-            const executionId = UniqueCodeGenerator.generateTimestampCode();
+            const executionId = UniqueCodes.generateTimestampCode();
             return {
                 executionId,
                 jobId,
@@ -66,7 +66,7 @@ class JobService {
             };
         }
 
-        const executionId = UniqueCodeGenerator.generateTimestampCode();
+        const executionId = UniqueCodes.generateTimestampCode();
         const startedAt = new Date();
         
         const wrappedProgressCallback: JobProgressCallback = (current: number, total: number, message?: string) => {

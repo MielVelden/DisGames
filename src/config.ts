@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { calculateDuration } from './utils/Duration';
+import { calculateDuration } from './utils/helpers/Duration';
 import { Duration, DurationEnum } from './interfaces/application/Duration';
 
 export const TOKEN = process.env.TOKEN;

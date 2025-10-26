@@ -1,19 +1,19 @@
 import { InteractionEvent } from '../../src/interfaces/application/Event';
 import { EventTypeEnum } from '../../src/interfaces/enums';
-import { PerformanceTestConfig, PerformanceTestResult, PerformanceMetrics, PerformanceBaseline } from '../interfaces/PerformanceTestInterface';
+import { PerformanceTestConfig, PerformanceTestResult, PerformanceMetrics } from '../interfaces/PerformanceTestInterface';
 import { TestDiscordEventBuilder } from '../builders/TestDiscordEventBuilder';
 import { createTestUserAsync } from '../fixtures/users';
 import { createTestServerAsync } from '../fixtures/servers';
 import { createTestChannelAsync } from '../fixtures/channels';
 import { createTestGameAsync } from '../fixtures/games';
-import Logger, { loggerColors, loggerEmojis, LogLevel } from '../../src/utils/Logger';
+import Logger, { loggerColors, loggerEmojis, LogLevel } from '../../src/utils/application/Logger';
 import GameService from '../../src/services/domain/GameService';
 import { EventService } from '../../src/services/application/EventService';
-import { handleCommand } from '../../src/utils/Commands';
+import { handleCommand } from '../../src/utils/handlers/CommandHandler';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import { DifficultyEnum } from '../../src/interfaces/enums/games/DifficultyEnum';
-import Webhook, { WebhookType } from '../../src/utils/Webhook';
+import Webhook, { WebhookType } from '../../src/utils/application/Webhook';
 
 export class PerformanceTestHelper {
     private memorySnapshots: number[] = [];

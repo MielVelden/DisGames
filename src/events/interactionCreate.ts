@@ -5,13 +5,13 @@ import {
 import DiscordService from '../services/discord/DiscordService';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
 import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
-import { handleCommand } from '../utils/Commands';
+import { handleCommand } from '../utils/handlers/CommandHandler';
 import { EventService } from '../services/application/EventService';
 import ComponentService from '../services/application/ComponentService';
-import { ComponentError } from '../utils/Error';
+import { ComponentError } from '../utils/application/Error';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import { i18n } from '../utils/i18n/i18n';
-import Logger from '../utils/Logger';
+import Logger from '../utils/application/Logger';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
 

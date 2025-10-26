@@ -3,8 +3,8 @@ import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
-import { isValidEnumValue } from "../utils/Enum";
-import { ErrorHelper } from "../utils/Error";
+import { isValidEnumValue } from "../utils/helpers/Enum";
+import { ErrorHelper } from "../utils/application/Error";
 
 interface BaseEntity {
   Id?: number;

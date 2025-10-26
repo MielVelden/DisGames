@@ -1,6 +1,6 @@
 import { REPOSITORY_CACHE_TTL } from "../../config";
-import { durationToMilliseconds } from "../../utils/Duration";
-import Logger from "../../utils/Logger";
+import { durationToMilliseconds } from "../../utils/helpers/Duration";
+import Logger from "../../utils/application/Logger";
 
 interface BaseEntity {
   Id?: number;

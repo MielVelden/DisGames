@@ -1,4 +1,4 @@
-import { LogLevel } from "../../src/utils/Logger";
+import { LogLevel } from "../../src/utils/application/Logger";
 
 export interface TestEnvironment {
     isTestMode: boolean;

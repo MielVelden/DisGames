@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { MethodNameUtils } from './MethodNameUtils';
-import { EndpointInfo, ParameterInfo } from '../interfaces/application/Controller';
+import { MethodNameUtils } from '../helpers/MethodNames';
+import { EndpointInfo, ParameterInfo } from '../../interfaces/application/Controller';
+import { resolveSrcPath } from '../helpers/PathResolver';
 
 export class EndpointCollector {
-    private static readonly CONTROLLERS_PATH = path.join(__dirname, '../../src/controllers');
+    private static readonly CONTROLLERS_PATH = resolveSrcPath('controllers');
 
     static async collectAllEndpoints(): Promise<EndpointInfo[]> {
         const endpoints: EndpointInfo[] = [];

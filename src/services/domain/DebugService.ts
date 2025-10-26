@@ -1,7 +1,7 @@
 import { DebugModel } from "../../interfaces/database/TableInterfaces";
 import DebugRepository from "../../repositories/DebugRepository";
-import Logger from "../../utils/Logger";
-import { UniqueCodeGenerator } from "../../utils/UniqueCodeGenerator";
+import Logger from "../../utils/application/Logger";
+import { UniqueCodes } from "../../utils/helpers/UniqueCodes";
 
 class DebugService {
     public async getDebugById(id: number): Promise<DebugModel> {
@@ -14,7 +14,7 @@ class DebugService {
 
     public async createNewDebugRecord(): Promise<DebugModel> {
         const debugRecord = await DebugRepository.saveAsync({
-            UniqueCode: UniqueCodeGenerator.generateUUID(),
+            UniqueCode: UniqueCodes.generateUUID(),
             CreatedAt: new Date(),
         });
 

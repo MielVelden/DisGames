@@ -1,8 +1,8 @@
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import { DatabaseHelper } from '../../src/utils/database/DatabaseHelper';
 import { ExceptionEnum, TableEnum } from '../../src/interfaces/enums';
 import { closeConnectionAsync, commitTransactionAsync, getTableName, rollbackTransactionAsync, runQueryAsync, startTransactionAsync, validateConnectionAsync } from '../../src/repositories/util/ConnectionHandler';
-import { ErrorHelper } from '../../src/utils/Error';
+import { ErrorHelper } from '../../src/utils/application/Error';
 
 export class TestDatabase {
     private static _instance: TestDatabase;

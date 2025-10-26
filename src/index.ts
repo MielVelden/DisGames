@@ -1,10 +1,10 @@
 import { GatewayIntentBits } from 'discord.js';
 import { TOKEN } from './config';
 import { DiscordClient } from './interfaces/application/DiscordClient';
-import { loadEvents } from './utils/Event';
-import { loadCommands } from './utils/Commands';
+import { loadEvents } from './utils/collectors/EventCollector';
+import { loadCommands } from './utils/collectors/CommandCollector';
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
-import Logger from './utils/Logger';
+import Logger from './utils/application/Logger';
 import { startHttpServer } from './server';
 
 const token = TOKEN;

@@ -2,7 +2,7 @@ import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import { TestInputSimulator } from '../builders/TestInputSimulator';
 import { Component } from '../../src/interfaces/application/Message';
 import { GamesModel } from '../../src/interfaces/database/TableInterfaces';
-import { ComponentError } from '../../src/utils/ErrorHelper';
+import { ComponentError } from '../../src/utils/application/Error';
 import { TrackedMessage, TrackedReaction } from './InputQueueInterface';
 
 export interface GameFlowTestConfig {

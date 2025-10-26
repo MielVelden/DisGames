@@ -1,8 +1,8 @@
 import { GamesModel } from '../../src/interfaces/database/TableInterfaces';
 import { Component, ComponentType } from '../../src/interfaces/application/Message';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import { ExceptionEnum } from '../../src/interfaces/enums';
-import { ComponentError } from '../../src/utils/Error';
+import { ComponentError } from '../../src/utils/application/Error';
 import { GameFlowTestResult } from '../interfaces/GameFlowInterface';
 import { TrackedMessage, TrackedReaction } from '../interfaces/InputQueueInterface';
 

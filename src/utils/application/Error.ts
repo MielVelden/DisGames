@@ -1,8 +1,8 @@
-import { ComponentErrorOptions } from "../interfaces/application/Error";
-import { Component } from "../interfaces/application/Message";
-import { ExceptionEnum } from "../interfaces/enums/domain/ExpectionEnum";
-import { i18n } from "./i18n/i18n";
-import { MultiLingualString } from "./i18n/MultiLingualString";
+import { ComponentErrorOptions } from "../../interfaces/application/Error";
+import { Component } from "../../interfaces/application/Message";
+import { ExceptionEnum } from "../../interfaces/enums";
+import { i18n } from "../../utils/i18n/i18n";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export class ComponentError extends Error {
     public readonly components?: Component[];

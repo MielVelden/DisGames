@@ -8,8 +8,8 @@ import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import GameImageService from "../image/GameImageService";
 import { STRING_DELIMITER } from "../../config";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";
-import { ErrorHelper } from "../../utils/Error";
+import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { ErrorHelper } from "../../utils/application/Error";
 
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];

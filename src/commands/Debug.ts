@@ -4,8 +4,8 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { MessageInteractionEvent } from "../interfaces/application/Event";
-import Logger from "../utils/Logger";
-import { WebhookType } from "../utils/Webhook";
+import Logger from "../utils/application/Logger";
+import { WebhookType } from "../utils/application/Webhook";
 import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
 

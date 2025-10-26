@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { LogLevel } from '../../src/utils/Logger';
+import { LogLevel } from '../../src/utils/application/Logger';
 import { TestEnvironment } from '../interfaces/TestEnvironmentInterface';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.test') });

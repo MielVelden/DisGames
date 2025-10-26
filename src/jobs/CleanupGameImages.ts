@@ -2,7 +2,7 @@ import { JobModule } from "../interfaces/application/Job";
 import { GameTypeEnum } from "../interfaces/enums";
 import * as fs from 'fs';
 import * as path from 'path';
-import Logger from "../utils/Logger";
+import Logger from "../utils/application/Logger";
 
 export default {
     id: 'cleanup-game-images',

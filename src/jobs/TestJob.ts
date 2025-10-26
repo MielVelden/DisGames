@@ -1,5 +1,5 @@
 import { JobModule } from "../interfaces/application/Job";
-import Logger from "../utils/Logger";
+import Logger from "../utils/application/Logger";
 
 export default {
     id: 'test-job',

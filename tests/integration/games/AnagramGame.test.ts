@@ -4,7 +4,7 @@ import { TestInputSimulator } from '../../builders/TestInputSimulator';
 import { createGameFlowTestConfig } from '../../fixtures/games';
 import { createTestUserAsync } from '../../fixtures/users';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
-import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI } from '../../../src/utils/Emojis';
+import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI } from '../../../src/utils/constants/Emojis';
 import TestRunner from '../../TestRunner';
 import { TestSuite } from '../../interfaces/TestRunnerInterface';
 

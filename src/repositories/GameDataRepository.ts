@@ -3,7 +3,7 @@ import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
-import { ErrorHelper } from "../utils/Error";
+import { ErrorHelper } from "../utils/application/Error";
 
 class GameDataRepository implements Repository<GameDataModel> {
     private baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;

@@ -4,11 +4,11 @@ import * as path from 'path';
 import { GameDataModel } from '../../interfaces/database/TableInterfaces';
 import { GeneratedMedia } from '../../interfaces/application/Media';
 import { MediaType } from '../../interfaces/application/Media';
-import { UniqueCodeGenerator } from '../../utils/UniqueCodeGenerator';
+import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
 import { ExceptionEnum, GameTypeEnum, LanguageEnum } from '../../interfaces/enums';
-import Logger from '../../utils/Logger';
+import Logger from '../../utils/application/Logger';
 import { STRING_DELIMITER } from '../../config';
-import { ErrorHelper } from '../../utils/Error';
+import { ErrorHelper } from '../../utils/application/Error';
 
 interface CategoryData {
     categoryName: string;
@@ -75,7 +75,7 @@ class GameImageService {
             
             const gridItems = this.createGridStructureWithCategories(categoriesData, solvedCategories);
 
-            const uniqueCode = UniqueCodeGenerator.generateCode(12);
+            const uniqueCode = UniqueCodes.generateCode(12);
             const filename = `${serverId}-${uniqueCode}.png`;
             
             const gameDirectory = path.join(this.imagesPath, GameTypeEnum.CONNECTIONS.toString());

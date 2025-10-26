@@ -7,7 +7,7 @@ import { i18n, LanguageEnumTranslations } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { EventService } from "./EventService";
 import MediaService from "./MediaService";
-import Logger from "../../utils/Logger";
+import Logger from "../../utils/application/Logger";
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {

@@ -3,7 +3,7 @@ import { GeneratedMedia } from "../../interfaces/application/Media";
 import * as fs from 'fs';
 import * as path from 'path';
 import { GameTypeEnum } from "../../interfaces/enums";
-import Logger from "../../utils/Logger";
+import Logger from "../../utils/application/Logger";
 
 class MediaService {
     private readonly imagesPath: string;

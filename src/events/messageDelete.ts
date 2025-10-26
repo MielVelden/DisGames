@@ -6,7 +6,7 @@ import {
 import { EventTypeEnum } from '../interfaces/enums';
 import { handleMessageCreateAsync } from './messageCreate';
 import { EventService } from '../services/application/EventService';
-import Logger from '../utils/Logger';
+import Logger from '../utils/application/Logger';
 
 export default {
     name: Events.MessageDelete,

@@ -1,4 +1,4 @@
-import { EventTypeEnum } from '../../src/interfaces/application/Event';
+import { EventTypeEnum } from '../../src/interfaces/enums';
 import { TestResult } from './TestRunnerInterface';
 
 export interface PerformanceMetrics {

@@ -1,7 +1,7 @@
 import { ServersModel, ServersSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import { TableEnum } from '../../src/interfaces/enums';
 import { LanguageEnum } from '../../src/interfaces/enums/database/LanguageEnum';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import TestDatabase from '../config/TestDatabase';
 
 export const TEST_SERVERS: ServersSaveModel[] = [

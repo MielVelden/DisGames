@@ -3,10 +3,10 @@ import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableI
 import GameService from '../../src/services/domain/GameService';
 import GameRepository from '../../src/repositories/GameRepository';
 import { TestDiscordEventBuilder } from '../builders/TestDiscordEventBuilder';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameFlowTestConfig, GameFlowTestResult } from '../interfaces/GameFlowInterface';
-import { ComponentError } from '../../src/utils/Error';
+import { ComponentError } from '../../src/utils/application/Error';
 import { createTestGameAsync } from '../fixtures/games';
 import { TestInputSimulatorType } from '../interfaces/InputQueueInterface';
 import AssertionHelpers from './AssertionHelpers';

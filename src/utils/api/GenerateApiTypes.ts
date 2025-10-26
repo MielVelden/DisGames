@@ -1,5 +1,5 @@
-import { InterfaceCollector } from '../InterfaceCollector';
-import { EndpointCollector } from '../EndpointCollector';
+import { InterfaceCollector } from '../collectors/InterfaceCollector';
+import { EndpointCollector } from '../collectors/EndpointCollector';
 import { cleanupQualifiedTypes, isException, TYPE_EXCEPTIONS } from './Exceptions';
 
 export async function generateDisGamesTypes(): Promise<string> {

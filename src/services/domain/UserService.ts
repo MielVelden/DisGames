@@ -4,9 +4,9 @@ import { ProfileView } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import ServerService from "./ServerService";
-import { getEnumDefaultsByValue } from "../../utils/Enum";
-import { ErrorHelper } from "../../utils/Error";
-import Logger from "../../utils/Logger";
+import { getEnumDefaultsByValue } from "../../utils/helpers/Enum";
+import { ErrorHelper } from "../../utils/application/Error";
+import Logger from "../../utils/application/Logger";
 import { User } from "../../interfaces/domain";
 
 class UserService {

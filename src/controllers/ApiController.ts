@@ -1,12 +1,12 @@
 import type { UsersModel } from "../interfaces/database";
 import express from "express";
-import Logger from "../utils/Logger";
-import { MethodNameUtils } from "../utils/MethodNameUtils";
+import Logger from "../utils/application/Logger";
+import { MethodNameUtils } from "../utils/helpers/MethodNames";
 import UserService from "../services/domain/UserService";
 import * as fs from "fs";
 import * as path from "path";
 import { ExceptionEnum } from "../interfaces/enums";
-import { ErrorHelper } from "../utils/Error";
+import { ErrorHelper } from "../utils/application/Error";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();

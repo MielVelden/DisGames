@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { DEBUG_DISCORD_WEBHOOK_URL, DISCORD_WEBHOOK_URL } from '../config';
-import { LogLevel, loggerColors, loggerEmojis } from './Logger';
-import { InteractionEvent } from '../interfaces/application/Event';
-import { GameEvent } from '../services/events/GameEvent';
-import { DebugModel, TimelineEntriesModel } from '../interfaces/database/TableInterfaces';
-import { TableEnum, TimelineTypeEnum } from '../interfaces/enums';
-import { RepositoryUtils } from '../repositories/BaseRepository';
-import { FunctionEnum } from '../interfaces/enums/database/FunctionEnum';
-import { i18n } from './i18n/i18n';
-import { getEnumValueByIndex } from './Enum';
+import { DEBUG_DISCORD_WEBHOOK_URL, DISCORD_WEBHOOK_URL } from '../../config';
+import { LogLevel, loggerColors, loggerEmojis } from '../application/Logger';
+import { InteractionEvent } from '../../interfaces/application/Event';
+import { GameEvent } from '../../services/events/GameEvent';
+import { DebugModel, TimelineEntriesModel } from '../../interfaces/database/TableInterfaces';
+import { TableEnum, TimelineTypeEnum } from '../../interfaces/enums';
+import { RepositoryUtils } from '../../repositories/BaseRepository';
+import { FunctionEnum } from '../../interfaces/enums/database/FunctionEnum';
+import { i18n } from '../i18n/i18n';
+import { getEnumValueByIndex } from '../helpers/Enum';
 
 export enum WebhookType {
     INFO = 'INFO',

@@ -2,7 +2,7 @@ import { TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSav
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums/index";
-import { subtractDurationFromDate } from "../utils/Duration";
+import { subtractDurationFromDate } from "../utils/helpers/Duration";
 import { Duration } from "../interfaces/application";
 
 class TimelineRepository implements Repository<TimelineEntriesModel> {

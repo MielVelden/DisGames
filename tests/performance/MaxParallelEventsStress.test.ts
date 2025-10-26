@@ -3,7 +3,7 @@ import { PerformanceTestHelper } from '../helpers/PerformanceTestHelper';
 import AssertionHelpers from '../helpers/AssertionHelpers';
 import TestRunner from '../TestRunner';
 import { PerformanceTestSuite } from '../interfaces/PerformanceTestInterface';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 
 interface StressTestResult {
     maxEventsPerSecond: number;

@@ -3,7 +3,7 @@ import { JobItem, JobExecutionResult } from '../interfaces/application/Job';
 import { wsService } from '../server';
 import { JobProgressData } from '../interfaces/application/WebSocket';
 import { getClientId } from '../middleware/RequestContext';
-import Logger from '../utils/Logger';
+import Logger from '../utils/application/Logger';
 
 export class JobController {
     async getAllJobsAsync(): Promise<JobItem[]> {

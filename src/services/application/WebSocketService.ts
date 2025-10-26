@@ -1,7 +1,7 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { WebSocketEvent, WebSocketMessage, JobProgressData } from "../../interfaces/application/WebSocket";
-import { assertNever, ErrorHelper } from "../../utils/Error";
+import { assertNever, ErrorHelper } from "../../utils/application/Error";
 
 type Subscription = { table: TableEnum; objectId?: number };
 type JobSubscription = { executionId: string };

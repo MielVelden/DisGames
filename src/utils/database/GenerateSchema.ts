@@ -2,8 +2,7 @@ import { DatabaseConnection } from './DatabaseConnection';
 import { TableInterfaceGenerator } from './TableInterfaceGenerator';
 import { StoredProcedureGenerator } from './StoredProcedureGenerator';
 import { DatabaseEnumManager } from './DatabaseEnumManager';
-import { SchemaUtils } from './SchemaUtils';
-import Logger from '../Logger';
+import Logger from '../application/Logger';
 
 // File information
 const enumFileLocation = './src/interfaces/enums/';

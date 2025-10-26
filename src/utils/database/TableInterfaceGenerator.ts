@@ -3,7 +3,7 @@ import { DatabaseConnection } from './DatabaseConnection';
 import { SchemaUtils } from './SchemaUtils';
 import { JsonInterfaceValidator } from './JsonInterfaceValidator';
 import { InterfaceImportManager } from './InterfaceImportManager';
-import Logger from '../Logger';
+import Logger from '../application/Logger';
 
 export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;

@@ -8,7 +8,7 @@ import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../domain/GameService";
 import TimelineBuilder from "../domain/TimelineBuilder";
 import ComponentService from "../application/ComponentService";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/Emojis";
+import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 
 export default {
     config: {

@@ -1,52 +1,16 @@
-import path from "path";
-import fs from "fs";
-import { DiscordClient } from "../interfaces/application/DiscordClient";
-import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v10';
-import { Command, CommandOptionFollowUpType } from "../interfaces/application/Command";
-import discordService from "../services/discord/DiscordService";
-import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
-import { MultiLingualString } from "./i18n/MultiLingualString";
-import { LanguageCommandOptionTranslations } from "./i18n/i18n";
-import Logger from "./Logger";
-import { isSelectMenuEmpty } from "./SelectMenu";
-import ComponentService from "../services/application/ComponentService";
-import { ExceptionEnum } from "../interfaces/enums";
-import { ErrorHelper } from "./Error";
-
-const commands: Command[] = [];
-
-export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
-    const commandsPath = path.join(__dirname, '..', 'commands');
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
-    const loadedCommands: Command[] = [];
-
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath).default;
-        if (command && command.name && command.description && command.executeAsync) {
-            loadedCommands.push(command);
-            commands.push(command);
-            if (client) {
-                client.commands.set(command.name, command);
-            }
-            Logger.logInfo(`Command loaded: ${command.name}`);
-        } else {
-            Logger.logWarning(`Command in ${filePath} is not a valid Command object!`);
-        }
-    }
-
-    return loadedCommands;
-}
-
-export function getCommandConfig(commandName: string): Command | null {
-    commandName = commandName.toLowerCase();
-    const command = commands.find(c => c.name === commandName);
-    if (!command)
-        return null;
-    
-    return command;
-}
+import { Command, CommandOptionFollowUpType } from "../../interfaces/application/Command";
+import { InteractionEvent, SlashCommandInteractionEvent } from "../../interfaces/application/Event";
+import { getCommandName } from "../collectors/CommandCollector";
+import { MultiLingualString } from "../i18n/MultiLingualString";
+import { isSelectMenuEmpty } from "../helpers/SelectMenu";
+import ComponentService from "../../services/application/ComponentService";
+import Logger from "../application/Logger";
+import { ErrorHelper } from "../application/Error";
+import { loadCommands } from "../collectors/CommandCollector";
+import { ExceptionEnum } from "../../interfaces/enums";
+import DiscordService from "../../services/discord/DiscordService";
+import { REST } from "discord.js";
+import { Routes } from "discord.js";
 
 export async function handleCommand(command: Command, event: InteractionEvent): Promise<void> {
     await command.executeAsync(event);
@@ -107,10 +71,7 @@ export async function handleCommandOptions(event: SlashCommandInteractionEvent):
     }
 }
 
-export function getCommandName(key: LanguageCommandOptionTranslations<string | number>): string {
-    // Must be lowercase because Discord doesn't support uppercase options
-    return new MultiLingualString(key.action).getMessage().toLowerCase();
-}
+
 
 export async function deployCommands(): Promise<void> {
     const token = process.env.TOKEN;
@@ -119,13 +80,14 @@ export async function deployCommands(): Promise<void> {
     if (!token || !clientId) {
         Logger.logError('Missing environment variables: TOKEN and/or CLIENT_ID must be set in .env file!');
         process.exit(1);
+        //TODO: FIX THIS
     }
 
     const loadedCommands = await loadCommands();
     const commandsForRegistration: any[] = [];
 
     for (const command of loadedCommands) {
-        const slashCommandBuilder = discordService.mapCommandToSlashCommandBuilder(command as Command);
+        const slashCommandBuilder = DiscordService.mapCommandToSlashCommandBuilder(command as Command);
         commandsForRegistration.push(slashCommandBuilder.toJSON());
         Logger.logInfo(`Command added for registration: ${command.name}`);
     }

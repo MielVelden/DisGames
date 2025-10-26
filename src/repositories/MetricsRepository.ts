@@ -2,7 +2,7 @@ import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel } from "../interf
 import { Repository } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
-import { ErrorHelper } from "../utils/Error";
+import { ErrorHelper } from "../utils/application/Error";
 
 class MetricsRepository implements Repository<MetricsModel> {
     private baseRepository: BaseRepository<MetricsModel, MetricsSaveModel>;

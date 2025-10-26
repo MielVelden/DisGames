@@ -3,9 +3,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import TestConfig from './config/TestConfig';
-import TestMode from '../src/utils/TestMode';
+import TestMode from '../src/utils/application/TestMode';
 import DatabaseTestHelper from './helpers/DatabaseTestHelper';
-import Logger from '../src/utils/Logger';
+import Logger from '../src/utils/application/Logger';
 import { TestSuite, TestResult, TestRunResults, TestCase } from './interfaces/TestRunnerInterface';
 
 export class TestRunner {

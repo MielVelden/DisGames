@@ -24,9 +24,9 @@ import { createMultiLingualString, MultiLingualString } from '../../../utils/i18
 import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../application/ComponentService';
-import { DEFAULT_EMBED_COLOR } from '../../../utils/Colors';
+import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import * as fs from 'fs';
-import Logger from '../../../utils/Logger';
+import Logger from '../../../utils/application/Logger';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {

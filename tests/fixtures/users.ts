@@ -1,5 +1,5 @@
 import { UsersModel, UsersSaveModel } from '../../src/interfaces/database/TableInterfaces';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import { TableEnum, UserRoleEnum } from '../../src/interfaces/enums';
 import TestDatabase from '../config/TestDatabase';
 

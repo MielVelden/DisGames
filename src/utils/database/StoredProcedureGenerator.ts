@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { DatabaseConnection } from './DatabaseConnection';
 import { SchemaUtils } from './SchemaUtils';
-import Logger from '../Logger';
+import Logger from '../application/Logger';
 
 export class StoredProcedureGenerator {
   static async generateRoutineEnums(storedProcedureEnumFilePath: string, functionEnumFilePath: string): Promise<void> {

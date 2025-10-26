@@ -12,7 +12,7 @@ import { GameSettingsSchema, GameSettingsValues } from '../../src/interfaces/dom
 import { Games_Settings } from '../../src/interfaces/domain/GameSettings';
 import { LanguageEnum } from '../../src/interfaces/enums/database/LanguageEnum';
 import { BaseSelectMenu } from '../../src/interfaces/application/Message';
-import Logger from '../../src/utils/Logger';
+import Logger from '../../src/utils/application/Logger';
 import { MockEventWithCommand } from '../interfaces/MockEventInterface';
 import { TestChannel } from '../interfaces/ChannelTestInterface';
 import { TestMessage } from '../interfaces/MessageTestInterface';

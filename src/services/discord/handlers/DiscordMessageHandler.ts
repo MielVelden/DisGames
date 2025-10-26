@@ -19,9 +19,10 @@ import { EventService } from '../../application/EventService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
-import { createAcceptButton, createDenyButton } from '../../../utils/Button';
+import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
+import { createDenyButton } from '../../../builders/buttons/DenyButton';
 import { ExceptionEnum } from '../../../interfaces/enums';
-import { ErrorHelper } from '../../../utils/Error';
+import { ErrorHelper } from '../../../utils/application/Error';
 
 class DiscordMessageHandler {
     public async sendMessageAsync(user: DiscordUser, message: string): Promise<void> {

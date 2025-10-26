@@ -6,13 +6,17 @@ import { GameTypeEnum } from "../interfaces/enums";
 import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfaces/enums/commands/Games";
 import ComponentService from "../services/application/ComponentService";
 import GameService from "../services/domain/GameService";
-import { createDeleteButton, createMoveButton } from "../utils/Button";
-import { createActiveGameContainer, createGameHelpContainer, createGameSetupConfirmationContainer } from "../utils/Container";
+import { createDeleteButton } from "../builders/buttons/DeleteButton";
+import { createGameContainer } from "../builders/containers/GameContainer";
+import { createChannelSelectMenu } from "../builders/selectmenus/ChannelSelectMenu";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
-import { createChannelSelectMenu, createGamesSelectMenu } from "../utils/SelectMenu";
+import { createGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
 import { Games_Settings } from "../interfaces/domain/GameSettings";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
+import { createGameHelpContainer } from "../builders/containers/GameHelpContainer";
+import { createMoveButton } from "../builders/buttons/MoveButton";
+import { createGameSetupConfirmationContainer } from "../builders/containers/GameSetupConfirmationContainer";
 
 export class GamesCommand implements Command {
     name = CommandEnum.GAMES;
@@ -40,7 +44,7 @@ export class GamesCommand implements Command {
                         const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
                         const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
                         
-                        await event.addComponentsAsync(createActiveGameContainer(game, [
+                        await event.addComponentsAsync(createGameContainer(game, [
                             createMoveButton(event.user.userId, async (btnEvent) => {
                                 const channelSelectMenu = createChannelSelectMenu();
                                 const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);

@@ -6,7 +6,7 @@ import { GameDataModel, GamesModel, ServersModel } from "../../interfaces/databa
 import GameDataRepository from "../../repositories/GameDataRepository";
 import { GameConfig, IGameEvent } from "../../interfaces/domain/Game";
 import { GameAction } from "../../interfaces/domain/Game";
-import { ErrorHelper } from "../../utils/Error";
+import { ErrorHelper } from "../../utils/application/Error";
 
 export class GameEvent implements IGameEvent {
     public eventType: EventTypeEnum;

@@ -11,11 +11,11 @@ import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../..
 import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSetting";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
 import GameService from "../../domain/GameService";
-import { GameSettingsContainer } from "../../../utils/GameSettingsContainer";
+import { GameSettingsContainer } from "../../../builders/containers/GameSettingsContainer";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
-import { ErrorHelper } from "../../../utils/Error";
+import { ErrorHelper } from "../../../utils/application/Error";
 
 export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;

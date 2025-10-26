@@ -4,7 +4,7 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
-import { createProfileContainer } from "../utils/Container";
+import { createProfileContainer } from "../builders/containers/ProfileContainer";
 import UserService from "../services/domain/UserService";
 
 export class ProfileCommand implements Command {

@@ -2,9 +2,9 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { URL } from 'url';
-import Logger from '../../utils/Logger';
+import Logger from '../../utils/application/Logger';
 import { ExceptionEnum } from '../../interfaces/enums';
-import { ErrorHelper } from '../../utils/Error';
+import { ErrorHelper } from '../../utils/application/Error';
 
 dotenv.config();
 
