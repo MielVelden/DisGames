@@ -3,6 +3,7 @@ import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 
 const MAX_NUMBER = 100;
 
@@ -16,7 +17,7 @@ export default {
         isCalculated: true,
         expectedType: "number",
         firstAnswer: "1",
-        addCorrectReaction: true,
+        addCorrectReaction: false,
         options: {
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
             [GameOptionEnum.SAME_USER_DISABLED]: true,
@@ -29,24 +30,33 @@ export default {
             const answer = Number(event.getGameDataAnswer());
             const userAnswer = Number(event.userInput);
 
-            if(userAnswer === answer)
+            if(userAnswer === answer) {
+                event.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: DEFAULT_ACCEPT_EMOJI
+                });
                 return true;
-
+            }
+            
             // If the user answer is lower than the answer, add higher icon
-            if(userAnswer < answer)
+            if(userAnswer < answer) {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
                     component: "🔼"
                 });
-
+                return true;
+            }
             // If the user answer is higher than the answer, add lower icon
-            if(userAnswer > answer)
+            if(userAnswer > answer) {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
                     component: "🔽"
                 });
+                return true;
+            }
 
             return false;
         },

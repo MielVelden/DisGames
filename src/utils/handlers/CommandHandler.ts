@@ -12,11 +12,11 @@ import DiscordService from "../../services/discord/DiscordService";
 import { REST } from "discord.js";
 import { Routes } from "discord.js";
 
-export async function handleCommand(command: Command, event: InteractionEvent): Promise<void> {
+export async function handleCommandAsync(command: Command, event: InteractionEvent): Promise<void> {
     await command.executeAsync(event);
 }
 
-export async function handleCommandOptions(event: SlashCommandInteractionEvent): Promise<void> {
+export async function handleCommandOptionsAsync(event: SlashCommandInteractionEvent): Promise<void> {
     if (event.command.options) {
         for (const option of event.command.options) {
             if (option.choices && option.choices.length > 0) {

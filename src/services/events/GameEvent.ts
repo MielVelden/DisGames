@@ -111,10 +111,12 @@ export class GameEvent implements IGameEvent {
     }
 
     public getGameDataAnswer(): string {
+        console.log("getGameDataAnswer", this._gameData.Answer);
         return this._gameData.Answer;
     }
 
     public setGameDataAnswer(answer: string) {
+        console.log("setGameDataAnswer", answer);
         this._gameData.Answer = answer;
         this.requireUpdateModel = true;
     }

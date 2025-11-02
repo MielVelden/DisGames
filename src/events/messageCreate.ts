@@ -11,7 +11,7 @@ import { i18n } from '../utils/i18n/i18n';
 import { MultiLingualString } from '../utils/i18n/MultiLingualString';
 import ComponentService from '../services/application/ComponentService';
 import Logger from '../utils/application/Logger';
-import { handleCommand } from '../utils/handlers/CommandHandler';
+import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
 
@@ -44,7 +44,7 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
 
     try {
         if (event.command)
-            await handleCommand(event.command, event);
+            await handleCommandAsync(event.command, event);
         else
             await GameService.handleGameAsync(event);
     }

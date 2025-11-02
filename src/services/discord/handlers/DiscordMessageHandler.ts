@@ -14,14 +14,14 @@ import {
     Component
 } from '../../../interfaces/application/Message';
 import ComponentService from '../../application/ComponentService';
-import { createMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLingualString';
+import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { EventService } from '../../application/EventService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
 import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
 import { createDenyButton } from '../../../builders/buttons/DenyButton';
-import { ExceptionEnum } from '../../../interfaces/enums';
+import { EventTypeEnum, ExceptionEnum } from '../../../interfaces/enums';
 import { ErrorHelper } from '../../../utils/application/Error';
 
 class DiscordMessageHandler {
@@ -31,7 +31,13 @@ class DiscordMessageHandler {
 
     public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
-        if (!content) return;
+        if (!content)
+            return;
+
+        if (event.type === EventTypeEnum.MESSAGE_DELETE) {
+            await this.sendAsync(event, message);
+            return;
+        }
 
         await this.handleInteractionReplyAsync(event as MessageInteractionEvent, content);
     }
@@ -59,7 +65,7 @@ class DiscordMessageHandler {
 
     public async editAsync(event: InteractionEvent, message?: MultiLingualString | string): Promise<void> {
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
-        if (!content) 
+        if (!content)
             return;
 
         await this.handleInteractionEditAsync(event, content);
@@ -219,7 +225,7 @@ class DiscordMessageHandler {
                 await event.currentInteraction.reply(replyOptions);
             else if (event.currentInteraction instanceof DiscordMessage)
                 await event.currentInteraction.reply(replyOptions);
-            else 
+            else
                 ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         });
     }
@@ -243,7 +249,7 @@ class DiscordMessageHandler {
             const discordContainer = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(container);
 
             const replyOptions = DiscordComponentMapper.createReplyOptions(
-                [discordContainer, DiscordComponentMapper.createActionRowWithComponents([discordAcceptButton, discordDenyButton])], 
+                [discordContainer, DiscordComponentMapper.createActionRowWithComponents([discordAcceptButton, discordDenyButton])],
                 []
             );
 

@@ -1,10 +1,12 @@
-import { Interaction as DiscordInteraction } from "discord.js";
+import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction, Interaction as DiscordInteraction } from "discord.js";
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { SlashCommandInteractionEvent } from "../../../interfaces/application/Event";
 import { EventTypeEnum } from "../../../interfaces/enums";
 import { Command } from "../../../interfaces/application/Command";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
+import { handleCommandOptionsAsync } from "../../../utils/handlers/CommandHandler";
+import DiscordService from "../DiscordService";
 
 export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent implements SlashCommandInteractionEvent {
     public readonly command: Command;
@@ -26,13 +28,11 @@ export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent implements S
     public getOption(name: string): string | number | boolean | undefined;
     public getOption<T>(name: string): T | undefined;
     public getOption<T>(name: string): T | undefined {
-        const discordService = require("../DiscordService").default;
-        return discordService.getOption(this.currentInteraction, name);
+        return DiscordService.getOption(this.currentInteraction as DiscordChatInputCommandInteraction, name) as T | undefined;
     }
 
     public async handleCommandOptionsAsync(): Promise<void> {
-        const { handleCommandOptions } = require("../../../utils/Commands");
-        await handleCommandOptions(this);
+        await handleCommandOptionsAsync(this);
     }
 
     public getFollowUpOption(key: string): string | number | boolean | undefined {

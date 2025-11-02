@@ -283,6 +283,9 @@ class GameService {
             }
         }
 
+        if(gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE) 
+            return;
+        
         // Loop through all actions and handle them
         await this.handleGameActionsAsync(gameEvent, event);
 
@@ -344,16 +347,12 @@ class GameService {
                             priority: GameActionPriorityEnum.HIGH,
                             component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.userInput as string))
                         });
+
                         await this.handleGameActionsAsync(gameEvent, event);
-                        await event.sendAsync();
                         ErrorHelper.throw(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                     }
                     break;
                 case GameOptionEnum.SAME_USER_DISABLED:
-                    // Skip this option in debug mode
-                    if (DEBUG_MODE && !TestMode.isEnabled())
-                        break;
-
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId) {
                         gameEvent.deleteMessage();
                         ErrorHelper.throw(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);

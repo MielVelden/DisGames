@@ -1,11 +1,7 @@
 import axios from 'axios';
 import { DEBUG_DISCORD_WEBHOOK_URL, DISCORD_WEBHOOK_URL } from '../../config';
 import { EmbedConfig } from '../../interfaces/application/DiscordEmbed';
-
-export enum WebhookType {
-    INFO = 'INFO',
-    DEBUG = 'DEBUG',
-}
+import { WebhookType } from '../../interfaces/application';
 
 class Webhook {
     public static async sendDiscordEmbed(embed: EmbedConfig, webhookType: WebhookType = WebhookType.INFO): Promise<void> {

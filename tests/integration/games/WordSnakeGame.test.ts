@@ -64,8 +64,8 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                         .addConfirmation({ value: true, userId: userAlice.UserId! }) // Confirm game start
                         .addInput({ value: 'cats', userId: userAlice.UserId! }) // First correct answer
                         .addWrongInput({ value: 'wrong', userId: userBob.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // First wrong answer
-                        .addWrongInput({ value: 'also_wrong', userId: userBob.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // Second wrong answer
-                        .addWrongInput({ value: 'also_superwrong', userId: userAlice.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Double wrong answer
+                        .addInput({ value: 'stone', userId: userBob.UserId! }) // First correct answer
+                        .addWrongInput({ value: 'eating', userId: userBob.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Double answer
 
                     const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
                     const helper = new GameFlowTestHelper();
@@ -76,8 +76,8 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                     // Assert
                     AssertionHelpers.assertGameFlowSuccess(result, 'Game flow should handle wrong answers');
                     AssertionHelpers.assertNotNull(result.game, 'Game should exist');
-                    AssertionHelpers.assertTrue(result.game?.Answer === 's', 'Game should end with the correct answer');
-                    AssertionHelpers.assertReactionCount(result.trackedReactions, DEFAULT_ACCEPT_EMOJI, 1);
+                    AssertionHelpers.assertTrue(result.game?.Answer === 'e', 'Game should end with the correct answer');
+                    AssertionHelpers.assertReactionCount(result.trackedReactions, DEFAULT_ACCEPT_EMOJI, 2);
                 }
             }
         ]

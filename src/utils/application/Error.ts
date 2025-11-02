@@ -32,6 +32,7 @@ export class ComponentError extends Error {
     public shouldAnnounceError(): boolean {
         switch(this.errorKey) {
             case ExceptionEnum.RECORD_NOT_FOUND:
+            case ExceptionEnum.MESSAGE_CHANGE_DISABLED:
                 return false;
             default:
                 return true;
@@ -56,7 +57,6 @@ export class ErrorHelper {
         throw new ComponentError({ message, parameters });
     }
 }
-
 
 export function assertNever(x: never, origin: { [key: string]: string | number }): never {
     const originName = origin.constructor?.name ?? String(origin);

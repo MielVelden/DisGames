@@ -3,7 +3,7 @@ import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { MessageInteractionEvent } from "../interfaces/application/Event";
 import Logger from "../utils/application/Logger";
-import { WebhookType } from "../utils/application/Webhook";
+import { WebhookType } from "../interfaces/application";
 import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
 import { Command } from "../interfaces/application/Command";

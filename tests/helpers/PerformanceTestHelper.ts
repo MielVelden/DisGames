@@ -9,11 +9,12 @@ import { createTestGameAsync } from '../fixtures/games';
 import Logger, { loggerColors, loggerEmojis, LogLevel } from '../../src/utils/application/Logger';
 import GameService from '../../src/services/domain/GameService';
 import { EventService } from '../../src/services/application/EventService';
-import { handleCommand } from '../../src/utils/handlers/CommandHandler';
+import { handleCommandAsync } from '../../src/utils/handlers/CommandHandler';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import { DifficultyEnum } from '../../src/interfaces/enums/games/DifficultyEnum';
-import Webhook, { WebhookType } from '../../src/utils/application/Webhook';
+import Webhook from '../../src/utils/application/Webhook';
+import { WebhookType } from '../../src/interfaces/application';
 
 export class PerformanceTestHelper {
     private memorySnapshots: number[] = [];
@@ -335,9 +336,8 @@ export class PerformanceTestHelper {
         try {
             if (event.type === EventTypeEnum.SLASH_COMMAND) {
                 const command = (event as any).command;
-                if (command) {
-                    await handleCommand(command, event);
-                }
+                if (command)
+                    await handleCommandAsync(command, event);
             } else if (event.type === EventTypeEnum.MESSAGE) {
                 await GameService.handleGameAsync(event as any);
             } else if (event.type === EventTypeEnum.BUTTON) {

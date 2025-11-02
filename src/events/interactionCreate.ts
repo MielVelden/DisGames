@@ -5,7 +5,7 @@ import {
 import DiscordService from '../services/discord/DiscordService';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
 import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
-import { handleCommand } from '../utils/handlers/CommandHandler';
+import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import { EventService } from '../services/application/EventService';
 import ComponentService from '../services/application/ComponentService';
 import { ComponentError } from '../utils/application/Error';
@@ -31,13 +31,13 @@ export default {
                 messageId: event.messageId,
                 channelId: event.channelId,
                 guildId: event.guildId,
-                commandName: event.command.name
+                commandName: event?.command?.name
             }
         });
         
         try {
             if (event.type === EventTypeEnum.SLASH_COMMAND)
-                await handleCommand(event.command, event);
+                await handleCommandAsync(event.command, event);
             else
                 await EventService.handleEventAsync(event);
         }
