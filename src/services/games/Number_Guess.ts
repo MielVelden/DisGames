@@ -36,7 +36,7 @@ export default {
                     priority: GameActionPriorityEnum.HIGH,
                     component: DEFAULT_ACCEPT_EMOJI
                 });
-                return true;
+                return true; // TODO CHECK IF THIS IS CORRECT
             }
             
             // If the user answer is lower than the answer, add higher icon

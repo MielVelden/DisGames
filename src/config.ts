@@ -5,6 +5,7 @@ import { Duration, DurationEnum } from './interfaces/application/Duration';
 export const TOKEN = process.env.TOKEN;
 export const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 export const DEBUG_DISCORD_WEBHOOK_URL = process.env.DEBUG_DISCORD_WEBHOOK_URL;
+export const OWNER_ID = process.env.OWNER_ID;
 
 export const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
 export const REPOSITORY_CACHE_TTL: Duration = calculateDuration(5, DurationEnum.MINUTE);

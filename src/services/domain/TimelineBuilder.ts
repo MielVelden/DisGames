@@ -8,6 +8,8 @@ import ServerRepository from "../../repositories/ServerRepository";
 import GameRepository from "../../repositories/GameRepository";
 import Logger from "../../utils/application/Logger";
 import { ErrorHelper } from "../../utils/application/Error";
+import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyEnum";
+import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
 
 interface TimelineContext {
    event: InteractionEvent;
@@ -191,7 +193,9 @@ class TimelineBuilder {
         try {
             await Promise.all(entries.map(async entry => {
                 const timeline = await TimelineRepository.saveAsync(entry);
-                Logger.logTimeline(timeline);
+
+                if (getEnumProperty(MetadataKeyEnum.ShouldAnnounce, timeline.TimelineType))
+                    Logger.logTimeline(timeline);
             }));
         } catch (error) {
             ErrorHelper.wrap(error, ExceptionEnum.SAVE_FAILED);

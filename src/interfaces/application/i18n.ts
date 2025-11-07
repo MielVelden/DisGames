@@ -123,6 +123,9 @@ export interface I18nTranslations {
             labels: {
                 title: LanguageTranslations;
             }
+        },
+        impersonate: {
+            description: LanguageTranslations;
         }
     }
     exceptions: LanguageEnumTranslations<ExceptionEnum>;

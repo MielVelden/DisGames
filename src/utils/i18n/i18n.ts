@@ -504,6 +504,12 @@ export const i18n: I18nTranslations = {
                 },
             }
         },
+        impersonate: {
+            description: {
+                [LanguageEnum.EN]: "Impersonate another user",
+                [LanguageEnum.NL]: "Impersonate een andere gebruiker",
+            },
+        },
     },
     exceptions: {
         [ExceptionEnum.GAME_ALREADY_EXISTS]: {

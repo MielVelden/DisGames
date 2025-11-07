@@ -19,11 +19,11 @@ export default {
     name: Events.MessageCreate,
 
     async execute(message: Message, client: Client): Promise<void> {
-        await handleMessageCreateAsync(message, EventTypeEnum.MESSAGE);
+        await handleDiscordMessageAsync(message, EventTypeEnum.MESSAGE);
     },
 };
 
-export async function handleMessageCreateAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
+export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
     if (message.author.bot)
         return;
 
@@ -43,13 +43,13 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
     });
 
     try {
-        if (event.command)
+        if (event.command && event.command.canExecute?.(event))
             await handleCommandAsync(event.command, event);
         else
             await GameService.handleGameAsync(event);
     }
     catch (error) {
-        if (error instanceof ComponentError) {          
+        if (error instanceof ComponentError) {
             if (error.hasComponents()) {
                 const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
                 event.clearComponentsAsync();
@@ -57,15 +57,14 @@ export async function handleMessageCreateAsync(message: Message, eventType: Even
                 for (const component of error.components!) {
                     await event.addComponentAsync(component);
                 }
-            } else if(error.shouldAnnounceError()) {
+            } else if (error.shouldAnnounceError()) {
                 const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
                 await event.addComponentAsync(ComponentService.createContent(errorMessage));
             }
-            
+
             await event.replyAsync();
         }
-        
+
         Logger.logError(`Error handling message`, error as Error);
     }
 }
-

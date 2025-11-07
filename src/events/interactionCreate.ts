@@ -36,7 +36,7 @@ export default {
         });
         
         try {
-            if (event.type === EventTypeEnum.SLASH_COMMAND)
+            if (event.type === EventTypeEnum.SLASH_COMMAND && event.command.canExecute?.(event))
                 await handleCommandAsync(event.command, event);
             else
                 await EventService.handleEventAsync(event);

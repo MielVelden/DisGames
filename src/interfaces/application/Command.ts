@@ -15,7 +15,8 @@ export interface Command {
     permissions?: Permission[];
     options?: CommandOptionConfig<string | number>[];
 
-    executeAsync(interactionEvent: InteractionEvent): Promise<void>;
+    canExecute?: (event: InteractionEvent) => boolean;
+    executeAsync(event: InteractionEvent): Promise<void>;
 }
 
 // #region Command Option

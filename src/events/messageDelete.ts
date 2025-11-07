@@ -4,7 +4,7 @@ import {
     Message,
 } from 'discord.js';
 import { EventTypeEnum } from '../interfaces/enums';
-import { handleMessageCreateAsync } from './messageCreate';
+import { handleDiscordMessageAsync } from './messageCreate';
 import { EventService } from '../services/application/EventService';
 import Logger from '../utils/application/Logger';
 
@@ -20,6 +20,6 @@ export default {
         }
 
         Logger.logDebug(`Message deleted: ${message.content}`);
-        await handleMessageCreateAsync(message, EventTypeEnum.MESSAGE_DELETE);
+        await handleDiscordMessageAsync(message, EventTypeEnum.MESSAGE_DELETE);
     },
 };

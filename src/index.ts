@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { GatewayIntentBits } from 'discord.js';
 import { TOKEN } from './config';
 import { DiscordClient } from './interfaces/application/DiscordClient';

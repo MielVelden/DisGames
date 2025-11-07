@@ -2,10 +2,11 @@ import * as schedule from 'node-schedule';
 import { JobModule } from '../../interfaces/application/Job';
 import JobService from './JobService';
 import Logger from '../../utils/application/Logger';
-import Webhook, { WebhookType } from '../../utils/application/Webhook';
+import Webhook from '../../utils/application/Webhook';
 import { ExceptionEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
 import { createJobReportEmbed } from '../../builders/embeds/JobEmbed';
+import { WebhookType } from '../../interfaces/application';
 
 export class JobScheduler {
     private static instance: JobScheduler;
@@ -26,9 +27,8 @@ export class JobScheduler {
         const jobModules = JobService.getJobModules();
 
         for (const jobModule of jobModules) {
-            if (jobModule.isEnabled) {
+            if (jobModule.isEnabled)
                 this.scheduleJob(jobModule);
-            }
         }
     }
 
