@@ -1,5 +1,5 @@
-import { Permission } from "../application/Permission";
-import { UserRoleEnum } from "../enums/domain/UserRoleEnum";
+import { Permission } from "../enums/application/Permission";
+import { UserRoleEnum } from "../enums/application/UserRoleEnum";
 
 export interface User {
     id: number | undefined;

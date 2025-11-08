@@ -1,5 +1,5 @@
 import { DebugModel } from "../../interfaces/database/TableInterfaces";
-import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
+import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import DebugRepository from "../../repositories/DebugRepository";
 import { ErrorHelper } from "../../utils/application/Error";
 import Logger from "../../utils/application/Logger";

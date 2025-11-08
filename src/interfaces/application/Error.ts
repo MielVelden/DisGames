@@ -1,4 +1,4 @@
-import { ExceptionEnum } from "../enums/domain/ExpectionEnum";
+import { ExceptionEnum } from "../enums/application/ExpectionEnum";
 import { Component } from "./Message";
 
 export interface ComponentErrorOptions {

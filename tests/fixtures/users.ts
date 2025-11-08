@@ -58,6 +58,10 @@ export async function createTestUserAsync(overrides: Partial<UsersSaveModel> = {
     return user;
 }
 
+export async function createTestUserByNameAsync(username: "Alice" | "Bob"): Promise<UsersSaveModel> {
+    return createTestUserAsync({ Username: username });
+}
+
 export const TEST_USER_IDS = {
     PLAYER1: '123456789',
     PLAYER2: '987654321',

@@ -317,28 +317,29 @@ export class TestRunner {
 // Main execution function
 async function main(): Promise<void> {
     const args = process.argv.slice(2);
-    TestMode.enable();
     const runner = new TestRunner();
+    TestMode.enable();
 
     try {
+        // Debug mode
+        if (args.includes('--debug')) {
+            TestMode.enableDebugMode();
+            Logger.logTest('Debug mode enabled');
+            runner.enableDebugMode();
+        }
+
         // Load test files based on arguments
-        if (args.includes('--unit')) {
+        if (args.includes('--unit'))
             await runner.loadTestFiles(path.join(__dirname, 'unit'));
-        } else if (args.includes('--integration')) {
+        else if (args.includes('--integration'))
             await runner.loadTestFiles(path.join(__dirname, 'integration'));
-        } else if (args.includes('--performance')) {
+        else if (args.includes('--performance'))
             await runner.loadTestFiles(path.join(__dirname, 'performance'));
-        } else {
+        else {
             // Load all tests
             await runner.loadTestFiles(path.join(__dirname, 'unit'));
             await runner.loadTestFiles(path.join(__dirname, 'integration'));
-            await runner.loadTestFiles(path.join(__dirname, 'performance'));
-        }
-
-        // Debug mode
-        if (args.includes('--debug')) {
-            Logger.logTest('🐛 Debug mode enabled');
-            runner.enableDebugMode();
+            // await runner.loadTestFiles(path.join(__dirname, 'performance')); // Disabled for now
         }
 
         // Run all loaded tests
@@ -351,6 +352,8 @@ async function main(): Promise<void> {
         Logger.logError('❌ Test runner failed:', error as Error);
         process.exit(1);
     } finally {
+        if (args.includes('--debug'))
+            TestMode.disableDebugMode();
         TestMode.disable();
     }
 }

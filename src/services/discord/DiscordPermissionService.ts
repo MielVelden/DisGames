@@ -1,7 +1,7 @@
 import {
     GuildMember as DiscordGuildMember
 } from 'discord.js';
-import { Permission } from '../../interfaces/application/Permission';
+import { Permission } from '../../interfaces/enums/application/Permission';
 import DiscordEnumMapper from './mappers/DiscordEnumMapper';
 
 class DiscordPermissionService {

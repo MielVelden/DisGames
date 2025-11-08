@@ -34,7 +34,7 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                         .addCorrectInput({ value: 'star', userId: userAlice.UserId! }) // Second answer
                         .addCorrectInput({ value: 'listen', userId: userAlice.UserId! }); // Final answer
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act
@@ -61,7 +61,7 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                         .addInput({ value: 'also_wrong', userId: userAlice.UserId! }) // Wrong answer
                         .addInput({ value: 'also_superwrong', userId: userAlice.UserId! }); // Second wrong answer
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.ANAGRAM, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act

@@ -9,6 +9,7 @@ import { createGameEventEmbed, createGameErrorEmbed } from '../../builders/embed
 import { createDebugEmbed, createDebugCommandEmbed } from '../../builders/embeds/DebugEmbed';
 import { createTimelineEmbed } from '../../builders/embeds/TimelineEmbed';
 import { createBasicEmbed } from '../../builders/embeds/BasicEmbed';
+import TestMode from './TestMode';
 
 export enum LogLevel {
     INFO = 'INFO',
@@ -61,13 +62,13 @@ class Logger {
     }
 
     public async logDebug(message: string, options?: LoggerOptions): Promise<void> {
-        if (DEBUG_MODE)
+        if (TestMode.isDebugModeEnabled() || (!TestMode.isEnabled() && DEBUG_MODE))
             await this.log(LogLevel.DEBUG, message, undefined, options);
     }
 
     public async logTest(message: string): Promise<void> {
         // Only log when in debug mode
-        if (DEBUG_MODE)
+        if (TestMode.isDebugModeEnabled())
             await this.log(LogLevel.TEST, message);
     }
 
@@ -75,18 +76,16 @@ class Logger {
         const embed = createEventEmbed(event, message);
         await Webhook.sendDiscordEmbed(embed);
 
-        if (options?.sendToConsole !== false) {
+        if (options?.sendToConsole !== false)
             console.log(`[${LogLevel.EVENT}] ${message} - User: ${event.user.displayName}, Guild: ${event.guildId}`);
-        }
     }
 
     public async logGameEvent(gameEvent: GameEvent, message: string, options?: LoggerOptions): Promise<void> {
         const embed = createGameEventEmbed(gameEvent, message);
         await Webhook.sendDiscordEmbed(embed);
 
-        if (options?.sendToConsole !== false) {
+        if (options?.sendToConsole !== false)
             console.log(`[${LogLevel.GAME}] ${message} - Game: ${gameEvent.gameConfig.name.getMessage()}, User: ${gameEvent.user.displayName}`);
-        }
     }
 
     public async logGameError(gameEvent: GameEvent, error: Error, options?: LoggerOptions): Promise<void> {

@@ -7,7 +7,7 @@ import { WebhookType } from "../interfaces/application";
 import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
 import { Command } from "../interfaces/application/Command";
-import { Permission } from "../interfaces/application/Permission";
+import { Permission } from "../interfaces/enums/application/Permission";
 
 export class DebugCommand implements Command {
     name = CommandEnum.DEBUG;
@@ -18,12 +18,12 @@ export class DebugCommand implements Command {
     options = [];
 
     async executeAsync(event: MessageInteractionEvent): Promise<void> {
-        const command = event.content.split(' ')[1];
-        if (!command)
+        const uniqueCode = event.content.split(' ')[1];
+        if (!uniqueCode)
             return;
         
         // Handle debug record command
-        const debugRecord = await DebugService.getDebugByUniqueCodeAsync(command, true);
+        const debugRecord = await DebugService.getDebugByUniqueCodeAsync(uniqueCode, true);
 
         // Collect data from the server
         debugRecord.ServerId = event.server.Id;

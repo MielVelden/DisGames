@@ -19,6 +19,7 @@ interface QueryCacheEntry<T> {
 export class CacheManager<Model extends BaseEntity> {
   private cache: Map<number, CacheEntry<Model>> = new Map();
   private queryCache: Map<string, QueryCacheEntry<Model>> = new Map();
+  private inFlightQueries: Map<string, Promise<Model[]>> = new Map();
   private tableName: string;
 
   constructor(tableName: string) {
@@ -67,6 +68,7 @@ export class CacheManager<Model extends BaseEntity> {
       return null;
     }
     
+    Logger.logDebug(`Cache HIT [${this.tableName}] - Returning cached query result`);
     return entry.data;
   }
 
@@ -89,11 +91,25 @@ export class CacheManager<Model extends BaseEntity> {
 
   public invalidateAllQueryCache(): void {
     this.queryCache.clear();
+    this.inFlightQueries.clear();
   }
 
   public clearAllCache(): void {
     this.cache.clear();
     this.queryCache.clear();
+    this.inFlightQueries.clear();
+  }
+
+  public getInFlightQuery(queryHash: string): Promise<Model[]> | null {
+    return this.inFlightQueries.get(queryHash) || null;
+  }
+
+  public setInFlightQuery(queryHash: string, promise: Promise<Model[]>): void {
+    this.inFlightQueries.set(queryHash, promise);
+  }
+
+  public removeInFlightQuery(queryHash: string): void {
+    this.inFlightQueries.delete(queryHash);
   }
 
   public getCacheStats(): { idCacheSize: number; queryCacheSize: number } {

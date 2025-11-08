@@ -35,7 +35,7 @@ export default function registerConnectionsGameTests(runner: TestRunner): void {
                         .addInput({ value: 'red blue green yellow', userId: userBob.UserId! }) // Second category: Colors
                         .addInput({ value: 'apple,banana,orange,grape', userId: userAlice.UserId! }); // Third category: Fruits (4th auto-solved)
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.CONNECTIONS, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.CONNECTIONS, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act
@@ -68,7 +68,7 @@ export default function registerConnectionsGameTests(runner: TestRunner): void {
                         .addInput({ value: 'red blue green yellow', userId: userAlice.UserId! }) // Second correct answer: Colors
                         .addInput({ value: 'apple,banana,orange,grape', userId: userBob.UserId! }); // Third correct answer: Fruits
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.CONNECTIONS, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.CONNECTIONS, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act
@@ -98,7 +98,7 @@ export default function registerConnectionsGameTests(runner: TestRunner): void {
                         .addInput({ value: 'red blue green yellow', userId: userAlice.UserId! }) // Correct answer: Colors
                         .addInput({ value: 'apple,banana,orange,grape', userId: userAlice.UserId! }); // Correct answer: Fruits
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.CONNECTIONS, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.CONNECTIONS, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act

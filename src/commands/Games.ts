@@ -1,7 +1,7 @@
 import { Command, CommandOptionFollowUpType, CommandOptionType } from "../interfaces/application/Command";
 import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { SelectMenu } from "../interfaces/application/Message";
-import { Permission } from "../interfaces/application/Permission";
+import { Permission } from "../interfaces/enums/application/Permission";
 import { GameTypeEnum } from "../interfaces/enums";
 import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfaces/enums/commands/Games";
 import ComponentService from "../services/application/ComponentService";

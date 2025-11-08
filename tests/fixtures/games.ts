@@ -116,7 +116,11 @@ export const GAME_TEST_SETTINGS: Partial<Record<GameTypeEnum, any>> = {
     }
 };
 
-export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimulator: TestInputSimulator): Promise<GameFlowTestConfig> {
+export async function createGameFlowTestConfig(
+    gameType: GameTypeEnum, 
+    inputSimulator: TestInputSimulator,
+    userId?: string
+): Promise<GameFlowTestConfig> {
     const settings = GAME_TEST_SETTINGS[gameType] || {};
     
     const testServer = await createTestServerAsync();
@@ -126,7 +130,7 @@ export async function createGameFlowTestConfig(gameType: GameTypeEnum, inputSimu
         gameType: gameType,
         channelId: testChannelId,
         serverId: testServer.ServerId || TEST_SERVER_IDS.MAIN_SERVER,
-        userId: TEST_USER_IDS.PLAYER1,
+        userId: userId || TEST_USER_IDS.PLAYER1,
         settings: settings,
         inputSimulator: inputSimulator
     };

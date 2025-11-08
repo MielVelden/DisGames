@@ -3,7 +3,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../enums/commands/CommandEnum";
 import { InteractionEvent, SlashCommandInteractionEvent } from "./Event";
 import { SelectMenu } from "./Message";
-import { Permission } from "./Permission";
+import { Permission } from "../enums/application/Permission";
 
 export interface Command {
     name: CommandEnum;

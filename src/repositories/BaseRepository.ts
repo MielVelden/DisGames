@@ -5,6 +5,7 @@ import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 import { isValidEnumValue } from "../utils/helpers/Enum";
 import { ErrorHelper } from "../utils/application/Error";
+import Logger from "../utils/application/Logger";
 
 interface BaseEntity {
   Id?: number;
@@ -138,36 +139,63 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
         this.hasLimit1 = false;
         return cachedResult;
       }
+
+      // Check if query is already in-flight
+      const inFlightQuery = this.cacheManager.getInFlightQuery(queryHash);
+      if (inFlightQuery) {
+        // Reset query state and wait for in-flight query
+        this.params = [];
+        this.hasLimit1 = false;
+        return await inFlightQuery;
+      }
+
+      // Create and register in-flight promise
+      const queryPromise = this.executeQueryAndCache(queryHash);
+      this.cacheManager.setInFlightQuery(queryHash, queryPromise);
+      
+      // Reset query state
+      this.params = [];
+      this.hasLimit1 = false;
+      
+      return await queryPromise;
     }
 
+    // Non-cached query path
     const results = await runQueryAsync(this.query, this.params);
-
-    // Store original state for caching
-    const wasLimit1 = this.hasLimit1;
-    const queryHash = wasLimit1 ? this.cacheManager.generateQueryHash(this.query, this.params) : '';
-
-    // Reset query state
     this.params = [];
     this.hasLimit1 = false;
 
     if (!results)
       return [];
 
-    // Deserialize MultiLingualString and JSON fields
-    const deserializedResults = DatabaseHelper.processResultsFromDatabase(results);
+    return DatabaseHelper.processResultsFromDatabase(results) as Model[];
+  }
 
-    // Cache LIMIT 1 query results
-    if (wasLimit1 && deserializedResults.length > 0) {
+  private async executeQueryAndCache(queryHash: string): Promise<Model[]> {
+    try {
+      const results = await runQueryAsync(this.query, this.params);
+
+      if (!results || results.length === 0) {
+        return [];
+      }
+
+      // Deserialize MultiLingualString and JSON fields
+      const deserializedResults = DatabaseHelper.processResultsFromDatabase(results) as Model[];
+
+      // Cache the results
       this.cacheManager.setQueryCacheEntry(queryHash, deserializedResults);
 
       // Also cache by ID if the result has an ID
-      const firstResult = deserializedResults[0] as Model;
+      const firstResult = deserializedResults[0];
       if (firstResult.Id) {
         this.cacheManager.setCacheEntry(firstResult.Id, firstResult);
       }
-    }
 
-    return deserializedResults as Model[];
+      return deserializedResults;
+    } finally {
+      // Always remove from in-flight map when done
+      this.cacheManager.removeInFlightQuery(queryHash);
+    }
   }
 
   public async CallStoredProcedure(procedure: StoredProcedureEnum, params: any[] = []): Promise<Model[]> {

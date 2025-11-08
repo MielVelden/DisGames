@@ -23,7 +23,7 @@ import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import ComponentService from "../application/ComponentService";
 import { createCancelButton } from "../../builders/buttons/CancelButton";
 import { createMoveButton } from "../../builders/buttons/MoveButton";
-import { ExceptionEnum } from "../../interfaces/enums/domain/ExpectionEnum";
+import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import MediaService from "../application/MediaService";
@@ -276,7 +276,6 @@ class GameService {
             const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
             if (gameModule && gameModule.functions && gameModule.functions.onIncorrectAnswerAsync) {
                 await gameModule.functions.onIncorrectAnswerAsync(gameEvent);
-                await this.handleValidAnswerAsync(gameEvent);
             } else {
                 // Delete the message
                 await event.deleteAsync();

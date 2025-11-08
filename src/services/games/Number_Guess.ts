@@ -4,6 +4,7 @@ import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
+import ComponentService from "../application/ComponentService";
 
 const MAX_NUMBER = 100;
 
@@ -30,30 +31,11 @@ export default {
             const answer = Number(event.getGameDataAnswer());
             const userAnswer = Number(event.userInput);
 
-            if(userAnswer === answer) {
+            if (userAnswer === answer) {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
                     component: DEFAULT_ACCEPT_EMOJI
-                });
-                return true; // TODO CHECK IF THIS IS CORRECT
-            }
-            
-            // If the user answer is lower than the answer, add higher icon
-            if(userAnswer < answer) {
-                event.addAction({
-                    enum: GameActionEnum.REACTION,
-                    priority: GameActionPriorityEnum.HIGH,
-                    component: "🔼"
-                });
-                return true;
-            }
-            // If the user answer is higher than the answer, add lower icon
-            if(userAnswer > answer) {
-                event.addAction({
-                    enum: GameActionEnum.REACTION,
-                    priority: GameActionPriorityEnum.HIGH,
-                    component: "🔽"
                 });
                 return true;
             }
@@ -61,8 +43,41 @@ export default {
             return false;
         },
 
+        async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
+            const answer = Number(event.getGameDataAnswer());
+            const userAnswer = Number(event.userInput);
+
+            // If the user answer is lower than the answer, add higher icon
+            if (userAnswer < answer) {
+                event.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: "🔼"
+                });
+            }
+
+            // If the user answer is higher than the answer, add lower icon
+            if (userAnswer > answer) {
+                event.addAction({
+                    enum: GameActionEnum.REACTION,
+                    priority: GameActionPriorityEnum.HIGH,
+                    component: "🔽"
+                });
+            }
+        },
+
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
-            event.setGameDataAnswer((Math.floor(Math.random() * MAX_NUMBER) + 1).toString());
+            const newAnswer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
+            event.setGameDataAnswer(newAnswer);
+
+            // Add the new answer to the event
+            event.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.HIGH,
+                component: ComponentService.createContainer({
+                    description: i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].nextAnswer!(MAX_NUMBER.toString())
+                })
+            });
         }
     }
 } as GameModule;

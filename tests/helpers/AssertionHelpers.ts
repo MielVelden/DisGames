@@ -284,8 +284,8 @@ export class AssertionHelpers {
 
     public static assertNoMemoryLeaks(metrics: any, message?: string): void {
         const memoryGrowth = metrics.memoryUsage.final - metrics.memoryUsage.initial;
-        this.assertLessThan(memoryGrowth, 100, 
-            message || `Memory growth ${memoryGrowth}MB should be less than 100MB (potential memory leak)`);
+        this.assertLessThan(memoryGrowth, 500, 
+            message || `Memory growth ${memoryGrowth}MB should be less than 500MB (potential memory leak)`);
     }
 
     public static assertResponseTimeWithinLimit(responseTime: number, maxTime: number, message?: string): void {

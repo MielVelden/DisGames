@@ -90,7 +90,7 @@ export class GameFlowTestHelper {
                     break;
 
                 var answer = input?.value as string;
-                const userId = input?.userId;
+                const userId = input?.userId || config.userId;
 
                 if (input.type === TestInputSimulatorType.CORRECT_INPUT) {
                     var correctInput = await GameRepository.getByIDAsync(startResult.game.Id);

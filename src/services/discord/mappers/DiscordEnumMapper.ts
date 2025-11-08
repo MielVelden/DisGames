@@ -3,7 +3,7 @@ import {
     PermissionResolvable, PermissionsBitField,
     ButtonStyle as DiscordButtonStyle} from 'discord.js';
 import { EventTypeEnum } from '../../../interfaces/enums';
-import { Permission } from '../../../interfaces/application/Permission';
+import { Permission } from '../../../interfaces/enums/application/Permission';
 import { ButtonStyle, Component, ComponentType } from '../../../interfaces/application/Message';
 
 class DiscordEnumMapper {

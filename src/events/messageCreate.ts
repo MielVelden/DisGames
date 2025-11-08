@@ -43,7 +43,7 @@ export async function handleDiscordMessageAsync(message: Message, eventType: Eve
     });
 
     try {
-        if (event.command && event.command.canExecute?.(event))
+        if (event.command && (event.command.canExecute?.(event) ?? true))
             await handleCommandAsync(event.command, event);
         else
             await GameService.handleGameAsync(event);

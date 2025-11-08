@@ -2,7 +2,7 @@ import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnu
 import { GameFlowTestHelper } from '../../helpers/GameFlowTestHelper';
 import { TestInputSimulator } from '../../builders/TestInputSimulator';
 import { createGameFlowTestConfig } from '../../fixtures/games';
-import { createTestUserAsync } from '../../fixtures/users';
+import { createTestUserAsync, createTestUserByNameAsync } from '../../fixtures/users';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
 import { DEFAULT_ACCEPT_EMOJI } from '../../../src/utils/constants/Emojis';
 import TestRunner from '../../TestRunner';
@@ -27,8 +27,8 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                 name: 'should complete full word snake game flow successfully',
                 testFunction: async () => {
                     // Arrange
-                    const userAlice = await createTestUserAsync();
-                    const userBob = await createTestUserAsync();
+                    const userAlice = await createTestUserByNameAsync('Alice');
+                    const userBob = await createTestUserByNameAsync('Bob');
 
                     const inputSimulator = TestInputSimulator.create()
                         .setGameFirstAnswer('c')
@@ -37,7 +37,7 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                         .addInput({ value: 'stone', userId: userBob.UserId! }) // Second answer
                         .addInput({ value: 'eating', userId: userAlice.UserId! }); // Final answer
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act
@@ -56,18 +56,18 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                 name: 'should handle incorrect word snake answers',
                 testFunction: async () => {
                     // Arrange
-                    const userAlice = await createTestUserAsync();
-                    const userBob = await createTestUserAsync();
+                    const userAlice = await createTestUserByNameAsync('Alice');
+                    const userBob = await createTestUserByNameAsync('Bob');
 
                     const inputSimulator = TestInputSimulator.create()
                         .setGameFirstAnswer('c')
                         .addConfirmation({ value: true, userId: userAlice.UserId! }) // Confirm game start
-                        .addInput({ value: 'cats', userId: userAlice.UserId! }) // First correct answer
-                        .addWrongInput({ value: 'wrong', userId: userBob.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER }) // First wrong answer
-                        .addInput({ value: 'stone', userId: userBob.UserId! }) // First correct answer
-                        .addWrongInput({ value: 'eating', userId: userBob.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Double answer
+                        .addInput({ value: 'cats', userId: userAlice.UserId! }) // Alice: First correct answer
+                        .addWrongInput({ value: 'wrong', userId: userBob.UserId!, expectedException: ExceptionEnum.WRONG_ANSWER}) // Bob: First wrong answer
+                        .addInput({ value: 'stone', userId: userAlice.UserId! }) // Alice: Second correct answer  
+                        .addWrongInput({ value: 'eating', userId: userAlice.UserId!, expectedException: ExceptionEnum.SAME_USER_ALREADY_ANSWERED }); // Alice: Try again immediately (should fail)
 
-                    const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator);
+                    const testGame = await createGameFlowTestConfig(GameTypeEnum.WORD_SNAKE, inputSimulator, userAlice.UserId!);
                     const helper = new GameFlowTestHelper();
 
                     // Act

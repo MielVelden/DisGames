@@ -2,7 +2,7 @@ import { ExceptionEnum, GameTypeEnum, ProfileCommandActionEnum } from "../../int
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
-import { I18nTranslations, LanguageEnumTranslations, LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
+import { I18nTranslations } from "../../interfaces/application/i18n";
 
 export const i18n: I18nTranslations = {
     labels: {
@@ -329,6 +329,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "First number: {firstAnswer}",
                         [LanguageEnum.NL]: "Eerste getal: {firstAnswer}",
                     }, { firstAnswer }),
+                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
+                        [LanguageEnum.EN]: "I'm thinking of a number between 1 and {nextAnswer}. Can you guess it?",
+                        [LanguageEnum.NL]: "Ik denk aan een getal tussen 1 en {nextAnswer}. Kun je het raden?",
+                    }, { nextAnswer: nextAnswer || "" }),
                 },
                 [GameTypeEnum.TRIVIA_QUIZ]: {
                     name: {
