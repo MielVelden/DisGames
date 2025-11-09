@@ -80,6 +80,14 @@ class GameService {
         return this.games.find(game => game.config.id === gameTypeEnum);
     }
 
+    public getGameNameByType(gameTypeEnum: GameTypeEnum): MultiLingualString {
+        const gameModule = this.getGameByType(gameTypeEnum);
+        if (!gameModule)
+            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+
+        return gameModule.config.name;
+    }
+
     public async getGameByChannelIdAsync(channelId: string): Promise<GamesModel> {
         const game = await GameRepository.getByChannelIdAsync(channelId);
         return game;
@@ -396,7 +404,7 @@ class GameService {
 
         // If no game is found, return
         if (!game)
-            ErrorHelper.throw(ExceptionEnum.GAME_CHANNEL_NOT_FOUND);
+            ErrorHelper.throwSilently(ExceptionEnum.GAME_CHANNEL_NOT_FOUND);
 
         const gameModule = this.getGameByType(game.GameTypeEnum);
         if (!gameModule)

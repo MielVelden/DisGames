@@ -6,4 +6,5 @@ export interface ComponentErrorOptions {
     components?: Component[];
     cause?: unknown;
     parameters?: { [key: string]: string | number };
+    silently?: boolean;
 }

@@ -668,6 +668,10 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Save failed",
             [LanguageEnum.NL]: "Opslaan mislukt",
         },
+        [ExceptionEnum.USER_GAME_POINTS_NOT_FOUND]: {
+            [LanguageEnum.EN]: "User game points not found",
+            [LanguageEnum.NL]: "Gebruikerspelpunten niet gevonden",
+        },
     }
 };
 

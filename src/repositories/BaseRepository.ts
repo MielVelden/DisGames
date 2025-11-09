@@ -39,18 +39,16 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
   public async getById(id: number): Promise<Model | null> {
     // Check cache first
     const cached = this.cacheManager.getCacheEntry(id);
-    if (cached) {
+    if (cached)
       return cached;
-    }
 
     // Fetch from database
     const results = await this.Select().Where({ Id: id }).Limit(1).Execute();
     const result = results?.[0] || null;
 
     // Cache the result if found
-    if (result) {
+    if (result)
       this.cacheManager.setCacheEntry(id, result);
-    }
 
     return result;
   }
@@ -248,20 +246,24 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
         .map(() => '?')
         .join(', ');
 
-      const query = `INSERT INTO ${this.table} (${keys}) VALUES (${values})`;
+      const query = `INSERT INTO ${this.table} (${keys}) VALUES (${values}); SELECT * FROM ${this.table} WHERE Id = LAST_INSERT_ID()`;
       const params = Object.values(serializedEntity);
 
-      await runQueryAsync(query, params);
-
-      const result = await this.Select().OrderBy('Id', 'DESC').Limit(1).Execute();
-      if (result?.length === 0)
+      const results = await runQueryAsync(query, params);
+      if (!results)
+        ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
+      
+      const selectResults = Array.isArray(results) && results.length > 0 && Array.isArray(results[results.length - 1]) 
+        ? results[results.length - 1] 
+        : results;
+      if (!selectResults || selectResults.length === 0)
         ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
-      const savedRecord = result?.[0] as Model;
+      const savedRecord = DatabaseHelper.processResultsFromDatabase(selectResults)[0] as Model;
       // Cache the new record
-      if (savedRecord.Id) {
+      if (savedRecord.Id)
         this.cacheManager.setCacheEntry(savedRecord.Id, savedRecord);
-      }
+      
       return savedRecord;
     }
   }

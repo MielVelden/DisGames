@@ -8,7 +8,7 @@ export class ComponentError extends Error {
     public readonly components?: Component[];
     public readonly errorKey: ExceptionEnum;
     public readonly cause?: unknown;
-
+    public readonly silently?: boolean;
     constructor(options: ComponentErrorOptions) {
         const translated = new MultiLingualString(i18n.exceptions[options.message]);
         if (options.parameters)
@@ -18,6 +18,7 @@ export class ComponentError extends Error {
         this.name = 'ComponentError';
         this.components = options.components;
         this.errorKey = options.message;
+        this.silently = options.silently ?? false;
 
         if (options.cause)
             this.cause = options.cause;
@@ -30,6 +31,9 @@ export class ComponentError extends Error {
     }
 
     public shouldAnnounceError(): boolean {
+        if (this.silently)
+            return false;
+
         switch(this.errorKey) {
             case ExceptionEnum.RECORD_NOT_FOUND:
             case ExceptionEnum.MESSAGE_CHANGE_DISABLED:
@@ -43,6 +47,10 @@ export class ComponentError extends Error {
 export class ErrorHelper {
     static throw(message: ExceptionEnum): never {
         throw new ComponentError({ message });
+    }
+
+    static throwSilently(message: ExceptionEnum): never {
+        throw new ComponentError({ message, silently: true });
     }
 
     static throwWithComponents(message: ExceptionEnum, components: Component[]): never {

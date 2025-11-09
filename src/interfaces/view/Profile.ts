@@ -1,14 +1,17 @@
-import { BadgeEnum, GameTypeEnum } from "../enums";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export interface ProfileView {
-    userId: string;
-    username: string;
-    totalPoints: number;
-    mostPlayedServerId: number;
-    gamePoints: {
-        [key in GameTypeEnum]: number;
-    };
-    badges: {
-        [key in BadgeEnum]: boolean;
-    };
+    UserId: string;
+    Username: string;
+    UserRoleEnum: number;
+    TotalPoints: number;
+    UserRank: number;
+    TotalUsers: number;
+}
+
+export interface ProfileGameView {
+    gameName: MultiLingualString;
+    gamePoints: number;
+    gameRank: number;
+    gameRankPlayerCount: number;
 }

@@ -5,298 +5,298 @@ import { Debug_Data, Events_Payload, Games_Settings, Metrics_Metrics, TimelineEn
 
 export interface DatasheetsModel {
   Id: number;
+  ServerId: number;
   LanguageEnum: enums.LanguageEnum;
   Name: string;
-  ServerId: number;
 }
 
 export enum DatasheetsModelFieldEnum {
   Id = "Id",
+  ServerId = "ServerId",
   LanguageEnum = "LanguageEnum",
-  Name = "Name",
-  ServerId = "ServerId"
+  Name = "Name"
 }
 
 export interface DatasheetsSaveModel {
   Id?: number;
+  ServerId?: number;
   LanguageEnum?: enums.LanguageEnum;
   Name?: string;
-  ServerId?: number;
 }
 
 export interface DebugModel {
-  CreatedAt: Date;
-  Data: Debug_Data;
   Id: number;
-  ServerId: number;
   UniqueCode: string;
+  ServerId: number;
+  Data: Debug_Data;
+  CreatedAt: Date;
   UpdatedAt: Date;
 }
 
 export enum DebugModelFieldEnum {
-  CreatedAt = "CreatedAt",
-  Data = "Data",
   Id = "Id",
-  ServerId = "ServerId",
   UniqueCode = "UniqueCode",
+  ServerId = "ServerId",
+  Data = "Data",
+  CreatedAt = "CreatedAt",
   UpdatedAt = "UpdatedAt"
 }
 
 export interface DebugSaveModel {
-  CreatedAt?: Date;
-  DataJSON?: Debug_Data;
   Id?: number;
-  ServerId?: number;
   UniqueCode?: string;
+  ServerId?: number;
+  DataJSON?: Debug_Data;
+  CreatedAt?: Date;
   UpdatedAt?: Date;
 }
 
 export interface EventsModel {
-  CreatedAt: Date;
-  EventTypeEnum: enums.EventTypeEnum;
   Id: number;
-  Payload: Events_Payload;
   ServerId: number;
   UserId: number;
+  EventTypeEnum: enums.EventTypeEnum;
+  Payload: Events_Payload;
+  CreatedAt: Date;
 }
 
 export enum EventsModelFieldEnum {
-  CreatedAt = "CreatedAt",
-  EventTypeEnum = "EventTypeEnum",
   Id = "Id",
-  Payload = "Payload",
   ServerId = "ServerId",
-  UserId = "UserId"
+  UserId = "UserId",
+  EventTypeEnum = "EventTypeEnum",
+  Payload = "Payload",
+  CreatedAt = "CreatedAt"
 }
 
 export interface EventsSaveModel {
-  CreatedAt?: Date;
-  EventTypeEnum?: enums.EventTypeEnum;
   Id?: number;
-  PayloadJSON?: Events_Payload;
   ServerId?: number;
   UserId?: number;
+  EventTypeEnum?: enums.EventTypeEnum;
+  PayloadJSON?: Events_Payload;
+  CreatedAt?: Date;
 }
 
 export interface GameDataModel {
-  DataSheetId: number;
-  GameId: number;
   Id: number;
+  GameId: number;
+  DataSheetId: number;
   Message: MultiLingualString;
   Response: MultiLingualString;
 }
 
 export enum GameDataModelFieldEnum {
-  DataSheetId = "DataSheetId",
-  GameId = "GameId",
   Id = "Id",
+  GameId = "GameId",
+  DataSheetId = "DataSheetId",
   Message = "Message",
   Response = "Response"
 }
 
 export interface GameDataSaveModel {
-  DataSheetId?: number;
-  GameId?: number;
   Id?: number;
+  GameId?: number;
+  DataSheetId?: number;
   Message?: MultiLingualString;
   Response?: MultiLingualString;
 }
 
 export interface GameTypesModel {
-  allowMessageChange: number;
-  description: number;
-  gameDisabled: number;
-  gameName: string;
-  gameRules: number;
   Id: number;
+  gameName: string;
+  gameDisabled: number;
   pointPerGame: number;
+  description: number;
+  gameRules: number;
   replyMessage: number;
   sameUserAllowed: number;
+  allowMessageChange: number;
 }
 
 export enum GameTypesModelFieldEnum {
-  allowMessageChange = "allowMessageChange",
-  description = "description",
-  gameDisabled = "gameDisabled",
-  gameName = "gameName",
-  gameRules = "gameRules",
   Id = "Id",
+  gameName = "gameName",
+  gameDisabled = "gameDisabled",
   pointPerGame = "pointPerGame",
+  description = "description",
+  gameRules = "gameRules",
   replyMessage = "replyMessage",
-  sameUserAllowed = "sameUserAllowed"
+  sameUserAllowed = "sameUserAllowed",
+  allowMessageChange = "allowMessageChange"
 }
 
 export interface GameTypesSaveModel {
-  allowMessageChange?: number;
-  description?: number;
-  gameDisabled?: number;
-  gameName?: string;
-  gameRules?: number;
   Id?: number;
+  gameName?: string;
+  gameDisabled?: number;
   pointPerGame?: number;
+  description?: number;
+  gameRules?: number;
   replyMessage?: number;
   sameUserAllowed?: number;
+  allowMessageChange?: number;
 }
 
 export interface GamesModel {
-  Answer: string;
-  ChannelId: string;
-  GameTypeEnum: enums.GameTypeEnum;
   Id: number;
+  ChannelId: string;
+  ServerId: string;
+  GameTypeEnum: enums.GameTypeEnum;
+  Answer: string;
   LastUser: string;
   MessageId: string;
-  ServerId: string;
   Settings: Games_Settings;
 }
 
 export enum GamesModelFieldEnum {
-  Answer = "Answer",
-  ChannelId = "ChannelId",
-  GameTypeEnum = "GameTypeEnum",
   Id = "Id",
+  ChannelId = "ChannelId",
+  ServerId = "ServerId",
+  GameTypeEnum = "GameTypeEnum",
+  Answer = "Answer",
   LastUser = "LastUser",
   MessageId = "MessageId",
-  ServerId = "ServerId",
   Settings = "Settings"
 }
 
 export interface GamesSaveModel {
-  Answer?: string;
-  ChannelId?: string;
-  GameTypeEnum?: enums.GameTypeEnum;
   Id?: number;
+  ChannelId?: string;
+  ServerId?: string;
+  GameTypeEnum?: enums.GameTypeEnum;
+  Answer?: string;
   LastUser?: string;
   MessageId?: string;
-  ServerId?: string;
   SettingsJSON?: Games_Settings;
 }
 
 export interface GamesXDatasheetsModel {
-  DatasheetId: number;
-  GameId: number;
   Id: number;
+  GameId: number;
+  DatasheetId: number;
 }
 
 export enum GamesXDatasheetsModelFieldEnum {
-  DatasheetId = "DatasheetId",
+  Id = "Id",
   GameId = "GameId",
-  Id = "Id"
+  DatasheetId = "DatasheetId"
 }
 
 export interface GamesXDatasheetsSaveModel {
-  DatasheetId?: number;
-  GameId?: number;
   Id?: number;
+  GameId?: number;
+  DatasheetId?: number;
 }
 
 export interface LanguageModel {
+  Id: number;
+  NL: string;
   EN: string;
   ES: string;
   GE: string;
-  Id: number;
-  NL: string;
 }
 
 export enum LanguageModelFieldEnum {
+  Id = "Id",
+  NL = "NL",
   EN = "EN",
   ES = "ES",
-  GE = "GE",
-  Id = "Id",
-  NL = "NL"
+  GE = "GE"
 }
 
 export interface LanguageSaveModel {
+  Id?: number;
+  NL?: string;
   EN?: string;
   ES?: string;
   GE?: string;
-  Id?: number;
-  NL?: string;
 }
 
 export interface MetricsModel {
-  Date: Date;
   Id: number;
+  Date: Date;
   Metrics: Metrics_Metrics;
 }
 
 export enum MetricsModelFieldEnum {
-  Date = "Date",
   Id = "Id",
+  Date = "Date",
   Metrics = "Metrics"
 }
 
 export interface MetricsSaveModel {
-  Date?: Date;
   Id?: number;
+  Date?: Date;
   MetricsJSON?: Metrics_Metrics;
 }
 
 export interface PointsModel {
-  GameId: number;
   Id: number;
-  Points: number;
-  ServerId: string;
   UserId: string;
+  ServerId: string;
+  GameId: number;
+  Points: number;
 }
 
 export enum PointsModelFieldEnum {
-  GameId = "GameId",
   Id = "Id",
-  Points = "Points",
+  UserId = "UserId",
   ServerId = "ServerId",
-  UserId = "UserId"
+  GameId = "GameId",
+  Points = "Points"
 }
 
 export interface PointsSaveModel {
-  GameId?: number;
   Id?: number;
-  Points?: number;
-  ServerId?: string;
   UserId?: string;
+  ServerId?: string;
+  GameId?: number;
+  Points?: number;
 }
 
 export interface ServersModel {
   Id: number;
-  LanguageEnum: enums.LanguageEnum;
+  ServerId: string;
   Name: string;
   Points: number;
-  ServerId: string;
+  LanguageEnum: enums.LanguageEnum;
 }
 
 export enum ServersModelFieldEnum {
   Id = "Id",
-  LanguageEnum = "LanguageEnum",
+  ServerId = "ServerId",
   Name = "Name",
   Points = "Points",
-  ServerId = "ServerId"
+  LanguageEnum = "LanguageEnum"
 }
 
 export interface ServersSaveModel {
   Id?: number;
-  LanguageEnum?: enums.LanguageEnum;
+  ServerId?: string;
   Name?: string;
   Points?: number;
-  ServerId?: string;
+  LanguageEnum?: enums.LanguageEnum;
 }
 
 export interface StatisticsModel {
+  Id: number;
   Date: Date;
   GameId: number;
-  Id: number;
   Value: number;
 }
 
 export enum StatisticsModelFieldEnum {
+  Id = "Id",
   Date = "Date",
   GameId = "GameId",
-  Id = "Id",
   Value = "Value"
 }
 
 export interface StatisticsSaveModel {
+  Id?: number;
   Date?: Date;
   GameId?: number;
-  Id?: number;
   Value?: number;
 }
 
@@ -316,62 +316,62 @@ export interface TableEnumsSaveModel {
 }
 
 export interface TimelineEntriesModel {
-  Changes: TimelineEntries_Changes;
-  CreatedAt: Date;
   Id: number;
-  ObjectId: number;
-  ServerId: number;
   TableEnum: enums.TableEnum;
+  ObjectId: number;
   TimelineType: number;
   UserId: number;
+  ServerId: number;
+  Changes: TimelineEntries_Changes;
+  CreatedAt: Date;
 }
 
 export enum TimelineEntriesModelFieldEnum {
-  Changes = "Changes",
-  CreatedAt = "CreatedAt",
   Id = "Id",
-  ObjectId = "ObjectId",
-  ServerId = "ServerId",
   TableEnum = "TableEnum",
+  ObjectId = "ObjectId",
   TimelineType = "TimelineType",
-  UserId = "UserId"
+  UserId = "UserId",
+  ServerId = "ServerId",
+  Changes = "Changes",
+  CreatedAt = "CreatedAt"
 }
 
 export interface TimelineEntriesSaveModel {
-  ChangesJSON?: TimelineEntries_Changes;
-  CreatedAt?: Date;
   Id?: number;
-  ObjectId?: number;
-  ServerId?: number;
   TableEnum?: enums.TableEnum;
+  ObjectId?: number;
   TimelineType?: number;
   UserId?: number;
+  ServerId?: number;
+  ChangesJSON?: TimelineEntries_Changes;
+  CreatedAt?: Date;
 }
 
 export interface UsersModel {
-  CreatedAt: Date;
   Id: number;
-  OAuth2AccessToken: string;
   UserId: string;
   Username: string;
   UserRoleEnum: enums.UserRoleEnum;
+  OAuth2AccessToken: string;
+  CreatedAt: Date;
 }
 
 export enum UsersModelFieldEnum {
-  CreatedAt = "CreatedAt",
   Id = "Id",
-  OAuth2AccessToken = "OAuth2AccessToken",
   UserId = "UserId",
   Username = "Username",
-  UserRoleEnum = "UserRoleEnum"
+  UserRoleEnum = "UserRoleEnum",
+  OAuth2AccessToken = "OAuth2AccessToken",
+  CreatedAt = "CreatedAt"
 }
 
 export interface UsersSaveModel {
-  CreatedAt?: Date;
   Id?: number;
-  OAuth2AccessToken?: string;
   UserId?: string;
   Username?: string;
   UserRoleEnum?: enums.UserRoleEnum;
+  OAuth2AccessToken?: string;
+  CreatedAt?: Date;
 }
 

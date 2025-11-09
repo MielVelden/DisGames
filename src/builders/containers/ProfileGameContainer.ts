@@ -1,9 +1,9 @@
 import { Component, ComponentType, Container } from "../../interfaces/application/Message";
-import { ProfileView } from "../../interfaces/view";
-import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { ProfileGameView } from "../../interfaces/view";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 
-export function createProfileContainer(profile: ProfileView): Component {
+export function createProfileGameContainer(profile: ProfileGameView): Component {
     return {
             type: ComponentType.CONTAINER,
             components: [
@@ -14,14 +14,6 @@ export function createProfileContainer(profile: ProfileView): Component {
                 {
                     type: ComponentType.TEXT_DISPLAY,
                     content: new MultiLingualString(i18n.commands.profile.description)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString(profile.Username)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: createMultiLingualString(profile.UserRank.toString() + " / " + profile.TotalUsers.toString())
                 }
             ]
         } as Container

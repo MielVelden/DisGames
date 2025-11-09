@@ -1,6 +1,6 @@
 import { UsersModel } from "../../interfaces/database/TableInterfaces";
 import { BadgeEnum, ExceptionEnum, GameTypeEnum, UserRoleEnum } from "../../interfaces/enums";
-import { ProfileView } from "../../interfaces/view";
+import { ProfileGameView, ProfileView } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import ServerService from "./ServerService";
@@ -8,6 +8,7 @@ import { getEnumDefaultsByValue } from "../../utils/helpers/Enum";
 import { ErrorHelper } from "../../utils/application/Error";
 import Logger from "../../utils/application/Logger";
 import { User } from "../../interfaces/domain";
+import GameService from "./GameService";
 
 class UserService {
     public async getByUserIdAsync(userId: string, createIfNotExists: boolean = false): Promise<UsersModel> {
@@ -37,41 +38,24 @@ class UserService {
     }
 
     public async getUserProfileAsync(userId: string): Promise<ProfileView> {
-        const user = await this.getByUserIdAsync(userId);
-        const gamePoints = await PointRepository.getPointsAsync(userId);
-        if (!gamePoints) {
-            return {
-                userId: user.UserId,
-                username: user.Username,
-                totalPoints: 0,
-                mostPlayedServerId: 0,
-                gamePoints: getEnumDefaultsByValue(GameTypeEnum, 0),
-                badges: getEnumDefaultsByValue(BadgeEnum, false),
-            };
-        }
+        return await PointRepository.getUserProfileAsync(userId);
+    }
 
-        const server = await ServerService.getServerAsync(gamePoints.ServerId);
+    public async getUserGameProfileAsync(userId: string, gameId: number): Promise<ProfileGameView> {
+        const gamePoints = await PointRepository.getPointsByUserIdAndGameIdAsync(userId, gameId);
+        if (!gamePoints)
+            return {
+                gameName: GameService.getGameNameByType(gameId),
+                gamePoints: 0,
+                gameRank: 0,
+                gameRankPlayerCount: 0,
+            };
 
         return {
-            userId: user.UserId,
-            username: user.Username,
-            totalPoints: gamePoints?.Points ?? 0,
-            mostPlayedServerId: server.Id,
-            gamePoints: {
-                [GameTypeEnum.ANAGRAM]: gamePoints?.GameId === GameTypeEnum.ANAGRAM ? gamePoints?.Points : 0,
-                [GameTypeEnum.WORD_SNAKE]: gamePoints?.GameId === GameTypeEnum.WORD_SNAKE ? gamePoints?.Points : 0,
-                [GameTypeEnum.COUNTING]: 0,
-                [GameTypeEnum.NUMBER_GUESS]: 0,
-                [GameTypeEnum.TRIVIA_QUIZ]: 0,
-                [GameTypeEnum.GUESS_THE_PRICE]: 0,
-                [GameTypeEnum.MATH_QUIZ]: 0,
-                [GameTypeEnum.GUESS_THE_FLAG]: 0,
-                [GameTypeEnum.CONNECTIONS]: 0,
-            },
-            badges: {
-                [BadgeEnum.EARLY_BIRD]: gamePoints?.GameId === GameTypeEnum.ANAGRAM ? true : false,
-                [BadgeEnum.TESTER]: gamePoints?.GameId === GameTypeEnum.WORD_SNAKE ? true : false,
-            },
+            gameName: GameService.getGameNameByType(gameId),
+            gamePoints: gamePoints.Points,
+            gameRank: 0,
+            gameRankPlayerCount: 0,
         };
     }
 

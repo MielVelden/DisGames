@@ -30,6 +30,7 @@ export async function createConnectionAsync(): Promise<boolean> {
             database: dbName,
             password: url.password,
             port: Number(url.port) || 3306,
+            multipleStatements: true,
         });
 
         connection = await pool.getConnection();

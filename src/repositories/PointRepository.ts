@@ -1,7 +1,8 @@
 import { PointsModel, PointsModelFieldEnum, PointsSaveModel } from "../interfaces/database";
 import { Repository } from "../interfaces/database";
-import BaseRepository from "./BaseRepository";
-import { TableEnum } from "../interfaces/enums/index";
+import BaseRepository, { RepositoryUtils } from "./BaseRepository";
+import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
+import { ProfileView } from "../interfaces/view";
 
 class PointRepository implements Repository<PointsModel> {
     private baseRepository: BaseRepository<PointsModel, PointsSaveModel>;
@@ -36,6 +37,16 @@ class PointRepository implements Repository<PointsModel> {
         if (!model || model.length === 0)
             return null;
         return model[0];
+    }
+
+    async getPointsByUserIdAndGameIdAsync(userId: string, gameId: number): Promise<PointsModel | null> {
+        const model = await this.baseRepository.Select().Where({ UserId: userId, GameId: gameId }).Limit(1).Execute();
+        return model[0];
+    }
+
+    async getUserProfileAsync(userId: string): Promise<ProfileView> {
+        const model = await RepositoryUtils.CallStoredProcedureGeneric(StoredProcedureEnum.Getuserprofile, [userId]);
+        return model[0] as ProfileView;
     }
 }
 
