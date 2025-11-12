@@ -10,7 +10,7 @@ class DebugRepository implements Repository<DebugModel> {
         this.baseRepository = new BaseRepository<DebugModel, DebugSaveModel>(TableEnum.DEBUG, DebugModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<DebugModel | null> {
+    async getByIdAsync(id: number): Promise<DebugModel | null> {
         return this.baseRepository.getById(id);
     }
 

@@ -9,7 +9,7 @@ class UserRepository implements Repository<UsersModel> {
         this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel>(TableEnum.USERS, UsersModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<UsersModel | null> {
+    async getByIdAsync(id: number): Promise<UsersModel | null> {
         return this.baseRepository.getById(id);
     }
 

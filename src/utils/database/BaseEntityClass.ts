@@ -4,12 +4,18 @@ import { ErrorHelper } from '../application/Error';
 import { getEnumProperty } from '../helpers/EnumMetadata';
 import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
 
-export abstract class BaseEntityClass implements BaseEntity {
+type EnumValues<T> = T[keyof T];
+
+export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implements BaseEntity {
   Id?: number;
   protected static fieldEnum: Record<string, string> | undefined;
 
   constructor(data: BaseEntity) {
     this.Id = data.Id;
+  }
+
+  isUpdate(): boolean {
+    return this.Id !== undefined && this.Id !== 0;
   }
 
   getId(): number | undefined {
@@ -18,25 +24,54 @@ export abstract class BaseEntityClass implements BaseEntity {
 
   getExternalId(): string | number | undefined {
     const fieldEnum = (this.constructor as typeof BaseEntityClass).fieldEnum;
-    if (!fieldEnum) {
+    if (!fieldEnum)
       return undefined;
-    }
 
     const externalIdField = getEnumProperty(MetadataKeyEnum.ExternalIdField, fieldEnum as Record<string, string | number>);
-    if (!externalIdField) {
+    if (!externalIdField)
       return undefined;
-    }
 
     const fieldName = String(externalIdField);
     return (this as any)[fieldName];
   }
 
-  validateIsNull(field: string): void {
+  private getFieldValue(field: EnumValues<FieldEnum>): any {
+    const fieldEnum = (this.constructor as typeof BaseEntityClass).fieldEnum;
+    if (!fieldEnum)
+      ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+
     const fieldName = String(field);
-    const value = (this as any)[fieldName];
-    if (value === null || value === undefined) {
+    if (!Object.values(fieldEnum).includes(fieldName))
+      ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+
+    return (this as any)[fieldName];
+  }
+
+  validateIsNull(field: EnumValues<FieldEnum>): void {
+    const value = this.getFieldValue(field);
+    if (value === null || value === undefined)
       ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
-    }
+  }
+
+  validateIsNotNull(field: EnumValues<FieldEnum>): void {
+    const value = this.getFieldValue(field);
+    if (value === null || value === undefined)
+      ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+  }
+
+  validateIsProvidedAndNotNull(field: EnumValues<FieldEnum>): void {
+    const value = this.getFieldValue(field);
+    if (value === null || value === undefined)
+      ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+  }
+
+  validateHasNotChanged(field: EnumValues<FieldEnum>, value: any): void {
+    const currentValue = this.getFieldValue(field);
+    if (currentValue === null || currentValue === undefined)
+      return; // Field is not set, so it has not changed
+
+    if (currentValue !== value)
+      ErrorHelper.throw(ExceptionEnum.FIELD_HAS_CHANGED);
   }
 }
 

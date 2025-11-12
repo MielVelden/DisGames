@@ -10,7 +10,7 @@ class GameRepository implements Repository<GamesModel> {
         this.baseRepository = new BaseRepository<GamesModel, GamesSaveModel>(TableEnum.GAMES, GamesModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<GamesModel | null> {
+    async getByIdAsync(id: number): Promise<GamesModel | null> {
         return this.baseRepository.getById(id);
     }
 

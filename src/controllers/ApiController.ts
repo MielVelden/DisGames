@@ -44,7 +44,7 @@ export class ApiController {
 		if (!userId) 
 			return null;
 		
-		const user = await UserService.getByUserIdAsync(userId);
+		const user = await UserService.getByExternalIdAsync(userId);
 		if (!user) 
 			return null;
 

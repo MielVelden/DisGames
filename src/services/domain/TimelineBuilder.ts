@@ -1,7 +1,7 @@
 import { ExceptionEnum, TableEnum, TimelineTypeEnum } from "../../interfaces/enums";
 import { TimelineChanges } from "../../interfaces/domain/Timeline";
 import TimelineRepository from "../../repositories/TimelineRepository";
-import { TimelineEntriesSaveModel, TimelineEntriesSaveModelClass } from "../../interfaces/database";
+import { TimelineEntriesSaveModel } from "../../interfaces/database";
 import { InteractionEvent } from "../../interfaces/application/Event";
 import UserRepository from "../../repositories/UserRepository";
 import ServerRepository from "../../repositories/ServerRepository";
@@ -86,7 +86,7 @@ class TimelineBuilder {
         if(!user || !server)
             return;
 
-        const timelineEntry = new TimelineEntriesSaveModelClass({
+        const timelineEntry = new TimelineEntriesSaveModel({
             TableEnum: table,
             ObjectId: objectId,
             TimelineType: timelineType,
@@ -113,7 +113,7 @@ class TimelineBuilder {
     }
 
     async forGameResetAsync(gameId: number, context: TimelineContext): Promise<void> {
-        const game = await GameRepository.getByIDAsync(gameId);
+        const game = await GameRepository.getByIdAsync(gameId);
         if (!game) 
             ErrorHelper.throw(ExceptionEnum.GAME_NOT_FOUND);
 

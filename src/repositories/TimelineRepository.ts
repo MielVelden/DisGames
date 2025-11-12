@@ -12,7 +12,7 @@ class TimelineRepository implements Repository<TimelineEntriesModel> {
         this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>(TableEnum.TIMELINE_ENTRIES, TimelineEntriesModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<TimelineEntriesModel | null> {
+    async getByIdAsync(id: number): Promise<TimelineEntriesModel | null> {
         return this.baseRepository.getById(id);
     }
 

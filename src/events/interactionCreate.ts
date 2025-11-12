@@ -10,6 +10,7 @@ import { EventService } from '../services/application/EventService';
 import { handleErrorAsync } from '../utils/application/Error';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
+import { EventsSaveModel } from '../interfaces/database';
 
 export default {
     name: Events.InteractionCreate,
@@ -19,7 +20,7 @@ export default {
         const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction) as SlashCommandInteractionEvent;
 
         // Save the event to the database
-        EventsService.saveAsync({
+        EventsService.saveAsync(new EventsSaveModel({
             UserId: event.user.id,
             ServerId: event.server.Id,
             EventTypeEnum: event.type,
@@ -29,7 +30,7 @@ export default {
                 guildId: event.guildId,
                 commandName: event?.command?.name
             }
-        });
+        }), event);
         
         try {
             if (event.type === EventTypeEnum.SLASH_COMMAND && (event.command.canExecute?.(event) ?? true))

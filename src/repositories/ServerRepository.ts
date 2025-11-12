@@ -11,7 +11,7 @@ class ServerRepository implements Repository<ServersModel> {
         this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel>(TableEnum.SERVERS, ServersModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<ServersModel | null> {
+    async getByIdAsync(id: number): Promise<ServersModel | null> {
         return this.baseRepository.getById(id);
     }
 

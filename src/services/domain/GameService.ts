@@ -1,5 +1,5 @@
 import { InteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
-import { GameDataModel, GamesModel, GamesSaveModel } from "../../interfaces/database/TableInterfaces";
+import { GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
 import {
@@ -105,7 +105,7 @@ class GameService {
         let components = ComponentService.createStartMessageAsync(game.GameTypeEnum as GameTypeEnum, game.Answer as string);
 
         if (gameModule.functions.getStartComponentsAsync) {
-            const server = await ServerService.getByServerIdAsync(game.ServerId);
+            const server = await ServerService.getByExternalIdAsync(game.ServerId);
             const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
             components.pop();
             components = components.concat(startComponents);
@@ -132,7 +132,7 @@ class GameService {
 
         // Check if the savable is valid
         if (savable.Id) {
-            const model = await GameRepository.getByIDAsync(savable.Id);
+            const model = await GameRepository.getByIdAsync(savable.Id);
             if (!model)
                 ErrorHelper.throwSilently(ExceptionEnum.GAME_NOT_FOUND);
 
@@ -141,7 +141,7 @@ class GameService {
                 ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
             if (!gameModule.config.isCalculated) {
-                const gameDataArray = await GameDataRepository.getGameDataByGamesIdAsync(model.Id);
+                const gameDataArray = await GameDataRepository.getRandomDataByGameIdAsync(model.Id);
                 gameData = gameDataArray;
                 savable.Answer = gameData.map(data => data.Response.getMessage(event.server.LanguageEnum)).join(ARRAY_JOIN_DELIMITER);
             }
@@ -219,7 +219,7 @@ class GameService {
         const model = await GameRepository.saveAsync(savable);
 
         if (!gameModule.config.firstAnswer) {
-            gameData = await GameDataRepository.getGameDataByGamesIdAsync(model.Id!);
+            gameData = await GameDataRepository.getRandomDataByGameIdAsync(model.Id!);
 
             if (gameModule.functions.prepareDataAsync)
                 model.Answer = await gameModule.functions.prepareDataAsync(gameData, event.server.LanguageEnum);
@@ -269,7 +269,12 @@ class GameService {
             // Answer is correct
             await this.handleValidAnswerAsync(gameEvent);
             // Add points to the user
-            await PointService.saveAsync(gameEvent.user.userId, gameEvent.gameId, gameEvent.server.ServerId, gameEvent.gameConfig.points);
+            await PointService.saveAsync(new PointsSaveModel({
+                UserId: gameEvent.user.userId,
+                ServerId: gameEvent.server.ServerId,
+                GameId: gameEvent.gameId,
+                Points: gameEvent.gameConfig.points
+            }), event);
 
             // Timeline for correct answer
             await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {

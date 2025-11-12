@@ -11,7 +11,7 @@ class MetricsRepository implements Repository<MetricsModel> {
         this.baseRepository = new BaseRepository<MetricsModel, MetricsSaveModel>(TableEnum.METRICS, MetricsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<MetricsModel | null> {
+    async getByIdAsync(id: number): Promise<MetricsModel | null> {
         return this.baseRepository.getById(id);
     }
 

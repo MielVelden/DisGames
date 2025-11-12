@@ -10,7 +10,7 @@ class GamesXDatasheetRepository implements Repository<GamesXDatasheetsModel> {
         this.baseRepository = new BaseRepository<GamesXDatasheetsModel, GamesXDatasheetsSaveModel>(TableEnum.GAMESXDATASHEETS, GamesXDatasheetsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<GamesXDatasheetsModel | null> {
+    async getByIdAsync(id: number): Promise<GamesXDatasheetsModel | null> {
         return this.baseRepository.getById(id);
     }
 

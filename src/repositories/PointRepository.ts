@@ -11,7 +11,7 @@ class PointRepository implements Repository<PointsModel> {
         this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel>(TableEnum.POINTS, PointsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<PointsModel | null> {
+    async getByIdAsync(id: number): Promise<PointsModel | null> {
         return this.baseRepository.getById(id);
     }
 
@@ -39,8 +39,10 @@ class PointRepository implements Repository<PointsModel> {
         return model[0];
     }
 
-    async getPointsByUserIdAndGameIdAsync(userId: string, gameId: number): Promise<PointsModel | null> {
-        const model = await this.baseRepository.Select().Where({ UserId: userId, GameId: gameId }).Limit(1).Execute();
+    async getPointsByUserServerGameIdAsync(userId: string, serverId: string, gameId: number): Promise<PointsModel | null> {
+        const model = await this.baseRepository.Select().Where({ UserId: userId, ServerId: serverId, GameId: gameId }).Limit(1).Execute();
+        if (!model || model.length === 0)
+            return null;
         return model[0];
     }
 

@@ -10,7 +10,7 @@ class DataSheetRepository implements Repository<DatasheetsModel> {
         this.baseRepository = new BaseRepository<DatasheetsModel, DatasheetsSaveModel>(TableEnum.DATASHEETS, DatasheetsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<DatasheetsModel | null> {
+    async getByIdAsync(id: number): Promise<DatasheetsModel | null> {
         return this.baseRepository.getById(id);
     }
 

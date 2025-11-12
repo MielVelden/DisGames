@@ -17,6 +17,7 @@ import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { createGameHelpContainer } from "../builders/containers/GameHelpContainer";
 import { createMoveButton } from "../builders/buttons/MoveButton";
 import { createGameSetupConfirmationContainer } from "../builders/containers/GameSetupConfirmationContainer";
+import { GamesSaveModel } from "../interfaces/database";
 
 export class GamesCommand implements Command {
     name = CommandEnum.GAMES;
@@ -51,10 +52,10 @@ export class GamesCommand implements Command {
                                 if(channelEvent) {
                                     const channelName = await channelEvent.getChannelNameAsync(channelEvent.selected);
                                     
-                                    await GameService.saveAsync({
+                                    await GameService.saveAsync(new GamesSaveModel({
                                         Id: game.Id,
                                         ChannelId: channelEvent.selected
-                                    }, channelEvent);
+                                    }), channelEvent);
                                     await channelEvent.addComponentAsync(ComponentService.createContainer({
                                         description: i18n.commands.games.labels.movedToChannel(channelName)
                                     }));
@@ -131,12 +132,12 @@ export class GamesCommand implements Command {
                         
                         if (confirmedEvent) {
                             // Save the game with settings
-                            await GameService.saveAsync({
+                            await GameService.saveAsync(new GamesSaveModel({
                                 GameTypeEnum: gameTypeEnum,
                                 ChannelId: event.channelId,
                                 ServerId: event.guildId,
                                 SettingsJSON: gameSettings
-                            }, confirmedEvent);
+                            }), confirmedEvent);
                             await confirmedEvent.editAsync();
                         }
                     }

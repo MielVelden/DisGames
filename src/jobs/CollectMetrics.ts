@@ -1,10 +1,10 @@
 import { JobModule } from "../interfaces/application/Job";
-import MetricsService from "../services/domain/MetricsService";
 import UserService from "../services/domain/UserService";
 import DashboardService from "../services/application/DashboardService";
 import { DashboardEnum } from "../interfaces/enums/view/DashboardEnum";
 import { MetricsInfo } from "../interfaces/domain";
 import MetricsRepository from "../repositories/MetricsRepository";
+import { MetricsSaveModel } from "../interfaces/database";
 
 export default {
     id: 'collect-metrics',
@@ -31,11 +31,11 @@ export default {
         
         progress(dashboards.length + 1, dashboards.length + 1, 'Saving metrics');
         
-        await MetricsRepository.saveAsync({
+        await MetricsRepository.saveAsync(new MetricsSaveModel({
             Date: new Date(),
             MetricsJSON: {
                 informations: informations,
             },
-        });
+        }));
     }
 } as JobModule;

@@ -1,9 +1,25 @@
-import { GameDataModel } from "../../interfaces/database/TableInterfaces";
+import { InteractionEvent } from "../../interfaces/application";
+import { GameDataModel, GameDataSaveModel } from "../../interfaces/database/TableInterfaces";
 import GameDataRepository from "../../repositories/GameDataRepository";
+import { BaseDomainService } from "./BaseDomainService";
 
-class GameDataService {
-    public async getGameDataAsync(gamesId: number): Promise<GameDataModel[]> {
-        return await GameDataRepository.getGameDataByGamesIdAsync(gamesId);
+class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel, typeof GameDataRepository> {
+    protected readonly repository = GameDataRepository;
+
+    public getAllAsync(): Promise<GameDataModel[]> {
+        return this.repository.getAllAsync();
+    }
+
+    protected async performSaveAsync(savable: GameDataSaveModel, event: InteractionEvent): Promise<GameDataModel> {
+        return await this.repository.saveAsync(savable);
+    }
+
+    public purgeAsync(id: number): Promise<void> {
+        return this.repository.purgeAsync(id);
+    }
+
+    public async getRandomDataByGameIdAsync(gameId: number): Promise<GameDataModel[]> {
+        return await this.repository.getRandomDataByGameIdAsync(gameId);
     }
 }
 

@@ -12,7 +12,7 @@ class EventsRepository implements Repository<EventsModel> {
         this.baseRepository = new BaseRepository<EventsModel, EventsSaveModel>(TableEnum.EVENTS, EventsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<EventsModel | null> {
+    async getByIdAsync(id: number): Promise<EventsModel | null> {
         return this.baseRepository.getById(id);
     }
 

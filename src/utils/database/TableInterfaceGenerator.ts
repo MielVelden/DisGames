@@ -83,7 +83,8 @@ export class TableInterfaceGenerator {
 
     // Generate header with imports
     let interfaceContent = InterfaceImportManager.generateHeader(jsonInterfaceImports);
-    interfaceContent += `import { BaseEntityClass } from '../../utils/database/BaseEntityClass';\n\n`;
+    interfaceContent += `import { BaseEntityClass } from '../../utils/database/BaseEntityClass';\n`;
+    interfaceContent += `import { BaseEntity } from '../../interfaces/database/BaseEntity';\n\n`;
 
     for (const table of tables as any[]) {
       const tableName = table['TABLE_NAME'];
@@ -114,7 +115,7 @@ export class TableInterfaceGenerator {
       const modelClassName = `${SchemaUtils.capitalize(tableName)}${this.suffix}`;
       const fieldEnumName = `${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix}`;
       
-      interfaceContent += `export class ${modelClassName} extends BaseEntityClass implements ${modelClassName} {\n`;
+      interfaceContent += `export class ${modelClassName} extends BaseEntityClass<${fieldEnumName}> implements ${modelClassName} {\n`;
       interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n\n`;
       
       filteredColumns.forEach((column: any) => {
@@ -124,11 +125,11 @@ export class TableInterfaceGenerator {
         }
       });
 
-      interfaceContent += `\n  constructor(data: ${modelClassName}) {\n`;
-      interfaceContent += `    super(data);\n`;
+      interfaceContent += `\n  constructor(data: Partial<${modelClassName}>) {\n`;
+      interfaceContent += `    super(data as BaseEntity);\n`;
       filteredColumns.forEach((column: any) => {
         const fieldName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
-        interfaceContent += `    this.${fieldName} = data.${fieldName};\n`;
+        interfaceContent += `    this.${fieldName} = data.${fieldName}!;\n`;
       });
       interfaceContent += `  }\n`;
       interfaceContent += `}\n\n`;
@@ -148,7 +149,8 @@ export class TableInterfaceGenerator {
       interfaceContent += `}\n\n`;
 
       const saveModelClassName = `${SchemaUtils.capitalize(tableName)}${this.saveSuffix}`;
-      interfaceContent += `export class ${saveModelClassName} extends BaseEntityClass implements ${saveModelClassName} {\n`;
+      const saveModelInterfaceName = `${SchemaUtils.capitalize(tableName)}${this.saveSuffix}`;
+      interfaceContent += `export class ${saveModelClassName} extends BaseEntityClass<${fieldEnumName}> implements ${saveModelInterfaceName} {\n`;
       interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n\n`;
       
       filteredColumns.forEach((column: any) => {
@@ -160,7 +162,7 @@ export class TableInterfaceGenerator {
         }
       });
 
-      interfaceContent += `\n  constructor(data: ${saveModelClassName}) {\n`;
+      interfaceContent += `\n  constructor(data: Partial<${saveModelInterfaceName}>) {\n`;
       interfaceContent += `    super({ Id: data.Id ?? 0 });\n`;
       filteredColumns.forEach((column: any) => {
         const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME) 
