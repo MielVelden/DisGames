@@ -1,34 +1,53 @@
-import { UsersModel } from "../../interfaces/database/TableInterfaces";
-import { BadgeEnum, ExceptionEnum, GameTypeEnum, UserRoleEnum } from "../../interfaces/enums";
+import { UsersModel, UsersSaveModel } from "../../interfaces/database/TableInterfaces";
+import { ExceptionEnum, UserRoleEnum } from "../../interfaces/enums";
 import { ProfileGameView, ProfileView } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
-import ServerService from "./ServerService";
-import { getEnumDefaultsByValue } from "../../utils/helpers/Enum";
 import { ErrorHelper } from "../../utils/application/Error";
 import Logger from "../../utils/application/Logger";
 import { User } from "../../interfaces/domain";
 import GameService from "./GameService";
+import TimelineBuilder from "./TimelineBuilder";
+import { InteractionEvent } from "../../interfaces/application";
+import { BaseDomainService } from "./BaseDomainService";
 
-class UserService {
-    public async getByUserIdAsync(userId: string, createIfNotExists: boolean = false): Promise<UsersModel> {
+class UserService extends BaseDomainService<UsersModel, UsersSaveModel> {
+    public async getByIdAsync(id: number): Promise<UsersModel> {
+        const user = await UserRepository.getByIDAsync(id);
+        if (!user)
+            ErrorHelper.throw(ExceptionEnum.USER_NOT_FOUND);
+        return user;
+    }
+
+    public async getByUserIdAsync(userId: string, throwIfNotFound: boolean = true): Promise<UsersModel> {
         const user = await UserRepository.getByUserIdAsync(userId);
-        if (!user && createIfNotExists) {
-            return await UserRepository.saveAsync({
-                UserId: userId,
-                Username: userId,
-            });
-        }
+        if (!user && throwIfNotFound)
+            ErrorHelper.throw(ExceptionEnum.USER_NOT_FOUND);
 
         return user;
     }
 
-    public async getAllAsync(identity: User): Promise<UsersModel[]> {
-        // TODO: Check permissions
+    protected async performSaveAsync(savable: UsersSaveModel, event: InteractionEvent): Promise<UsersModel> {
+        const user = await UserRepository.saveAsync(savable);
+        await TimelineBuilder.forUserUpdateAsync({
+            old: null,
+            new: user,
+            objectId: user.Id,
+            event: event
+        });
+        return user;
+    }
+
+    public async getAllAsync(): Promise<UsersModel[]> {
         return await UserRepository.getAllAsync();
     }
 
+    public async purgeAsync(id: number): Promise<void> {
+        await UserRepository.purgeAsync(id);
+    }
+
     public async updateUsernameAsync(userId: string, username: string): Promise<UsersModel> {
+        //TODO: External key
         const user = await this.getByUserIdAsync(userId);
         if (!user)
             ErrorHelper.throw(ExceptionEnum.USER_NOT_FOUND);

@@ -29,9 +29,8 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import MediaService from "../application/MediaService";
 import Logger from "../../utils/application/Logger";
 import TimelineBuilder from "./TimelineBuilder";
-import { ARRAY_JOIN_DELIMITER, DEBUG_MODE } from "../../config";
+import { ARRAY_JOIN_DELIMITER } from "../../config";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
-import TestMode from "../../utils/application/TestMode";
 import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
 
@@ -106,7 +105,7 @@ class GameService {
         let components = ComponentService.createStartMessageAsync(game.GameTypeEnum as GameTypeEnum, game.Answer as string);
 
         if (gameModule.functions.getStartComponentsAsync) {
-            const server = await ServerService.getServerAsync(game.ServerId);
+            const server = await ServerService.getByServerIdAsync(game.ServerId);
             const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
             components.pop();
             components = components.concat(startComponents);
@@ -135,7 +134,7 @@ class GameService {
         if (savable.Id) {
             const model = await GameRepository.getByIDAsync(savable.Id);
             if (!model)
-                ErrorHelper.throw(ExceptionEnum.GAME_NOT_FOUND);
+                ErrorHelper.throwSilently(ExceptionEnum.GAME_NOT_FOUND);
 
             const gameModule = this.getGameByType(model.GameTypeEnum as GameTypeEnum);
             if (!gameModule)
@@ -284,6 +283,7 @@ class GameService {
             const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
             if (gameModule && gameModule.functions && gameModule.functions.onIncorrectAnswerAsync) {
                 await gameModule.functions.onIncorrectAnswerAsync(gameEvent);
+                await this.handleUpdateGameDataAsync(gameEvent);        
             } else {
                 // Delete the message
                 await event.deleteAsync();
@@ -303,6 +303,11 @@ class GameService {
         await event.replyAsync();
     }
 
+    private async handleUpdateGameDataAsync(gameEvent: GameEvent) {
+        if (gameEvent.requireUpdateModel)
+            await GameRepository.saveAsync(gameEvent.getGameData());
+    }
+
     private async handleValidAnswerAsync(gameEvent: GameEvent) {
         if (gameEvent.gameConfig.hasImages) {
             const nextAnswer = await gameEvent.getNextAnswerAsync();
@@ -320,9 +325,7 @@ class GameService {
         if (gameEvent.getUpdatedGameAnswerAsync)
             await gameEvent.getUpdatedGameAnswerAsync(gameEvent);
 
-        // Save the model
-        if (gameEvent.requireUpdateModel)
-            await GameRepository.saveAsync(gameEvent.getGameData());
+        await this.handleUpdateGameDataAsync(gameEvent);
     }
 
     private async handleGameActionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent) {

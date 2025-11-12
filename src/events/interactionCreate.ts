@@ -7,11 +7,7 @@ import { DiscordClient } from '../interfaces/application/DiscordClient';
 import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import { EventService } from '../services/application/EventService';
-import ComponentService from '../services/application/ComponentService';
-import { ComponentError } from '../utils/application/Error';
-import { MultiLingualString } from '../utils/i18n/MultiLingualString';
-import { i18n } from '../utils/i18n/i18n';
-import Logger from '../utils/application/Logger';
+import { handleErrorAsync } from '../utils/application/Error';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
 
@@ -42,22 +38,7 @@ export default {
                 await EventService.handleEventAsync(event);
         }
         catch (error) {
-            if (error instanceof ComponentError && error.hasComponents()) {
-                const errorKey = error.errorKey;
-                const errorMessage = new MultiLingualString(i18n.exceptions[errorKey]);
-                if (error.hasComponents()) {
-                    event.clearComponentsAsync();
-                    event.addComponentAsync(ComponentService.createContent(errorMessage));
-                    error.components!.forEach(async (component) => {
-                        await event.addComponentAsync(component);
-                    });
-                } else if(error.shouldAnnounceError()) {
-                    await event.addComponentAsync(ComponentService.createContent(errorMessage));
-                }
-            }
-
-            await event.replyAsync();
-            Logger.logError(`Error handling interaction`, error as Error);
+            await handleErrorAsync(error, event);
         }
     },
 };

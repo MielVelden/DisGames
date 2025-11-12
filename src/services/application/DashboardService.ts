@@ -7,6 +7,8 @@ import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
 import { calculateDuration } from "../../utils/helpers/Duration";
 import { assertNever } from "../../utils/application/Error";
+import { ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";
+import ChartService from "./ChartService";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardView> {
@@ -119,6 +121,9 @@ class DashboardService {
         const gamesPlayed = await TimelineRepository.getGamesPlayedAsync(timeFrame);
         const averageGamesPlayedPerUser = gamesPlayed / users;
 
+        // Get the chart
+        const chart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_User_NewUser, identity);
+        
         return {
             cards: [
                 this.createDashboardCard(
@@ -157,7 +162,8 @@ class DashboardService {
                         secondaryText: "Users play on average multiple games"
                     }
                 )
-            ]
+            ],
+            chart: chart
         }
     }
 

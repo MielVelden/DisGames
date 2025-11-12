@@ -6,7 +6,6 @@ import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../domain/GameService";
-import TimelineBuilder from "../domain/TimelineBuilder";
 import ComponentService from "../application/ComponentService";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 
@@ -53,8 +52,8 @@ export default {
             const resetOnFail = GameService.getSettingValue<boolean>(event.getGameData(), GameSettingsEnum.RESET_ON_FAIL);
             
             if (resetOnFail) {
-                // Reset the counter back to 0
-                event.setGameDataAnswer("0");
+                // Reset the counter back to 1
+                event.setGameDataAnswer(event.gameConfig.firstAnswer);
 
                 event.addAction({
                     enum: GameActionEnum.REACTION,

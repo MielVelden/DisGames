@@ -16,3 +16,4 @@ export enum TimelineTypeEnum {
 ShouldAnnounce(TimelineTypeEnum.GAME_RESET);
 ShouldAnnounce(TimelineTypeEnum.GAME_CREATED);
 ShouldAnnounce(TimelineTypeEnum.GAME_PLAYED);
+ShouldAnnounce(TimelineTypeEnum.USER_CREATED);

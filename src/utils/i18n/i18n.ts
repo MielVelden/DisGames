@@ -672,6 +672,10 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "User game points not found",
             [LanguageEnum.NL]: "Gebruikerspelpunten niet gevonden",
         },
+        [ExceptionEnum.INVALID_ARGUMENT]: {
+            [LanguageEnum.EN]: "Invalid argument",
+            [LanguageEnum.NL]: "Ongeldig argument",
+        },
     }
 };
 

@@ -34,11 +34,11 @@ export class PathResolver {
     }
 
     static isDev(): boolean {
-        if (this.isDevelopmentMode !== null) {
+        if (this.isDevelopmentMode !== null)
             return this.isDevelopmentMode;
-        }
-        
-        this.isDevelopmentMode = __dirname.includes('/src/');
+
+        const dirnameParts = __dirname.split(path.sep);
+        this.isDevelopmentMode = dirnameParts.includes('src');
         return this.isDevelopmentMode;
     }
 
