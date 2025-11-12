@@ -1,5 +1,6 @@
 export enum MetadataKeyEnum {
-    ShouldAnnounce = "ShouldAnnounce"
+    ShouldAnnounce = "ShouldAnnounce",
+    ExternalIdField = "ExternalIdField"
 }
 
 export type EnumValue = string | number;

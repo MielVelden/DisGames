@@ -6,10 +6,7 @@ import { CacheManager } from "./util/CacheManager";
 import { isValidEnumValue } from "../utils/helpers/Enum";
 import { ErrorHelper } from "../utils/application/Error";
 import Logger from "../utils/application/Logger";
-
-interface BaseEntity {
-  Id?: number;
-}
+import { BaseEntity } from "../interfaces/database/BaseEntity";
 
 type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE';
 
@@ -290,7 +287,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 }
 
 export default BaseRepository;
-export type { ComparisonOperator, WhereCondition, BaseEntity };
+export type { ComparisonOperator, WhereCondition };
 
 export class RepositoryUtils {
 

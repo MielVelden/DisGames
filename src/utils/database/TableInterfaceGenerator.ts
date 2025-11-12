@@ -83,6 +83,7 @@ export class TableInterfaceGenerator {
 
     // Generate header with imports
     let interfaceContent = InterfaceImportManager.generateHeader(jsonInterfaceImports);
+    interfaceContent += `import { BaseEntityClass } from '../../utils/database/BaseEntityClass';\n\n`;
 
     for (const table of tables as any[]) {
       const tableName = table['TABLE_NAME'];
@@ -110,6 +111,28 @@ export class TableInterfaceGenerator {
 
       interfaceContent += this.generateFieldEnum(tableName, filteredColumns);
 
+      const modelClassName = `${SchemaUtils.capitalize(tableName)}${this.suffix}`;
+      const fieldEnumName = `${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix}`;
+      
+      interfaceContent += `export class ${modelClassName} extends BaseEntityClass implements ${modelClassName} {\n`;
+      interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n\n`;
+      
+      filteredColumns.forEach((column: any) => {
+        const fieldName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
+        if (fieldName !== 'Id') {
+          interfaceContent += `  ${fieldName}: ${SchemaUtils.mapMySQLTypeToTypescript(column.COLUMN_NAME, column.DATA_TYPE, enumMapping, tableName)};\n`;
+        }
+      });
+
+      interfaceContent += `\n  constructor(data: ${modelClassName}) {\n`;
+      interfaceContent += `    super(data);\n`;
+      filteredColumns.forEach((column: any) => {
+        const fieldName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
+        interfaceContent += `    this.${fieldName} = data.${fieldName};\n`;
+      });
+      interfaceContent += `  }\n`;
+      interfaceContent += `}\n\n`;
+
       interfaceContent += `export interface ${SchemaUtils.capitalize(tableName)}${this.saveSuffix} {\n`;
 
       // Use same filtered columns for SaveModel
@@ -122,6 +145,34 @@ export class TableInterfaceGenerator {
         interfaceContent += `  ${columnName}?: ${SchemaUtils.mapMySQLTypeToTypescript(column.COLUMN_NAME, column.DATA_TYPE, enumMapping, tableName)};\n`;
       });
 
+      interfaceContent += `}\n\n`;
+
+      const saveModelClassName = `${SchemaUtils.capitalize(tableName)}${this.saveSuffix}`;
+      interfaceContent += `export class ${saveModelClassName} extends BaseEntityClass implements ${saveModelClassName} {\n`;
+      interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n\n`;
+      
+      filteredColumns.forEach((column: any) => {
+        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME) 
+          ? column.COLUMN_NAME
+          : SchemaUtils.formatColumnName(column.COLUMN_NAME);
+        if (columnName !== 'Id') {
+          interfaceContent += `  ${columnName}?: ${SchemaUtils.mapMySQLTypeToTypescript(column.COLUMN_NAME, column.DATA_TYPE, enumMapping, tableName)};\n`;
+        }
+      });
+
+      interfaceContent += `\n  constructor(data: ${saveModelClassName}) {\n`;
+      interfaceContent += `    super({ Id: data.Id ?? 0 });\n`;
+      filteredColumns.forEach((column: any) => {
+        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME) 
+          ? column.COLUMN_NAME
+          : SchemaUtils.formatColumnName(column.COLUMN_NAME);
+        if (columnName === 'Id') {
+          interfaceContent += `    if (data.Id !== undefined) this.Id = data.Id;\n`;
+        } else {
+          interfaceContent += `    if (data.${columnName} !== undefined) this.${columnName} = data.${columnName};\n`;
+        }
+      });
+      interfaceContent += `  }\n`;
       interfaceContent += `}\n\n`;
     }
 

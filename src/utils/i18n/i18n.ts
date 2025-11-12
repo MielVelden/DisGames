@@ -676,6 +676,10 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Invalid argument",
             [LanguageEnum.NL]: "Ongeldig argument",
         },
+        [ExceptionEnum.FIELD_IS_NULL]: {
+            [LanguageEnum.EN]: "Field cannot be null",
+            [LanguageEnum.NL]: "Veld mag niet null zijn",
+        },
     }
 };
 
