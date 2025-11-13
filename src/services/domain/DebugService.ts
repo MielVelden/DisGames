@@ -24,9 +24,9 @@ class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof 
 
             return await this.repository.saveAsync(savable);
         } else {
-            savable.validateIsNull(DebugModelFieldEnum.ServerId);
-            savable.validateIsNull(DebugModelFieldEnum.Data);
-            savable.validateIsNotNull(DebugModelFieldEnum.UniqueCode);
+            savable.validateIsNotNull(DebugModelFieldEnum.ServerId);
+            savable.validateIsNotNull(DebugModelFieldEnum.Data);
+            savable.validateIsNull(DebugModelFieldEnum.UniqueCode);
             savable.UniqueCode = UniqueCodes.generateUUID();
             return await this.repository.saveAsync(savable);
         }

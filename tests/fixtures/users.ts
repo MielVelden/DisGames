@@ -4,33 +4,33 @@ import { TableEnum, UserRoleEnum } from '../../src/interfaces/enums';
 import TestDatabase from '../config/TestDatabase';
 
 export const TEST_USERS: UsersSaveModel[] = [
-    {
+    new UsersSaveModel({
         UserId: '123456789',
         Username: 'TestPlayer1',
         UserRoleEnum: UserRoleEnum.USER,
         CreatedAt: new Date()
-    },
-    {
+    }),
+    new UsersSaveModel({
         UserId: '987654321',
         Username: 'TestPlayer2',
         UserRoleEnum: UserRoleEnum.USER,
         CreatedAt: new Date()
-    },
-    {
+    }),
+    new UsersSaveModel({
         UserId: '555666777',
         Username: 'TestAdmin',
         UserRoleEnum: UserRoleEnum.ADMIN,
         CreatedAt: new Date()
-    },
-    {
+    }),
+    new UsersSaveModel({
         UserId: '111222333',
         Username: 'TestBot',
         UserRoleEnum: UserRoleEnum.SYSTEM,
         CreatedAt: new Date()
-    }
+    }),
 ];
 
-export const MOCK_USERS: UsersModel[] = TEST_USERS.map((user, index) => ({
+export const MOCK_USERS: UsersModel[] = TEST_USERS.map((user, index) => new UsersModel({
     Id: index + 1,
     UserId: user.UserId!,
     Username: user.Username!,
@@ -45,11 +45,11 @@ export function getTestUser(userId: string): UsersModel | undefined {
 
 export async function createTestUserAsync(overrides: Partial<UsersSaveModel> = {}): Promise<UsersSaveModel> {
     const defaultUser = TEST_USERS[0];
-    const user: UsersSaveModel = {
+    const user = new UsersSaveModel({
         ...defaultUser,
         ...overrides,
         UserId: overrides.UserId || `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    };
+    });
 
     // Save user to database
     await TestDatabase.insertAsync(TableEnum.USERS, user);

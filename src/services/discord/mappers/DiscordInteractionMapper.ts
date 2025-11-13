@@ -159,7 +159,7 @@ class DiscordInteractionMapper {
     }
 
     private async mapDiscordUserToUser(discordUser: DiscordUser, discordMember: DiscordGuildMember, event: InteractionEvent): Promise<User> {
-        let user = await UserService.getByExternalIdAsync(discordUser.id);
+        let user = await UserService.getByExternalIdAsync(discordUser.id).catch(() => undefined);
         if (!user)
             user = await UserService.saveAsync(new UsersSaveModel({
                 UserId: discordUser.id,
@@ -195,7 +195,7 @@ class DiscordInteractionMapper {
     }
 
     private async mapDiscordServerToServerAsync(discordServer: DiscordServer, event: InteractionEvent): Promise<ServersModel> {
-        let server = await ServerService.getByExternalIdAsync(discordServer.id);
+        let server = await ServerService.getByExternalIdAsync(discordServer.id).catch(() => undefined);
         if (!server)
             server = await ServerService.saveAsync(new ServersSaveModel({
                 ServerId: discordServer.id,

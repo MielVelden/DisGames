@@ -5,27 +5,27 @@ import Logger from '../../src/utils/application/Logger';
 import TestDatabase from '../config/TestDatabase';
 
 export const TEST_SERVERS: ServersSaveModel[] = [
-    {
+    new ServersSaveModel({
         ServerId: '987654321',
         Name: 'TestServer',
         LanguageEnum: LanguageEnum.NL,
         Points: 0
-    },
-    {
+    }),
+    new ServersSaveModel({
         ServerId: '123456789',
         Name: 'TestServer',
         LanguageEnum: LanguageEnum.EN,
         Points: 100
-    },
-    {
+    }),
+    new ServersSaveModel({
         ServerId: '555666777',
         Name: 'TestServer',
         LanguageEnum: LanguageEnum.NL,
         Points: 50
-    }
+    }),
 ];
 
-export const MOCK_SERVERS: ServersModel[] = TEST_SERVERS.map((server, index) => ({
+export const MOCK_SERVERS: ServersModel[] = TEST_SERVERS.map((server, index) => new ServersModel({
     Id: index + 1,
     ServerId: server.ServerId || 'default',
     Name: server.Name || 'TestServer',
@@ -39,11 +39,11 @@ export function getTestServer(serverId: string): ServersModel | undefined {
 
 export async function createTestServerAsync(overrides: Partial<ServersSaveModel> = {}): Promise<ServersSaveModel> {
     const defaultServer = TEST_SERVERS[0];
-    const server: ServersSaveModel = {
+    const server = new ServersSaveModel({
         ...defaultServer,
         ...overrides,
         ServerId: overrides.ServerId || `test_server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    };
+    });
 
     // Save server to database
     await TestDatabase.insertAsync(TableEnum.SERVERS, server);
