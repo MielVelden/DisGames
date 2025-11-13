@@ -10,7 +10,7 @@ import { TEST_SERVER_IDS, TEST_CHANNEL_IDS, createTestServerAsync } from './serv
 import { TEST_USER_IDS } from './users';
 
 export const TEST_GAMES: GamesSaveModel[] = [
-    {
+    new GamesSaveModel({
         ChannelId: TEST_CHANNEL_IDS.MAIN_CHANNEL,
         ServerId: TEST_SERVER_IDS.MAIN_SERVER,
         GameTypeEnum: GameTypeEnum.ANAGRAM,
@@ -18,8 +18,8 @@ export const TEST_GAMES: GamesSaveModel[] = [
         SettingsJSON: {
             difficulty: 'medium',
         } as any
-    },
-    {
+    }),
+    new GamesSaveModel({
         ChannelId: TEST_CHANNEL_IDS.GAME_CHANNEL,
         ServerId: TEST_SERVER_IDS.ENGLISH_SERVER,
         GameTypeEnum: GameTypeEnum.NUMBER_GUESS,
@@ -28,8 +28,8 @@ export const TEST_GAMES: GamesSaveModel[] = [
             minNumber: 1,
             maxNumber: 100
         } as any
-    },
-    {
+    }),
+    new GamesSaveModel({
         ChannelId: TEST_CHANNEL_IDS.TEST_CHANNEL,
         ServerId: TEST_SERVER_IDS.TEST_SERVER,
         GameTypeEnum: GameTypeEnum.COUNTING,
@@ -37,10 +37,10 @@ export const TEST_GAMES: GamesSaveModel[] = [
         SettingsJSON: {
             startNumber: 1
         } as any
-    }
+    }),
 ];
 
-export const MOCK_GAMES: GamesModel[] = TEST_GAMES.map((game, index) => ({
+export const MOCK_GAMES: GamesModel[] = TEST_GAMES.map((game, index) => new GamesModel({
     Id: index + 1,
     ...game,
     Answer: game.Answer || 'default',
@@ -58,12 +58,12 @@ export function getTestGame(gameType: GameTypeEnum): GamesModel | undefined {
 
 export async function createTestGameAsync(overrides: Partial<GamesSaveModel> = {}, skipDatabaseInsert: boolean = false): Promise<GamesModel> {
     const defaultGame = TEST_GAMES[0];
-    const game = {
+    const game = new GamesSaveModel({
         ...defaultGame,
         ...overrides,
         ChannelId: overrides.ChannelId || `test_channel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         ServerId: overrides.ServerId || TEST_SERVER_IDS.MAIN_SERVER
-    };
+    });
     
     // Remove Answer for new games unless explicitly provided
     if (!overrides.Answer) {

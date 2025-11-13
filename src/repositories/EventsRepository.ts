@@ -1,18 +1,17 @@
-import { EventsModel, EventsModelFieldEnum, EventsSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { EventsModel, EventsModelFieldEnum, EventsSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { EventTypeEnum, TableEnum } from "../interfaces/enums/index";
 import { Duration } from "../interfaces/application";
 import { subtractDurationFromDate } from "../utils/helpers/Duration";
 
-class EventsRepository implements Repository<EventsModel> {
-    private baseRepository: BaseRepository<EventsModel, EventsSaveModel>;
+class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveModel> {
+    public readonly baseRepository: BaseRepository<EventsModel, EventsSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<EventsModel, EventsSaveModel>(TableEnum.EVENTS, EventsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<EventsModel | null> {
+    async getByIdAsync(id: number): Promise<EventsModel | null> {
         return this.baseRepository.getById(id);
     }
 

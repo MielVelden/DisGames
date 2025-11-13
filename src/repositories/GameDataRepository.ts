@@ -1,18 +1,18 @@
 import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel } from "../interfaces/database/TableInterfaces";
-import { Repository } from "../interfaces/database";
+import { RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
 import { ErrorHelper } from "../utils/application/Error";
 
-class GameDataRepository implements Repository<GameDataModel> {
-    private baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
+class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSaveModel> {
+    public readonly baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel>(TableEnum.GAME_DATA, GameDataModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<GameDataModel | null> {
+    async getByIdAsync(id: number): Promise<GameDataModel | null> {
         return this.baseRepository.getById(id);
     }
 
@@ -33,8 +33,8 @@ class GameDataRepository implements Repository<GameDataModel> {
        return result[0];
     }
 
-    async getGameDataByGamesIdAsync(gamesId: number): Promise<GameDataModel[]> {
-        const result = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.Getrandomgamedata, [gamesId]);
+    async getRandomDataByGameIdAsync(gameId: number): Promise<GameDataModel[]> {
+        const result = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.Getrandomgamedata, [gameId]);
         if (!result || result.length === 0)
             ErrorHelper.throwWithParameters(ExceptionEnum.RECORD_NOT_FOUND, { recordType: TableEnum.GAME_DATA.toString() });
 

@@ -1,6 +1,6 @@
 import { InterfaceCollector } from '../collectors/InterfaceCollector';
 import { EndpointCollector } from '../collectors/EndpointCollector';
-import { cleanupQualifiedTypes, isException, TYPE_EXCEPTIONS } from './Exceptions';
+import { cleanupQualifiedTypes, isException, TYPE_EXCEPTIONS, getExceptionDefinition } from './Exceptions';
 
 export async function generateDisGamesTypes(): Promise<string> {
     const interfaces = await InterfaceCollector.collectAllInterfaces();
@@ -11,6 +11,11 @@ export async function generateDisGamesTypes(): Promise<string> {
     let output = '';
     output += `// Auto-generated TypeScript definitions and API wrapper for DisGames\n`;
     output += `// Generated on: ${new Date().toISOString()}\n\n`;
+
+    for (const exception of TYPE_EXCEPTIONS) {
+        if (exception.customDefinition && !exception.skipExport)
+            output += `${exception.customDefinition}\n\n`;
+    }
 
     output += `// ===== DISGAMES INTERFACES =====\n`;
 
@@ -29,18 +34,14 @@ export async function generateDisGamesTypes(): Promise<string> {
 
                 seenNames.add(interfaceInfo.name);
 
-                let qualifiedContent = qualifyTypeReferences(interfaceInfo.content, category, interfaces);
+                let qualifiedContent = interfaceInfo.content;
+                qualifiedContent = removeImports(qualifiedContent);
+                qualifiedContent = qualifyTypeReferences(qualifiedContent, category, interfaces);
                 qualifiedContent = cleanupQualifiedTypes(qualifiedContent);
                 output += `  ${qualifiedContent}\n\n`;
             }
 
             output += `}\n\n`;
-        }
-    }
-
-    for (const exception of TYPE_EXCEPTIONS) {
-        if (exception.customDefinition && !exception.skipExport) {
-            output += `${exception.customDefinition}\n\n`;
         }
     }
 
@@ -62,6 +63,10 @@ function groupByCategory(interfaces: any[]): Record<string, any[]> {
     }
 
     return grouped;
+}
+
+function removeImports(content: string): string {
+    return content.replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '').trim();
 }
 
 function qualifyTypeReferences(content: string, currentCategory: string, allInterfaces: any[]): string {

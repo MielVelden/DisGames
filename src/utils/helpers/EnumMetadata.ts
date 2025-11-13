@@ -2,11 +2,14 @@ import { EnumValue, MetadataKeyEnum, MetadataValue } from '../../interfaces/enum
 
 const enumMetadataRegistry = new Map<string, Map<MetadataKeyEnum, MetadataValue>>();
 
-function getEnumKey(enumValue: EnumValue): string {
+function getEnumKey(enumValue: EnumValue | Record<string, string | number>): string {
+    if (typeof enumValue === 'object' && enumValue !== null && !Array.isArray(enumValue)) {
+        return Object.keys(enumValue).sort().join(',') + ':' + Object.values(enumValue).sort().join(',');
+    }
     return String(enumValue);
 }
 
-function ensureMetadataMap(enumValue: EnumValue): Map<MetadataKeyEnum, MetadataValue> {
+function ensureMetadataMap(enumValue: EnumValue | Record<string, string | number>): Map<MetadataKeyEnum, MetadataValue> {
     const key = getEnumKey(enumValue);
     if (!enumMetadataRegistry.has(key))
         enumMetadataRegistry.set(key, new Map());
@@ -18,7 +21,7 @@ export function EnumProperty<T extends EnumValue>(enumValue: EnumValue, property
     metadataMap.set(propertyKey, value);
 }
 
-export function getEnumProperty<T extends EnumValue>(
+export function getEnumProperty<T extends EnumValue | Record<string, string | number>>(
     key: MetadataKeyEnum,
     enumValue: T
 ): boolean | string | number | undefined {
@@ -32,4 +35,12 @@ export function getEnumProperty<T extends EnumValue>(
 export function ShouldAnnounce<T extends EnumValue>(enumValue: T): void {
     const metadataMap = ensureMetadataMap(enumValue);
     metadataMap.set(MetadataKeyEnum.ShouldAnnounce, true);
+}
+
+export function SetExternalIdField<T extends Record<string, string | number>>(
+    fieldEnum: T,
+    modelFieldEnum: T[keyof T]
+): void {
+    const metadataMap = ensureMetadataMap(fieldEnum);
+    metadataMap.set(MetadataKeyEnum.ExternalIdField, modelFieldEnum);
 }

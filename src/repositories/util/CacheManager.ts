@@ -1,10 +1,7 @@
 import { REPOSITORY_CACHE_TTL } from "../../config";
 import { durationToMilliseconds } from "../../utils/helpers/Duration";
 import Logger from "../../utils/application/Logger";
-
-interface BaseEntity {
-  Id?: number;
-}
+import { BaseEntity } from "../../interfaces/database/BaseEntity";
 
 interface CacheEntry<T> {
   data: T;

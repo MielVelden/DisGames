@@ -1,16 +1,15 @@
-import { DatasheetsModel, DatasheetsModelFieldEnum, DatasheetsSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { DatasheetsModel, DatasheetsModelFieldEnum, DatasheetsSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum } from "../interfaces/enums/index";
 
-class DataSheetRepository implements Repository<DatasheetsModel> {
-    private baseRepository: BaseRepository<DatasheetsModel, DatasheetsSaveModel>;
+class DataSheetRepository implements RepositoryWithBase<DatasheetsModel, DatasheetsSaveModel> {
+    public readonly baseRepository: BaseRepository<DatasheetsModel, DatasheetsSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<DatasheetsModel, DatasheetsSaveModel>(TableEnum.DATASHEETS, DatasheetsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<DatasheetsModel | null> {
+    async getByIdAsync(id: number): Promise<DatasheetsModel | null> {
         return this.baseRepository.getById(id);
     }
 

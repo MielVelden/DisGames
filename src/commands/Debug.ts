@@ -8,6 +8,7 @@ import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
 import { Command } from "../interfaces/application/Command";
 import { Permission } from "../interfaces/enums/application/Permission";
+import { DebugSaveModel } from "../interfaces/database/TableInterfaces";
 
 export class DebugCommand implements Command {
     name = CommandEnum.DEBUG;
@@ -23,7 +24,10 @@ export class DebugCommand implements Command {
             return;
         
         // Handle debug record command
-        const debugRecord = await DebugService.getDebugByUniqueCodeAsync(uniqueCode, true);
+        const debugRecord = await DebugService.getByExternalIdAsync(uniqueCode);
+
+        if (!debugRecord || debugRecord.UpdatedAt === null)
+            return;
 
         // Collect data from the server
         debugRecord.ServerId = event.server.Id;
@@ -43,10 +47,10 @@ export class DebugCommand implements Command {
         };
 
         // Save debug record
-        await DebugService.saveAsync(debugRecord);
+        await DebugService.saveAsync(debugRecord, event);
 
         // Create a new debug record
-        const newDebugEvent = await DebugService.createEmptyRecordAsync();
+        const newDebugEvent = await DebugService.saveAsync(new DebugSaveModel({}), event);
         await Logger.logDebugCommand(debugRecord, newDebugEvent.UniqueCode, { webhookType: WebhookType.DEBUG, sendToDiscord: true });
         await event.replyAsync(new MultiLingualString(i18n.commands.debug.labels.thanks));
     }

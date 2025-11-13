@@ -5,12 +5,12 @@ import UserService from "../services/domain/UserService";
 
 class UserController implements Controller {
     async getByIdAsync(discordUserId: string, identity: User): Promise<UsersModel> {
-        const user = await UserService.getByUserIdAsync(discordUserId);
+        const user = await UserService.getByExternalIdAsync(discordUserId);
         return user;
     }
 
     async getAllAsync(identity: User): Promise<UsersModel[]> {
-        const users = await UserService.getAllAsync(identity);
+        const users = await UserService.getAllAsync();
         return users;
     }
 }

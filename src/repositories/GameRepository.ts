@@ -1,16 +1,15 @@
-import { GamesModel, GamesModelFieldEnum, GamesSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { GamesModel, GamesModelFieldEnum, GamesSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { GameTypeEnum, TableEnum } from "../interfaces/enums/index";
 
-class GameRepository implements Repository<GamesModel> {
-    private baseRepository: BaseRepository<GamesModel, GamesSaveModel>;
+class GameRepository implements RepositoryWithBase<GamesModel, GamesSaveModel> {
+    public readonly baseRepository: BaseRepository<GamesModel, GamesSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<GamesModel, GamesSaveModel>(TableEnum.GAMES, GamesModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<GamesModel | null> {
+    async getByIdAsync(id: number): Promise<GamesModel | null> {
         return this.baseRepository.getById(id);
     }
 

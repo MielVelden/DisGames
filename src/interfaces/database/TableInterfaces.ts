@@ -3,6 +3,9 @@ import * as enums from "../../interfaces/enums";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Debug_Data, Events_Payload, Games_Settings, Metrics_Metrics, TimelineEntries_Changes } from "../domain";
 
+import { BaseEntityClass } from '../../utils/database/BaseEntityClass';
+import { BaseEntity } from '../../interfaces/database/BaseEntity';
+
 export interface DatasheetsModel {
   Id: number;
   ServerId: number;
@@ -17,11 +20,43 @@ export enum DatasheetsModelFieldEnum {
   Name = "Name"
 }
 
+export class DatasheetsModel extends BaseEntityClass<DatasheetsModelFieldEnum> implements DatasheetsModel {
+  protected static fieldEnum = DatasheetsModelFieldEnum;
+
+  ServerId: number;
+  LanguageEnum: enums.LanguageEnum;
+  Name: string;
+
+  constructor(data: Partial<DatasheetsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.ServerId = data.ServerId!;
+    this.LanguageEnum = data.LanguageEnum!;
+    this.Name = data.Name!;
+  }
+}
+
 export interface DatasheetsSaveModel {
   Id?: number;
   ServerId?: number;
   LanguageEnum?: enums.LanguageEnum;
   Name?: string;
+}
+
+export class DatasheetsSaveModel extends BaseEntityClass<DatasheetsModelFieldEnum> implements DatasheetsSaveModel {
+  protected static fieldEnum = DatasheetsModelFieldEnum;
+
+  ServerId?: number;
+  LanguageEnum?: enums.LanguageEnum;
+  Name?: string;
+
+  constructor(data: Partial<DatasheetsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.LanguageEnum !== undefined) this.LanguageEnum = data.LanguageEnum;
+    if (data.Name !== undefined) this.Name = data.Name;
+  }
 }
 
 export interface DebugModel {
@@ -42,6 +77,26 @@ export enum DebugModelFieldEnum {
   UpdatedAt = "UpdatedAt"
 }
 
+export class DebugModel extends BaseEntityClass<DebugModelFieldEnum> implements DebugModel {
+  protected static fieldEnum = DebugModelFieldEnum;
+
+  UniqueCode: string;
+  ServerId: number;
+  Data: Debug_Data;
+  CreatedAt: Date;
+  UpdatedAt: Date;
+
+  constructor(data: Partial<DebugModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.UniqueCode = data.UniqueCode!;
+    this.ServerId = data.ServerId!;
+    this.Data = data.Data!;
+    this.CreatedAt = data.CreatedAt!;
+    this.UpdatedAt = data.UpdatedAt!;
+  }
+}
+
 export interface DebugSaveModel {
   Id?: number;
   UniqueCode?: string;
@@ -49,6 +104,26 @@ export interface DebugSaveModel {
   DataJSON?: Debug_Data;
   CreatedAt?: Date;
   UpdatedAt?: Date;
+}
+
+export class DebugSaveModel extends BaseEntityClass<DebugModelFieldEnum> implements DebugSaveModel {
+  protected static fieldEnum = DebugModelFieldEnum;
+
+  UniqueCode?: string;
+  ServerId?: number;
+  DataJSON?: Debug_Data;
+  CreatedAt?: Date;
+  UpdatedAt?: Date;
+
+  constructor(data: Partial<DebugSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.UniqueCode !== undefined) this.UniqueCode = data.UniqueCode;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.DataJSON !== undefined) this.DataJSON = data.DataJSON;
+    if (data.CreatedAt !== undefined) this.CreatedAt = data.CreatedAt;
+    if (data.UpdatedAt !== undefined) this.UpdatedAt = data.UpdatedAt;
+  }
 }
 
 export interface EventsModel {
@@ -69,6 +144,26 @@ export enum EventsModelFieldEnum {
   CreatedAt = "CreatedAt"
 }
 
+export class EventsModel extends BaseEntityClass<EventsModelFieldEnum> implements EventsModel {
+  protected static fieldEnum = EventsModelFieldEnum;
+
+  ServerId: number;
+  UserId: number;
+  EventTypeEnum: enums.EventTypeEnum;
+  Payload: Events_Payload;
+  CreatedAt: Date;
+
+  constructor(data: Partial<EventsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.ServerId = data.ServerId!;
+    this.UserId = data.UserId!;
+    this.EventTypeEnum = data.EventTypeEnum!;
+    this.Payload = data.Payload!;
+    this.CreatedAt = data.CreatedAt!;
+  }
+}
+
 export interface EventsSaveModel {
   Id?: number;
   ServerId?: number;
@@ -76,6 +171,26 @@ export interface EventsSaveModel {
   EventTypeEnum?: enums.EventTypeEnum;
   PayloadJSON?: Events_Payload;
   CreatedAt?: Date;
+}
+
+export class EventsSaveModel extends BaseEntityClass<EventsModelFieldEnum> implements EventsSaveModel {
+  protected static fieldEnum = EventsModelFieldEnum;
+
+  ServerId?: number;
+  UserId?: number;
+  EventTypeEnum?: enums.EventTypeEnum;
+  PayloadJSON?: Events_Payload;
+  CreatedAt?: Date;
+
+  constructor(data: Partial<EventsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.UserId !== undefined) this.UserId = data.UserId;
+    if (data.EventTypeEnum !== undefined) this.EventTypeEnum = data.EventTypeEnum;
+    if (data.PayloadJSON !== undefined) this.PayloadJSON = data.PayloadJSON;
+    if (data.CreatedAt !== undefined) this.CreatedAt = data.CreatedAt;
+  }
 }
 
 export interface GameDataModel {
@@ -94,12 +209,48 @@ export enum GameDataModelFieldEnum {
   Response = "Response"
 }
 
+export class GameDataModel extends BaseEntityClass<GameDataModelFieldEnum> implements GameDataModel {
+  protected static fieldEnum = GameDataModelFieldEnum;
+
+  GameId: number;
+  DataSheetId: number;
+  Message: MultiLingualString;
+  Response: MultiLingualString;
+
+  constructor(data: Partial<GameDataModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.GameId = data.GameId!;
+    this.DataSheetId = data.DataSheetId!;
+    this.Message = data.Message!;
+    this.Response = data.Response!;
+  }
+}
+
 export interface GameDataSaveModel {
   Id?: number;
   GameId?: number;
   DataSheetId?: number;
   Message?: MultiLingualString;
   Response?: MultiLingualString;
+}
+
+export class GameDataSaveModel extends BaseEntityClass<GameDataModelFieldEnum> implements GameDataSaveModel {
+  protected static fieldEnum = GameDataModelFieldEnum;
+
+  GameId?: number;
+  DataSheetId?: number;
+  Message?: MultiLingualString;
+  Response?: MultiLingualString;
+
+  constructor(data: Partial<GameDataSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.GameId !== undefined) this.GameId = data.GameId;
+    if (data.DataSheetId !== undefined) this.DataSheetId = data.DataSheetId;
+    if (data.Message !== undefined) this.Message = data.Message;
+    if (data.Response !== undefined) this.Response = data.Response;
+  }
 }
 
 export interface GameTypesModel {
@@ -126,6 +277,32 @@ export enum GameTypesModelFieldEnum {
   allowMessageChange = "allowMessageChange"
 }
 
+export class GameTypesModel extends BaseEntityClass<GameTypesModelFieldEnum> implements GameTypesModel {
+  protected static fieldEnum = GameTypesModelFieldEnum;
+
+  gameName: string;
+  gameDisabled: number;
+  pointPerGame: number;
+  description: number;
+  gameRules: number;
+  replyMessage: number;
+  sameUserAllowed: number;
+  allowMessageChange: number;
+
+  constructor(data: Partial<GameTypesModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.gameName = data.gameName!;
+    this.gameDisabled = data.gameDisabled!;
+    this.pointPerGame = data.pointPerGame!;
+    this.description = data.description!;
+    this.gameRules = data.gameRules!;
+    this.replyMessage = data.replyMessage!;
+    this.sameUserAllowed = data.sameUserAllowed!;
+    this.allowMessageChange = data.allowMessageChange!;
+  }
+}
+
 export interface GameTypesSaveModel {
   Id?: number;
   gameName?: string;
@@ -136,6 +313,32 @@ export interface GameTypesSaveModel {
   replyMessage?: number;
   sameUserAllowed?: number;
   allowMessageChange?: number;
+}
+
+export class GameTypesSaveModel extends BaseEntityClass<GameTypesModelFieldEnum> implements GameTypesSaveModel {
+  protected static fieldEnum = GameTypesModelFieldEnum;
+
+  gameName?: string;
+  gameDisabled?: number;
+  pointPerGame?: number;
+  description?: number;
+  gameRules?: number;
+  replyMessage?: number;
+  sameUserAllowed?: number;
+  allowMessageChange?: number;
+
+  constructor(data: Partial<GameTypesSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.gameName !== undefined) this.gameName = data.gameName;
+    if (data.gameDisabled !== undefined) this.gameDisabled = data.gameDisabled;
+    if (data.pointPerGame !== undefined) this.pointPerGame = data.pointPerGame;
+    if (data.description !== undefined) this.description = data.description;
+    if (data.gameRules !== undefined) this.gameRules = data.gameRules;
+    if (data.replyMessage !== undefined) this.replyMessage = data.replyMessage;
+    if (data.sameUserAllowed !== undefined) this.sameUserAllowed = data.sameUserAllowed;
+    if (data.allowMessageChange !== undefined) this.allowMessageChange = data.allowMessageChange;
+  }
 }
 
 export interface GamesModel {
@@ -160,6 +363,30 @@ export enum GamesModelFieldEnum {
   Settings = "Settings"
 }
 
+export class GamesModel extends BaseEntityClass<GamesModelFieldEnum> implements GamesModel {
+  protected static fieldEnum = GamesModelFieldEnum;
+
+  ChannelId: string;
+  ServerId: string;
+  GameTypeEnum: enums.GameTypeEnum;
+  Answer: string;
+  LastUser: string;
+  MessageId: string;
+  Settings: Games_Settings;
+
+  constructor(data: Partial<GamesModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.ChannelId = data.ChannelId!;
+    this.ServerId = data.ServerId!;
+    this.GameTypeEnum = data.GameTypeEnum!;
+    this.Answer = data.Answer!;
+    this.LastUser = data.LastUser!;
+    this.MessageId = data.MessageId!;
+    this.Settings = data.Settings!;
+  }
+}
+
 export interface GamesSaveModel {
   Id?: number;
   ChannelId?: string;
@@ -169,6 +396,30 @@ export interface GamesSaveModel {
   LastUser?: string;
   MessageId?: string;
   SettingsJSON?: Games_Settings;
+}
+
+export class GamesSaveModel extends BaseEntityClass<GamesModelFieldEnum> implements GamesSaveModel {
+  protected static fieldEnum = GamesModelFieldEnum;
+
+  ChannelId?: string;
+  ServerId?: string;
+  GameTypeEnum?: enums.GameTypeEnum;
+  Answer?: string;
+  LastUser?: string;
+  MessageId?: string;
+  SettingsJSON?: Games_Settings;
+
+  constructor(data: Partial<GamesSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.ChannelId !== undefined) this.ChannelId = data.ChannelId;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.GameTypeEnum !== undefined) this.GameTypeEnum = data.GameTypeEnum;
+    if (data.Answer !== undefined) this.Answer = data.Answer;
+    if (data.LastUser !== undefined) this.LastUser = data.LastUser;
+    if (data.MessageId !== undefined) this.MessageId = data.MessageId;
+    if (data.SettingsJSON !== undefined) this.SettingsJSON = data.SettingsJSON;
+  }
 }
 
 export interface GamesXDatasheetsModel {
@@ -183,10 +434,38 @@ export enum GamesXDatasheetsModelFieldEnum {
   DatasheetId = "DatasheetId"
 }
 
+export class GamesXDatasheetsModel extends BaseEntityClass<GamesXDatasheetsModelFieldEnum> implements GamesXDatasheetsModel {
+  protected static fieldEnum = GamesXDatasheetsModelFieldEnum;
+
+  GameId: number;
+  DatasheetId: number;
+
+  constructor(data: Partial<GamesXDatasheetsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.GameId = data.GameId!;
+    this.DatasheetId = data.DatasheetId!;
+  }
+}
+
 export interface GamesXDatasheetsSaveModel {
   Id?: number;
   GameId?: number;
   DatasheetId?: number;
+}
+
+export class GamesXDatasheetsSaveModel extends BaseEntityClass<GamesXDatasheetsModelFieldEnum> implements GamesXDatasheetsSaveModel {
+  protected static fieldEnum = GamesXDatasheetsModelFieldEnum;
+
+  GameId?: number;
+  DatasheetId?: number;
+
+  constructor(data: Partial<GamesXDatasheetsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.GameId !== undefined) this.GameId = data.GameId;
+    if (data.DatasheetId !== undefined) this.DatasheetId = data.DatasheetId;
+  }
 }
 
 export interface LanguageModel {
@@ -205,12 +484,48 @@ export enum LanguageModelFieldEnum {
   GE = "GE"
 }
 
+export class LanguageModel extends BaseEntityClass<LanguageModelFieldEnum> implements LanguageModel {
+  protected static fieldEnum = LanguageModelFieldEnum;
+
+  NL: string;
+  EN: string;
+  ES: string;
+  GE: string;
+
+  constructor(data: Partial<LanguageModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.NL = data.NL!;
+    this.EN = data.EN!;
+    this.ES = data.ES!;
+    this.GE = data.GE!;
+  }
+}
+
 export interface LanguageSaveModel {
   Id?: number;
   NL?: string;
   EN?: string;
   ES?: string;
   GE?: string;
+}
+
+export class LanguageSaveModel extends BaseEntityClass<LanguageModelFieldEnum> implements LanguageSaveModel {
+  protected static fieldEnum = LanguageModelFieldEnum;
+
+  NL?: string;
+  EN?: string;
+  ES?: string;
+  GE?: string;
+
+  constructor(data: Partial<LanguageSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.NL !== undefined) this.NL = data.NL;
+    if (data.EN !== undefined) this.EN = data.EN;
+    if (data.ES !== undefined) this.ES = data.ES;
+    if (data.GE !== undefined) this.GE = data.GE;
+  }
 }
 
 export interface MetricsModel {
@@ -225,10 +540,38 @@ export enum MetricsModelFieldEnum {
   Metrics = "Metrics"
 }
 
+export class MetricsModel extends BaseEntityClass<MetricsModelFieldEnum> implements MetricsModel {
+  protected static fieldEnum = MetricsModelFieldEnum;
+
+  Date: Date;
+  Metrics: Metrics_Metrics;
+
+  constructor(data: Partial<MetricsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.Date = data.Date!;
+    this.Metrics = data.Metrics!;
+  }
+}
+
 export interface MetricsSaveModel {
   Id?: number;
   Date?: Date;
   MetricsJSON?: Metrics_Metrics;
+}
+
+export class MetricsSaveModel extends BaseEntityClass<MetricsModelFieldEnum> implements MetricsSaveModel {
+  protected static fieldEnum = MetricsModelFieldEnum;
+
+  Date?: Date;
+  MetricsJSON?: Metrics_Metrics;
+
+  constructor(data: Partial<MetricsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.Date !== undefined) this.Date = data.Date;
+    if (data.MetricsJSON !== undefined) this.MetricsJSON = data.MetricsJSON;
+  }
 }
 
 export interface PointsModel {
@@ -247,12 +590,48 @@ export enum PointsModelFieldEnum {
   Points = "Points"
 }
 
+export class PointsModel extends BaseEntityClass<PointsModelFieldEnum> implements PointsModel {
+  protected static fieldEnum = PointsModelFieldEnum;
+
+  UserId: string;
+  ServerId: string;
+  GameId: number;
+  Points: number;
+
+  constructor(data: Partial<PointsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.UserId = data.UserId!;
+    this.ServerId = data.ServerId!;
+    this.GameId = data.GameId!;
+    this.Points = data.Points!;
+  }
+}
+
 export interface PointsSaveModel {
   Id?: number;
   UserId?: string;
   ServerId?: string;
   GameId?: number;
   Points?: number;
+}
+
+export class PointsSaveModel extends BaseEntityClass<PointsModelFieldEnum> implements PointsSaveModel {
+  protected static fieldEnum = PointsModelFieldEnum;
+
+  UserId?: string;
+  ServerId?: string;
+  GameId?: number;
+  Points?: number;
+
+  constructor(data: Partial<PointsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.UserId !== undefined) this.UserId = data.UserId;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.GameId !== undefined) this.GameId = data.GameId;
+    if (data.Points !== undefined) this.Points = data.Points;
+  }
 }
 
 export interface ServersModel {
@@ -271,12 +650,48 @@ export enum ServersModelFieldEnum {
   LanguageEnum = "LanguageEnum"
 }
 
+export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersModel {
+  protected static fieldEnum = ServersModelFieldEnum;
+
+  ServerId: string;
+  Name: string;
+  Points: number;
+  LanguageEnum: enums.LanguageEnum;
+
+  constructor(data: Partial<ServersModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.ServerId = data.ServerId!;
+    this.Name = data.Name!;
+    this.Points = data.Points!;
+    this.LanguageEnum = data.LanguageEnum!;
+  }
+}
+
 export interface ServersSaveModel {
   Id?: number;
   ServerId?: string;
   Name?: string;
   Points?: number;
   LanguageEnum?: enums.LanguageEnum;
+}
+
+export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersSaveModel {
+  protected static fieldEnum = ServersModelFieldEnum;
+
+  ServerId?: string;
+  Name?: string;
+  Points?: number;
+  LanguageEnum?: enums.LanguageEnum;
+
+  constructor(data: Partial<ServersSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.Name !== undefined) this.Name = data.Name;
+    if (data.Points !== undefined) this.Points = data.Points;
+    if (data.LanguageEnum !== undefined) this.LanguageEnum = data.LanguageEnum;
+  }
 }
 
 export interface StatisticsModel {
@@ -293,11 +708,43 @@ export enum StatisticsModelFieldEnum {
   Value = "Value"
 }
 
+export class StatisticsModel extends BaseEntityClass<StatisticsModelFieldEnum> implements StatisticsModel {
+  protected static fieldEnum = StatisticsModelFieldEnum;
+
+  Date: Date;
+  GameId: number;
+  Value: number;
+
+  constructor(data: Partial<StatisticsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.Date = data.Date!;
+    this.GameId = data.GameId!;
+    this.Value = data.Value!;
+  }
+}
+
 export interface StatisticsSaveModel {
   Id?: number;
   Date?: Date;
   GameId?: number;
   Value?: number;
+}
+
+export class StatisticsSaveModel extends BaseEntityClass<StatisticsModelFieldEnum> implements StatisticsSaveModel {
+  protected static fieldEnum = StatisticsModelFieldEnum;
+
+  Date?: Date;
+  GameId?: number;
+  Value?: number;
+
+  constructor(data: Partial<StatisticsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.Date !== undefined) this.Date = data.Date;
+    if (data.GameId !== undefined) this.GameId = data.GameId;
+    if (data.Value !== undefined) this.Value = data.Value;
+  }
 }
 
 export interface TableEnumsModel {
@@ -310,9 +757,33 @@ export enum TableEnumsModelFieldEnum {
   TableName = "TableName"
 }
 
+export class TableEnumsModel extends BaseEntityClass<TableEnumsModelFieldEnum> implements TableEnumsModel {
+  protected static fieldEnum = TableEnumsModelFieldEnum;
+
+  TableName: string;
+
+  constructor(data: Partial<TableEnumsModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.TableName = data.TableName!;
+  }
+}
+
 export interface TableEnumsSaveModel {
   Id?: number;
   TableName?: string;
+}
+
+export class TableEnumsSaveModel extends BaseEntityClass<TableEnumsModelFieldEnum> implements TableEnumsSaveModel {
+  protected static fieldEnum = TableEnumsModelFieldEnum;
+
+  TableName?: string;
+
+  constructor(data: Partial<TableEnumsSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.TableName !== undefined) this.TableName = data.TableName;
+  }
 }
 
 export interface TimelineEntriesModel {
@@ -337,6 +808,30 @@ export enum TimelineEntriesModelFieldEnum {
   CreatedAt = "CreatedAt"
 }
 
+export class TimelineEntriesModel extends BaseEntityClass<TimelineEntriesModelFieldEnum> implements TimelineEntriesModel {
+  protected static fieldEnum = TimelineEntriesModelFieldEnum;
+
+  TableEnum: enums.TableEnum;
+  ObjectId: number;
+  TimelineType: number;
+  UserId: number;
+  ServerId: number;
+  Changes: TimelineEntries_Changes;
+  CreatedAt: Date;
+
+  constructor(data: Partial<TimelineEntriesModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.TableEnum = data.TableEnum!;
+    this.ObjectId = data.ObjectId!;
+    this.TimelineType = data.TimelineType!;
+    this.UserId = data.UserId!;
+    this.ServerId = data.ServerId!;
+    this.Changes = data.Changes!;
+    this.CreatedAt = data.CreatedAt!;
+  }
+}
+
 export interface TimelineEntriesSaveModel {
   Id?: number;
   TableEnum?: enums.TableEnum;
@@ -346,6 +841,30 @@ export interface TimelineEntriesSaveModel {
   ServerId?: number;
   ChangesJSON?: TimelineEntries_Changes;
   CreatedAt?: Date;
+}
+
+export class TimelineEntriesSaveModel extends BaseEntityClass<TimelineEntriesModelFieldEnum> implements TimelineEntriesSaveModel {
+  protected static fieldEnum = TimelineEntriesModelFieldEnum;
+
+  TableEnum?: enums.TableEnum;
+  ObjectId?: number;
+  TimelineType?: number;
+  UserId?: number;
+  ServerId?: number;
+  ChangesJSON?: TimelineEntries_Changes;
+  CreatedAt?: Date;
+
+  constructor(data: Partial<TimelineEntriesSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.TableEnum !== undefined) this.TableEnum = data.TableEnum;
+    if (data.ObjectId !== undefined) this.ObjectId = data.ObjectId;
+    if (data.TimelineType !== undefined) this.TimelineType = data.TimelineType;
+    if (data.UserId !== undefined) this.UserId = data.UserId;
+    if (data.ServerId !== undefined) this.ServerId = data.ServerId;
+    if (data.ChangesJSON !== undefined) this.ChangesJSON = data.ChangesJSON;
+    if (data.CreatedAt !== undefined) this.CreatedAt = data.CreatedAt;
+  }
 }
 
 export interface UsersModel {
@@ -366,6 +885,26 @@ export enum UsersModelFieldEnum {
   CreatedAt = "CreatedAt"
 }
 
+export class UsersModel extends BaseEntityClass<UsersModelFieldEnum> implements UsersModel {
+  protected static fieldEnum = UsersModelFieldEnum;
+
+  UserId: string;
+  Username: string;
+  UserRoleEnum: enums.UserRoleEnum;
+  OAuth2AccessToken: string;
+  CreatedAt: Date;
+
+  constructor(data: Partial<UsersModel>) {
+    super(data as BaseEntity);
+    this.Id = data.Id!;
+    this.UserId = data.UserId!;
+    this.Username = data.Username!;
+    this.UserRoleEnum = data.UserRoleEnum!;
+    this.OAuth2AccessToken = data.OAuth2AccessToken!;
+    this.CreatedAt = data.CreatedAt!;
+  }
+}
+
 export interface UsersSaveModel {
   Id?: number;
   UserId?: string;
@@ -373,5 +912,25 @@ export interface UsersSaveModel {
   UserRoleEnum?: enums.UserRoleEnum;
   OAuth2AccessToken?: string;
   CreatedAt?: Date;
+}
+
+export class UsersSaveModel extends BaseEntityClass<UsersModelFieldEnum> implements UsersSaveModel {
+  protected static fieldEnum = UsersModelFieldEnum;
+
+  UserId?: string;
+  Username?: string;
+  UserRoleEnum?: enums.UserRoleEnum;
+  OAuth2AccessToken?: string;
+  CreatedAt?: Date;
+
+  constructor(data: Partial<UsersSaveModel>) {
+    super({ Id: data.Id ?? 0 });
+    if (data.Id !== undefined) this.Id = data.Id;
+    if (data.UserId !== undefined) this.UserId = data.UserId;
+    if (data.Username !== undefined) this.Username = data.Username;
+    if (data.UserRoleEnum !== undefined) this.UserRoleEnum = data.UserRoleEnum;
+    if (data.OAuth2AccessToken !== undefined) this.OAuth2AccessToken = data.OAuth2AccessToken;
+    if (data.CreatedAt !== undefined) this.CreatedAt = data.CreatedAt;
+  }
 }
 

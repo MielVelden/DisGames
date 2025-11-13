@@ -10,6 +10,7 @@ import { handleErrorAsync } from '../utils/application/Error';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
+import { EventsSaveModel } from '../interfaces/database';
 
 export default {
     name: Events.MessageCreate,
@@ -19,14 +20,8 @@ export default {
     },
 };
 
-export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
-    if (message.author.bot)
-        return;
-
-    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
-
-    // Save the event to the database
-    EventsService.saveAsync({
+export async function processMessageEventAsync(event: MessageInteractionEvent): Promise<void> {
+    EventsService.saveAsync(new EventsSaveModel({
         UserId: event.user.id,
         ServerId: event.server.Id,
         EventTypeEnum: event.type,
@@ -36,7 +31,7 @@ export async function handleDiscordMessageAsync(message: Message, eventType: Eve
             guildId: event.guildId,
             content: event.content
         }
-    });
+    }), event);
 
     try {
         if (event.command && (event.command.canExecute?.(event) ?? true))
@@ -47,4 +42,12 @@ export async function handleDiscordMessageAsync(message: Message, eventType: Eve
     catch (error) {
         await handleErrorAsync(error, event);
     }
+}
+
+export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
+    if (message.author.bot)
+        return;
+
+    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
+    await processMessageEventAsync(event);
 }

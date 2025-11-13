@@ -1,17 +1,16 @@
-import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ErrorHelper } from "../utils/application/Error";
 
-class MetricsRepository implements Repository<MetricsModel> {
-    private baseRepository: BaseRepository<MetricsModel, MetricsSaveModel>;
+class MetricsRepository implements RepositoryWithBase<MetricsModel, MetricsSaveModel> {
+    public readonly baseRepository: BaseRepository<MetricsModel, MetricsSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<MetricsModel, MetricsSaveModel>(TableEnum.METRICS, MetricsModelFieldEnum);
     }
 
-    async getByIDAsync(id: number): Promise<MetricsModel | null> {
+    async getByIdAsync(id: number): Promise<MetricsModel | null> {
         return this.baseRepository.getById(id);
     }
 

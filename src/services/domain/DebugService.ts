@@ -1,39 +1,39 @@
-import { DebugModel } from "../../interfaces/database/TableInterfaces";
+import { InteractionEvent } from "../../interfaces/application";
+import { DebugModel, DebugModelFieldEnum, DebugSaveModel } from "../../interfaces/database/TableInterfaces";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import DebugRepository from "../../repositories/DebugRepository";
 import { ErrorHelper } from "../../utils/application/Error";
-import Logger from "../../utils/application/Logger";
 import { UniqueCodes } from "../../utils/helpers/UniqueCodes";
+import { BaseDomainService } from "./BaseDomainService";
 
-class DebugService {
-    public async getDebugById(id: number): Promise<DebugModel> {
-        const debugRecord = await DebugRepository.getByIDAsync(id);
-        if (!debugRecord)
-            throw new Error("Debug not found");
+class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof DebugRepository> {
+    protected readonly repository = DebugRepository;
 
-        return debugRecord;
+    public async getAllAsync(): Promise<DebugModel[]> {
+        return await this.repository.getAllAsync();
     }
 
-    public async createEmptyRecordAsync(): Promise<DebugModel> {
-        const debugRecord = await DebugRepository.saveAsync({
-            UniqueCode: UniqueCodes.generateUUID(),
-            CreatedAt: new Date(),
-        });
+    protected async performSaveAsync(savable: DebugSaveModel, event: InteractionEvent): Promise<DebugModel> {
+        if (savable.isUpdate()) {
+            const debugRecord = await this.repository.getByIdAsync(savable.getId()!);
+            if (!debugRecord)
+                ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
-        Logger.logDebug(`Debug record created: ${debugRecord.UniqueCode}`);
-        return debugRecord;
+            savable.Id = debugRecord.Id;
+            savable.validateHasNotChanged(DebugModelFieldEnum.UniqueCode, debugRecord.UniqueCode);
+
+            return await this.repository.saveAsync(savable);
+        } else {
+            savable.validateIsNotNull(DebugModelFieldEnum.ServerId);
+            savable.validateIsNotNull(DebugModelFieldEnum.Data);
+            savable.validateIsNull(DebugModelFieldEnum.UniqueCode);
+            savable.UniqueCode = UniqueCodes.generateUUID();
+            return await this.repository.saveAsync(savable);
+        }
     }
 
-    public async getDebugByUniqueCodeAsync(uniqueCode: string, isEmpty: boolean = false): Promise<DebugModel> {
-        const debugRecord = await DebugRepository.getByUniqueCodeAsync(uniqueCode, isEmpty);
-        if (!debugRecord)
-            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
-        return debugRecord;
-    }
-
-    public async saveAsync(debugRecord: DebugModel): Promise<DebugModel> {
-        debugRecord.UpdatedAt = new Date();
-        return await DebugRepository.saveAsync(debugRecord);
+    public async purgeAsync(id: number): Promise<void> {
+        await this.repository.purgeAsync(id);
     }
 }
 

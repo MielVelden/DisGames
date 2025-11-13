@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
-import { ServersModel } from '../../../interfaces/database/TableInterfaces';
+import { ServersModel, ServersSaveModel, UsersSaveModel } from '../../../interfaces/database/TableInterfaces';
 import ServerService from '../../domain/ServerService';
 import { getCommandConfig } from '../../../utils/collectors/CommandCollector';
 import {
@@ -19,14 +19,11 @@ import {
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
 import UserService from '../../domain/UserService';
-import { EventTypeEnum } from '../../../interfaces/enums';
+import { EventTypeEnum, LanguageEnum } from '../../../interfaces/enums';
 
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
-        const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer);
-
         const baseParams = {
-            server,
             channelId: interaction.channelId!,
             guildId: interaction.guildId!,
             messageId: interaction.id
@@ -42,7 +39,7 @@ class DiscordInteractionMapper {
             const tempEvent = new SlashCommandDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
-                baseParams.server,
+                await this.getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -50,11 +47,12 @@ class DiscordInteractionMapper {
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
+            const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer, tempEvent);
 
             event = new SlashCommandDiscordEvent(
                 interaction,
                 user,
-                baseParams.server,
+                server,
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -64,7 +62,7 @@ class DiscordInteractionMapper {
             const tempEvent = new ButtonDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
-                baseParams.server,
+                await this.getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -72,11 +70,12 @@ class DiscordInteractionMapper {
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
+            const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer, tempEvent);
 
             event = new ButtonDiscordEvent(
                 interaction,
                 user,
-                baseParams.server,
+                server,
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -85,8 +84,8 @@ class DiscordInteractionMapper {
         } else if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
             const tempEvent = new SelectMenuDiscordEvent(
                 interaction,
-                await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
-                baseParams.server,
+                this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
+                this.getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -95,11 +94,12 @@ class DiscordInteractionMapper {
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
+            const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer, tempEvent);
 
             event = new SelectMenuDiscordEvent(
                 interaction,
                 user,
-                baseParams.server,
+                server,
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -114,13 +114,12 @@ class DiscordInteractionMapper {
     }
 
     public async mapMessageToInteractionEventAsync(message: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {
-        const server = await this.mapDiscordServerToServerAsync(message.guild as DiscordServer);
         const command = getCommandConfig(message.content.split(' ')[0].toLowerCase()) ?? undefined;
 
         const tempEvent = new MessageDiscordEvent(
             message,
-            await this.getTempUser(message.author, message.member as DiscordGuildMember),
-            server,
+            this.getTempUser(message.author, message.member as DiscordGuildMember),
+            this.getTempServer(message.guild as DiscordServer),
             message.channelId,
             message.guildId!,
             message.id,
@@ -130,6 +129,7 @@ class DiscordInteractionMapper {
         );
 
         const user = await this.mapDiscordUserToUser(message.author, message.member as DiscordGuildMember, tempEvent);
+        const server = await this.mapDiscordServerToServerAsync(message.guild as DiscordServer, tempEvent);
 
         return new MessageDiscordEvent(
             message,
@@ -144,7 +144,7 @@ class DiscordInteractionMapper {
         );
     }
 
-    private async getTempUser(discordUser: DiscordUser, discordMember: DiscordGuildMember): Promise<User> {
+    private getTempUser(discordUser: DiscordUser, discordMember: DiscordGuildMember): User {
         return {
             id: undefined,
             userId: discordUser.id,
@@ -159,12 +159,12 @@ class DiscordInteractionMapper {
     }
 
     private async mapDiscordUserToUser(discordUser: DiscordUser, discordMember: DiscordGuildMember, event: InteractionEvent): Promise<User> {
-        let user = await UserService.getByUserIdAsync(discordUser.id, false);
+        let user = await UserService.getByExternalIdAsync(discordUser.id).catch(() => undefined);
         if (!user)
-            user = await UserService.saveAsync({
+            user = await UserService.saveAsync(new UsersSaveModel({
                 UserId: discordUser.id,
                 Username: discordUser.username,
-            }, event);
+            }), event);
 
         // Update the username if it has changed
         if (discordUser.username !== user.Username)
@@ -183,8 +183,24 @@ class DiscordInteractionMapper {
         };
     }
 
-    private async mapDiscordServerToServerAsync(discordServer: DiscordServer): Promise<ServersModel> {
-        const server = await ServerService.getByServerIdAsync(discordServer.id, true);
+
+    private getTempServer(discordServer: DiscordServer): ServersModel {
+        return new ServersModel({
+            Id: 0,
+            ServerId: discordServer.id,
+            Name: discordServer.name,
+            Points: 0,
+            LanguageEnum: LanguageEnum.EN,
+        });
+    }
+
+    private async mapDiscordServerToServerAsync(discordServer: DiscordServer, event: InteractionEvent): Promise<ServersModel> {
+        let server = await ServerService.getByExternalIdAsync(discordServer.id).catch(() => undefined);
+        if (!server)
+            server = await ServerService.saveAsync(new ServersSaveModel({
+                ServerId: discordServer.id,
+                Name: discordServer.name,
+            }), event);
 
         // Update the server name if it has changed
         if (discordServer.name !== server.Name)

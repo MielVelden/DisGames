@@ -5,7 +5,7 @@ import TimelineRepository from "../repositories/TimelineRepository";
 
 class TimelineController implements Controller {
     async getByIdAsync(id: number, identity: User): Promise<TimelineEntriesModel> {
-        const timeline = await TimelineRepository.getByIDAsync(id);
+        const timeline = await TimelineRepository.getByIdAsync(id);
         return timeline!;
     }
 

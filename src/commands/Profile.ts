@@ -35,7 +35,7 @@ export class ProfileCommand implements Command {
                             userId: event.user.userId,
                             handle: async (interaction: InteractionEvent) => {
                                 const gameId = Number((interaction as SelectMenuInteractionEvent).selected);
-                                const userGameProfile = await UserService.getUserGameProfileAsync(event.user.userId, gameId);
+                                const userGameProfile = await UserService.getUserGameProfileAsync(event.user.userId, event.server.ServerId, gameId);
                                 const profileGameComponents = createProfileGameContainer(userGameProfile);
                                 await interaction.addComponentAsync(profileGameComponents);
                                 await interaction.editAsync();

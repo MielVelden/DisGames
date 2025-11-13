@@ -86,14 +86,14 @@ class TimelineBuilder {
         if(!user || !server)
             return;
 
-        const timelineEntry: TimelineEntriesSaveModel = {
+        const timelineEntry = new TimelineEntriesSaveModel({
             TableEnum: table,
             ObjectId: objectId,
             TimelineType: timelineType,
             UserId: user.Id!,
             ServerId: server.Id!,
             ChangesJSON: changes
-        };
+        });
 
         context.event.addTimelineEntry(timelineEntry);
     }
@@ -113,7 +113,7 @@ class TimelineBuilder {
     }
 
     async forGameResetAsync(gameId: number, context: TimelineContext): Promise<void> {
-        const game = await GameRepository.getByIDAsync(gameId);
+        const game = await GameRepository.getByIdAsync(gameId);
         if (!game) 
             ErrorHelper.throw(ExceptionEnum.GAME_NOT_FOUND);
 

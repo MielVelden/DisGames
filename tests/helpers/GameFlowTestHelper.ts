@@ -45,13 +45,13 @@ export class GameFlowTestHelper {
             });
 
             // Create game save model
-            const gameSaveModel: GamesSaveModel = {
+            const gameSaveModel = new GamesSaveModel({
                 ChannelId: config.channelId,
                 ServerId: config.serverId,
                 GameTypeEnum: config.gameType,
                 SettingsJSON: config.settings || {},
                 Answer: config.inputSimulator.getGameFirstAnswer() || firstAnswer || ''
-            };
+            });
             const game = await createTestGameAsync(gameSaveModel);
             this.results.game = game;
 
@@ -93,7 +93,7 @@ export class GameFlowTestHelper {
                 const userId = input?.userId || config.userId;
 
                 if (input.type === TestInputSimulatorType.CORRECT_INPUT) {
-                    var correctInput = await GameRepository.getByIDAsync(startResult.game.Id);
+                    var correctInput = await GameRepository.getByIdAsync(startResult.game.Id);
                     if (correctInput)
                         answer = correctInput.Answer;
                 }
@@ -122,7 +122,7 @@ export class GameFlowTestHelper {
             }
 
             // Get final game state
-            const finalGame = await GameRepository.getByIDAsync(startResult.game.Id);
+            const finalGame = await GameRepository.getByIdAsync(startResult.game.Id);
             if (finalGame) {
                 this.results.game = finalGame;
                 this.results.finalAnswer = finalGame.Answer;
@@ -156,7 +156,7 @@ export class GameFlowTestHelper {
 
     public async verifyGameStateAsync(gameId: number, expectedState: Partial<GamesModel>): Promise<boolean> {
         try {
-            const game = await GameRepository.getByIDAsync(gameId);
+            const game = await GameRepository.getByIdAsync(gameId);
             if (!game) {
                 Logger.logError(`Game ${gameId} not found`);
                 return false;

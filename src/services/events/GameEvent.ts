@@ -90,7 +90,7 @@ export class GameEvent implements IGameEvent {
 
     public async getNextAnswerAsync(): Promise<GameDataModel[]> {
         if(!this._nextAnswer)
-            this._nextAnswer = await GameDataRepository.getGameDataByGamesIdAsync(this._gameData.Id);
+            this._nextAnswer = await GameDataRepository.getRandomDataByGameIdAsync(this._gameData.Id);
 
         if(!this._nextAnswer)
             ErrorHelper.throw(ExceptionEnum.NO_NEXT_ANSWER_FOUND);

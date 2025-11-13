@@ -1,8 +1,10 @@
-import { ExceptionEnum, GameTypeEnum, ProfileCommandActionEnum } from "../../interfaces/enums";
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
+import { ProfileCommandActionEnum } from "../../interfaces/enums/commands/Profile";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
+import { GameTypeEnum } from "../../interfaces/enums/database/GameTypeEnum";
+import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 
 export const i18n: I18nTranslations = {
     labels: {
@@ -675,6 +677,14 @@ export const i18n: I18nTranslations = {
         [ExceptionEnum.INVALID_ARGUMENT]: {
             [LanguageEnum.EN]: "Invalid argument",
             [LanguageEnum.NL]: "Ongeldig argument",
+        },
+        [ExceptionEnum.FIELD_IS_NULL]: {
+            [LanguageEnum.EN]: "Field cannot be null",
+            [LanguageEnum.NL]: "Veld mag niet null zijn",
+        },
+        [ExceptionEnum.FIELD_HAS_CHANGED]: {
+            [LanguageEnum.EN]: "Field has changed",
+            [LanguageEnum.NL]: "Veld is gewijzigd",
         },
     }
 };
