@@ -1,11 +1,10 @@
-import { PointsModel, PointsModelFieldEnum, PointsSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { PointsModel, PointsModelFieldEnum, PointsSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository, { RepositoryUtils } from "./BaseRepository";
 import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { ProfileView } from "../interfaces/view";
 
-class PointRepository implements Repository<PointsModel> {
-    private baseRepository: BaseRepository<PointsModel, PointsSaveModel>;
+class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel> {
+    public readonly baseRepository: BaseRepository<PointsModel, PointsSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel>(TableEnum.POINTS, PointsModelFieldEnum);

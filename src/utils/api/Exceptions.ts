@@ -24,6 +24,10 @@ export const TYPE_EXCEPTIONS: TypeException[] = [
     {
         typeName: 'DiscordMessage',
         customDefinition: 'export type DiscordMessage = any;'
+    },
+    {
+        typeName: 'BaseRepository',
+        customDefinition: 'export type BaseRepository<T extends DisGames.Interfaces.Database.BaseEntity, S extends DisGames.Interfaces.Database.BaseEntity> = any;'
     }
 ];
 

@@ -49,7 +49,7 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
 
   validateIsNull(field: EnumValues<FieldEnum>): void {
     const value = this.getFieldValue(field);
-    if (value === null || value === undefined)
+    if (value !== null && value !== undefined)
       ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
   }
 

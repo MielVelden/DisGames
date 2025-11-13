@@ -1,11 +1,12 @@
 import { InteractionEvent } from "../../interfaces/application";
 import { ExceptionEnum } from "../../interfaces/enums";
 import { ErrorHelper } from "../../utils/application/Error";
-import { Repository } from "../../interfaces/database/Repository";
+import { Repository, RepositoryWithBase } from "../../interfaces/database/Repository";
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
 import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyEnum";
+import { BaseEntity } from "../../interfaces/database/BaseEntity";
 
-export abstract class BaseDomainService<T extends { getId(): number | undefined; getExternalId(): string | number | undefined; }, S, R extends Repository<T> = Repository<T>> {
+export abstract class BaseDomainService<T extends BaseEntity & { getId(): number | undefined; getExternalId(): string | number | undefined; }, S extends BaseEntity, R extends Repository<T> = Repository<T>> {
     protected abstract readonly repository: R;
 
     public async getByIdAsync(id: number): Promise<T> {
@@ -16,25 +17,27 @@ export abstract class BaseDomainService<T extends { getId(): number | undefined;
     }
 
     public async getByExternalIdAsync(externalId: string | number): Promise<T> {
-        const repositoryWithBase = this.repository as any;
-        if (!repositoryWithBase.baseRepository)
+        if (!this.hasBaseRepository(this.repository))
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
-        // Use the fieldEnum from baseRepository (it's the enum object itself)
-        const fieldEnum = repositoryWithBase.baseRepository.fieldEnum;
+        const fieldEnum = this.repository.baseRepository.getFieldEnum();
         if (!fieldEnum)
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
-        // Pass the enum object directly without type casting to ensure getEnumKey works correctly
         const externalIdField = getEnumProperty(MetadataKeyEnum.ExternalIdField, fieldEnum);
         if (!externalIdField)
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
-        const fieldName = String(externalIdField);
-        const results = await repositoryWithBase.baseRepository.Select().Where({ [fieldName]: externalId }).Limit(1).Execute();
+        const fieldName = String(externalIdField) as keyof T;
+        const whereCondition = { [fieldName]: externalId } as Partial<Record<keyof T, T[keyof T]>>;
+        const results = await this.repository.baseRepository.Select().Where(whereCondition).Limit(1).Execute();
         if (!results || results.length === 0)
             ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
         return results[0];
+    }
+
+    private hasBaseRepository(repo: Repository<T>): repo is RepositoryWithBase<T, S> {
+        return 'baseRepository' in repo && repo.baseRepository !== undefined;
     }
 
     public abstract getAllAsync(): Promise<T[]>;

@@ -26,7 +26,7 @@ export class DebugCommand implements Command {
         // Handle debug record command
         const debugRecord = await DebugService.getByExternalIdAsync(uniqueCode);
 
-        if (!debugRecord || debugRecord.UpdatedAt !== null)
+        if (!debugRecord || debugRecord.UpdatedAt === null)
             return;
 
         // Collect data from the server

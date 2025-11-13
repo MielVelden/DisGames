@@ -1,12 +1,12 @@
 import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel } from "../interfaces/database/TableInterfaces";
-import { Repository } from "../interfaces/database";
+import { RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
 import { ErrorHelper } from "../utils/application/Error";
 
-class GameDataRepository implements Repository<GameDataModel> {
-    private baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
+class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSaveModel> {
+    public readonly baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel>(TableEnum.GAME_DATA, GameDataModelFieldEnum);

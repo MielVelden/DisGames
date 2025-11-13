@@ -1,12 +1,11 @@
-import { TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums/index";
 import { subtractDurationFromDate } from "../utils/helpers/Duration";
 import { Duration } from "../interfaces/application";
 
-class TimelineRepository implements Repository<TimelineEntriesModel> {
-    private baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>;
+class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, TimelineEntriesSaveModel> {
+    public readonly baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>(TableEnum.TIMELINE_ENTRIES, TimelineEntriesModelFieldEnum);

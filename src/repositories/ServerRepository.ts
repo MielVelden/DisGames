@@ -1,11 +1,10 @@
-import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../interfaces/database";
-import { Repository } from "../interfaces/database";
+import { ServersModel, ServersModelFieldEnum, ServersSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ComponentError } from "../utils/application/Error";
 
-class ServerRepository implements Repository<ServersModel> {
-    private baseRepository: BaseRepository<ServersModel, ServersSaveModel>;
+class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveModel> {
+    public readonly baseRepository: BaseRepository<ServersModel, ServersSaveModel>;
 
     constructor() {
         this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel>(TableEnum.SERVERS, ServersModelFieldEnum);

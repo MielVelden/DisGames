@@ -33,6 +33,10 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     this.cacheManager = new CacheManager<Model>(this.table);
   }
 
+  public getFieldEnum(): Record<string, string> {
+    return this.fieldEnum;
+  }
+
   public async getById(id: number): Promise<Model | null> {
     // Check cache first
     const cached = this.cacheManager.getCacheEntry(id);
