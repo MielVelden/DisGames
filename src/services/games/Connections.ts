@@ -7,7 +7,7 @@ import { GameDataModel, ServersModel } from "../../interfaces/database/TableInte
 import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import GameImageService from "../image/GameImageService";
-import { STRING_DELIMITER } from "../../config";
+import { STRING_DELIMITER } from "../../constants";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
 

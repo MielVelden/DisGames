@@ -1,14 +1,15 @@
 import { BaseEntity } from '../../interfaces/database/BaseEntity';
-import { ExceptionEnum } from '../../interfaces/enums';
+import { ExceptionEnum, TableEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../application/Error';
 import { getEnumProperty } from '../helpers/EnumMetadata';
-import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
+import { EnumValue, MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
 
 type EnumValues<T> = T[keyof T];
 
 export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implements BaseEntity {
   Id?: number;
   protected static fieldEnum: Record<string, string> | undefined;
+  protected static tableEnum: TableEnum;
 
   constructor(data: BaseEntity) {
     this.Id = data.Id;
@@ -23,11 +24,12 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
   }
 
   getExternalId(): string | number | undefined {
+    const tableEnum = (this.constructor as typeof BaseEntityClass).tableEnum;
     const fieldEnum = (this.constructor as typeof BaseEntityClass).fieldEnum;
-    if (!fieldEnum)
+    if (!fieldEnum || !tableEnum)
       return undefined;
 
-    const externalIdField = getEnumProperty(MetadataKeyEnum.ExternalIdField, fieldEnum as Record<string, string | number>);
+    const externalIdField = getEnumProperty(TableEnum, tableEnum, MetadataKeyEnum.ExternalIdField);
     if (!externalIdField)
       return undefined;
 

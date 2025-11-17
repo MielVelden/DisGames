@@ -13,7 +13,7 @@ export enum TimelineTypeEnum {
     GAME_RESET,
 }
 
-ShouldAnnounce(TimelineTypeEnum.GAME_RESET);
-ShouldAnnounce(TimelineTypeEnum.GAME_CREATED);
-ShouldAnnounce(TimelineTypeEnum.GAME_PLAYED);
-ShouldAnnounce(TimelineTypeEnum.USER_CREATED);
+ShouldAnnounce(TimelineTypeEnum, TimelineTypeEnum.GAME_RESET);
+ShouldAnnounce(TimelineTypeEnum, TimelineTypeEnum.GAME_CREATED);
+ShouldAnnounce(TimelineTypeEnum, TimelineTypeEnum.GAME_PLAYED);
+ShouldAnnounce(TimelineTypeEnum, TimelineTypeEnum.GAME_RESET);

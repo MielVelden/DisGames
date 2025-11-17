@@ -22,6 +22,7 @@ export enum DatasheetsModelFieldEnum {
 
 export class DatasheetsModel extends BaseEntityClass<DatasheetsModelFieldEnum> implements DatasheetsModel {
   protected static fieldEnum = DatasheetsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.DATASHEETS;
 
   ServerId: number;
   LanguageEnum: enums.LanguageEnum;
@@ -45,6 +46,7 @@ export interface DatasheetsSaveModel {
 
 export class DatasheetsSaveModel extends BaseEntityClass<DatasheetsModelFieldEnum> implements DatasheetsSaveModel {
   protected static fieldEnum = DatasheetsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.DATASHEETS;
 
   ServerId?: number;
   LanguageEnum?: enums.LanguageEnum;
@@ -79,6 +81,7 @@ export enum DebugModelFieldEnum {
 
 export class DebugModel extends BaseEntityClass<DebugModelFieldEnum> implements DebugModel {
   protected static fieldEnum = DebugModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.DEBUG;
 
   UniqueCode: string;
   ServerId: number;
@@ -108,6 +111,7 @@ export interface DebugSaveModel {
 
 export class DebugSaveModel extends BaseEntityClass<DebugModelFieldEnum> implements DebugSaveModel {
   protected static fieldEnum = DebugModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.DEBUG;
 
   UniqueCode?: string;
   ServerId?: number;
@@ -146,6 +150,7 @@ export enum EventsModelFieldEnum {
 
 export class EventsModel extends BaseEntityClass<EventsModelFieldEnum> implements EventsModel {
   protected static fieldEnum = EventsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.EVENTS;
 
   ServerId: number;
   UserId: number;
@@ -175,6 +180,7 @@ export interface EventsSaveModel {
 
 export class EventsSaveModel extends BaseEntityClass<EventsModelFieldEnum> implements EventsSaveModel {
   protected static fieldEnum = EventsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.EVENTS;
 
   ServerId?: number;
   UserId?: number;
@@ -211,6 +217,7 @@ export enum GameDataModelFieldEnum {
 
 export class GameDataModel extends BaseEntityClass<GameDataModelFieldEnum> implements GameDataModel {
   protected static fieldEnum = GameDataModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.GAME_DATA;
 
   GameId: number;
   DataSheetId: number;
@@ -237,6 +244,7 @@ export interface GameDataSaveModel {
 
 export class GameDataSaveModel extends BaseEntityClass<GameDataModelFieldEnum> implements GameDataSaveModel {
   protected static fieldEnum = GameDataModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.GAME_DATA;
 
   GameId?: number;
   DataSheetId?: number;
@@ -277,70 +285,6 @@ export enum GameTypesModelFieldEnum {
   allowMessageChange = "allowMessageChange"
 }
 
-export class GameTypesModel extends BaseEntityClass<GameTypesModelFieldEnum> implements GameTypesModel {
-  protected static fieldEnum = GameTypesModelFieldEnum;
-
-  gameName: string;
-  gameDisabled: number;
-  pointPerGame: number;
-  description: number;
-  gameRules: number;
-  replyMessage: number;
-  sameUserAllowed: number;
-  allowMessageChange: number;
-
-  constructor(data: Partial<GameTypesModel>) {
-    super(data as BaseEntity);
-    this.Id = data.Id!;
-    this.gameName = data.gameName!;
-    this.gameDisabled = data.gameDisabled!;
-    this.pointPerGame = data.pointPerGame!;
-    this.description = data.description!;
-    this.gameRules = data.gameRules!;
-    this.replyMessage = data.replyMessage!;
-    this.sameUserAllowed = data.sameUserAllowed!;
-    this.allowMessageChange = data.allowMessageChange!;
-  }
-}
-
-export interface GameTypesSaveModel {
-  Id?: number;
-  gameName?: string;
-  gameDisabled?: number;
-  pointPerGame?: number;
-  description?: number;
-  gameRules?: number;
-  replyMessage?: number;
-  sameUserAllowed?: number;
-  allowMessageChange?: number;
-}
-
-export class GameTypesSaveModel extends BaseEntityClass<GameTypesModelFieldEnum> implements GameTypesSaveModel {
-  protected static fieldEnum = GameTypesModelFieldEnum;
-
-  gameName?: string;
-  gameDisabled?: number;
-  pointPerGame?: number;
-  description?: number;
-  gameRules?: number;
-  replyMessage?: number;
-  sameUserAllowed?: number;
-  allowMessageChange?: number;
-
-  constructor(data: Partial<GameTypesSaveModel>) {
-    super({ Id: data.Id ?? 0 });
-    if (data.Id !== undefined) this.Id = data.Id;
-    if (data.gameName !== undefined) this.gameName = data.gameName;
-    if (data.gameDisabled !== undefined) this.gameDisabled = data.gameDisabled;
-    if (data.pointPerGame !== undefined) this.pointPerGame = data.pointPerGame;
-    if (data.description !== undefined) this.description = data.description;
-    if (data.gameRules !== undefined) this.gameRules = data.gameRules;
-    if (data.replyMessage !== undefined) this.replyMessage = data.replyMessage;
-    if (data.sameUserAllowed !== undefined) this.sameUserAllowed = data.sameUserAllowed;
-    if (data.allowMessageChange !== undefined) this.allowMessageChange = data.allowMessageChange;
-  }
-}
-
 export interface GamesModel {
   Id: number;
   ChannelId: string;
@@ -365,6 +309,7 @@ export enum GamesModelFieldEnum {
 
 export class GamesModel extends BaseEntityClass<GamesModelFieldEnum> implements GamesModel {
   protected static fieldEnum = GamesModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.GAMES;
 
   ChannelId: string;
   ServerId: string;
@@ -400,6 +345,7 @@ export interface GamesSaveModel {
 
 export class GamesSaveModel extends BaseEntityClass<GamesModelFieldEnum> implements GamesSaveModel {
   protected static fieldEnum = GamesModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.GAMES;
 
   ChannelId?: string;
   ServerId?: string;
@@ -434,40 +380,6 @@ export enum GamesXDatasheetsModelFieldEnum {
   DatasheetId = "DatasheetId"
 }
 
-export class GamesXDatasheetsModel extends BaseEntityClass<GamesXDatasheetsModelFieldEnum> implements GamesXDatasheetsModel {
-  protected static fieldEnum = GamesXDatasheetsModelFieldEnum;
-
-  GameId: number;
-  DatasheetId: number;
-
-  constructor(data: Partial<GamesXDatasheetsModel>) {
-    super(data as BaseEntity);
-    this.Id = data.Id!;
-    this.GameId = data.GameId!;
-    this.DatasheetId = data.DatasheetId!;
-  }
-}
-
-export interface GamesXDatasheetsSaveModel {
-  Id?: number;
-  GameId?: number;
-  DatasheetId?: number;
-}
-
-export class GamesXDatasheetsSaveModel extends BaseEntityClass<GamesXDatasheetsModelFieldEnum> implements GamesXDatasheetsSaveModel {
-  protected static fieldEnum = GamesXDatasheetsModelFieldEnum;
-
-  GameId?: number;
-  DatasheetId?: number;
-
-  constructor(data: Partial<GamesXDatasheetsSaveModel>) {
-    super({ Id: data.Id ?? 0 });
-    if (data.Id !== undefined) this.Id = data.Id;
-    if (data.GameId !== undefined) this.GameId = data.GameId;
-    if (data.DatasheetId !== undefined) this.DatasheetId = data.DatasheetId;
-  }
-}
-
 export interface LanguageModel {
   Id: number;
   NL: string;
@@ -484,50 +396,6 @@ export enum LanguageModelFieldEnum {
   GE = "GE"
 }
 
-export class LanguageModel extends BaseEntityClass<LanguageModelFieldEnum> implements LanguageModel {
-  protected static fieldEnum = LanguageModelFieldEnum;
-
-  NL: string;
-  EN: string;
-  ES: string;
-  GE: string;
-
-  constructor(data: Partial<LanguageModel>) {
-    super(data as BaseEntity);
-    this.Id = data.Id!;
-    this.NL = data.NL!;
-    this.EN = data.EN!;
-    this.ES = data.ES!;
-    this.GE = data.GE!;
-  }
-}
-
-export interface LanguageSaveModel {
-  Id?: number;
-  NL?: string;
-  EN?: string;
-  ES?: string;
-  GE?: string;
-}
-
-export class LanguageSaveModel extends BaseEntityClass<LanguageModelFieldEnum> implements LanguageSaveModel {
-  protected static fieldEnum = LanguageModelFieldEnum;
-
-  NL?: string;
-  EN?: string;
-  ES?: string;
-  GE?: string;
-
-  constructor(data: Partial<LanguageSaveModel>) {
-    super({ Id: data.Id ?? 0 });
-    if (data.Id !== undefined) this.Id = data.Id;
-    if (data.NL !== undefined) this.NL = data.NL;
-    if (data.EN !== undefined) this.EN = data.EN;
-    if (data.ES !== undefined) this.ES = data.ES;
-    if (data.GE !== undefined) this.GE = data.GE;
-  }
-}
-
 export interface MetricsModel {
   Id: number;
   Date: Date;
@@ -542,6 +410,7 @@ export enum MetricsModelFieldEnum {
 
 export class MetricsModel extends BaseEntityClass<MetricsModelFieldEnum> implements MetricsModel {
   protected static fieldEnum = MetricsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.METRICS;
 
   Date: Date;
   Metrics: Metrics_Metrics;
@@ -562,6 +431,7 @@ export interface MetricsSaveModel {
 
 export class MetricsSaveModel extends BaseEntityClass<MetricsModelFieldEnum> implements MetricsSaveModel {
   protected static fieldEnum = MetricsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.METRICS;
 
   Date?: Date;
   MetricsJSON?: Metrics_Metrics;
@@ -592,6 +462,7 @@ export enum PointsModelFieldEnum {
 
 export class PointsModel extends BaseEntityClass<PointsModelFieldEnum> implements PointsModel {
   protected static fieldEnum = PointsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.POINTS;
 
   UserId: string;
   ServerId: string;
@@ -618,6 +489,7 @@ export interface PointsSaveModel {
 
 export class PointsSaveModel extends BaseEntityClass<PointsModelFieldEnum> implements PointsSaveModel {
   protected static fieldEnum = PointsModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.POINTS;
 
   UserId?: string;
   ServerId?: string;
@@ -652,6 +524,7 @@ export enum ServersModelFieldEnum {
 
 export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersModel {
   protected static fieldEnum = ServersModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.SERVERS;
 
   ServerId: string;
   Name: string;
@@ -678,6 +551,7 @@ export interface ServersSaveModel {
 
 export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersSaveModel {
   protected static fieldEnum = ServersModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.SERVERS;
 
   ServerId?: string;
   Name?: string;
@@ -708,45 +582,6 @@ export enum StatisticsModelFieldEnum {
   Value = "Value"
 }
 
-export class StatisticsModel extends BaseEntityClass<StatisticsModelFieldEnum> implements StatisticsModel {
-  protected static fieldEnum = StatisticsModelFieldEnum;
-
-  Date: Date;
-  GameId: number;
-  Value: number;
-
-  constructor(data: Partial<StatisticsModel>) {
-    super(data as BaseEntity);
-    this.Id = data.Id!;
-    this.Date = data.Date!;
-    this.GameId = data.GameId!;
-    this.Value = data.Value!;
-  }
-}
-
-export interface StatisticsSaveModel {
-  Id?: number;
-  Date?: Date;
-  GameId?: number;
-  Value?: number;
-}
-
-export class StatisticsSaveModel extends BaseEntityClass<StatisticsModelFieldEnum> implements StatisticsSaveModel {
-  protected static fieldEnum = StatisticsModelFieldEnum;
-
-  Date?: Date;
-  GameId?: number;
-  Value?: number;
-
-  constructor(data: Partial<StatisticsSaveModel>) {
-    super({ Id: data.Id ?? 0 });
-    if (data.Id !== undefined) this.Id = data.Id;
-    if (data.Date !== undefined) this.Date = data.Date;
-    if (data.GameId !== undefined) this.GameId = data.GameId;
-    if (data.Value !== undefined) this.Value = data.Value;
-  }
-}
-
 export interface TableEnumsModel {
   Id: number;
   TableName: string;
@@ -755,35 +590,6 @@ export interface TableEnumsModel {
 export enum TableEnumsModelFieldEnum {
   Id = "Id",
   TableName = "TableName"
-}
-
-export class TableEnumsModel extends BaseEntityClass<TableEnumsModelFieldEnum> implements TableEnumsModel {
-  protected static fieldEnum = TableEnumsModelFieldEnum;
-
-  TableName: string;
-
-  constructor(data: Partial<TableEnumsModel>) {
-    super(data as BaseEntity);
-    this.Id = data.Id!;
-    this.TableName = data.TableName!;
-  }
-}
-
-export interface TableEnumsSaveModel {
-  Id?: number;
-  TableName?: string;
-}
-
-export class TableEnumsSaveModel extends BaseEntityClass<TableEnumsModelFieldEnum> implements TableEnumsSaveModel {
-  protected static fieldEnum = TableEnumsModelFieldEnum;
-
-  TableName?: string;
-
-  constructor(data: Partial<TableEnumsSaveModel>) {
-    super({ Id: data.Id ?? 0 });
-    if (data.Id !== undefined) this.Id = data.Id;
-    if (data.TableName !== undefined) this.TableName = data.TableName;
-  }
 }
 
 export interface TimelineEntriesModel {
@@ -810,6 +616,7 @@ export enum TimelineEntriesModelFieldEnum {
 
 export class TimelineEntriesModel extends BaseEntityClass<TimelineEntriesModelFieldEnum> implements TimelineEntriesModel {
   protected static fieldEnum = TimelineEntriesModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.TIMELINE_ENTRIES;
 
   TableEnum: enums.TableEnum;
   ObjectId: number;
@@ -845,6 +652,7 @@ export interface TimelineEntriesSaveModel {
 
 export class TimelineEntriesSaveModel extends BaseEntityClass<TimelineEntriesModelFieldEnum> implements TimelineEntriesSaveModel {
   protected static fieldEnum = TimelineEntriesModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.TIMELINE_ENTRIES;
 
   TableEnum?: enums.TableEnum;
   ObjectId?: number;
@@ -887,6 +695,7 @@ export enum UsersModelFieldEnum {
 
 export class UsersModel extends BaseEntityClass<UsersModelFieldEnum> implements UsersModel {
   protected static fieldEnum = UsersModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.USERS;
 
   UserId: string;
   Username: string;
@@ -916,6 +725,7 @@ export interface UsersSaveModel {
 
 export class UsersSaveModel extends BaseEntityClass<UsersModelFieldEnum> implements UsersSaveModel {
   protected static fieldEnum = UsersModelFieldEnum;
+  protected static tableEnum = enums.TableEnum.USERS;
 
   UserId?: string;
   Username?: string;

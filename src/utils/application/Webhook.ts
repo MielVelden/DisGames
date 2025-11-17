@@ -1,21 +1,24 @@
 import axios from 'axios';
-import { DEBUG_DISCORD_WEBHOOK_URL, DISCORD_WEBHOOK_URL } from '../../config';
 import { EmbedConfig } from '../../interfaces/application/DiscordEmbed';
 import { WebhookType } from '../../interfaces/application';
+import { getConfigValue } from './Config';
+import { EnvConfigEnum } from '../../interfaces/enums/application/EnvConfigEnum';
 
 class Webhook {
     public static async sendDiscordEmbed(embed: EmbedConfig, webhookType: WebhookType = WebhookType.INFO): Promise<void> {
-        if (!DISCORD_WEBHOOK_URL)
+        const discordWebhookUrl = getConfigValue(EnvConfigEnum.DISCORD_WEBHOOK_URL);
+        const debugDiscordWebhookUrl = getConfigValue(EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL);
+        if (!discordWebhookUrl)
             return;
 
-        let webhookUrl: string = DISCORD_WEBHOOK_URL;
+        let webhookUrl: string = discordWebhookUrl;
         switch (webhookType) {
             case WebhookType.DEBUG:
-                if (DEBUG_DISCORD_WEBHOOK_URL)
-                    webhookUrl = DEBUG_DISCORD_WEBHOOK_URL;
+                if (debugDiscordWebhookUrl)
+                    webhookUrl = debugDiscordWebhookUrl;
                 break;
             default:
-                webhookUrl = DISCORD_WEBHOOK_URL;
+                webhookUrl = discordWebhookUrl;
         }
 
         try {
@@ -23,7 +26,7 @@ class Webhook {
                 embeds: [embed]
             });
         } catch (error) {
-            console.error('[Webhook] Failed to send Discord webhook:', error);
+            console.error('[Webhook] Failed to send Discord webhook:', error); //TODO: FIX THIS
         }
     }
 }

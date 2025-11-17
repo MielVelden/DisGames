@@ -1,6 +1,3 @@
-import { SetExternalIdField } from "../../../utils/helpers/EnumMetadata";
-import { DebugModelFieldEnum, GamesModelFieldEnum, ServersModelFieldEnum, UsersModelFieldEnum } from "../../database";
-
 export enum TableEnum {
     SERVERS = 1,
     GAMES = 2,
@@ -14,8 +11,3 @@ export enum TableEnum {
     EVENTS,
     METRICS,
 }
-
-SetExternalIdField(UsersModelFieldEnum, UsersModelFieldEnum.UserId);
-SetExternalIdField(ServersModelFieldEnum, ServersModelFieldEnum.ServerId);
-SetExternalIdField(GamesModelFieldEnum, GamesModelFieldEnum.ChannelId);
-SetExternalIdField(DebugModelFieldEnum, DebugModelFieldEnum.UniqueCode);

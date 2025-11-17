@@ -7,7 +7,7 @@ import { MediaType } from '../../interfaces/application/Media';
 import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
 import { ExceptionEnum, GameTypeEnum, LanguageEnum } from '../../interfaces/enums';
 import Logger from '../../utils/application/Logger';
-import { STRING_DELIMITER } from '../../config';
+import { STRING_DELIMITER } from '../../constants';
 import { ErrorHelper } from '../../utils/application/Error';
 
 interface CategoryData {

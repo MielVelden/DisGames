@@ -686,6 +686,22 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Field has changed",
             [LanguageEnum.NL]: "Veld is gewijzigd",
         },
+        [ExceptionEnum.FIELD_IS_MISSING_AND_REQUIRED]: {
+            [LanguageEnum.EN]: "Field {key} is missing and required",
+            [LanguageEnum.NL]: "Veld {key} is ontbrekend en verplicht",
+        },
+        [ExceptionEnum.FIELD_HAS_INVALID_TYPE]: {
+            [LanguageEnum.EN]: "Field {key} has type {received}, but expected {expected}.",
+            [LanguageEnum.NL]: "Veld {key} heeft type {received}, maar verwachtte {expected}.",
+        },
+        [ExceptionEnum.FIELD_HAS_INVALID_VALUE]: {
+            [LanguageEnum.EN]: "Field {key} has an invalid value",
+            [LanguageEnum.NL]: "Veld {key} heeft een ongeldige waarde",
+        },
+        [ExceptionEnum.TABLE_NOT_FOUND]: {
+            [LanguageEnum.EN]: "Table {tableName} not found",
+            [LanguageEnum.NL]: "Tabel {tableName} niet gevonden",
+        },
     }
 };
 

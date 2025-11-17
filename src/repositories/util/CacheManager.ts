@@ -1,4 +1,4 @@
-import { REPOSITORY_CACHE_TTL } from "../../config";
+import { REPOSITORY_CACHE_TTL } from "../../constants";
 import { durationToMilliseconds } from "../../utils/helpers/Duration";
 import Logger from "../../utils/application/Logger";
 import { BaseEntity } from "../../interfaces/database/BaseEntity";

@@ -5,7 +5,8 @@ import { TestDiscordEventBuilder } from '../../builders/TestDiscordEventBuilder'
 import { createTestUserAsync } from '../../fixtures/users';
 import { createTestServerAsync } from '../../fixtures/servers';
 import { createTestChannelAsync } from '../../fixtures/channels';
-import { OWNER_ID } from '../../../src/config';
+import { getConfigValue } from '../../../src/utils/application/Config';
+import { EnvConfigEnum } from '../../../src/interfaces/enums/application/EnvConfigEnum';
 import { MessageInteractionEvent } from '../../../src/interfaces/application/Event';
 
 export default function registerImpersonateTests(runner: TestRunner): void {
@@ -34,7 +35,7 @@ export default function registerImpersonateTests(runner: TestRunner): void {
                     const testChannel = await createTestChannelAsync();
                     
                     const eventBuilder = TestDiscordEventBuilder.create()
-                        .withUser({ id: OWNER_ID || ownerUser.UserId })
+                        .withUser({ id: getConfigValue(EnvConfigEnum.DISCORD_OWNER_ID) || ownerUser.UserId })
                         .withServer({ id: testServer.ServerId })
                         .withChannel({ id: testChannel });
                     

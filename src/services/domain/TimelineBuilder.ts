@@ -194,7 +194,7 @@ class TimelineBuilder {
             await Promise.all(entries.map(async entry => {
                 const timeline = await TimelineRepository.saveAsync(entry);
 
-                if (getEnumProperty(MetadataKeyEnum.ShouldAnnounce, timeline.TimelineType))
+                if (getEnumProperty(TimelineTypeEnum, timeline.TimelineType, MetadataKeyEnum.ShouldAnnounce))
                     Logger.logTimeline(timeline);
             }));
         } catch (error) {

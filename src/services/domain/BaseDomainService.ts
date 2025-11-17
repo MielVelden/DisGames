@@ -1,5 +1,5 @@
 import { InteractionEvent } from "../../interfaces/application";
-import { ExceptionEnum } from "../../interfaces/enums";
+import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { ErrorHelper } from "../../utils/application/Error";
 import { Repository, RepositoryWithBase } from "../../interfaces/database/Repository";
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
@@ -24,7 +24,7 @@ export abstract class BaseDomainService<T extends BaseEntity & { getId(): number
         if (!fieldEnum)
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
-        const externalIdField = getEnumProperty(MetadataKeyEnum.ExternalIdField, fieldEnum);
+        const externalIdField = getEnumProperty(TableEnum, this.repository.baseRepository.tableEnum, MetadataKeyEnum.ExternalIdField);
         if (!externalIdField)
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 

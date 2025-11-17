@@ -1,13 +1,14 @@
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { Command } from "../interfaces/application/Command";
-import { OWNER_ID } from "../config";
 import { handleDiscordMessageAsync } from "../events/messageCreate";
 import { EventTypeEnum } from "../interfaces/enums";
 import { Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { i18n } from "../utils/i18n/i18n";
 import DiscordMemberService from "../services/discord/DiscordMemberService";
+import { getConfigValue } from "../utils/application/Config";
+import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 
 export class ImpersonateCommand implements Command {
     name = CommandEnum.IMPERSONATE;
@@ -16,7 +17,7 @@ export class ImpersonateCommand implements Command {
     isMessageCommand = true;
     options = [];
     canExecute = (event: InteractionEvent): boolean => {
-        return event.user.userId === OWNER_ID;
+        return event.user.userId === getConfigValue(EnvConfigEnum.DISCORD_OWNER_ID);
     }
 
     async executeAsync(event: MessageInteractionEvent): Promise<void> {

@@ -1,18 +1,15 @@
 import 'reflect-metadata';
 import { GatewayIntentBits } from 'discord.js';
-import { TOKEN } from './config';
 import { DiscordClient } from './interfaces/application/DiscordClient';
 import { loadEvents } from './utils/collectors/EventCollector';
 import { loadCommands } from './utils/collectors/CommandCollector';
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
 import Logger from './utils/application/Logger';
 import { startHttpServer } from './server';
+import { getConfig, getConfigValue } from './utils/application/Config';
+import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
 
-const token = TOKEN;
-if (!token) {
-  Logger.logError('No Discord token found in .env file!');
-  process.exit(1);
-}
+getConfig();
 
 const client = new DiscordClient({
   intents: [
@@ -37,4 +34,4 @@ client.once('ready', async () => {
   });
 });
 
-client.login(token);
+client.login(getConfigValue(EnvConfigEnum.TOKEN));

@@ -18,7 +18,7 @@ type WhereCondition<T> = {
 };
 
 class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
-  protected tableEnum: TableEnum;
+  public readonly tableEnum: TableEnum;
   protected fieldEnum: Record<string, string>;
   protected table: string;
   protected query: string = '';

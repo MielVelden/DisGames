@@ -11,6 +11,8 @@ import { ExceptionEnum } from "../../interfaces/enums";
 import DiscordService from "../../services/discord/DiscordService";
 import { REST } from "discord.js";
 import { Routes } from "discord.js";
+import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
+import { getConfigValue } from "../application/Config";
 
 export async function handleCommandAsync(command: Command, event: InteractionEvent): Promise<void> {
     await command.executeAsync(event);
@@ -74,14 +76,8 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
 
 
 export async function deployCommands(): Promise<void> {
-    const token = process.env.TOKEN;
-    const clientId = process.env.CLIENT_ID;
-
-    if (!token || !clientId) {
-        Logger.logError('Missing environment variables: TOKEN and/or CLIENT_ID must be set in .env file!');
-        process.exit(1);
-        //TODO: FIX THIS
-    }
+    const token = getConfigValue(EnvConfigEnum.TOKEN);
+    const clientId = getConfigValue(EnvConfigEnum.DISCORD_CLIENT_ID);
 
     const loadedCommands = await loadCommands();
     const commandsForRegistration: any[] = [];

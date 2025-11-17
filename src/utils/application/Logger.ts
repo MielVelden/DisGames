@@ -1,6 +1,7 @@
 import { InteractionEvent } from '../../interfaces/application/Event';
 import { GameEvent } from '../../services/events/GameEvent';
-import { DEBUG_MODE } from '../../config';
+import { getConfigValue } from './Config';
+import { EnvConfigEnum } from '../../interfaces/enums/application/EnvConfigEnum';
 import { DebugModel, TimelineEntriesModel } from '../../interfaces/database/TableInterfaces';
 import Webhook from './Webhook';
 import { WebhookType } from '../../interfaces/application';
@@ -62,7 +63,7 @@ class Logger {
     }
 
     public async logDebug(message: string, options?: LoggerOptions): Promise<void> {
-        if (TestMode.isDebugModeEnabled() || (!TestMode.isEnabled() && DEBUG_MODE))
+        if (TestMode.isDebugModeEnabled() || (!TestMode.isEnabled() && getConfigValue(EnvConfigEnum.DEBUG_MODE)))
             await this.log(LogLevel.DEBUG, message, undefined, options);
     }
 

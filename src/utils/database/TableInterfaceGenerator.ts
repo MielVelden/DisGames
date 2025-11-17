@@ -4,6 +4,10 @@ import { SchemaUtils } from './SchemaUtils';
 import { JsonInterfaceValidator } from './JsonInterfaceValidator';
 import { InterfaceImportManager } from './InterfaceImportManager';
 import Logger from '../application/Logger';
+import { TableEnum } from '../../interfaces/enums/database/TableEnum';
+import { getEnumValue } from '../helpers/Enum';
+import { ExceptionEnum } from '../../interfaces/enums/application/ExpectionEnum';
+import { ErrorHelper } from '../application/Error';
 
 export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;
@@ -27,7 +31,7 @@ export class TableInterfaceGenerator {
   private static filterDuplicateColumns(columns: any[]): any[] {
     const jsonColumns = new Set<string>();
     const nonJsonColumns = new Set<string>();
-    
+
     // First pass: identify JSON columns and their corresponding non-JSON counterparts
     for (const column of columns) {
       if (SchemaUtils.isJsonField(column.COLUMN_NAME)) {
@@ -37,13 +41,13 @@ export class TableInterfaceGenerator {
         nonJsonColumns.add(column.COLUMN_NAME);
       }
     }
-    
+
     // Second pass: filter out non-JSON columns that have JSON equivalents
     return columns.filter(column => {
       if (SchemaUtils.isJsonField(column.COLUMN_NAME)) {
         return true; // Always include JSON columns
       }
-      
+
       const columnName = column.COLUMN_NAME;
       return !jsonColumns.has(columnName); // Exclude if JSON equivalent exists
     });
@@ -55,7 +59,7 @@ export class TableInterfaceGenerator {
     enumFile: string
   ): Promise<void> {
     const connection = DatabaseConnection.getConnection();
-    
+
     // Get all enums from the index.ts file
     const enumPaths = SchemaUtils.getExportedEnums(enumFileLocation, enumFile);
     const enumMapping = await SchemaUtils.createEnumMapping(enumFileLocation, enumPaths);
@@ -70,9 +74,9 @@ export class TableInterfaceGenerator {
 
     // Collect all JSON interface imports needed
     const jsonInterfaceImports = await InterfaceImportManager.collectJsonInterfaceImports(
-      tables as any[], 
-      connection, 
-      DatabaseConnection.databaseName, 
+      tables as any[],
+      connection,
+      DatabaseConnection.databaseName,
       SchemaUtils
     );
 
@@ -114,10 +118,15 @@ export class TableInterfaceGenerator {
 
       const modelClassName = `${SchemaUtils.capitalize(tableName)}${this.suffix}`;
       const fieldEnumName = `${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix}`;
-      
+      const tableEnumEnum = getEnumValue(TableEnum, tableName.toUpperCase());
+
+      if (!tableEnumEnum)
+        continue;
+
       interfaceContent += `export class ${modelClassName} extends BaseEntityClass<${fieldEnumName}> implements ${modelClassName} {\n`;
-      interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n\n`;
-      
+      interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n`;
+      interfaceContent += `  protected static tableEnum = enums.TableEnum.${tableEnumEnum};\n\n`;
+
       filteredColumns.forEach((column: any) => {
         const fieldName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
         if (fieldName !== 'Id') {
@@ -139,10 +148,10 @@ export class TableInterfaceGenerator {
       // Use same filtered columns for SaveModel
       filteredColumns.forEach((column: any) => {
         // For SaveModel, keep original column names (including JSON suffix) like MultiLingualString does with MLS
-        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME) 
+        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME)
           ? column.COLUMN_NAME  // Keep SettingsJSON for save operations
           : SchemaUtils.formatColumnName(column.COLUMN_NAME);
-        
+
         interfaceContent += `  ${columnName}?: ${SchemaUtils.mapMySQLTypeToTypescript(column.COLUMN_NAME, column.DATA_TYPE, enumMapping, tableName)};\n`;
       });
 
@@ -151,10 +160,11 @@ export class TableInterfaceGenerator {
       const saveModelClassName = `${SchemaUtils.capitalize(tableName)}${this.saveSuffix}`;
       const saveModelInterfaceName = `${SchemaUtils.capitalize(tableName)}${this.saveSuffix}`;
       interfaceContent += `export class ${saveModelClassName} extends BaseEntityClass<${fieldEnumName}> implements ${saveModelInterfaceName} {\n`;
-      interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n\n`;
-      
+      interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n`;
+      interfaceContent += `  protected static tableEnum = enums.TableEnum.${tableEnumEnum};\n\n`;
+
       filteredColumns.forEach((column: any) => {
-        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME) 
+        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME)
           ? column.COLUMN_NAME
           : SchemaUtils.formatColumnName(column.COLUMN_NAME);
         if (columnName !== 'Id') {
@@ -165,7 +175,7 @@ export class TableInterfaceGenerator {
       interfaceContent += `\n  constructor(data: Partial<${saveModelInterfaceName}>) {\n`;
       interfaceContent += `    super({ Id: data.Id ?? 0 });\n`;
       filteredColumns.forEach((column: any) => {
-        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME) 
+        const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME)
           ? column.COLUMN_NAME
           : SchemaUtils.formatColumnName(column.COLUMN_NAME);
         if (columnName === 'Id') {

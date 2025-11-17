@@ -29,7 +29,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import MediaService from "../application/MediaService";
 import Logger from "../../utils/application/Logger";
 import TimelineBuilder from "./TimelineBuilder";
-import { ARRAY_JOIN_DELIMITER } from "../../config";
+import { ARRAY_JOIN_DELIMITER } from "../../constants";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";

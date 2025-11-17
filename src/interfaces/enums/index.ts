@@ -13,3 +13,7 @@ export * from './games/GameSettingsEnum';
 export * from './commands/Games';
 export * from './commands/Profile';
 export * from './application/EventTypeEnum';
+
+// Import metadata options to trigger registrations
+import './database/TableEnumOptions';
+import './application/EnvConfigEnumOptions';
