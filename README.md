@@ -24,6 +24,7 @@ Six unique game types with interactive components, real-time scoring, and multi-
 - **🔧 Flexible Configuration** - Per-channel game setup with customizable rules
 - **📡 REST API & WebSocket** - Dashboard integration and real-time updates
 - **⏰ Job Scheduling** - Automated maintenance tasks and cleanup
+- **📝 Auto-generated TypeScript Types** - Automatic generation of TypeScript definitions and API wrapper for all endpoints
 
 ## 🏗️ Architecture
 
@@ -33,16 +34,31 @@ DisGames follows **Domain-Driven Design** and **clean architecture principles** 
 src/
 ├── commands/            # Command definitions
 ├── events/              # Event handlers (messages, interactions)
+├── builders/            # UI component builders
+│   ├── buttons/         # Button components
+│   ├── containers/      # Message container builders
+│   ├── embeds/          # Rich embed builders
+│   └── selectmenus/     # Select menu components
 ├── services/
 │   ├── application/     # Application layer (Components, Media, WebSocket, Jobs)
 │   ├── domain/          # Domain layer (Game, User, Server, Points business logic)
 │   ├── discord/         # Discord integration layer (Events, Handlers, Mappers)
-│   └── games/           # Game implementations (Anagram, Connections, Counting, etc.)
+│   ├── games/           # Game implementations (Anagram, Connections, Counting, etc.)
+│   └── image/           # Image generation services
 ├── repositories/        # Data access layer with BaseRepository pattern
-├── controllers/         # API controllers (Dashboard, Timeline, User)
+├── controllers/         # API controllers (Dashboard, Timeline, User, TypeGenerator)
+├── middleware/          # Express middleware (API keys, request context)
 ├── jobs/                # Scheduled background tasks
 ├── interfaces/          # TypeScript types (application, domain, database, enums, view)
-└── utils/               # Helpers (i18n, Logger)
+└── utils/               # Utilities and helpers
+    ├── api/             # API type generation and exceptions
+    ├── application/     # Application utilities (Config, Error, Logger)
+    ├── collectors/      # Automatic discovery (Commands, Endpoints, Interfaces)
+    ├── constants/       # Constants (Colors, Emojis)
+    ├── database/        # Database utilities and validators
+    ├── handlers/        # Event and command handlers
+    ├── helpers/         # Helper functions (Duration, Embed, Enum, etc.)
+    └── i18n/            # Internationalization system
 ```
 
 ### 🔧 Key Technologies
@@ -54,6 +70,8 @@ src/
 - **WebSocket (ws)** - Real-time communication for live updates
 - **Canvas** - Dynamic image generation for game visuals
 - **node-schedule** - Cron-based job scheduling
+- **Zod** - Schema validation and type-safe configuration
+- **reflect-metadata** - Metadata reflection for advanced TypeScript patterns
 - **Custom Test Framework** - Unit, integration, and performance testing
 
 ## 🚀 Getting Started
@@ -127,12 +145,13 @@ Games automatically respond to messages in configured channels with real-time va
 
 - **🔥 Battle-Tested** - Currently serving 1000+ Discord servers in production
 - **🏗️ Domain-Driven Design** - Clear separation between application, domain, and infrastructure layers
-- **🛡️ Type Safety** - Strict TypeScript with comprehensive interface definitions
+- **🛡️ Type Safety** - Strict TypeScript with comprehensive interface definitions and auto-generated API types
 - **⚡ Performance** - Connection pooling, efficient queries, and optimized image generation
 - **🌍 Multi-Language** - Complete i18n system with server-specific language preferences
 - **🧪 Well-Tested** - Custom test framework with unit, integration, and performance tests
-- **📡 API Ready** - REST endpoints and WebSocket support for external dashboards
+- **📡 API Ready** - REST endpoints with auto-generated TypeScript wrappers and WebSocket support
 - **🔧 Maintainable** - Repository pattern, dependency injection, and clean architecture
+- **🔐 Secure** - API key authentication, OAuth support, and request context isolation
 
 ## 🤝 Contributing
 
