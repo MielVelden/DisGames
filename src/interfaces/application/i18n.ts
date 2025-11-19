@@ -44,6 +44,10 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
     }
 }
 
+export function isMultiLingualString(value: any): value is MultiLingualString {
+    return value instanceof MultiLingualString;
+}
+
 export interface I18nTranslations {
     labels: {
         common: {

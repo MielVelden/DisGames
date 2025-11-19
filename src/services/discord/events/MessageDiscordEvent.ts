@@ -12,6 +12,10 @@ export class MessageDiscordEvent extends BaseReplyDiscordEvent implements Messag
     public readonly content: string;
     public readonly command?: Command;
     
+    public override get currentInteraction(): DiscordMessage {
+        return super.currentInteraction as DiscordMessage;
+    }
+    
     constructor(
         interaction: DiscordMessage,
         user: User,

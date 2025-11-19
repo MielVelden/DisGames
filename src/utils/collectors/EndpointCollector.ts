@@ -2,12 +2,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { MethodNameUtils } from '../helpers/MethodNames';
 import { EndpointInfo, ParameterInfo } from '../../interfaces/application/Controller';
-import { resolvePath } from '../helpers/PathResolver';
+import { resolveSourcePath } from '../helpers/PathResolver';
 
 export class EndpointCollector {
-    private static readonly CONTROLLERS_PATH = resolvePath('controllers');
+    private static readonly CONTROLLERS_PATH = resolveSourcePath('controllers');
 
-    static async collectAllEndpoints(): Promise<EndpointInfo[]> {
+    static async collectAllEndpointsAsync(): Promise<EndpointInfo[]> {
         const endpoints: EndpointInfo[] = [];
         const controllerFiles = fs.readdirSync(this.CONTROLLERS_PATH)
             .filter(file => (file.endsWith('.ts') || file.endsWith('.js')) && file !== 'ApiController.ts');

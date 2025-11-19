@@ -4,20 +4,21 @@ import {
 } from 'discord.js';
 import DiscordService from '../services/discord/DiscordService';
 import { DiscordClient } from '../interfaces/application/DiscordClient';
-import { SlashCommandInteractionEvent } from '../interfaces/application/Event';
+import { InteractionEvent, isSlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import { EventService } from '../services/application/EventService';
 import { handleErrorAsync } from '../utils/application/Error';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum } from '../interfaces/enums';
 import { EventsSaveModel } from '../interfaces/database';
+import Logger from '../utils/application/Logger';
 
 export default {
     name: Events.InteractionCreate,
 
     async execute(interaction: Interaction, client: DiscordClient): Promise<void> {
         // Map the interaction to the InteractionEvent interface
-        const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction) as SlashCommandInteractionEvent;
+        const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction);
 
         // Save the event to the database
         EventsService.saveAsync(new EventsSaveModel({
@@ -28,18 +29,21 @@ export default {
                 messageId: event.messageId,
                 channelId: event.channelId,
                 guildId: event.guildId,
-                commandName: event?.command?.name
+                commandName: isSlashCommandInteractionEvent(event) ? event.command?.name : undefined
             }
         }), event);
         
         try {
-            if (event.type === EventTypeEnum.SLASH_COMMAND && (event.command.canExecute?.(event) ?? true))
+            if (isSlashCommandInteractionEvent(event) && (event.command.canExecute?.(event) ?? true))
                 await handleCommandAsync(event.command, event);
             else
                 await EventService.handleEventAsync(event);
         }
         catch (error) {
-            await handleErrorAsync(error, event);
+            if (isSlashCommandInteractionEvent(event))
+                await handleErrorAsync(error, event);
+            else
+                Logger.logError(`Error handling interaction`, error as Error);
         }
     },
 };

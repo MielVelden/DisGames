@@ -22,6 +22,22 @@ export const TYPE_EXCEPTIONS: TypeException[] = [
         customDefinition: 'export type DiscordInteraction = any;'
     },
     {
+        typeName: 'DiscordChatInputCommandInteraction',
+        customDefinition: 'export type DiscordChatInputCommandInteraction = any;'
+    },
+    {
+        typeName: 'DiscordStringSelectMenuInteraction',
+        customDefinition: 'export type DiscordStringSelectMenuInteraction = any;'
+    },
+    {
+        typeName: 'DiscordButtonInteraction',
+        customDefinition: 'export type DiscordButtonInteraction = any;'
+    },
+    {
+        typeName: 'DiscordMessageComponentInteraction',
+        customDefinition: 'export type DiscordMessageComponentInteraction = any;'
+    },
+    {
         typeName: 'DiscordMessage',
         customDefinition: 'export type DiscordMessage = any;'
     },

@@ -121,8 +121,9 @@ class DashboardService {
         const gamesPlayed = await TimelineRepository.getGamesPlayedAsync(timeFrame);
         const averageGamesPlayedPerUser = gamesPlayed / users;
 
-        // Get the chart
-        const chart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_User_NewUser, identity);
+        // Get the charts
+        const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_User_NewUser, identity);
+        const pieChart = await ChartService.getChartAsync(ChartTypeEnum.PieChart_User_DeviceType, identity);
         
         return {
             cards: [
@@ -163,7 +164,7 @@ class DashboardService {
                     }
                 )
             ],
-            chart: chart
+            charts: [lineChart, pieChart]
         }
     }
 

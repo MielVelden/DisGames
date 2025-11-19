@@ -2,12 +2,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { InterfaceInfo } from '../../interfaces/application/Controller';
 import { MethodNameUtils } from '../helpers/MethodNames';
-import { resolvePath } from '../helpers/PathResolver';
+import { resolveSourcePath } from '../helpers/PathResolver';
 
 export class InterfaceCollector {
-    private static readonly INTERFACES_PATH = resolvePath('interfaces');
+    private static readonly INTERFACES_PATH = resolveSourcePath('interfaces');
 
-    static async collectAllInterfaces(): Promise<InterfaceInfo[]> {
+    static async collectAllInterfacesAsync(): Promise<InterfaceInfo[]> {
         const interfaces: InterfaceInfo[] = [];
         const categories = ['application', 'database', 'domain', 'enums', 'view'];
 

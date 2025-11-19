@@ -56,9 +56,21 @@ export class PathResolver {
     }
 
     static resolvePath(...pathSegments: string[]): string {
-        return this.isDev() 
+        return this.isDev()
             ? this.resolveSrc(...pathSegments)
             : this.resolveDist(...pathSegments);
+    }
+
+    static resolveSourcePath(...pathSegments: string[]): string {
+        const srcPath = this.resolveSrc(...pathSegments);
+        if (fs.existsSync(srcPath))
+            return srcPath;
+
+        const distPath = this.resolveDist(...pathSegments);
+        if (fs.existsSync(distPath))
+            return distPath;
+
+        return this.resolve(...pathSegments);
     }
 
     static relative(from: string, to: string): string {
@@ -72,4 +84,8 @@ export class PathResolver {
 
 export function resolvePath(...pathSegments: string[]): string {
     return PathResolver.resolvePath(...pathSegments);
+}
+
+export function resolveSourcePath(...pathSegments: string[]): string {
+    return PathResolver.resolveSourcePath(...pathSegments);
 }

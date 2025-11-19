@@ -1,5 +1,3 @@
-import { LogLevel } from "../../../utils/application/Logger";
-
 export enum EnvConfigEnum {
     DISGAMES_API_PORT = "DISGAMES_API_PORT",
     DATABASE_URL = "DATABASE_URL",
@@ -26,7 +24,7 @@ const configTypeDefaults = {
     [EnvConfigEnum.DISCORD_CLIENT_ID]: "",
     [EnvConfigEnum.DISCORD_OWNER_ID]: "",
     [EnvConfigEnum.DISCORD_WEBHOOK_URL]: "",
-    [EnvConfigEnum.PREFIX]: "",
+    [EnvConfigEnum.PREFIX]: "!",
     [EnvConfigEnum.TOKEN]: "",
     [EnvConfigEnum.TEST_TIMEOUT]: 30000,
     [EnvConfigEnum.TEST_ROLLBACK]: false,

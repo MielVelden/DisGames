@@ -87,7 +87,7 @@ class DiscordService {
     }
 
     public async deleteAsync(event: InteractionEvent): Promise<void> {
-        return await DiscordMessageHandler.deleteAsync(event as MessageInteractionEvent);
+        return await DiscordMessageHandler.deleteAsync(event);
     }
 
     public async getUserInputBySelectMenuAsync(event: InteractionEvent, selectMenu: SelectMenu): Promise<InteractionEvent | null> {

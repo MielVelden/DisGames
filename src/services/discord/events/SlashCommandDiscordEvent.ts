@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction, Interaction as DiscordInteraction } from "discord.js";
+import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction } from "discord.js";
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { SlashCommandInteractionEvent } from "../../../interfaces/application/Event";
@@ -13,7 +13,7 @@ export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent implements S
     public readonly followUpOptions: Record<string, string | number | boolean> = {};
 
     constructor(
-        interaction: DiscordInteraction,
+        interaction: DiscordChatInputCommandInteraction,
         user: User,
         server: ServersModel,
         channelId: string,
@@ -23,6 +23,10 @@ export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent implements S
     ) {
         super(EventTypeEnum.SLASH_COMMAND, interaction.id, interaction, user, server, channelId, guildId, messageId);
         this.command = command;
+    }
+
+    public override get currentInteraction(): DiscordChatInputCommandInteraction {
+        return super.currentInteraction as DiscordChatInputCommandInteraction;
     }
 
     public getOption(name: string): string | number | boolean | undefined;

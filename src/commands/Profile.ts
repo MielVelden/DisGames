@@ -1,5 +1,5 @@
 import { Command, CommandOptionType } from "../interfaces/application/Command";
-import { InteractionEvent, SelectMenuInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
+import { InteractionEvent, isSelectMenuInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
@@ -7,8 +7,6 @@ import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
 import { createProfileContainer } from "../builders/containers/ProfileContainer";
 import UserService from "../services/domain/UserService";
 import { createAllGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
-import { GamesCommandFollowUpKeysEnum } from "../interfaces/enums/commands/Games";
-import GameService from "../services/domain/GameService";
 import { createProfileGameContainer } from "../builders/containers/ProfileGameContainer";
 
 export class ProfileCommand implements Command {
@@ -34,7 +32,10 @@ export class ProfileCommand implements Command {
                         const gameSelectMenu = createAllGamesSelectMenu({
                             userId: event.user.userId,
                             handle: async (interaction: InteractionEvent) => {
-                                const gameId = Number((interaction as SelectMenuInteractionEvent).selected);
+                                if (!isSelectMenuInteractionEvent(interaction))
+                                    return;
+                                
+                                const gameId = Number(interaction.selected);
                                 const userGameProfile = await UserService.getUserGameProfileAsync(event.user.userId, event.server.ServerId, gameId);
                                 const profileGameComponents = createProfileGameContainer(userGameProfile);
                                 await interaction.addComponentAsync(profileGameComponents);
@@ -42,10 +43,6 @@ export class ProfileCommand implements Command {
                             }
                         });
                         await event.addComponentAsync(gameSelectMenu);
-
-
-
-
                         await event.replyAsync();
                     }
                 },
