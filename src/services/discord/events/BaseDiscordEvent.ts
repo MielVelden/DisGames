@@ -20,7 +20,7 @@ import { ErrorHelper } from "../../../utils/application/Error";
 export abstract class BaseDiscordEvent implements InteractionEvent {
     public readonly type: EventTypeEnum;
     public readonly customId: string;
-    public readonly currentInteraction: DiscordInteraction | DiscordMessage;
+    protected readonly interaction: DiscordInteraction | DiscordMessage;
     public readonly user: User;
     public readonly server: ServersModel;
     public readonly messageId: string;
@@ -42,7 +42,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
     ) {
         this.type = type;
         this.customId = customId;
-        this.currentInteraction = interaction;
+        this.interaction = interaction;
         this.user = user;
         this.server = server;
         this.channelId = channelId;
@@ -188,4 +188,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
         await TimelineBuilder.commitTimelineEntriesAsync(this.timelineEntries);
         this.timelineEntries = [];
     }
-} 
+    public get currentInteraction(): DiscordInteraction | DiscordMessage {
+        return this.interaction;
+    }
+}

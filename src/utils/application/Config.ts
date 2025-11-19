@@ -105,10 +105,34 @@ export function getConfig(): ConfigValueTypeMap {
 
 function parseConfig(values: Record<EnvConfigEnum, unknown>, schema: z.ZodObject<ConfigSchemaShape>): ConfigValueTypeMap {
     try {
-        return schema.parse(values) as ConfigValueTypeMap;
+        const parsedValues = schema.parse(values) as Partial<ConfigValueTypeMap>;
+        return applyDefaults(parsedValues);
     } catch (error) {
         throw buildConfigError(error);
     }
+}
+
+function applyDefaults(parsedValues: Partial<ConfigValueTypeMap>): ConfigValueTypeMap {
+    const completedValues: Record<EnvConfigEnum, ConfigValueTypeMap[EnvConfigEnum] | undefined> = {} as Record<EnvConfigEnum, ConfigValueTypeMap[EnvConfigEnum] | undefined>;
+    const enumValues = getEnumAsList(EnvConfigEnum);
+
+    enumValues.forEach(enumValue => {
+        const value = parsedValues[enumValue];
+        if (value !== undefined) {
+            completedValues[enumValue] = value;
+            return;
+        }
+
+        const defaultValue = CONFIG_TYPE_DEFAULTS[enumValue];
+        if (defaultValue !== undefined) {
+            completedValues[enumValue] = defaultValue;
+            return;
+        }
+
+        completedValues[enumValue] = undefined;
+    });
+
+    return completedValues as ConfigValueTypeMap;
 }
 
 function buildConfigError(error: unknown): Error {

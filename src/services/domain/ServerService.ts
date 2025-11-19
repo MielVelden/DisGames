@@ -12,10 +12,15 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
 
     public async updateNameAsync(serverId: string, name: string): Promise<ServersModel> {
         const server = await this.getByExternalIdAsync(serverId);
-        if (!server)
-            ErrorHelper.throw(ExceptionEnum.SERVER_NOT_FOUND);
         server.Name = name;
         Logger.logDebug(`Updated server name to ${name} for server ${serverId}`);
+        return await this.repository.saveAsync(server);
+    }
+
+    public async updateMemberCountAsync(serverId: string, memberCount: number): Promise<ServersModel> {
+        const server = await this.getByExternalIdAsync(serverId);
+        server.MemberCount = memberCount;
+        Logger.logDebug(`Updated server member count to ${memberCount} for server ${serverId}`);
         return await this.repository.saveAsync(server);
     }
 

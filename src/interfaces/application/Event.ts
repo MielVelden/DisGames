@@ -1,7 +1,12 @@
 import { User } from "../domain/User";
 import { Component, BaseSelectMenu } from "./Message";
 import { ServersModel, TimelineEntriesSaveModel } from "../database/TableInterfaces";
-import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
+import {
+    ButtonInteraction as DiscordButtonInteraction,
+    ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
+    Interaction as DiscordInteraction, Message as DiscordMessage,
+    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
+} from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
@@ -21,7 +26,7 @@ export interface InteractionEvent {
     addComponentAsync(component: Component): Promise<void>;
     addComponentsAsync(components: Component[]): Promise<void>;
     clearComponentsAsync(): Promise<void>;
-    
+
     // Message and component editing/sending
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
     editAsync(content?: string): Promise<void>;
@@ -55,9 +60,21 @@ export interface ReplyInteractionEvent extends InteractionEvent {
     replyAsync(content?: MultiLingualString): Promise<void>;
 }
 
+export function isReplyInteractionEvent(event: InteractionEvent): event is ReplyInteractionEvent {
+    return (
+        event.type === EventTypeEnum.SLASH_COMMAND ||
+        event.type === EventTypeEnum.MESSAGE ||
+        event.type === EventTypeEnum.BUTTON ||
+        event.type === EventTypeEnum.SELECT_MENU
+    );
+}
+
+
 export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    currentInteraction: DiscordChatInputCommandInteraction;
+
     command: Command;
-    
+
     getOption(name: string): string | number | boolean | undefined;
     getOption<T>(name: string): T | undefined;
     handleCommandOptionsAsync(): Promise<void>;
@@ -66,9 +83,15 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
     followUpOptions: Record<string, string | number | boolean>;
 }
 
+export function isSlashCommandInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent {
+    return event.type === EventTypeEnum.SLASH_COMMAND;
+}
+
 export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    currentInteraction: DiscordMessage;
+
     command?: Command;
-    
+
     sendAsync(): Promise<void>;
     reactAsync(emoji: string): Promise<void>;
 
@@ -77,16 +100,32 @@ export interface MessageInteractionEvent extends InteractionEvent, ReplyInteract
     content: string;
 }
 
+export function isMessageInteractionEvent(event: InteractionEvent): event is MessageInteractionEvent {
+    return event.type === EventTypeEnum.MESSAGE;
+}
+
 export interface ButtonInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    currentInteraction: DiscordButtonInteraction;
+    
     sendAsync(): Promise<void>;
     reactAsync(emoji: string): Promise<void>;
     deleteAsync(): Promise<void>;
 }
 
+export function isButtonInteractionEvent(event: InteractionEvent): event is ButtonInteractionEvent {
+    return event.type === EventTypeEnum.BUTTON;
+}
+
 export interface SelectMenuInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+    currentInteraction: DiscordStringSelectMenuInteraction;
+
     selected: string;
     deferReplyAsync(): Promise<void>;
     sendAsync(): Promise<void>;
+}
+
+export function isSelectMenuInteractionEvent(event: InteractionEvent): event is SelectMenuInteractionEvent {
+    return event.type === EventTypeEnum.SELECT_MENU;
 }
 
 export interface Handler {

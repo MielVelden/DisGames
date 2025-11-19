@@ -4,7 +4,7 @@ import {
     Message,
 } from 'discord.js';
 import DiscordService from '../services/discord/DiscordService';
-import { MessageInteractionEvent } from '../interfaces/application/Event';
+import { InteractionEvent, isMessageInteractionEvent } from '../interfaces/application/Event';
 import GameService from '../services/domain/GameService';
 import { handleErrorAsync } from '../utils/application/Error';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
@@ -20,7 +20,9 @@ export default {
     },
 };
 
-export async function processMessageEventAsync(event: MessageInteractionEvent): Promise<void> {
+export async function processMessageEventAsync(event: InteractionEvent): Promise<void> {
+    if (!isMessageInteractionEvent(event))
+        return;
     EventsService.saveAsync(new EventsSaveModel({
         UserId: event.user.id,
         ServerId: event.server.Id,
@@ -48,6 +50,6 @@ export async function handleDiscordMessageAsync(message: Message, eventType: Eve
     if (message.author.bot)
         return;
 
-    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType) as MessageInteractionEvent;
+    const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType);
     await processMessageEventAsync(event);
 }

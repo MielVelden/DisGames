@@ -53,6 +53,10 @@ export interface ActionRow extends Component {
     components: Component[];
 }
 
+export function isActionRow(actionRow: Component): actionRow is ActionRow {
+    return actionRow.type === ComponentType.ACTION_ROW;
+}
+
 // #endregion
 
 // #region Button
@@ -91,6 +95,10 @@ export interface LinkButton extends BaseButton {
 export interface PremiumButton extends BaseButton {
     style: ButtonStyle.PREMIUM;
     sku_id: string;
+}
+
+export function isActionButton(button: Component): button is ActionButton {
+    return button.type === ComponentType.BUTTON && ((button as ActionButton).style === ButtonStyle.PRIMARY || (button as ActionButton).style === ButtonStyle.SECONDARY || (button as ActionButton).style === ButtonStyle.SUCCESS || (button as ActionButton).style === ButtonStyle.DANGER);
 }
 
 // #endregion
@@ -144,6 +152,10 @@ export interface ChannelSelect extends BaseSelectMenu {
     type: ComponentType.CHANNEL_SELECT;
     channel_types?: number[];
     default_values?: SelectDefaultValue[];
+}
+
+export function isSelectMenu(selectMenu: Component): selectMenu is SelectMenu {
+    return selectMenu.type === ComponentType.STRING_SELECT || selectMenu.type === ComponentType.USER_SELECT || selectMenu.type === ComponentType.ROLE_SELECT || selectMenu.type === ComponentType.MENTIONABLE_SELECT || selectMenu.type === ComponentType.CHANNEL_SELECT;
 }
 
 // #endregion
@@ -233,6 +245,10 @@ export interface ContainerBuilder {
     title?: MultiLingualString;
     description: MultiLingualString;
     footer?: MultiLingualString;
+}
+
+export function isContainer(container: Component): container is Container {
+    return container.type === ComponentType.CONTAINER;
 }
 
 // #endregion

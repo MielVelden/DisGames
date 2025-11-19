@@ -1,4 +1,4 @@
-import { InteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
+import { InteractionEvent, isMessageInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
 import { GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
@@ -22,7 +22,7 @@ import GameDataRepository from "../../repositories/GameDataRepository";
 import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import ComponentService from "../application/ComponentService";
 import { createCancelButton } from "../../builders/buttons/CancelButton";
-import { createMoveButton } from "../../builders/buttons/MoveButton";
+import { createMoveButton as createMoveButtonAsync } from "../../builders/buttons/MoveButton";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -181,7 +181,7 @@ class GameService {
             GameRepository.getByServerAndGameIdAsync(savable.ServerId, savable.GameTypeEnum as GameTypeEnum)
         ]);
 
-        const handleReplace = async (existingGame: GamesModel, event: MessageInteractionEvent) => {
+        const handleReplaceAsync = async (existingGame: GamesModel, event: MessageInteractionEvent) => {
             await GameRepository.purgeAsync(existingGame.Id);
             await this.saveAsync(savable, event);
             await event.editAsync();
@@ -191,7 +191,11 @@ class GameService {
         if (activeChannelGame) {
             ErrorHelper.throwWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
-                [createMoveButton(event.user.userId, (event: InteractionEvent) => handleReplace(activeChannelGame, event as MessageInteractionEvent)),
+                [createMoveButtonAsync(event.user.userId, async (event: InteractionEvent) => {
+                    if (!isMessageInteractionEvent(event))
+                        return;
+                    await handleReplaceAsync(activeChannelGame, event);
+                }),
                 createCancelButton(event.user.userId)]
             );
         }
@@ -200,7 +204,11 @@ class GameService {
         if (activeServerGame) {
             ErrorHelper.throwWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_GAME,
-                [createMoveButton(event.user.userId, (event: InteractionEvent) => handleReplace(activeServerGame, event as MessageInteractionEvent)),
+                [createMoveButtonAsync(event.user.userId, async (event: InteractionEvent) => {
+                    if (!isMessageInteractionEvent(event))
+                        return;
+                    await handleReplaceAsync(activeServerGame, event);
+                }),
                 createCancelButton(event.user.userId)]
             );
         }

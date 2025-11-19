@@ -138,6 +138,7 @@ export class GamesCommand implements Command {
                                 ServerId: event.guildId,
                                 SettingsJSON: gameSettings
                             }), confirmedEvent);
+                            
                             await confirmedEvent.editAsync();
                         }
                     }

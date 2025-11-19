@@ -1,28 +1,28 @@
 import { SetIsRequired, SetValidateRegex } from "../../../utils/helpers/EnumMetadata";
 import { EnvConfigEnum } from "./EnvConfigEnum";
 
-// Disgames API Port
+// Basic required values
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISGAMES_API_PORT);
+SetIsRequired(EnvConfigEnum, EnvConfigEnum.PREFIX);
+SetIsRequired(EnvConfigEnum, EnvConfigEnum.TOKEN);
+
+SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_CLIENT_ID);
+SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_CLIENT_ID, /^[0-9]+$/);
+SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_OWNER_ID);
+SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_OWNER_ID, /^[0-9]+$/);
 
 // Database URL
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DATABASE_URL);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DATABASE_URL, /^mysql:\/\/[\w-]+:[\w-]+@[\w-.]+:\d+\/[\w-]+$/);
 
-// Discord Client ID
-SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_CLIENT_ID);
+SetValidateRegex(EnvConfigEnum, EnvConfigEnum.TEST_DATABASE_URL, /^mysql:\/\/[\w-]+:[\w-]+@[\w-.]+:\d+\/[\w-]+$/);
 
-// Discord Owner ID
-SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_OWNER_ID);
-
-// Discord Webhook URL
+// Discord Webhook URLs
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_WEBHOOK_URL);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_WEBHOOK_URL, /^https:\/\/(ptb\.|canary\.)?discord\.com\/api\/webhooks\/\d+\/[\w-]+$/);
 
-// Prefix
-SetIsRequired(EnvConfigEnum, EnvConfigEnum.PREFIX);
-
-// Token
-SetIsRequired(EnvConfigEnum, EnvConfigEnum.TOKEN);
+SetValidateRegex(EnvConfigEnum, EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL, /^https:\/\/(ptb\.|canary\.)?discord\.com\/api\/webhooks\/\d+\/[\w-]+$/);
+SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL, /^https:\/\/(ptb\.|canary\.)?discord\.com\/api\/webhooks\/\d+\/[\w-]+$/);
 
 // Dashboard API Keys
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS);

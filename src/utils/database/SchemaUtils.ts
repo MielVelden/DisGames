@@ -56,7 +56,6 @@ export class SchemaUtils {
 
     switch (mysqlType.toLowerCase()) {
       case 'int':
-      case 'tinyint':
       case 'smallint':
       case 'mediumint':
       case 'bigint':
@@ -76,7 +75,7 @@ export class SchemaUtils {
       case 'timestamp':
         return 'Date';
       case 'boolean':
-      case 'tinyint(1)':
+      case 'tinyint':
         return 'boolean';
       default:
         return 'any';

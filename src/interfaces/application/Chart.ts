@@ -1,3 +1,5 @@
+import { ChartEnum } from "../enums/application/ChartTypeEnum";
+
 export interface ChartData {
     [key: string]: string | number;
 }
@@ -7,5 +9,5 @@ export interface ChartDefinition {
     data: ChartData[];
     xAxisKey: string;
     valueKeys: string[];
-    type?: "area" | "line" | "bar";
+    type?: ChartEnum;
 }

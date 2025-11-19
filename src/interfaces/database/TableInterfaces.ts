@@ -268,9 +268,9 @@ export interface GameTypesModel {
   pointPerGame: number;
   description: number;
   gameRules: number;
-  replyMessage: number;
-  sameUserAllowed: number;
-  allowMessageChange: number;
+  replyMessage: boolean;
+  sameUserAllowed: boolean;
+  allowMessageChange: boolean;
 }
 
 export enum GameTypesModelFieldEnum {
@@ -512,6 +512,7 @@ export interface ServersModel {
   Name: string;
   Points: number;
   LanguageEnum: enums.LanguageEnum;
+  MemberCount: number;
 }
 
 export enum ServersModelFieldEnum {
@@ -519,7 +520,8 @@ export enum ServersModelFieldEnum {
   ServerId = "ServerId",
   Name = "Name",
   Points = "Points",
-  LanguageEnum = "LanguageEnum"
+  LanguageEnum = "LanguageEnum",
+  MemberCount = "MemberCount"
 }
 
 export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersModel {
@@ -530,6 +532,7 @@ export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> impleme
   Name: string;
   Points: number;
   LanguageEnum: enums.LanguageEnum;
+  MemberCount: number;
 
   constructor(data: Partial<ServersModel>) {
     super(data as BaseEntity);
@@ -538,6 +541,7 @@ export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> impleme
     this.Name = data.Name!;
     this.Points = data.Points!;
     this.LanguageEnum = data.LanguageEnum!;
+    this.MemberCount = data.MemberCount!;
   }
 }
 
@@ -547,6 +551,7 @@ export interface ServersSaveModel {
   Name?: string;
   Points?: number;
   LanguageEnum?: enums.LanguageEnum;
+  MemberCount?: number;
 }
 
 export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersSaveModel {
@@ -557,6 +562,7 @@ export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> imp
   Name?: string;
   Points?: number;
   LanguageEnum?: enums.LanguageEnum;
+  MemberCount?: number;
 
   constructor(data: Partial<ServersSaveModel>) {
     super({ Id: data.Id ?? 0 });
@@ -565,6 +571,7 @@ export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> imp
     if (data.Name !== undefined) this.Name = data.Name;
     if (data.Points !== undefined) this.Points = data.Points;
     if (data.LanguageEnum !== undefined) this.LanguageEnum = data.LanguageEnum;
+    if (data.MemberCount !== undefined) this.MemberCount = data.MemberCount;
   }
 }
 

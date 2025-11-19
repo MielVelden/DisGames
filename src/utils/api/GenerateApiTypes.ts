@@ -3,8 +3,8 @@ import { EndpointCollector } from '../collectors/EndpointCollector';
 import { cleanupQualifiedTypes, isException, TYPE_EXCEPTIONS, getExceptionDefinition } from './Exceptions';
 
 export async function generateDisGamesTypes(): Promise<string> {
-    const interfaces = await InterfaceCollector.collectAllInterfaces();
-    const endpoints = await EndpointCollector.collectAllEndpoints();
+    const interfaces = await InterfaceCollector.collectAllInterfacesAsync();
+    const endpoints = await EndpointCollector.collectAllEndpointsAsync();
 
     const grouped = groupByCategory(interfaces);
 

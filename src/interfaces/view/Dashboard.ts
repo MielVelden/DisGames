@@ -1,6 +1,8 @@
+import { ChartDefinition } from "../application/Chart";
+
 export interface DashboardView {
     cards: DashboardSectionCardData[]
-    chart?: any;
+    charts?: ChartDefinition[];
 }
 
 export type TrendDirection = "up" | "down";

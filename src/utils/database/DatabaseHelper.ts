@@ -1,3 +1,4 @@
+import { isMultiLingualString } from "../../interfaces/application";
 import { MultiLingualString } from "../i18n/MultiLingualString";
 import { SchemaUtils } from "./SchemaUtils";
 
@@ -10,7 +11,7 @@ export class DatabaseHelper {
     const serialized = { ...entity };
     
     for (const [key, value] of Object.entries(serialized)) {
-      if (value instanceof MultiLingualString) {
+      if (isMultiLingualString(value)) {
         serialized[key] = JSON.stringify(value.toJSON());
       }
     }

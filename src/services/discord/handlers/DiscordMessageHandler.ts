@@ -1,14 +1,10 @@
 import {
     User as DiscordUser,
-
-    ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
-    ButtonInteraction as DiscordButtonInteraction,
-    ButtonBuilder as DiscordButtonBuilder,
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
     ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction
 } from 'discord.js';
-import { InteractionEvent, MessageInteractionEvent } from '../../../interfaces/application/Event';
+import { InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent, isSelectMenuInteractionEvent, isSlashCommandInteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
 import {
     Component
@@ -39,7 +35,7 @@ class DiscordMessageHandler {
             return;
         }
 
-        await this.handleInteractionReplyAsync(event as MessageInteractionEvent, content);
+        await this.handleInteractionReplyAsync(event, content);
     }
 
     public async sendAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
@@ -71,22 +67,23 @@ class DiscordMessageHandler {
         await this.handleInteractionEditAsync(event, content);
     }
 
-    public async deleteAsync(event: MessageInteractionEvent): Promise<void> {
+    public async deleteAsync(event: InteractionEvent): Promise<void> {
         // Mark message as internally deleted before deleting
-        if (event.messageDeleted)
-            return;
 
-        event.messageDeleted = true;
+        if (isMessageInteractionEvent(event)) {
+            if (event.messageDeleted)
+                return;
 
-        if (event.currentInteraction instanceof DiscordMessage) {
+            event.messageDeleted = true;
+
             EventService.markMessageAsInternallyDeleted(event.currentInteraction.id);
             await event.currentInteraction.delete();
         } else {
             // For button interactions, we can get the message ID
-            if (event.currentInteraction instanceof DiscordButtonInteraction && event.currentInteraction.message)
+            if (isButtonInteractionEvent(event) && event.currentInteraction.message)
                 EventService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
 
-            if (event.currentInteraction instanceof DiscordButtonInteraction)
+            if (isButtonInteractionEvent(event))
                 await event.currentInteraction.deleteReply();
         }
     }
@@ -103,50 +100,60 @@ class DiscordMessageHandler {
     }
 
 
-    public async handleInteractionReplyAsync(event: MessageInteractionEvent, content: DiscordMessageContent): Promise<void> {
+    public async handleInteractionReplyAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
         // If the message is deleted, don't reply
-        if (event.messageDeleted)
+        if (isMessageInteractionEvent(event) && event.messageDeleted)
             return;
 
-        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-            if (event.currentInteraction.replied) {
-                await event.currentInteraction.editReply({
-                    ...content,
-                    content: null
-                });
-            } else {
-                await event.currentInteraction.reply(content);
-            }
-        } else if (event.currentInteraction instanceof DiscordMessage) {
-            if (event.currentInteraction.resolved) {
-                await event.currentInteraction.edit(content);
-            } else {
-                await event.currentInteraction.reply(content);
-            }
-        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
-            await event.currentInteraction.update(content);
-        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
-            await event.currentInteraction.update(content);
-        } else {
-            throw new Error("Not implemented yet");
+        switch (true) {
+            case isSlashCommandInteractionEvent(event):
+                if (event.currentInteraction.replied) {
+                    await event.currentInteraction.editReply({
+                        ...content,
+                        content: null
+                    });
+                } else {
+                    await event.currentInteraction.reply(content);
+                }
+                break;
+            case isMessageInteractionEvent(event):
+                if (event.currentInteraction.resolved) {
+                    await event.currentInteraction.edit(content);
+                } else {
+                    await event.currentInteraction.reply(content);
+                }
+                break;
+            case isButtonInteractionEvent(event):
+                await event.currentInteraction.update(content);
+                break;
+            case isSelectMenuInteractionEvent(event):
+                await event.currentInteraction.update(content);
+                break;
+            default:
+                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         }
     }
 
     public async handleInteractionEditAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
-        if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-            await event.currentInteraction.editReply(content);
-        } else if (event.currentInteraction instanceof DiscordMessage) {
-            await event.currentInteraction.edit(content);
-        } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
-            await event.currentInteraction.update(content);
-        } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction || event.currentInteraction instanceof DiscordChannelSelectMenuInteraction) {
-            if (event.currentInteraction.deferred) {
+        switch (true) {
+            case isSlashCommandInteractionEvent(event):
                 await event.currentInteraction.editReply(content);
-            } else {
+                break;
+            case isMessageInteractionEvent(event):
+                await event.currentInteraction.edit(content);
+                break;
+            case isButtonInteractionEvent(event):
                 await event.currentInteraction.update(content);
-            }
-        } else {
-            throw new Error("Not implemented yet");
+                break;
+            case isSelectMenuInteractionEvent(event):
+                if (event.currentInteraction.deferred) {
+                    await event.currentInteraction.editReply(content);
+                } else {
+                    await event.currentInteraction.update(content);
+                }
+                break;
+            default:
+                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         }
     }
 
@@ -187,15 +194,20 @@ class DiscordMessageHandler {
             const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
 
-            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction ||
-                event.currentInteraction instanceof DiscordMessage) {
-                await event.currentInteraction.reply(replyOptions);
-            } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
-                await event.currentInteraction.editReply(replyOptions);
-            } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
-                await event.currentInteraction.update(replyOptions);
-            } else
-                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+            switch (true) {
+                case isSlashCommandInteractionEvent(event):
+                case isMessageInteractionEvent(event):
+                    await event.currentInteraction.reply(replyOptions);
+                    break;
+                case isSelectMenuInteractionEvent(event):
+                    await event.currentInteraction.editReply(replyOptions);
+                    break;
+                case isButtonInteractionEvent(event):
+                    await event.currentInteraction.update(replyOptions);
+                    break;
+                default:
+                    ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+            }
         });
     }
 
@@ -221,12 +233,14 @@ class DiscordMessageHandler {
             const discordMessage = ComponentService.createContent(question);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordButtons)], []);
 
-            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction)
-                await event.currentInteraction.reply(replyOptions);
-            else if (event.currentInteraction instanceof DiscordMessage)
-                await event.currentInteraction.reply(replyOptions);
-            else
-                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+            switch (true) {
+                case isSlashCommandInteractionEvent(event):
+                case isMessageInteractionEvent(event):
+                    await event.currentInteraction.reply(replyOptions);
+                    break;
+                default:
+                    ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+            }
         });
     }
 
@@ -253,19 +267,22 @@ class DiscordMessageHandler {
                 []
             );
 
-            if (event.currentInteraction instanceof DiscordChatInputCommandInteraction) {
-                if (event.currentInteraction.replied)
-                    await event.currentInteraction.editReply(replyOptions);
-                else
+            switch (true) {
+                case isSlashCommandInteractionEvent(event):
+                    if (event.currentInteraction.replied)
+                        await event.currentInteraction.editReply(replyOptions);
+                    else
+                        await event.currentInteraction.reply(replyOptions);
+                    break;
+                case isMessageInteractionEvent(event):
                     await event.currentInteraction.reply(replyOptions);
-            } else if (event.currentInteraction instanceof DiscordMessage) {
-                await event.currentInteraction.reply(replyOptions);
-            } else if (event.currentInteraction instanceof DiscordButtonInteraction) {
-                await event.currentInteraction.update(replyOptions);
-            } else if (event.currentInteraction instanceof DiscordStringSelectMenuInteraction) {
-                await event.currentInteraction.update(replyOptions);
-            } else {
-                ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+                    break;
+                case isButtonInteractionEvent(event):
+                case isSelectMenuInteractionEvent(event):
+                    await event.currentInteraction.update(replyOptions);
+                    break;
+                default:
+                    ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
             }
         });
     }

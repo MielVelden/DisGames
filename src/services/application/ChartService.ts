@@ -1,5 +1,5 @@
 import { User } from "../../interfaces/domain";
-import { ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";
+import { ChartEnum, ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";
 import { ChartDefinition } from "../../interfaces/application/Chart";
 import { assertNever } from "../../utils/application/Error";
 
@@ -8,6 +8,8 @@ class ChartService {
         switch (chartEnum) {
             case ChartTypeEnum.LineChart_User_NewUser:
                 return this.getLineChartUserNewUserAsync(identity);
+            case ChartTypeEnum.PieChart_User_DeviceType:
+                return this.getPieChartUserDeviceTypeAsync(identity);
             default:
                 assertNever(chartEnum, ChartTypeEnum);
         }
@@ -15,7 +17,7 @@ class ChartService {
 
     private async getLineChartUserNewUserAsync(identity: User): Promise<ChartDefinition> {
         const chartData = [
-            { date: "2024-04-01", desktop: 222, mobile: 150 },
+            { date: "2024-04-01", desktop: 300, mobile: 150 },
             { date: "2024-04-02", desktop: 97, mobile: 180 },
             { date: "2024-04-03", desktop: 167, mobile: 120 },
             { date: "2024-04-04", desktop: 242, mobile: 260 },
@@ -76,7 +78,7 @@ class ChartService {
             { date: "2024-05-29", desktop: 78, mobile: 130 },
             { date: "2024-05-30", desktop: 340, mobile: 280 },
             { date: "2024-05-31", desktop: 178, mobile: 230 },
-            { date: "2024-06-01", desktop: 178, mobile: 200 },
+            { date: "2024-06-01", desktop: 300, mobile: 200 },
             { date: "2024-06-02", desktop: 470, mobile: 410 },
             { date: "2024-06-03", desktop: 103, mobile: 160 },
             { date: "2024-06-04", desktop: 439, mobile: 380 },
@@ -106,14 +108,29 @@ class ChartService {
             { date: "2024-06-28", desktop: 149, mobile: 200 },
             { date: "2024-06-29", desktop: 103, mobile: 160 },
             { date: "2024-06-30", desktop: 446, mobile: 400 },
-          ];
+        ];
 
         return {
             title: "New Users",
             data: chartData,
             xAxisKey: "date",
             valueKeys: ["desktop", "mobile"],
-            type: "line",
+            type: ChartEnum.Line,
+        };
+    }
+
+    private async getPieChartUserDeviceTypeAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = [
+            { device: "Desktop", value: 300 },
+            { device: "Mobile", value: 150 },
+        ];
+
+        return {
+            title: "User Device Type",
+            data: chartData,
+            xAxisKey: "device",
+            valueKeys: ["value"],
+            type: ChartEnum.Pie,
         };
     }
 }

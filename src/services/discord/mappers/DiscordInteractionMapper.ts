@@ -3,7 +3,8 @@ import {
     User as DiscordUser,
     GuildMember as DiscordGuildMember,
     Guild as DiscordServer,
-    Message as DiscordMessage
+    Message as DiscordMessage,
+    StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from 'discord.js';
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
@@ -83,7 +84,7 @@ class DiscordInteractionMapper {
             );
         } else if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
             const tempEvent = new SelectMenuDiscordEvent(
-                interaction,
+                interaction as DiscordStringSelectMenuInteraction,
                 this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
                 this.getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
@@ -97,7 +98,7 @@ class DiscordInteractionMapper {
             const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer, tempEvent);
 
             event = new SelectMenuDiscordEvent(
-                interaction,
+                interaction as DiscordStringSelectMenuInteraction,
                 user,
                 server,
                 baseParams.channelId,
@@ -205,6 +206,9 @@ class DiscordInteractionMapper {
         // Update the server name if it has changed
         if (discordServer.name !== server.Name)
             await ServerService.updateNameAsync(discordServer.id, discordServer.name);
+
+        if (discordServer.memberCount !== server.MemberCount && discordServer.memberCount !== undefined)
+            await ServerService.updateMemberCountAsync(discordServer.id, discordServer.memberCount);
 
         return server;
     }

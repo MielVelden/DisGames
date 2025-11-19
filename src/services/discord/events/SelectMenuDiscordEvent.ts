@@ -1,4 +1,4 @@
-import { Interaction as DiscordInteraction } from "discord.js";
+import { StringSelectMenuInteraction as DiscordStringSelectMenuInteraction } from "discord.js";
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
@@ -9,8 +9,12 @@ import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent implements SelectMenuInteractionEvent {
     public readonly selected: string;
 
+    public override get currentInteraction(): DiscordStringSelectMenuInteraction {
+        return super.currentInteraction as DiscordStringSelectMenuInteraction;
+    }
+
     constructor(
-        interaction: DiscordInteraction,
+        interaction: DiscordStringSelectMenuInteraction,
         user: User,
         server: ServersModel,
         channelId: string,
@@ -24,7 +28,7 @@ export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent implements Sel
     }
 
     public async deferReplyAsync(): Promise<void> {
-        await DiscordMessageHandler.deferUpdateAsync(this.currentInteraction as any);
+        await DiscordMessageHandler.deferUpdateAsync(this.currentInteraction);
     }
 
     public async sendAsync(): Promise<void> {
