@@ -4,7 +4,7 @@ import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyE
 import { getEnumAsList } from "../helpers/Enum";
 import { getEnumProperty } from "../helpers/EnumMetadata";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
-import { ErrorHelper } from "./Error";
+import { assertNever, ErrorHelper } from "./Error";
 
 type ConfigSchemaShape = {
     [K in EnvConfigEnum]: ZodTypeAny;
@@ -39,7 +39,7 @@ function buildValidator(enumValue: EnvConfigEnum, validateRegex?: string): ZodTy
         case "string":
             return buildStringValidator(validateRegex);
         default:
-            throw new Error(`Unsupported config type for ${enumValue}`);
+            assertNever(sampleValue, { [enumValue]: enumValue });
     }
 }
 
@@ -119,7 +119,7 @@ function buildConfigError(error: unknown): Error {
 }
 
 function formatIssue(issue: ZodIssue): void {
-    const key = String(issue.path[0] ?? "Onbekende sleutel");
+    const key = String(issue.path[0] ?? "INVALID_CONFIG_KEY");
 
     if (issue.code === "invalid_type" && issue.received === "undefined")
         ErrorHelper.throwWithParameters(ExceptionEnum.FIELD_IS_MISSING_AND_REQUIRED, { key: key });

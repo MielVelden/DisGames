@@ -5,6 +5,8 @@ import { URL } from 'url';
 import Logger from '../../utils/application/Logger';
 import { ExceptionEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
+import { getConfigValue } from '../../utils/application/Config';
+import { EnvConfigEnum } from '../../interfaces/enums/application/EnvConfigEnum';
 
 dotenv.config();
 
@@ -16,7 +18,7 @@ let table_enums: Array<{ Id: number, TableName: string }> = [];
 
 export async function createConnectionAsync(): Promise<boolean> {
     try {
-        const dbUrl = process.env.DATABASE_URL as string;
+        const dbUrl = getConfigValue(EnvConfigEnum.DATABASE_URL) as string;
 
         if (!dbUrl)
             ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { environmentVariable: 'DATABASE_URL' });

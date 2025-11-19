@@ -2,13 +2,15 @@ import mysql from 'mysql2/promise';
 import * as dotenv from 'dotenv';
 import { ExceptionEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../application/Error';
+import { getConfigValue } from '../application/Config';
+import { EnvConfigEnum } from '../../interfaces/enums/application/EnvConfigEnum';
 
 dotenv.config();
 
 export class DatabaseConnection {
   private static pool: mysql.Pool;
   private static connection: mysql.PoolConnection;
-  private static databaseUrl = process.env.DATABASE_URL as string;
+  private static databaseUrl = getConfigValue(EnvConfigEnum.DATABASE_URL) as string;
   public static databaseName = DatabaseConnection.databaseUrl.split('/').pop()?.split('?')[0] as string;
 
   static async createConnection(): Promise<mysql.PoolConnection> {

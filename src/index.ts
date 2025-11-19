@@ -26,7 +26,7 @@ client.once('ready', async () => {
     if (success) {
       await loadCommands(client);
       await loadEvents(client);
-      const port = Number(process.env.DISGAMES_API_PORT || 3600);
+      const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);
       startHttpServer(port);
     } else {
       Logger.logError(`Failed to connect to database`);

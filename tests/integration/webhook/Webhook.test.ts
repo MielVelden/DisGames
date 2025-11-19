@@ -1,9 +1,11 @@
 import axios from 'axios';
 import TestRunner from '../../TestRunner';
 import { TestSuite } from '../../interfaces/TestRunnerInterface';
+import { getConfigValue } from '../../../src/utils/application/Config';
+import { EnvConfigEnum } from '../../../src/interfaces/enums/application/EnvConfigEnum';
 
 export default function registerWebhookTests(runner: TestRunner): void {
-    const testWebhookUrl = process.env.TEST_DISCORD_WEBHOOK_URL;
+    const testWebhookUrl = getConfigValue(EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL);
 
     const suite: TestSuite = {
         name: 'Discord Webhook',
