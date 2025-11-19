@@ -61,8 +61,14 @@ export interface ReplyInteractionEvent extends InteractionEvent {
 }
 
 export function isReplyInteractionEvent(event: InteractionEvent): event is ReplyInteractionEvent {
-    return event.type === EventTypeEnum.MESSAGE || event.type === EventTypeEnum.BUTTON || event.type === EventTypeEnum.SELECT_MENU;
+    return (
+        event.type === EventTypeEnum.SLASH_COMMAND ||
+        event.type === EventTypeEnum.MESSAGE ||
+        event.type === EventTypeEnum.BUTTON ||
+        event.type === EventTypeEnum.SELECT_MENU
+    );
 }
+
 
 export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
     currentInteraction: DiscordChatInputCommandInteraction;

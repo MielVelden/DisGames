@@ -1,4 +1,4 @@
-import { InteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from "../../interfaces/application";
+import { InteractionEvent, isReplyInteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from "../../interfaces/application";
 import { ComponentErrorOptions } from "../../interfaces/application/Error";
 import { Component } from "../../interfaces/application/Message";
 import { ExceptionEnum } from "../../interfaces/enums";
@@ -80,7 +80,7 @@ export function assertNever(x: never, origin: { [key: string]: string | number }
     throw new Error(i18n.labels.handleNever(x, originName).getMessage());
 }
 
-export async function handleErrorAsync(error: unknown, event: MessageInteractionEvent | SlashCommandInteractionEvent): Promise<void> {
+export async function handleErrorAsync(error: unknown, event: InteractionEvent): Promise<void> {
     if (error instanceof ComponentError) {
         if (error.hasComponents()) {
             const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
@@ -94,7 +94,8 @@ export async function handleErrorAsync(error: unknown, event: MessageInteraction
             await event.addComponentAsync(ComponentService.createContent(errorMessage));
         }
 
-        await event.replyAsync();
+        if (isReplyInteractionEvent(event))
+            await event.replyAsync();
 
         if(!error.silently)
             Logger.logError(`Error handling message`, error as Error);

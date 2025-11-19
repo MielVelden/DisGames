@@ -207,7 +207,7 @@ class DiscordInteractionMapper {
         if (discordServer.name !== server.Name)
             await ServerService.updateNameAsync(discordServer.id, discordServer.name);
 
-        if(discordServer.memberCount !== server.MemberCount && discordServer.memberCount !== undefined)
+        if (discordServer.memberCount !== server.MemberCount && discordServer.memberCount !== undefined)
             await ServerService.updateMemberCountAsync(discordServer.id, discordServer.memberCount);
 
         return server;
