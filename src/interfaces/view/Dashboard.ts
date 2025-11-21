@@ -1,3 +1,4 @@
+import { Duration } from "../application";
 import { ChartDefinition } from "../application/Chart";
 
 export interface DashboardView {
@@ -26,4 +27,10 @@ export type DashboardSectionCardData = {
 export type DashboardSectionCardsProps = {
   cards: DashboardSectionCardData[]
   className?: string
+}
+
+export interface TimeframeData {
+  timeFrame: Duration;
+  currentValue: number;
+  previousValue: number;
 }

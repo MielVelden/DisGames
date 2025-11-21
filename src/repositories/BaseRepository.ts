@@ -5,7 +5,6 @@ import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 import { isValidEnumValue } from "../utils/helpers/Enum";
 import { ErrorHelper } from "../utils/application/Error";
-import Logger from "../utils/application/Logger";
 import { BaseEntity } from "../interfaces/database/BaseEntity";
 
 type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE';
@@ -100,6 +99,18 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 
   public async Count(): Promise<number> {
     this.query = this.query.replace(/^SELECT .+ FROM/, 'SELECT COUNT(*) as Total FROM');
+    this.hasLimit1 = true;
+    
+    const results = await this.Execute();
+    
+    if (!results || results.length === 0)
+      return 0;
+    
+    return (results[0] as unknown as { Total: number }).Total as number;
+  }
+
+  public async Sum(field: keyof Model): Promise<number> {
+    this.query = this.query.replace(/^SELECT .+ FROM/, `SELECT SUM(${String(field)}) as Total FROM`);
     this.hasLimit1 = true;
     
     const results = await this.Execute();

@@ -42,6 +42,10 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
     public async purgeAsync(id: number): Promise<void> {
         await this.repository.purgeAsync(id);
     }
+
+    public async getTotalMembersAsync(): Promise<number> {
+        return await this.repository.getTotalMembersAsync();
+    }
 }
 
 export default new ServerService();

@@ -1,4 +1,5 @@
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { GameTypeEnum } from "../enums";
 
 export interface ProfileView {
     UserId: string;
@@ -10,7 +11,7 @@ export interface ProfileView {
 }
 
 export interface ProfileGameView {
-    gameName: MultiLingualString;
+    gameType: GameTypeEnum;
     gamePoints: number;
     gameRank: number;
     gameRankPlayerCount: number;

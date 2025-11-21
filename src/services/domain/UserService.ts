@@ -45,19 +45,20 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
 
     public async getUserGameProfileAsync(userId: string, serverId: string, gameId: number): Promise<ProfileGameView> {
         const gamePoints = await PointRepository.getPointsByUserServerGameIdAsync(userId, serverId, gameId);
+        const gameRank = await PointRepository.getGameRankAsync(userId, serverId, gameId);
         if (!gamePoints)
             return {
-                gameName: GameService.getGameNameByType(gameId),
+                gameType: gameId,
                 gamePoints: 0,
-                gameRank: 0,
-                gameRankPlayerCount: 0,
+                gameRank: gameRank.rank,
+                gameRankPlayerCount: gameRank.total,
             };
 
         return {
-            gameName: GameService.getGameNameByType(gameId),
+            gameType: gameId,
             gamePoints: gamePoints.Points,
-            gameRank: 0,
-            gameRankPlayerCount: 0,
+            gameRank: gameRank.rank,
+            gameRankPlayerCount: gameRank.total,
         };
     }
 

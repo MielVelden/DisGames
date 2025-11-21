@@ -62,6 +62,19 @@ export interface I18nTranslations {
         },
         handleNever: (uniqueCase: string, origin: string) => MultiLingualString;
     },
+    tables: {
+        users: {
+            singleName: LanguageTranslations;
+            multiName: LanguageTranslations;
+            fields: {
+                username: LanguageTranslations;
+            };
+        },
+        points: {
+            singleName: LanguageTranslations;
+            multiName: LanguageTranslations;
+        },
+    }
     commands: {
         debug: {
             description: LanguageTranslations;
@@ -126,7 +139,11 @@ export interface I18nTranslations {
             option: LanguageCommandOptionTranslations<ProfileCommandActionEnum>;
             labels: {
                 title: LanguageTranslations;
-            }
+                position: LanguageTranslations;
+                notRanked: LanguageTranslations;
+                globalUserRank: LanguageTranslations;
+                globalPoints: LanguageTranslations;
+            };
         },
         impersonate: {
             description: LanguageTranslations;

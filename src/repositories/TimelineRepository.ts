@@ -3,6 +3,7 @@ import BaseRepository from "./BaseRepository";
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums/index";
 import { subtractDurationFromDate } from "../utils/helpers/Duration";
 import { Duration } from "../interfaces/application";
+import { TimeframeData as TimeFrameData } from "../interfaces/view/Dashboard";
 
 class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, TimelineEntriesSaveModel> {
     public readonly baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>;
@@ -27,14 +28,43 @@ class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, Tim
         await this.baseRepository.Delete(id);
     }
 
-    async getGamesPlayedAsync(duration: Duration): Promise<number> {
+    async getGamesPlayedTimeFrameAsync(duration: Duration): Promise<TimeFrameData> {
         const startDate = subtractDurationFromDate(duration, new Date());
-        return await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.GAME_PLAYED, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousStartDate = subtractDurationFromDate(duration, startDate);
+        const currentGamesPlayed = await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.GAME_PLAYED, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousGamesPlayed = await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.GAME_PLAYED, CreatedAt: { operator: '>=', value: previousStartDate } }).Count();
+
+        return {
+            timeFrame: duration,
+            currentValue: currentGamesPlayed,
+            previousValue: previousGamesPlayed
+        }
     }
 
-    async getTotalUsersCreatedAsync(duration: Duration): Promise<number> {
+    async getUsersTimeFrameAsync(duration: Duration): Promise<TimeFrameData> {
         const startDate = subtractDurationFromDate(duration, new Date());
-        return await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.USER_CREATED, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousStartDate = subtractDurationFromDate(duration, startDate);
+        const currentUsers = await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.USER_CREATED, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousUsers = await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.USER_CREATED, CreatedAt: { operator: '>=', value: previousStartDate } }).Count();
+
+        return {
+            timeFrame: duration,
+            currentValue: currentUsers,
+            previousValue: previousUsers
+        }
+    }
+
+    async getServersTimeFrameAsync(duration: Duration): Promise<TimeFrameData> {
+        const startDate = subtractDurationFromDate(duration, new Date());
+        const previousStartDate = subtractDurationFromDate(duration, startDate);
+        const currentServers = await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.SERVER_CREATED, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousServers = await this.baseRepository.Select().Where({ TimelineType: TimelineTypeEnum.SERVER_CREATED, CreatedAt: { operator: '>=', value: previousStartDate } }).Count();
+
+        return {
+            timeFrame: duration,
+            currentValue: currentServers,
+            previousValue: previousServers
+        }
     }
 }
 

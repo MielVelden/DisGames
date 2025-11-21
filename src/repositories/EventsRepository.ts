@@ -3,6 +3,7 @@ import BaseRepository from "./BaseRepository";
 import { EventTypeEnum, TableEnum } from "../interfaces/enums/index";
 import { Duration } from "../interfaces/application";
 import { subtractDurationFromDate } from "../utils/helpers/Duration";
+import { TimeframeData } from "../interfaces/view/Dashboard";
 
 class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveModel> {
     public readonly baseRepository: BaseRepository<EventsModel, EventsSaveModel>;
@@ -27,9 +28,17 @@ class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveMode
         await this.baseRepository.Delete(id);
     }
 
-    async getTotalMessagesSentAsync(duration: Duration): Promise<number> {
+    async getMessagesSentTimeFrameAsync(duration: Duration): Promise<TimeframeData> {
         const startDate = subtractDurationFromDate(duration, new Date());
-        return await this.baseRepository.Select().Where({ EventTypeEnum: EventTypeEnum.MESSAGE, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousStartDate = subtractDurationFromDate(duration, startDate);
+        const currentMessages = await this.baseRepository.Select().Where({ EventTypeEnum: EventTypeEnum.MESSAGE, CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousMessages = await this.baseRepository.Select().Where({ EventTypeEnum: EventTypeEnum.MESSAGE, CreatedAt: { operator: '>=', value: previousStartDate } }).Count();
+
+        return {
+            timeFrame: duration,
+            currentValue: currentMessages,
+            previousValue: previousMessages
+        }
     }
 }
 

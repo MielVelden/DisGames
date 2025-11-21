@@ -34,6 +34,10 @@ class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveMo
             });
         return model[0];
     }
+
+    async getTotalMembersAsync(): Promise<number> {
+        return await this.baseRepository.Select().Sum("MemberCount");
+    }
 }
 
 export default new ServerRepository();

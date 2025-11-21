@@ -47,6 +47,34 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.NL]: "Niet afgehandelde case {uniqueCase} in {origin}"
         }, { uniqueCase, origin })
     },
+    tables: {
+        users: {
+            singleName: {
+                [LanguageEnum.EN]: "User",
+                [LanguageEnum.NL]: "Gebruiker",
+            },
+            multiName: {
+                [LanguageEnum.EN]: "Users",
+                [LanguageEnum.NL]: "Gebruikers",
+            },
+            fields: {
+                username: {
+                    [LanguageEnum.EN]: "Username",
+                    [LanguageEnum.NL]: "Gebruikersnaam",
+                },
+            }
+        },
+        points: {
+            singleName: {
+                [LanguageEnum.EN]: "Point",
+                [LanguageEnum.NL]: "Punt",
+            },
+            multiName: {
+                [LanguageEnum.EN]: "Points",
+                [LanguageEnum.NL]: "Punten",
+            }
+        },
+    },
     commands: {
         debug: {
             description: {
@@ -507,6 +535,22 @@ export const i18n: I18nTranslations = {
                 title: {
                     [LanguageEnum.EN]: "Profile",
                     [LanguageEnum.NL]: "Profiel",
+                },
+                position: {
+                    [LanguageEnum.EN]: "Position",
+                    [LanguageEnum.NL]: "Positie",
+                },
+                notRanked: {
+                    [LanguageEnum.EN]: "Not ranked yet",
+                    [LanguageEnum.NL]: "Nog niet gerankt",
+                },
+                globalUserRank: {
+                    [LanguageEnum.EN]: "Global User Rank",
+                    [LanguageEnum.NL]: "Globale Gebruikersrang",
+                },
+                globalPoints: {
+                    [LanguageEnum.EN]: "Global Points",
+                    [LanguageEnum.NL]: "Globale Punten",
                 },
             }
         },

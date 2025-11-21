@@ -2,6 +2,7 @@ import { PointsModel, PointsModelFieldEnum, PointsSaveModel, RepositoryWithBase 
 import BaseRepository, { RepositoryUtils } from "./BaseRepository";
 import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { ProfileView } from "../interfaces/view";
+import { runQueryAsync, getTableName } from "./util/ConnectionHandler";
 
 class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel> {
     public readonly baseRepository: BaseRepository<PointsModel, PointsSaveModel>;
@@ -48,6 +49,44 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
     async getUserProfileAsync(userId: string): Promise<ProfileView> {
         const model = await RepositoryUtils.CallStoredProcedureGeneric(StoredProcedureEnum.Getuserprofile, [userId]);
         return model[0] as ProfileView;
+    }
+
+    async getGameRankAsync(userId: string, serverId: string, gameId: number): Promise<{ rank: number; total: number }> {
+        const tableName = getTableName(TableEnum.POINTS);
+        const userPoints = await this.baseRepository.Select().Where({ UserId: userId, ServerId: serverId, GameId: gameId }).Limit(1).Execute();
+        
+        if (!userPoints || userPoints.length === 0) {
+            const total = await this.baseRepository.Select().Where({ ServerId: serverId, GameId: gameId }).Count();
+            return { rank: 0, total };
+        }
+        
+        const userPointsValue = userPoints[0].Points;
+        
+        const query = `
+            SELECT 
+                (SELECT COUNT(*) + 1 
+                 FROM ${tableName} p2 
+                 WHERE p2.ServerId = ? 
+                   AND p2.GameId = ? 
+                   AND p2.Points > ?
+                ) as \`Rank\`,
+                (SELECT COUNT(DISTINCT UserId) 
+                 FROM ${tableName} 
+                 WHERE ServerId = ? 
+                   AND GameId = ?
+                ) as Total
+        `;
+        
+        const results = await runQueryAsync(query, [serverId, gameId, userPointsValue, serverId, gameId]);
+        
+        if (!results || results.length === 0)
+            return { rank: 0, total: 0 };
+        
+        const result = results[0];
+        return {
+            rank: result.Rank || result.rank || 0,
+            total: result.Total || result.total || 0
+        };
     }
 }
 

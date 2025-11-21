@@ -10,6 +10,8 @@ class ChartService {
                 return this.getLineChartUserNewUserAsync(identity);
             case ChartTypeEnum.PieChart_User_DeviceType:
                 return this.getPieChartUserDeviceTypeAsync(identity);
+            case ChartTypeEnum.LineChart_Server_NewServer:
+                return this.getLineChartServerNewServerAsync(identity);
             default:
                 assertNever(chartEnum, ChartTypeEnum);
         }
@@ -131,6 +133,21 @@ class ChartService {
             xAxisKey: "device",
             valueKeys: ["value"],
             type: ChartEnum.Pie,
+        };
+    }
+
+    private async getLineChartServerNewServerAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = [
+            { date: "2024-04-01", servers: 300 },
+            { date: "2024-04-02", servers: 97 },
+        ];
+
+        return {
+            title: "New Servers",
+            data: chartData,
+            xAxisKey: "date",
+            valueKeys: ["servers"],
+            type: ChartEnum.Line,
         };
     }
 }
