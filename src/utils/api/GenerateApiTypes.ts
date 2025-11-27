@@ -1,6 +1,6 @@
 import { InterfaceCollector } from '../collectors/InterfaceCollector';
 import { EndpointCollector } from '../collectors/EndpointCollector';
-import { cleanupQualifiedTypes, isException, TYPE_EXCEPTIONS, getExceptionDefinition } from './Exceptions';
+import { cleanupQualifiedTypes, isException, getExceptionDefinition, collectExceptionDefinitions } from './Exceptions';
 
 export async function generateDisGamesTypes(): Promise<string> {
     const interfaces = await InterfaceCollector.collectAllInterfacesAsync();
@@ -12,9 +12,9 @@ export async function generateDisGamesTypes(): Promise<string> {
     output += `// Auto-generated TypeScript definitions and API wrapper for DisGames\n`;
     output += `// Generated on: ${new Date().toISOString()}\n\n`;
 
-    for (const exception of TYPE_EXCEPTIONS) {
-        if (exception.customDefinition && !exception.skipExport)
-            output += `${exception.customDefinition}\n\n`;
+    const exceptionDefinitions = collectExceptionDefinitions(interfaces);
+    for (const definition of exceptionDefinitions) {
+        output += `${definition}\n\n`;
     }
 
     output += `// ===== DISGAMES INTERFACES =====\n`;
