@@ -37,7 +37,6 @@ export function createProfileGameContainer(gameProfile: ProfileGameView): Compon
 }
 
 function createGameProfileText(gameProfile: ProfileGameView): MultiLingualString {
-    console.log(gameProfile);
     if(gameProfile.gamePoints === 0)
         return new MultiLingualString(i18n.commands.profile.labels.notRanked);
 

@@ -4,7 +4,7 @@ import {
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
     ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction
 } from 'discord.js';
-import { InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent, isSelectMenuInteractionEvent, isSlashCommandInteractionEvent } from '../../../interfaces/application/Event';
+import { InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent, isSlashCommandInteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
 import {
     Component
@@ -30,9 +30,11 @@ class DiscordMessageHandler {
         if (!content)
             return;
 
-        if (event.type === EventTypeEnum.MESSAGE_DELETE) {
-            await this.sendAsync(event, message);
-            return;
+        if (isMessageInteractionEvent(event)) {
+            if (event.type === EventTypeEnum.MESSAGE_DELETE) {
+                await this.sendAsync(event, message);
+                return;
+            }
         }
 
         await this.handleInteractionReplyAsync(event, content);
@@ -105,8 +107,8 @@ class DiscordMessageHandler {
         if (isMessageInteractionEvent(event) && event.messageDeleted)
             return;
 
-        switch (true) {
-            case isSlashCommandInteractionEvent(event):
+        switch (event.type) {
+            case EventTypeEnum.SLASH_COMMAND:
                 if (event.currentInteraction.replied) {
                     await event.currentInteraction.editReply({
                         ...content,
@@ -116,17 +118,19 @@ class DiscordMessageHandler {
                     await event.currentInteraction.reply(content);
                 }
                 break;
-            case isMessageInteractionEvent(event):
+            case EventTypeEnum.MESSAGE:
+            case EventTypeEnum.MESSAGE_UPDATE:
+            case EventTypeEnum.MESSAGE_DELETE:
                 if (event.currentInteraction.resolved) {
                     await event.currentInteraction.edit(content);
                 } else {
                     await event.currentInteraction.reply(content);
                 }
                 break;
-            case isButtonInteractionEvent(event):
+            case EventTypeEnum.BUTTON:
                 await event.currentInteraction.update(content);
                 break;
-            case isSelectMenuInteractionEvent(event):
+            case EventTypeEnum.SELECT_MENU:
                 await event.currentInteraction.update(content);
                 break;
             default:
@@ -135,17 +139,19 @@ class DiscordMessageHandler {
     }
 
     public async handleInteractionEditAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
-        switch (true) {
-            case isSlashCommandInteractionEvent(event):
+        switch (event.type) {
+            case EventTypeEnum.SLASH_COMMAND:
                 await event.currentInteraction.editReply(content);
                 break;
-            case isMessageInteractionEvent(event):
+            case EventTypeEnum.MESSAGE:
+            case EventTypeEnum.MESSAGE_UPDATE:
+            case EventTypeEnum.MESSAGE_DELETE:
                 await event.currentInteraction.edit(content);
                 break;
-            case isButtonInteractionEvent(event):
+            case EventTypeEnum.BUTTON:
                 await event.currentInteraction.update(content);
                 break;
-            case isSelectMenuInteractionEvent(event):
+            case EventTypeEnum.SELECT_MENU:
                 if (event.currentInteraction.deferred) {
                     await event.currentInteraction.editReply(content);
                 } else {
@@ -194,15 +200,17 @@ class DiscordMessageHandler {
             const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
 
-            switch (true) {
-                case isSlashCommandInteractionEvent(event):
-                case isMessageInteractionEvent(event):
+            switch (event.type) {
+                case EventTypeEnum.SLASH_COMMAND:
+                case EventTypeEnum.MESSAGE:
+                case EventTypeEnum.MESSAGE_UPDATE:
+                case EventTypeEnum.MESSAGE_DELETE:
                     await event.currentInteraction.reply(replyOptions);
                     break;
-                case isSelectMenuInteractionEvent(event):
+                case EventTypeEnum.SELECT_MENU:
                     await event.currentInteraction.editReply(replyOptions);
                     break;
-                case isButtonInteractionEvent(event):
+                case EventTypeEnum.BUTTON:
                     await event.currentInteraction.update(replyOptions);
                     break;
                 default:
@@ -233,9 +241,11 @@ class DiscordMessageHandler {
             const discordMessage = ComponentService.createContent(question);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordButtons)], []);
 
-            switch (true) {
-                case isSlashCommandInteractionEvent(event):
-                case isMessageInteractionEvent(event):
+            switch (event.type) {
+                case EventTypeEnum.SLASH_COMMAND:
+                case EventTypeEnum.MESSAGE:
+                case EventTypeEnum.MESSAGE_UPDATE:
+                case EventTypeEnum.MESSAGE_DELETE:
                     await event.currentInteraction.reply(replyOptions);
                     break;
                 default:
@@ -267,18 +277,20 @@ class DiscordMessageHandler {
                 []
             );
 
-            switch (true) {
-                case isSlashCommandInteractionEvent(event):
+            switch (event.type) {
+                case EventTypeEnum.SLASH_COMMAND:
                     if (event.currentInteraction.replied)
                         await event.currentInteraction.editReply(replyOptions);
                     else
                         await event.currentInteraction.reply(replyOptions);
                     break;
-                case isMessageInteractionEvent(event):
+                case EventTypeEnum.MESSAGE:
+                case EventTypeEnum.MESSAGE_UPDATE:
+                case EventTypeEnum.MESSAGE_DELETE:
                     await event.currentInteraction.reply(replyOptions);
                     break;
-                case isButtonInteractionEvent(event):
-                case isSelectMenuInteractionEvent(event):
+                case EventTypeEnum.BUTTON:
+                case EventTypeEnum.SELECT_MENU:
                     await event.currentInteraction.update(replyOptions);
                     break;
                 default:

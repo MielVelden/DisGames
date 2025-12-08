@@ -23,7 +23,7 @@ export default {
 export async function processMessageEventAsync(event: InteractionEvent): Promise<void> {
     if (!isMessageInteractionEvent(event))
         return;
-    EventsService.saveAsync(new EventsSaveModel({
+    await EventsService.saveAsync(new EventsSaveModel({
         UserId: event.user.id,
         ServerId: event.server.Id,
         EventTypeEnum: event.type,

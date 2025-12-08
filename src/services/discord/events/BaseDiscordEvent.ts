@@ -3,7 +3,7 @@ import { Component, BaseSelectMenu } from "../../../interfaces/application/Messa
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
-import { InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
+import { BaseInteractionEvent, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
@@ -17,7 +17,7 @@ import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 import { ErrorHelper } from "../../../utils/application/Error";
 
-export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> implements InteractionEvent {
+export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> implements BaseInteractionEvent {
     public readonly type: EventTypeEnum;
     public readonly customId: string;
     protected readonly interaction: TInteraction;
@@ -51,40 +51,48 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
     }
 
     public async addComponentAsync(component: Component): Promise<void> {
-        await DiscordComponentMapper.addComponentAsync(this, component);
+        await DiscordComponentMapper.addComponentAsync(this as unknown as InteractionEvent, component);
     }
 
     public async addComponentsAsync(components: Component[]): Promise<void> {
-        await DiscordComponentMapper.addComponentsAsync(this, components);
+        await DiscordComponentMapper.addComponentsAsync(this as unknown as InteractionEvent, components);
     }
 
     public async clearComponentsAsync(): Promise<void> {
-        await DiscordComponentMapper.clearComponentsAsync(this);
+        await DiscordComponentMapper.clearComponentsAsync(this as unknown as InteractionEvent);
     }
 
     public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
-        await DiscordMessageHandler.sendToChannelAsync(this, channelId, components);
+        await DiscordMessageHandler.sendToChannelAsync(this as unknown as InteractionEvent, channelId, components);
     }
 
     public async editAsync(content?: string): Promise<void> {
-        await DiscordMessageHandler.editAsync(this, content);
+        await DiscordMessageHandler.editAsync(this as unknown as InteractionEvent, content);
     }
 
     public async editWithComponentAsync(component: Component): Promise<void> {
-        await DiscordMessageHandler.editWithComponentAsync(this, component);
+        await DiscordMessageHandler.editWithComponentAsync(this as unknown as InteractionEvent, component);
     }
 
     public async getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null> {
-        const result = await DiscordMessageHandler.getUserInputBySelectMenuAsync(this, selectMenu as any);
+        const result = await DiscordMessageHandler.getUserInputBySelectMenuAsync(this as unknown as InteractionEvent, selectMenu as any);
         return result as SelectMenuInteractionEvent | null;
     }
 
     public async getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
-        return await DiscordMessageHandler.getUserInputByButtonsAsync(this, question, buttons);
+        return await DiscordMessageHandler.getUserInputByButtonsAsync(this as unknown as InteractionEvent, question, buttons);
     }
 
     public async getConfirmationFromUser(container: Component): Promise<InteractionEvent | null> {
-        return await DiscordMessageHandler.getConfirmationFromUser(this, container);
+        return await DiscordMessageHandler.getConfirmationFromUser(this as unknown as InteractionEvent, container);
+    }
+
+    private updateSetting<K extends keyof GameSettingsValues>(
+        settings: GameSettingsValues,
+        key: K,
+        value: GameSettingsValues[K]
+    ): void {
+        settings[key] = value;
     }
 
     public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {
@@ -106,7 +114,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                 userId: this.user.userId,
                 onSettingChange: (btnEvent, key, value) => {
                     if (!isResolved) {
-                        (currentSettings as any)[key] = value;
+                        this.updateSetting(currentSettings, key, value);
                         updateContainer(btnEvent);
                     }
                 },
@@ -146,7 +154,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                     if (selectResult && !isResolved) {
                         const newValue = enumSetting.options.find((opt: any) => opt.value.toString() === selectResult.selected)?.value;
                         if (newValue !== undefined) {
-                            (currentSettings as any)[key] = newValue;
+                            this.updateSetting(currentSettings, key, newValue);
                             config.currentSettings = currentSettings;
                             await updateContainer(selectResult);
                         }
@@ -154,7 +162,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                 }
             };
             
-            const updateContainer = async (btnEvent?: InteractionEvent) => {
+            const updateContainer = async (btnEvent?: InteractionEvent): Promise<void> => {
                 const container = GameSettingsContainer.createInteractiveContainer(config, handlers);
                 
                 if (btnEvent) {

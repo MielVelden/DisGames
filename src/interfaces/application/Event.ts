@@ -4,7 +4,7 @@ import { ServersModel, TimelineEntriesSaveModel } from "../database/TableInterfa
 import {
     ButtonInteraction as DiscordButtonInteraction,
     ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
-    Interaction as DiscordInteraction, Message as DiscordMessage,
+    Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -13,64 +13,43 @@ import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domai
 import { Duration } from "./Duration";
 import { EventTypeEnum } from "../enums";
 
-export interface InteractionEvent {
-    // Event type and identifiers
-    type: EventTypeEnum;
+export interface BaseInteractionEvent {
     customId: string;
 
-    // Discord interaction or message object
-    currentInteraction: DiscordInteraction | DiscordMessage;
-
-    // Component management
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;
     addComponentsAsync(components: Component[]): Promise<void>;
     clearComponentsAsync(): Promise<void>;
 
-    // Message and component editing/sending
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
     editAsync(content?: string): Promise<void>;
     editWithComponentAsync(component: Component): Promise<void>;
 
-    // User input and interaction
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUser(container: Component): Promise<InteractionEvent | null>;
     getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null>;
 
-    // Channel utilities
     getChannelNameAsync(channelId: string): Promise<string>;
 
-    // User and server context
     user: User;
     server: ServersModel;
 
-    // Message and channel identifiers
     messageId: string;
     channelId: string;
     guildId: string;
 
-    // Timeline tracking
     timelineEntries: TimelineEntriesSaveModel[];
     addTimelineEntry(entry: TimelineEntriesSaveModel): void;
     commitTimelineAsync(): Promise<void>;
 }
 
-export interface ReplyInteractionEvent extends InteractionEvent {
+export interface ReplyInteractionEvent {
     replyAsync(content?: MultiLingualString): Promise<void>;
 }
 
-export function isReplyInteractionEvent(event: InteractionEvent): event is ReplyInteractionEvent {
-    return (
-        event.type === EventTypeEnum.SLASH_COMMAND ||
-        event.type === EventTypeEnum.MESSAGE ||
-        event.type === EventTypeEnum.BUTTON ||
-        event.type === EventTypeEnum.SELECT_MENU
-    );
-}
-
-
-export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+export interface SlashCommandInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {
+    type: EventTypeEnum.SLASH_COMMAND;
     currentInteraction: DiscordChatInputCommandInteraction;
 
     command: Command;
@@ -83,11 +62,8 @@ export interface SlashCommandInteractionEvent extends InteractionEvent, ReplyInt
     followUpOptions: Record<string, string | number | boolean>;
 }
 
-export function isSlashCommandInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent {
-    return event.type === EventTypeEnum.SLASH_COMMAND;
-}
-
-export interface MessageInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+export interface MessageInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {
+    type: EventTypeEnum.MESSAGE | EventTypeEnum.MESSAGE_UPDATE | EventTypeEnum.MESSAGE_DELETE;
     currentInteraction: DiscordMessage;
 
     command?: Command;
@@ -100,11 +76,8 @@ export interface MessageInteractionEvent extends InteractionEvent, ReplyInteract
     content: string;
 }
 
-export function isMessageInteractionEvent(event: InteractionEvent): event is MessageInteractionEvent {
-    return event.type === EventTypeEnum.MESSAGE;
-}
-
-export interface ButtonInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+export interface ButtonInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {
+    type: EventTypeEnum.BUTTON;
     currentInteraction: DiscordButtonInteraction;
     
     sendAsync(): Promise<void>;
@@ -112,16 +85,47 @@ export interface ButtonInteractionEvent extends InteractionEvent, ReplyInteracti
     deleteAsync(): Promise<void>;
 }
 
-export function isButtonInteractionEvent(event: InteractionEvent): event is ButtonInteractionEvent {
-    return event.type === EventTypeEnum.BUTTON;
-}
-
-export interface SelectMenuInteractionEvent extends InteractionEvent, ReplyInteractionEvent {
+export interface SelectMenuInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {
+    type: EventTypeEnum.SELECT_MENU;
     currentInteraction: DiscordStringSelectMenuInteraction;
 
     selected: string;
     deferReplyAsync(): Promise<void>;
     sendAsync(): Promise<void>;
+}
+
+export type InteractionEvent = 
+    | SlashCommandInteractionEvent 
+    | ButtonInteractionEvent 
+    | SelectMenuInteractionEvent 
+    | MessageInteractionEvent;
+
+export function isReplyInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent | ButtonInteractionEvent | SelectMenuInteractionEvent | MessageInteractionEvent {
+    switch (event.type) {
+        case EventTypeEnum.SLASH_COMMAND:
+        case EventTypeEnum.MESSAGE:
+        case EventTypeEnum.MESSAGE_UPDATE:
+        case EventTypeEnum.MESSAGE_DELETE:
+        case EventTypeEnum.BUTTON:
+        case EventTypeEnum.SELECT_MENU:
+            return true;
+        default:
+            return false;
+    }
+}
+
+export function isSlashCommandInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent {
+    return event.type === EventTypeEnum.SLASH_COMMAND;
+}
+
+export function isMessageInteractionEvent(event: InteractionEvent): event is MessageInteractionEvent {
+    return event.type === EventTypeEnum.MESSAGE || 
+           event.type === EventTypeEnum.MESSAGE_UPDATE || 
+           event.type === EventTypeEnum.MESSAGE_DELETE;
+}
+
+export function isButtonInteractionEvent(event: InteractionEvent): event is ButtonInteractionEvent {
+    return event.type === EventTypeEnum.BUTTON;
 }
 
 export function isSelectMenuInteractionEvent(event: InteractionEvent): event is SelectMenuInteractionEvent {
