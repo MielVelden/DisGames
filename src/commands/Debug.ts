@@ -6,9 +6,11 @@ import Logger from "../utils/application/Logger";
 import { WebhookType } from "../interfaces/application";
 import DebugService from "../services/domain/DebugService";
 import GameRepository from "../repositories/GameRepository";
-import { Command } from "../interfaces/application/Command";
+import { Command, CommandOptionConfig } from "../interfaces/application/Command";
 import { Permission } from "../interfaces/enums/application/Permission";
 import { DebugSaveModel } from "../interfaces/database/TableInterfaces";
+
+const optionsConfig = [] satisfies CommandOptionConfig<string | number>[];
 
 export class DebugCommand implements Command {
     name = CommandEnum.DEBUG;
@@ -16,7 +18,7 @@ export class DebugCommand implements Command {
     isSlashCommand = false;
     isMessageCommand = true;
     permissions = [Permission.ADMINISTRATOR];
-    options = [];
+    options = optionsConfig;
 
     async executeAsync(event: MessageInteractionEvent): Promise<void> {
         const uniqueCode = event.content.split(' ')[1];

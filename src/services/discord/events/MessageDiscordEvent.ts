@@ -7,14 +7,10 @@ import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { Command } from "../../../interfaces/application/Command";
 
-export class MessageDiscordEvent extends BaseReplyDiscordEvent implements MessageInteractionEvent {
+export class MessageDiscordEvent extends BaseReplyDiscordEvent<DiscordMessage> implements MessageInteractionEvent {
     public messageDeleted: boolean = false;
     public readonly content: string;
     public readonly command?: Command;
-    
-    public override get currentInteraction(): DiscordMessage {
-        return super.currentInteraction as DiscordMessage;
-    }
     
     constructor(
         interaction: DiscordMessage,
@@ -37,7 +33,7 @@ export class MessageDiscordEvent extends BaseReplyDiscordEvent implements Messag
     }
 
     public async reactAsync(emoji: string): Promise<void> {
-        await DiscordMessageHandler.reactAsync(this.currentInteraction as DiscordMessage, emoji);
+        await DiscordMessageHandler.reactAsync(this.currentInteraction, emoji);
     }
 
     public async deleteAsync(): Promise<void> {

@@ -6,12 +6,8 @@ import { EventTypeEnum } from "../../../interfaces/enums";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 
-export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent implements SelectMenuInteractionEvent {
+export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringSelectMenuInteraction> implements SelectMenuInteractionEvent {
     public readonly selected: string;
-
-    public override get currentInteraction(): DiscordStringSelectMenuInteraction {
-        return super.currentInteraction as DiscordStringSelectMenuInteraction;
-    }
 
     constructor(
         interaction: DiscordStringSelectMenuInteraction,

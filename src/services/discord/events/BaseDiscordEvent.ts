@@ -17,10 +17,10 @@ import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 import { ErrorHelper } from "../../../utils/application/Error";
 
-export abstract class BaseDiscordEvent implements InteractionEvent {
+export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> implements InteractionEvent {
     public readonly type: EventTypeEnum;
     public readonly customId: string;
-    protected readonly interaction: DiscordInteraction | DiscordMessage;
+    protected readonly interaction: TInteraction;
     public readonly user: User;
     public readonly server: ServersModel;
     public readonly messageId: string;
@@ -33,7 +33,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
     constructor(
         type: EventTypeEnum,
         customId: string,
-        interaction: DiscordInteraction | DiscordMessage,
+        interaction: TInteraction,
         user: User,
         server: ServersModel,
         channelId: string,
@@ -188,7 +188,7 @@ export abstract class BaseDiscordEvent implements InteractionEvent {
         await TimelineBuilder.commitTimelineEntriesAsync(this.timelineEntries);
         this.timelineEntries = [];
     }
-    public get currentInteraction(): DiscordInteraction | DiscordMessage {
+    public get currentInteraction(): TInteraction {
         return this.interaction;
     }
 }

@@ -8,7 +8,7 @@ import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import { handleCommandOptionsAsync } from "../../../utils/handlers/CommandHandler";
 import DiscordService from "../DiscordService";
 
-export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent implements SlashCommandInteractionEvent {
+export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent<DiscordChatInputCommandInteraction> implements SlashCommandInteractionEvent {
     public readonly command: Command;
     public readonly followUpOptions: Record<string, string | number | boolean> = {};
 
@@ -25,14 +25,10 @@ export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent implements S
         this.command = command;
     }
 
-    public override get currentInteraction(): DiscordChatInputCommandInteraction {
-        return super.currentInteraction as DiscordChatInputCommandInteraction;
-    }
-
     public getOption(name: string): string | number | boolean | undefined;
     public getOption<T>(name: string): T | undefined;
     public getOption<T>(name: string): T | undefined {
-        return DiscordService.getOption(this.currentInteraction as DiscordChatInputCommandInteraction, name) as T | undefined;
+        return DiscordService.getOption(this.currentInteraction, name) as T | undefined;
     }
 
     public async handleCommandOptionsAsync(): Promise<void> {

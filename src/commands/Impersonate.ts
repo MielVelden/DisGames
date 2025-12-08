@@ -1,6 +1,6 @@
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
-import { Command } from "../interfaces/application/Command";
+import { Command, CommandOptionConfig } from "../interfaces/application/Command";
 import { handleDiscordMessageAsync } from "../events/messageCreate";
 import { EventTypeEnum } from "../interfaces/enums";
 import { Message as DiscordMessage } from "discord.js";
@@ -10,12 +10,14 @@ import DiscordMemberService from "../services/discord/DiscordMemberService";
 import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 
+const optionsConfig = [] satisfies CommandOptionConfig<string | number>[];
+
 export class ImpersonateCommand implements Command {
     name = CommandEnum.IMPERSONATE;
     description = new MultiLingualString(i18n.commands.impersonate.description);
     isSlashCommand = false;
     isMessageCommand = true;
-    options = [];
+    options = optionsConfig;
     canExecute = (event: InteractionEvent): boolean => {
         return event.user.userId === getConfigValue(EnvConfigEnum.DISCORD_OWNER_ID);
     }

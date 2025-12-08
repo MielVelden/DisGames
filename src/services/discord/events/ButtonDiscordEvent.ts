@@ -6,11 +6,7 @@ import { EventTypeEnum } from "../../../interfaces/enums";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 
-export class ButtonDiscordEvent extends BaseReplyDiscordEvent implements ButtonInteractionEvent {
-    public override get currentInteraction(): DiscordButtonInteraction {
-        return super.currentInteraction as DiscordButtonInteraction;
-    }
-
+export class ButtonDiscordEvent extends BaseReplyDiscordEvent<DiscordButtonInteraction> implements ButtonInteractionEvent {
     constructor(
         interaction: DiscordButtonInteraction,
         user: User,
