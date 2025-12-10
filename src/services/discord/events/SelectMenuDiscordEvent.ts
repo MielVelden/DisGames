@@ -7,6 +7,7 @@ import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 
 export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringSelectMenuInteraction> implements SelectMenuInteractionEvent {
+    public readonly type: EventTypeEnum.SELECT_MENU = EventTypeEnum.SELECT_MENU;
     public readonly selected: string;
 
     constructor(

@@ -7,6 +7,8 @@ import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 
 export class ButtonDiscordEvent extends BaseReplyDiscordEvent<DiscordButtonInteraction> implements ButtonInteractionEvent {
+    public readonly type: EventTypeEnum.BUTTON = EventTypeEnum.BUTTON;
+    
     constructor(
         interaction: DiscordButtonInteraction,
         user: User,

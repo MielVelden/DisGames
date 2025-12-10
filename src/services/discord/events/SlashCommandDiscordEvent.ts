@@ -9,6 +9,7 @@ import { handleCommandOptionsAsync } from "../../../utils/handlers/CommandHandle
 import DiscordService from "../DiscordService";
 
 export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent<DiscordChatInputCommandInteraction> implements SlashCommandInteractionEvent {
+    public readonly type: EventTypeEnum.SLASH_COMMAND = EventTypeEnum.SLASH_COMMAND;
     public readonly command: Command;
     public readonly followUpOptions: Record<string, string | number | boolean> = {};
 

@@ -8,6 +8,7 @@ import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 import { Command } from "../../../interfaces/application/Command";
 
 export class MessageDiscordEvent extends BaseReplyDiscordEvent<DiscordMessage> implements MessageInteractionEvent {
+    public readonly type: EventTypeEnum.MESSAGE | EventTypeEnum.MESSAGE_UPDATE | EventTypeEnum.MESSAGE_DELETE;
     public messageDeleted: boolean = false;
     public readonly content: string;
     public readonly command?: Command;
@@ -19,11 +20,12 @@ export class MessageDiscordEvent extends BaseReplyDiscordEvent<DiscordMessage> i
         channelId: string,
         guildId: string,
         messageId: string,
-        eventType: EventTypeEnum,
+        eventType: EventTypeEnum.MESSAGE | EventTypeEnum.MESSAGE_UPDATE | EventTypeEnum.MESSAGE_DELETE,
         content: string,
         command?: Command
     ) {
         super(eventType, interaction.id, interaction, user, server, channelId, guildId, messageId);
+        this.type = eventType;
         this.content = content;
         this.command = command ?? undefined;
     }

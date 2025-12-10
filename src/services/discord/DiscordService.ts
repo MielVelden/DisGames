@@ -21,7 +21,8 @@ import { InteractionEvent, MessageInteractionEvent } from '../../interfaces/appl
 import { Command } from '../../interfaces/application/Command';
 import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
-import { EventTypeEnum } from '../../interfaces/enums';
+import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../interfaces/enums';
+import { ErrorHelper } from '../../utils/application/Error';
 
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';
@@ -63,6 +64,9 @@ class DiscordService {
     }
 
     public async mapMessageToInteractionEventAsync(message: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {
+        if (!isMessageEventType(eventType))
+            ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+        
         return await DiscordInteractionMapper.mapMessageToInteractionEventAsync(message, eventType);
     }
 

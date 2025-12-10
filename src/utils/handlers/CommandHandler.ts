@@ -1,5 +1,5 @@
 import { Command, CommandOptionFollowUpType } from "../../interfaces/application/Command";
-import { InteractionEvent, SlashCommandInteractionEvent } from "../../interfaces/application/Event";
+import { InteractionEvent, SlashCommandInteractionEvent, SelectMenuInteractionEvent } from "../../interfaces/application/Event";
 import { getCommandName } from "../collectors/CommandCollector";
 import { MultiLingualString } from "../i18n/MultiLingualString";
 import { isSelectMenuEmpty } from "../helpers/SelectMenu";
@@ -49,7 +49,7 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
                                     return;
                                 }
 
-                                const selectMenuEvent = await currentEvent.getUserInputBySelectMenuAsync(selectMenu);
+                                const selectMenuEvent: SelectMenuInteractionEvent | null = await currentEvent.getUserInputBySelectMenuAsync(selectMenu);
                                 if (selectMenuEvent) {
                                     event.setFollowUpOption(followUp.key, selectMenuEvent.selected);
                                     currentEvent = selectMenuEvent;

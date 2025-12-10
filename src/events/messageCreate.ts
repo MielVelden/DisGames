@@ -9,7 +9,7 @@ import GameService from '../services/domain/GameService';
 import { handleErrorAsync } from '../utils/application/Error';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import EventsService from '../services/domain/EventsService';
-import { EventTypeEnum } from '../interfaces/enums';
+import { EventTypeEnum, isMessageEventType } from '../interfaces/enums';
 import { EventsSaveModel } from '../interfaces/database';
 
 export default {
@@ -49,7 +49,10 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
 export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
     if (message.author.bot)
         return;
-
+    
+    if (!isMessageEventType(eventType))
+        return;
+    
     const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType);
     await processMessageEventAsync(event);
 }

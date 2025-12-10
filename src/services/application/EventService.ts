@@ -115,7 +115,8 @@ export class EventService {
   }
 
   public static handleEventAsync(event: InteractionEvent) {
-    switch (event.type) {
+    const type = event.type;
+    switch (type) {
       case EventTypeEnum.BUTTON:
         return this.handleButtonInteraction(event);
       case EventTypeEnum.SELECT_MENU:
@@ -124,10 +125,9 @@ export class EventService {
       case EventTypeEnum.MESSAGE_UPDATE:
       case EventTypeEnum.MESSAGE_DELETE:
       case EventTypeEnum.SLASH_COMMAND:
-      case EventTypeEnum.MODAL_SUBMIT:
         ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
       default:
-        assertNever(event.type, ExceptionEnum)
+        assertNever(type, EventTypeEnum)
     }
   }
 } 

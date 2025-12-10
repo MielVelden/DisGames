@@ -20,7 +20,8 @@ import {
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
 import UserService from '../../domain/UserService';
-import { EventTypeEnum, LanguageEnum } from '../../../interfaces/enums';
+import { EventTypeEnum, ExceptionEnum, isMessageEventType, LanguageEnum } from '../../../interfaces/enums';
+import { ErrorHelper } from '../../../utils/application/Error';
 
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
@@ -115,8 +116,11 @@ class DiscordInteractionMapper {
     }
 
     public async mapMessageToInteractionEventAsync(message: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {
+        if (!isMessageEventType(eventType))
+            ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+        
         const command = getCommandConfig(message.content.split(' ')[0].toLowerCase()) ?? undefined;
-
+        
         const tempEvent = new MessageDiscordEvent(
             message,
             this.getTempUser(message.author, message.member as DiscordGuildMember),
