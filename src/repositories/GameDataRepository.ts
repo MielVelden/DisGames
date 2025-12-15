@@ -28,9 +28,9 @@ class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSa
         await this.baseRepository.Delete(id);
     }
     
-    async getByGameIdAsync(gameId: GameTypeEnum): Promise<GameDataModel> {
-       const result = await this.baseRepository.Select().Where({ GameId: gameId }).Limit(1).Execute();
-       return result[0];
+    async getByGameIdAsync(gameId: GameTypeEnum): Promise<GameDataModel[]> {
+       const result = await this.baseRepository.Select().Where({ GameId: gameId }).Execute();
+       return result;
     }
 
     async getRandomDataByGameIdAsync(gameId: number): Promise<GameDataModel[]> {

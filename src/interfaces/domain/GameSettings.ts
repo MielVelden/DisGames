@@ -4,7 +4,8 @@ import { DifficultyEnum } from "../enums/games/DifficultyEnum";
 
 export enum GameSettingType {
     BOOLEAN = "boolean",
-    ENUM = "enum"
+    ENUM = "enum",
+    LIST = "list"
 }
 
 export interface GameSettingOption {
@@ -27,17 +28,34 @@ export interface BooleanGameSetting extends BaseGameSetting {
     defaultValue: boolean;
 }
 
+export function isBooleanGameSetting(setting: GameSetting): setting is BooleanGameSetting {
+    return setting.type === GameSettingType.BOOLEAN;
+}
+
 export interface EnumGameSetting extends BaseGameSetting {
     type: GameSettingType.ENUM;
     options: GameSettingOption[];
     defaultValue: string | number;
 }
 
-export type GameSetting = BooleanGameSetting | EnumGameSetting;
+export function isEnumGameSetting(setting: GameSetting): setting is EnumGameSetting {
+    return setting.type === GameSettingType.ENUM;
+}
+
+export interface ListGameSetting extends BaseGameSetting {
+    type: GameSettingType.LIST;
+    options: GameSettingOption[];
+}
+
+export function isListGameSetting(setting: GameSetting): setting is ListGameSetting {
+    return setting.type === GameSettingType.LIST;
+}
+
+export type GameSetting = BooleanGameSetting | EnumGameSetting | ListGameSetting;
 
 export type GameSettingsSchema = GameSetting[];
 
-export type GameSettingsValues = Partial<Record<GameSettingsEnum, boolean | string | number>>;
+export type GameSettingsValues = Partial<Record<GameSettingsEnum, boolean | string | number | number[]>>;
 
 export interface GameSettingsValidationResult {
     isValid: boolean;
@@ -49,4 +67,5 @@ export interface GameSettingsValidationResult {
 export interface Games_Settings {
   difficulty?: DifficultyEnum;
   resetOnFail?: boolean;
+  datasheets?: number[];
 } 

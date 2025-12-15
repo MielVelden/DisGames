@@ -252,6 +252,16 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Complexe woorden, sterke verwarring",
                     },
                 },
+                datasheets: {
+                    label: {
+                        [LanguageEnum.EN]: "Datasheets",
+                        [LanguageEnum.NL]: "Datasheets",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Choose the datasheets for this game",
+                        [LanguageEnum.NL]: "Kies de datasheets voor dit spel",
+                    },
+                },
             },
             buttons: {
                 delete: {

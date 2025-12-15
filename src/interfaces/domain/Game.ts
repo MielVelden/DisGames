@@ -44,6 +44,7 @@ export interface GameConfig {
     firstAnswer: string;
     addCorrectReaction: boolean;
     hasImages?: boolean;
+    hasDataSheets?: boolean;
     options: {
         [key in GameOptionEnum]: boolean;
     };

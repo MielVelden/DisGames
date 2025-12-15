@@ -48,11 +48,8 @@ export class ApiController {
 		if (!user) 
 			return null;
 
-		if (!user.OAuth2AccessToken) 
-			return user; // allow first-time link
-
-		if (access && user.OAuth2AccessToken === access) 
-			return user;
+		// if (access && user.OAuth2AccessToken === access) 
+		// 	return user;
 
 		return null;
 	}

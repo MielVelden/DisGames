@@ -7,7 +7,7 @@ import { BaseInteractionEvent, InteractionEvent, SelectMenuInteractionEvent } fr
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
-import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../../interfaces/domain/GameSettings";
+import { GameSettingsValues, GameSettingsSchema, Games_Settings, GameSettingOption } from "../../../interfaces/domain/GameSettings";
 import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSetting";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
 import GameService from "../../domain/GameService";
@@ -99,7 +99,8 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         const mapSettings = (settings: GameSettingsValues): Games_Settings => {
             return {
                 difficulty: settings.difficulty as DifficultyEnum,
-                resetOnFail: settings.resetOnFail as boolean
+                resetOnFail: settings.resetOnFail as boolean,
+                datasheets: settings.datasheets as number[]
             };
         };
         
@@ -142,7 +143,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                         custom_id: crypto.randomUUID(),
                         placeholder: enumSetting.label,
                         question: enumSetting.label,
-                        options: enumSetting.options.map((option: any): SelectOption => ({
+                        options: enumSetting.options.map((option: GameSettingOption): SelectOption => ({
                             label: option.label,
                             value: option.value.toString(),
                             description: option.description,
@@ -152,13 +153,21 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                     
                     const selectResult = await btnEvent.getUserInputBySelectMenuAsync(selectMenu);
                     if (selectResult && !isResolved) {
-                        const newValue = enumSetting.options.find((opt: any) => opt.value.toString() === selectResult.selected)?.value;
+                        const newValue = enumSetting.options.find((opt: GameSettingOption) => opt.value.toString() === selectResult.selected)?.value;
                         if (newValue !== undefined) {
                             this.updateSetting(currentSettings, key, newValue);
                             config.currentSettings = currentSettings;
                             await updateContainer(selectResult);
                         }
                     }
+                },
+                onListClick: async (btnEvent, key, listSetting, toggledValue, isSelected, newValues) => {
+                    if (isResolved)
+                        return;
+
+                    this.updateSetting(currentSettings, key, newValues);
+                    config.currentSettings = currentSettings;
+                    await updateContainer(btnEvent);
                 }
             };
             

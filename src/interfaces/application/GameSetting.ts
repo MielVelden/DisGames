@@ -1,4 +1,4 @@
-import { GameSettingsSchema, GameSettingsValues, EnumGameSetting } from "../domain/GameSettings";
+import { GameSettingsSchema, GameSettingsValues, EnumGameSetting, ListGameSetting } from "../domain/GameSettings";
 import { GameSettingsEnum } from "../enums/games/GameSettingsEnum";
 import { LanguageEnum } from "../enums";
 import { ButtonInteractionEvent } from "./Event";
@@ -8,7 +8,7 @@ export interface GameSettingsContainerConfig {
     currentSettings: GameSettingsValues;
     languageEnum: LanguageEnum;
     userId: string;
-    onSettingChange?: (btnEvent: ButtonInteractionEvent, key: GameSettingsEnum, value: boolean | string | number) => void;
+    onSettingChange?: (btnEvent: ButtonInteractionEvent, key: GameSettingsEnum, value: boolean | string | number | number[]) => void;
     onAccept?: () => void;
     onCancel?: () => void;
 }
@@ -16,6 +16,14 @@ export interface GameSettingsContainerConfig {
 export interface GameSettingsHandler {
     onBooleanClick?: (btnEvent: ButtonInteractionEvent, key: GameSettingsEnum, currentValue: boolean) => Promise<void>;
     onEnumClick?: (btnEvent: ButtonInteractionEvent, key: GameSettingsEnum, enumSetting: EnumGameSetting, currentValue: any) => Promise<void>;
+    onListClick?: (
+        btnEvent: ButtonInteractionEvent,
+        key: GameSettingsEnum,
+        listSetting: ListGameSetting,
+        toggledValue: number,
+        isSelected: boolean,
+        newValues: number[]
+    ) => Promise<void>;
     onAcceptClick?: (btnEvent: ButtonInteractionEvent) => Promise<void>;
     onCancelClick?: (btnEvent: ButtonInteractionEvent) => Promise<void>;
 }

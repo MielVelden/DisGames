@@ -1,18 +1,17 @@
 import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../../interfaces/application/Message";
 import { ButtonStyle } from "../../interfaces/application/Message";
-import { 
-    GameSettingsSchema, 
-    GameSettingsValues, 
+import {
     GameSettingType,
-    BooleanGameSetting,
-    EnumGameSetting
+    EnumGameSetting,
+    isBooleanGameSetting,
+    isEnumGameSetting,
+    isListGameSetting,
 } from "../../interfaces/domain/GameSettings";
-import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
 import { LanguageEnum } from "../../interfaces/enums";
-import { 
-    GameSettingsContainerConfig, 
-    GameSettingsHandler, 
-    GameSettingsDisplayConfig 
+import {
+    GameSettingsContainerConfig,
+    GameSettingsHandler,
+    GameSettingsDisplayConfig
 } from "../../interfaces/application/GameSetting";
 import ComponentService from "../../services/application/ComponentService";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -20,38 +19,38 @@ import { i18n } from "../../utils/i18n/i18n";
 import { ButtonInteractionEvent } from "../../interfaces/application/Event";
 
 export class GameSettingsContainer {
-    
+
     static createInteractiveContainer(config: GameSettingsContainerConfig, handlers?: GameSettingsHandler): Container {
         const components: Component[] = [];
-        
+
         // Add title
         components.push({
             type: ComponentType.TITLE,
             content: new MultiLingualString(i18n.commands.games.settings.title)
         } as Title);
-        
+
         components.push({
             type: ComponentType.TEXT_DISPLAY,
             content: new MultiLingualString(i18n.commands.games.settings.description)
         } as TextDisplay);
-        
+
         // Add separator
         components.push({
             type: ComponentType.SEPARATOR,
             divider: true,
             spacing: 1
         } as Separator);
-        
+
         // Create settings components
         config.settingsSchema.forEach((setting) => {
             const currentValue = config.currentSettings[setting.key];
-            
+
             // Setting title
             components.push({
                 type: ComponentType.TITLE,
                 content: setting.label
             } as Title);
-            
+
             // Setting description
             if (setting.description) {
                 components.push({
@@ -59,8 +58,8 @@ export class GameSettingsContainer {
                     content: setting.description
                 } as TextDisplay);
             }
-            
-            if (setting.type === GameSettingType.BOOLEAN) {
+
+            if (isBooleanGameSetting(setting)) {
                 const boolValue = currentValue as boolean;
                 components.push(ComponentService.createButton({
                     style: boolValue ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
@@ -68,30 +67,61 @@ export class GameSettingsContainer {
                 }, {
                     userId: config.userId,
                     handle: async (btnEvent: any) => {
-                        if (handlers?.onBooleanClick) {
+                        if (handlers?.onBooleanClick)
                             await handlers.onBooleanClick(btnEvent, setting.key, boolValue);
-                        } else if (config.onSettingChange) {
+                        else if (config.onSettingChange)
                             config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, !boolValue);
-                        }
                     }
                 }));
-            } else if (setting.type === GameSettingType.ENUM) {
-                const enumSetting = setting as EnumGameSetting;
-                const selectedOption = enumSetting.options.find(opt => opt.value === currentValue);
-                
+            }
+            if (isEnumGameSetting(setting)) {
+                const selectedOption = setting.options.find(opt => opt.value === currentValue);
+
                 components.push(ComponentService.createButton({
                     style: ButtonStyle.PRIMARY,
                     label: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown),
                 }, {
                     userId: config.userId,
                     handle: async (btnEvent: any) => {
-                        if (handlers?.onEnumClick) {
-                            await handlers.onEnumClick(btnEvent, setting.key, enumSetting, currentValue);
-                        }
+                        if (handlers?.onEnumClick)
+                            await handlers.onEnumClick(btnEvent, setting.key, setting, currentValue);
                     }
                 }));
             }
-            
+            if (isListGameSetting(setting)) {
+                const listValues = Array.isArray(currentValue)
+                    ? (currentValue as number[])
+                    : currentValue !== undefined && currentValue !== null
+                        ? [Number(currentValue)]
+                        : [];
+
+                setting.options.forEach(option => {
+                    const optionValue = typeof option.value === "number" ? option.value : Number(option.value);
+                    if (Number.isNaN(optionValue))
+                        return;
+
+                    const isSelected = listValues.includes(optionValue);
+
+                    components.push(ComponentService.createButton({
+                        style: isSelected ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
+                        label: option.label,
+                    }, {
+                        userId: config.userId,
+                        handle: async (btnEvent: any) => {
+                            const newValues = isSelected
+                                ? listValues.filter(v => v !== optionValue)
+                                : [...listValues, optionValue];
+
+                            if (handlers?.onListClick) {
+                                await handlers.onListClick(btnEvent, setting.key, setting, optionValue, !isSelected, newValues);
+                            } else if (config.onSettingChange) {
+                                config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, newValues);
+                            }
+                        }
+                    }));
+                });
+            }
+
             // Add separator between settings
             components.push({
                 type: ComponentType.SEPARATOR,
@@ -99,7 +129,7 @@ export class GameSettingsContainer {
                 spacing: 1
             } as Separator);
         });
-        
+
         // Add Accept button
         if (config.onAccept || handlers?.onAcceptClick) {
             components.push(ComponentService.createButton({
@@ -116,7 +146,7 @@ export class GameSettingsContainer {
                 }
             }));
         }
-        
+
         // Add Cancel button
         if (config.onCancel || handlers?.onCancelClick) {
             components.push(ComponentService.createButton({
@@ -133,37 +163,70 @@ export class GameSettingsContainer {
                 }
             }));
         }
-        
+
         return {
             type: ComponentType.CONTAINER,
             components
         } as Container;
     }
-    
+
     static createReadOnlyDisplay(config: GameSettingsDisplayConfig): Component[] {
         const components: Component[] = [];
-        
+
         config.settingsSchema.forEach((setting) => {
             const currentValue = config.settings[setting.key];
-            let statusEmoji = "";
-            
+            let displayEn = "";
+            let displayNl = "";
+
             if (setting.type === GameSettingType.BOOLEAN) {
-                statusEmoji = currentValue ? "🟢" : "🔴";
+                const statusEmoji = currentValue ? "🟢" : "🔴";
+                const label = setting.label.getMessage(config.languageEnum);
+                displayEn = `${statusEmoji} ${label}`;
+                displayNl = `${statusEmoji} ${label}`;
             } else if (setting.type === GameSettingType.ENUM) {
                 const enumSetting = setting as EnumGameSetting;
                 const hasValue = enumSetting.options.some(opt => opt.value === currentValue);
-                statusEmoji = hasValue ? "🟢" : "🔴";
+                const statusEmoji = hasValue ? "🟢" : "🔴";
+                const label = setting.label.getMessage(config.languageEnum);
+                displayEn = `${statusEmoji} ${label}`;
+                displayNl = `${statusEmoji} ${label}`;
+            } else if (setting.type === GameSettingType.LIST) {
+                const listValues = Array.isArray(currentValue)
+                    ? (currentValue as number[])
+                    : currentValue !== undefined && currentValue !== null
+                        ? [Number(currentValue)]
+                        : [];
+
+                const selectedOptions = setting.options.filter(opt => {
+                    const optionValue = typeof opt.value === "number" ? opt.value : Number(opt.value);
+                    if (Number.isNaN(optionValue))
+                        return false;
+                    return listValues.includes(optionValue);
+                });
+
+                const hasAny = selectedOptions.length > 0;
+                const statusEmoji = hasAny ? "🟢" : "🔴";
+                const label = setting.label.getMessage(config.languageEnum);
+                const valuesEn = selectedOptions.map(opt => opt.label.getMessage(LanguageEnum.EN)).join(", ");
+                const valuesNl = selectedOptions.map(opt => opt.label.getMessage(LanguageEnum.NL)).join(", ");
+
+                displayEn = hasAny
+                    ? `${statusEmoji} ${label}: ${valuesEn}`
+                    : `${statusEmoji} ${label}`;
+                displayNl = hasAny
+                    ? `${statusEmoji} ${label}: ${valuesNl}`
+                    : `${statusEmoji} ${label}`;
             }
-            
+
             components.push({
                 type: ComponentType.TEXT_DISPLAY,
                 content: new MultiLingualString({
-                    [LanguageEnum.EN]: `${statusEmoji} ${setting.label.getMessage(config.languageEnum)}`,
-                    [LanguageEnum.NL]: `${statusEmoji} ${setting.label.getMessage(config.languageEnum)}`,
+                    [LanguageEnum.EN]: displayEn,
+                    [LanguageEnum.NL]: displayNl,
                 })
             } as TextDisplay);
         });
-        
+
         return components;
     }
 } 

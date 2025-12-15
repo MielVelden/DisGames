@@ -1,6 +1,6 @@
 import { InteractionEvent, isMessageInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
-import { GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
-import { GameAction, GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
+import { DatasheetsModel, GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
+import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
 import {
     GameSettingsSchema,
@@ -33,6 +33,7 @@ import { ARRAY_JOIN_DELIMITER } from "../../constants";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
+import DataSheetService from "./DataSheetService";
 
 class GameService {
     private games: GameModule[] = [];
@@ -55,6 +56,7 @@ class GameService {
                     const gameModule = require(gamePath).default as GameModule;
 
                     if (gameModule && gameModule.config && gameModule.functions) {
+                        this.completeGameConfigAsync(gameModule.config);
                         this.games.push(gameModule);
                     }
                 } catch (error) {
@@ -63,6 +65,28 @@ class GameService {
             }
         } catch (error) {
             Logger.logError('Error loading games directory:', error as Error);
+        }
+    }
+
+    private async completeGameConfigAsync(gameConfig: GameConfig): Promise<void> {
+        if (!gameConfig.settings)
+            gameConfig.settings = [];
+
+        if (gameConfig.hasDataSheets) {
+            const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
+            if (datasheets.length > 0) {
+            gameConfig.settings.push({
+                key: GameSettingsEnum.DATASHEETS,
+                type: GameSettingType.LIST,
+                label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
+                description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
+                options: datasheets.map((datasheet: DatasheetsModel) => ({
+                    value: datasheet.Id,
+                    label: datasheet.Name,
+                        description: datasheet.Description,
+                    }))
+                });
+            }
         }
     }
 
@@ -296,16 +320,16 @@ class GameService {
             const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
             if (gameModule && gameModule.functions && gameModule.functions.onIncorrectAnswerAsync) {
                 await gameModule.functions.onIncorrectAnswerAsync(gameEvent);
-                await this.handleUpdateGameDataAsync(gameEvent);        
+                await this.handleUpdateGameDataAsync(gameEvent);
             } else {
                 // Delete the message
                 await event.deleteAsync();
             }
         }
 
-        if(gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE) 
+        if (gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)
             return;
-        
+
         // Loop through all actions and handle them
         await this.handleGameActionsAsync(gameEvent, event);
 

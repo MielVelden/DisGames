@@ -123,6 +123,10 @@ export interface I18nTranslations {
                     mediumDescription: LanguageTranslations;
                     hardDescription: LanguageTranslations;
                 };
+                datasheets: {
+                    label: LanguageTranslations;
+                    description: LanguageTranslations;
+                };
             },
             buttons: {
                 delete: LanguageTranslations;

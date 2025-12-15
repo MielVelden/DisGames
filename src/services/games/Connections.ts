@@ -71,17 +71,26 @@ function validateCategory(words: string[], gameDataArray: GameDataModel[], langu
     return -1; // No valid category found
 }
 
-function parseWordsFromAnswer(answer: string): string[] {
-    if (!answer)
+function parseWordsFromAnswer(userInput: string): string[] {
+    if (!userInput)
         return [];
 
-    // Split by various delimiters and take first 4 valid words
-    const words = answer.split(/[,${STRING_DELIMITER}|\s]+/)
-        .map(word => word.trim())
-        .filter(word => word.length > 0)
-        .slice(0, 4);
-
-    return words;
+    // Check if input contains commas
+    if (userInput.includes(',')) {
+        // Split by commas and take first 4 items (each item can contain multiple words)
+        const items = userInput.split(',')
+            .map(item => item.trim())
+            .filter(item => item.length > 0)
+            .slice(0, 4);
+        return items;
+    } else {
+        // No commas: split by whitespace and take first 4 words
+        const words = userInput.split(/\s+/)
+            .map(word => word.trim())
+            .filter(word => word.length > 0)
+            .slice(0, 4);
+        return words;
+    }
 }
 
 async function createGameImage(gameState: ConnectionsGameState, serverId: string, languageEnum: LanguageEnum): Promise<Component> {
@@ -109,6 +118,7 @@ export default {
         expectedType: "string",
         addCorrectReaction: true,
         hasImages: false,
+        hasDataSheets: true,
         options: {
             [GameOptionEnum.IS_INACTIVE]: false,
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: false,
@@ -134,9 +144,8 @@ export default {
                     const allCategories = [0, 1, 2, 3];
                     const missingCategory = allCategories.find(cat => !gameState.solvedCategories.includes(cat));
                     
-                    if (missingCategory !== undefined) {
+                    if (missingCategory !== undefined)
                         gameState.solvedCategories.push(missingCategory);
-                    }
                 }
                 
                 // Update the event with the new game state

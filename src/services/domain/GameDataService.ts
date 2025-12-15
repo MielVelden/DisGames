@@ -1,5 +1,6 @@
 import { InteractionEvent } from "../../interfaces/application";
 import { GameDataModel, GameDataSaveModel } from "../../interfaces/database/TableInterfaces";
+import { GameTypeEnum } from "../../interfaces/enums";
 import GameDataRepository from "../../repositories/GameDataRepository";
 import { BaseDomainService } from "./BaseDomainService";
 
@@ -20,6 +21,10 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
 
     public async getRandomDataByGameIdAsync(gameId: number): Promise<GameDataModel[]> {
         return await this.repository.getRandomDataByGameIdAsync(gameId);
+    }
+
+    public async getByGameIdAsync(gameId: GameTypeEnum): Promise<GameDataModel[]> {
+        return await this.repository.getByGameIdAsync(gameId);
     }
 }
 
