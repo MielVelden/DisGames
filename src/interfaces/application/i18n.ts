@@ -151,6 +151,9 @@ export interface I18nTranslations {
         },
         impersonate: {
             description: LanguageTranslations;
+        },
+        restartGame: {
+            description: LanguageTranslations;
         }
     }
     exceptions: LanguageEnumTranslations<ExceptionEnum>;

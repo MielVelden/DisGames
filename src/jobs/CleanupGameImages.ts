@@ -14,7 +14,7 @@ export default {
     handler: async (progress): Promise<void> => {
         const imagesPath = path.join(process.cwd(), 'images');
         const gameIds: GameTypeEnum[] = [GameTypeEnum.CONNECTIONS];
-        
+
         let totalFiles = 0;
         for (const gameId of gameIds) {
             const gameDirectory = path.join(imagesPath, 'games', gameId.toString());
@@ -25,23 +25,24 @@ export default {
         }
 
         let processedFiles = 0;
-        
+
         for (const gameId of gameIds) {
             const gameDirectory = path.join(imagesPath, 'games', gameId.toString());
-            if (!fs.existsSync(gameDirectory)) continue;
-            
+            if (!fs.existsSync(gameDirectory))
+                continue;
+
             const files = fs.readdirSync(gameDirectory);
             const filesToDelete = files.filter(file => file.endsWith('.png'));
-            
+
             for (const fileToDelete of filesToDelete) {
                 fs.unlinkSync(path.join(gameDirectory, fileToDelete));
                 Logger.logInfo(`Deleted game image: ${path.join(gameDirectory, fileToDelete)}`);
-                
+
                 processedFiles++;
                 progress(processedFiles, totalFiles, `Deleting ${fileToDelete}`);
             }
         }
-        
+
         if (totalFiles === 0) {
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid spamming the progress bar
             progress(1, 1, 'No files to delete');

@@ -1,5 +1,6 @@
 import { 
     InteractionEvent,
+    MessageInteractionEvent,
     SelectMenuInteractionEvent
 } from '../../src/interfaces/application/Event';
 import { User } from '../../src/interfaces/domain/User';
@@ -22,7 +23,7 @@ import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { MultiLingualString } from '../../src/utils/i18n/MultiLingualString';
 import { EventTypeEnum, UserRoleEnum } from '../../src/interfaces/enums';
 
-export class MockDiscordEvent implements InteractionEvent {
+export class MockDiscordEvent {
     public readonly type: EventTypeEnum;
     public readonly customId: string;
     public readonly currentInteraction: any;
@@ -113,7 +114,7 @@ export class MockDiscordEvent implements InteractionEvent {
 
     public async getConfirmationFromUser(container: Component): Promise<InteractionEvent | null> {
         const confirmation = this.inputSimulator.getNextConfirmationResponse();
-        return confirmation?.value as boolean ? this : null;
+        return confirmation?.value as boolean ? this as unknown as InteractionEvent : null;
     }
 
     public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {
@@ -255,7 +256,7 @@ export class TestDiscordEventBuilder {
         return (id && id !== '1') ? id : (this.lastChannelId || id);
     }
 
-    public buildSlashCommandEvent(commandName: CommandEnum, options: Record<string, any> = {}): MockDiscordEvent {
+    public buildSlashCommandEvent(commandName: CommandEnum, options: Record<string, any> = {}): InteractionEvent {
         const mockCommand: Command = {
             name: commandName,
             description: new MultiLingualString({ 
@@ -319,10 +320,10 @@ export class TestDiscordEventBuilder {
         event.command = mockCommand;
         event.getOption = (name: string) => options[name];
 
-        return event as MockDiscordEvent;
+        return event as unknown as InteractionEvent;
     }
 
-    public buildMessageEvent(content: string = this.inputSimulator.getMessage().content, userId?: string): MockDiscordEvent {
+    public buildMessageEvent(content: string = this.inputSimulator.getMessage().content, userId?: string): MessageInteractionEvent {
         const user: User = {
             id: undefined,
             userId: userId || this.inputSimulator.getUser().id,
@@ -373,10 +374,10 @@ export class TestDiscordEventBuilder {
 
         event.content = content;
 
-        return event;
+        return event as unknown as MessageInteractionEvent;
     }
 
-    public buildButtonEvent(customId: string): MockDiscordEvent {
+    public buildButtonEvent(customId: string): InteractionEvent {
         const user: User = {
             id: undefined,
             userId: this.inputSimulator.getUser().id,
@@ -419,7 +420,7 @@ export class TestDiscordEventBuilder {
             this.inputSimulator.getServer().id,
             this.inputSimulator.getMessage().id,
             this.inputSimulator
-        );
+        ) as unknown as InteractionEvent;
     }
 
     public static create(): TestDiscordEventBuilder {

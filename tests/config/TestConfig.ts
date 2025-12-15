@@ -36,9 +36,8 @@ export class TestConfig {
     }
 
     private validateConfig(): void {
-        if (!this._environment.databaseUrl) {
+        if (!this._environment.databaseUrl)
             throw new Error('DATABASE_URL or TEST_DATABASE_URL must be set in environment variables');
-        }
     }
 
     public static reset(): void {

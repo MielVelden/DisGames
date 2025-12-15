@@ -73,19 +73,23 @@ class GameService {
             gameConfig.settings = [];
 
         if (gameConfig.hasDataSheets) {
-            const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
-            if (datasheets.length > 0) {
-            gameConfig.settings.push({
-                key: GameSettingsEnum.DATASHEETS,
-                type: GameSettingType.LIST,
-                label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
-                description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
-                options: datasheets.map((datasheet: DatasheetsModel) => ({
-                    value: datasheet.Id,
-                    label: datasheet.Name,
-                        description: datasheet.Description,
-                    }))
-                });
+            try {
+                const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
+                if (datasheets.length > 0) {
+                gameConfig.settings.push({
+                    key: GameSettingsEnum.DATASHEETS,
+                    type: GameSettingType.LIST,
+                    label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
+                    description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
+                    options: datasheets.map((datasheet: DatasheetsModel) => ({
+                        value: datasheet.Id,
+                        label: datasheet.Name,
+                            description: datasheet.Description,
+                        }))
+                    });
+                }
+            } catch (error) {
+                Logger.logError(`Failed to load datasheets for game ${gameConfig.id}, continuing without datasheet settings`, error as Error);
             }
         }
     }

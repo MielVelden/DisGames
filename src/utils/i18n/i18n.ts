@@ -570,6 +570,12 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.NL]: "Impersonate een andere gebruiker",
             },
         },
+        restartGame: {
+            description: {
+                [LanguageEnum.EN]: "Restart the game",
+                [LanguageEnum.NL]: "Het spel opnieuw starten",
+            },
+        },
     },
     exceptions: {
         [ExceptionEnum.GAME_ALREADY_EXISTS]: {

@@ -34,7 +34,6 @@ export const MOCK_USERS: UsersModel[] = TEST_USERS.map((user, index) => new User
     Id: index + 1,
     UserId: user.UserId!,
     Username: user.Username!,
-    OAuth2AccessToken: undefined!,
     UserRoleEnum: UserRoleEnum.USER,
     CreatedAt: new Date()
 }));

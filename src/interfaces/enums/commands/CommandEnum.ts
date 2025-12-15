@@ -3,4 +3,5 @@ export enum CommandEnum {
     PROFILE = 'profile',
     DEBUG = 'debug',
     IMPERSONATE = 'impersonate',
+    RESTARTGAME = 'restartgame',
 }

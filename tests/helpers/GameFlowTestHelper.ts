@@ -56,8 +56,9 @@ export class GameFlowTestHelper {
             this.results.game = game;
 
             // Collect sent messages
-            this.results.messages = startEvent.getSentMessages();
-            this.results.timeline = startEvent.timelineEntries;
+            const mockStartEvent = startEvent as any;
+            this.results.messages = mockStartEvent.getSentMessages ? mockStartEvent.getSentMessages() : [];
+            this.results.timeline = mockStartEvent.timelineEntries || [];
 
             this.results.success = true;
 
@@ -111,9 +112,10 @@ export class GameFlowTestHelper {
                 }
 
                 // Collect results
-                const sentMessages = answerEvent.getSentMessages();
+                const mockAnswerEvent = answerEvent as any;
+                const sentMessages = mockAnswerEvent.getSentMessages ? mockAnswerEvent.getSentMessages() : [];
                 this.results.messages.push(...sentMessages);
-                this.results.timeline.push(...answerEvent.timelineEntries);
+                this.results.timeline.push(...(mockAnswerEvent.timelineEntries || []));
 
                 Logger.logDebug(`Processed answer ${i}: "${answer}"`);
 
