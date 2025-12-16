@@ -41,6 +41,7 @@ export class ComponentError extends Error {
         switch (this.errorKey) {
             case ExceptionEnum.RECORD_NOT_FOUND:
             case ExceptionEnum.MESSAGE_CHANGE_DISABLED:
+            case ExceptionEnum.ANSWER_SKIPPED:
                 return false;
             default:
                 return true;

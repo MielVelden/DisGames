@@ -9,15 +9,15 @@ import { Component } from "../../interfaces/application/Message";
 
 export default {
     config: {
-        id: GameTypeEnum.GUESS_THE_FLAG,
-        emoji: "🏳️",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].description),
+        id: GameTypeEnum.TRIVIA_QUIZ,
+        emoji: "❓",
+        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].name),
+        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
         addCorrectReaction: true,
-        hasImages: true,
+        hasDataSheets: true,
         options: {
             [GameOptionEnum.ALLOW_SKIPPING]: true,
         }
@@ -30,13 +30,15 @@ export default {
 
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
             const nextAnswer = await event.getNextAnswerAsync();
+            const nextQuestion = nextAnswer[0].Message;
             const nextAnswerMessage = nextAnswer[0].Response.getMessage(event.server.LanguageEnum);
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
                 component: ComponentService.createContainer({
-                    title: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
-                    description: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
+                    title: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].name),
+                    description: nextQuestion,
+                    footer: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
                 })
             })
 
@@ -44,9 +46,10 @@ export default {
         },
 
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
+            const firstQuestion = gameData[0].Message.getMessage(server.LanguageEnum);
             return [
                 ComponentService.createContainer({
-                    description: i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].start!()
+                    description: i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].startMessage(firstQuestion)
                 })];
         },
     } as GameFunctions

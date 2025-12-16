@@ -422,6 +422,7 @@ class GameService {
                     if (gameEvent.userInput === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
                         await this.handleGameActionsAsync(gameEvent, event);
+                        ErrorHelper.throw(ExceptionEnum.ANSWER_SKIPPED);
                     }
                     break;
                 default:

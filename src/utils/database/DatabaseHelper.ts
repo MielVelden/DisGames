@@ -68,19 +68,13 @@ export class DatabaseHelper {
           // Use the value from the non-JSON field (guaranteed to be an object)
           serialized[key] = JSON.stringify(jsonFieldsToProcess.get(key));
         } else if (value === null) {
-          delete serialized[key];
+          // Keep null values - they should be included in UPDATE queries when explicitly set
+          serialized[key] = null;
         } else if (value !== undefined && typeof value !== 'string') {
           // Only serialize if it's not already a string
           serialized[key] = JSON.stringify(value);
         }
         // If it's already a string, keep it as-is (already serialized)
-      }
-    }
-    
-    // Remove null values from all fields
-    for (const [key, value] of Object.entries(serialized)) {
-      if (value === null) {
-        delete serialized[key];
       }
     }
     

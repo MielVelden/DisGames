@@ -149,6 +149,15 @@ export interface I18nTranslations {
                 globalPoints: LanguageTranslations;
             };
         },
+        settings: {
+            description: LanguageTranslations;
+            labels: {
+                title: LanguageTranslations;
+                description: LanguageTranslations;
+                changeLanguage: LanguageTranslations;
+                languageChanged: LanguageTranslations;
+            };
+        },
         impersonate: {
             description: LanguageTranslations;
         },
@@ -157,4 +166,5 @@ export interface I18nTranslations {
         }
     }
     exceptions: LanguageEnumTranslations<ExceptionEnum>;
+    languages: LanguageEnumTranslations<LanguageEnum>;
 }

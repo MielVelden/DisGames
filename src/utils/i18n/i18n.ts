@@ -465,6 +465,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Can you guess the flag?",
                         [LanguageEnum.NL]: "Kun jij de vlag raden?",
                     }),
+                    start: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "Let’s start, you can start guessing the flag by typing the country name. When you're not sure, you can skip the answer by typing '?'",
+                        [LanguageEnum.NL]: "We beginnen, je kan beginnen met raden aan de vlag door de landnaam te typen. Wanneer je niet zeker bent, kan je het antwoord overslaan door '?' te typen",
+                    }),
                 },
                 [GameTypeEnum.CONNECTIONS]: {
                     name: {
@@ -563,6 +567,30 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.NL]: "Globale Punten",
                 },
             }
+        },
+        settings: {
+            description: {
+                [LanguageEnum.EN]: "Manage the settings for the bot",
+                [LanguageEnum.NL]: "Beheer de instellingen voor de bot",
+            },
+            labels: {
+                title: {
+                    [LanguageEnum.EN]: "Settings",
+                    [LanguageEnum.NL]: "Instellingen",
+                },
+                description: {
+                    [LanguageEnum.EN]: "Manage the settings for the bot",
+                    [LanguageEnum.NL]: "Beheer de instellingen voor de bot",
+                },
+                changeLanguage: {
+                    [LanguageEnum.EN]: "Change Language",
+                    [LanguageEnum.NL]: "Taal wijzigen",
+                },
+                languageChanged: {
+                    [LanguageEnum.EN]: "Language changed successfully",
+                    [LanguageEnum.NL]: "Taal succesvol gewijzigd",
+                },
+            },
         },
         impersonate: {
             description: {
@@ -762,7 +790,29 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Table {tableName} not found",
             [LanguageEnum.NL]: "Tabel {tableName} niet gevonden",
         },
-    }
+        [ExceptionEnum.ANSWER_SKIPPED]: {
+            [LanguageEnum.EN]: "Answer skipped",
+            [LanguageEnum.NL]: "Antwoord overslagen",
+        },
+    },
+    languages: {
+        [LanguageEnum.EN]: {
+            [LanguageEnum.EN]: "English",
+            [LanguageEnum.NL]: "Engels"
+        },
+        [LanguageEnum.NL]: {
+            [LanguageEnum.EN]: "Dutch",
+            [LanguageEnum.NL]: "Nederlands"
+        },
+        [LanguageEnum.ES]: {
+            [LanguageEnum.EN]: "Spanish",
+            [LanguageEnum.NL]: "Spaans"
+        },
+        [LanguageEnum.DE]: {
+            [LanguageEnum.EN]: "German",
+            [LanguageEnum.NL]: "Duits"
+        },
+    },
 };
 
 // Export the types for use in other files

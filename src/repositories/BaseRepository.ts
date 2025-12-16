@@ -225,14 +225,28 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
       if (isValidEnumValue(this.fieldEnum, 'UpdatedAt'))
         serializedEntity.UpdatedAt = new Date();
 
-      // UPDATE
-      const setClause = Object.keys(serializedEntity)
-        .filter(key => key !== 'Id')
-        .map(key => `${key} = ?`)
-        .join(', ');
+      // UPDATE - only include fields that are explicitly set (not undefined)
+      const fieldsToUpdate: string[] = [];
+      const valuesToUpdate: any[] = [];
+      
+      for (const [key, value] of Object.entries(serializedEntity)) {
+        if (key !== 'Id' && value !== undefined) {
+          fieldsToUpdate.push(key);
+          valuesToUpdate.push(value);
+        }
+      }
 
+      if (fieldsToUpdate.length === 0) {
+        // No fields to update, just return the existing record
+        const result = await this.Select().Where({ Id: serializedEntity.Id }).Execute();
+        if (result.length === 0)
+          ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
+        return result[0] as Model;
+      }
+
+      const setClause = fieldsToUpdate.map(key => `${key} = ?`).join(', ');
       const query = `UPDATE ${this.table} SET ${setClause} WHERE Id = ?`;
-      const params = [...Object.values(serializedEntity).filter((_, index) => Object.keys(serializedEntity)[index] !== 'Id'), serializedEntity.Id];
+      const params = [...valuesToUpdate, serializedEntity.Id];
 
       // Run the update
       await runQueryAsync(query, params);
