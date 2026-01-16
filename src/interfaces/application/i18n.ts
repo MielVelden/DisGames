@@ -156,6 +156,7 @@ export interface I18nTranslations {
                 description: LanguageTranslations;
                 changeLanguage: LanguageTranslations;
                 languageChanged: LanguageTranslations;
+                clickHereToChangeLanguage: LanguageTranslations;
             };
         },
         impersonate: {

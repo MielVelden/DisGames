@@ -32,8 +32,11 @@ class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
         const discordSelectMenuOption = new DiscordSelectMenuOptionBuilder()
             .setLabel(option.label.getMessage())
-            .setDescription(option.description?.getMessage() || "")
             .setValue(option.value);
+
+        const description = option.description?.getMessage();
+        if (description && description.trim().length > 0)
+            discordSelectMenuOption.setDescription(description);
 
         if (option.emoji)
             discordSelectMenuOption.setEmoji({ name: option.emoji });

@@ -590,6 +590,10 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Language changed successfully",
                     [LanguageEnum.NL]: "Taal succesvol gewijzigd",
                 },
+                clickHereToChangeLanguage: {
+                    [LanguageEnum.EN]: "Click here to change language",
+                    [LanguageEnum.NL]: "Klik hier om de taal te wijzigen",
+                },
             },
         },
         impersonate: {

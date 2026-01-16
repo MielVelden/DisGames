@@ -23,9 +23,8 @@ export class MultiLingualString {
         
         for (const [langKey, translation] of Object.entries(this.translations)) {
             const languageEnum = parseInt(langKey) as LanguageEnum;
-            if (translation && translation.trim() !== '') {
+            if (translation && translation.trim() !== '')
                 result[languageEnum] = translation;
-            }
         }
         
         return result;
@@ -74,19 +73,17 @@ export class MultiLingualString {
         
         for (const [langKey, translation] of Object.entries(data)) {
             const languageEnum = parseInt(langKey) as LanguageEnum;
-            if (Object.values(LanguageEnum).includes(languageEnum)) {
+            if (Object.values(LanguageEnum).includes(languageEnum))
                 translations[languageEnum] = translation;
-            }
         }
         
         // Ensure at least the default language exists
         if (!translations[DEFAULT_LANGUAGE]) {
             const firstAvailableTranslation = Object.values(translations)[0];
-            if (firstAvailableTranslation) {
+            if (firstAvailableTranslation)
                 translations[DEFAULT_LANGUAGE] = firstAvailableTranslation;
-            } else {
+            else
                 return null;
-            }
         }
         
         return new MultiLingualString(translations);

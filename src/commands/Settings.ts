@@ -27,12 +27,13 @@ export class SettingsCommand implements Command {
             const languageSelectMenu = createLanguageSelectMenu();
             const languageEvent = await event.getUserInputBySelectMenuAsync(languageSelectMenu);
             if(languageEvent) {
-                const language = isValidEnumValue(LanguageEnum, languageEvent.selected) ? getEnumValue(LanguageEnum, languageEvent.selected) : undefined;
+                const languageKey = languageEvent.selected as keyof typeof LanguageEnum;
+                const language = LanguageEnum[languageKey];
                 await ServerService.saveAsync(new ServersSaveModel({
                     Id: server.Id,
                     LanguageEnum: language
                 }), languageEvent);
-                await event.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.languageChanged)));
+                await languageEvent.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.languageChanged)));
             }
         });
 

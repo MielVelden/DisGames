@@ -114,3 +114,14 @@ export function SetValidateRegex(
         metadataMap.set(MetadataKeyEnum.ValidateRegex, regex.source);
     });
 }
+
+export function SetEmoji(
+    enumObject: EnumType,
+    enumValue: EnumValue,
+    emoji: string
+): void {
+    queueRegistration(() => {
+        const metadataMap = ensureMetadataMap(enumObject, enumValue);
+        metadataMap.set(MetadataKeyEnum.Emoji, emoji);
+    });
+}
