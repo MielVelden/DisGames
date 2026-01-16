@@ -3,9 +3,10 @@ import { DiscordClient } from "../../interfaces/application/DiscordClient";
 import path from "path";
 import fs from "fs";
 import Logger from "../application/Logger";
-import { MultiLingualString } from "../i18n/MultiLingualString";
+import { DEFAULT_LANGUAGE, MultiLingualString } from "../i18n/MultiLingualString";
 import { LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
 import { resolvePath } from "../helpers/PathResolver";
+import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 
 const commands: Command[] = [];
 
@@ -41,7 +42,7 @@ export function getCommandConfig(commandName: string): Command | null {
     return command;
 }
 
-export function getCommandName(key: LanguageCommandOptionTranslations<string | number>): string {
+export function getCommandName(key: LanguageCommandOptionTranslations<string | number>, language?: LanguageEnum): string {
     // Must be lowercase because Discord doesn't support uppercase options
-    return new MultiLingualString(key.action).getMessage().toLowerCase();
+    return new MultiLingualString(key.action).getMessage(language).toLowerCase();
 }

@@ -11,6 +11,7 @@ import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import EventsService from '../services/domain/EventsService';
 import { EventTypeEnum, isMessageEventType } from '../interfaces/enums';
 import { EventsSaveModel } from '../interfaces/database';
+import { withEventContextAsync } from '../middleware/EventContext';
 
 export default {
     name: Events.MessageCreate,
@@ -23,27 +24,29 @@ export default {
 export async function processMessageEventAsync(event: InteractionEvent): Promise<void> {
     if (!isMessageInteractionEvent(event))
         return;
-    await EventsService.saveAsync(new EventsSaveModel({
-        UserId: event.user.id,
-        ServerId: event.server.Id,
-        EventTypeEnum: event.type,
-        PayloadJSON: {
-            messageId: event.messageId,
-            channelId: event.channelId,
-            guildId: event.guildId,
-            content: event.content
-        }
-    }), event);
+    return withEventContextAsync(event, async () => {
+        await EventsService.saveAsync(new EventsSaveModel({
+            UserId: event.user.id,
+            ServerId: event.server.Id,
+            EventTypeEnum: event.type,
+            PayloadJSON: {
+                messageId: event.messageId,
+                channelId: event.channelId,
+                guildId: event.guildId,
+                content: event.content
+            }
+        }), event);
 
-    try {
-        if (event.command && (event.command.canExecute?.(event) ?? true))
-            await handleCommandAsync(event.command, event);
-        else
-            await GameService.handleGameAsync(event);
-    }
-    catch (error) {
-        await handleErrorAsync(error, event);
-    }
+        try {
+            if (event.command && (event.command.canExecute?.(event) ?? true))
+                await handleCommandAsync(event.command, event);
+            else
+                await GameService.handleGameAsync(event);
+        }
+        catch (error) {
+            await handleErrorAsync(error, event);
+        }
+    });
 }
 
 export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {

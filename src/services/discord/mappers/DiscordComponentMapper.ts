@@ -27,6 +27,7 @@ import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import * as fs from 'fs';
 import Logger from '../../../utils/application/Logger';
+import { withEventContextAsync } from '../../../middleware/EventContext';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -386,23 +387,24 @@ class DiscordComponentMapper {
     // #endregion
 
     public async buildMessageContentAsync(event: InteractionEvent, components: Component[], message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
-        if(message) {
-            if(typeof message === 'string')
-                message = createMultiLingualString(message);
+        return withEventContextAsync(event, async () => {
+            if(message) {
+                if(typeof message === 'string')
+                    message = createMultiLingualString(message);
 
-            components.push(ComponentService.createContent(message));
-        }
+                components.push(ComponentService.createContent(message));
+            }
 
-        const rootComponents = await this.mapRootComponentsAsync(components);
-        
-        if (rootComponents.length === 0) {
-            return null;
-        }
+            const rootComponents = await this.mapRootComponentsAsync(components);
+            
+            if (rootComponents.length === 0) {
+                return null;
+            }
 
-        // Collect all local attachments from MediaGallery components
-        const files: AttachmentBuilder[] = this.collectLocalAttachments(components);
+            const files: AttachmentBuilder[] = this.collectLocalAttachments(components);
 
-        return this.createReplyOptions(rootComponents, files);
+            return this.createReplyOptions(rootComponents, files);
+        });
     }
 
     public createReplyOptions(components: any[], files: AttachmentBuilder[]): DiscordMessageContent {

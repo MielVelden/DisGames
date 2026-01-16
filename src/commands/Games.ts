@@ -72,7 +72,7 @@ const optionsConfig = [
                 followUps: [{
                     key: GamesCommandFollowUpKeysEnum.ALL_GAMES,
                     type: CommandOptionFollowUpType.SELECT_MENU,
-                    configAsync: async (): Promise<SelectMenu> => {
+                    configAsync: async (_event: SlashCommandInteractionEvent): Promise<SelectMenu> => {
                         return createGamesSelectMenu(GameService.getGames());
                     }
                 }],
@@ -88,7 +88,7 @@ const optionsConfig = [
                 followUps: [{
                     key: GamesCommandFollowUpKeysEnum.ALL_GAMES,
                     type: CommandOptionFollowUpType.SELECT_MENU,
-                    configAsync: async (): Promise<SelectMenu> => {
+                    configAsync: async (_event: SlashCommandInteractionEvent): Promise<SelectMenu> => {
                         return createGamesSelectMenu(GameService.getGames());
                     }
                 }],

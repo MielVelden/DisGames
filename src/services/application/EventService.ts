@@ -4,6 +4,7 @@ import { DurationEnum } from '../../interfaces/application/Duration';
 import Logger from '../../utils/application/Logger';
 import { EventTypeEnum, ExceptionEnum } from '../../interfaces/enums';
 import { assertNever, ErrorHelper } from '../../utils/application/Error';
+import { withEventContextAsync } from '../../middleware/EventContext';
 
 const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
 
@@ -115,19 +116,21 @@ export class EventService {
   }
 
   public static handleEventAsync(event: InteractionEvent) {
-    const type = event.type;
-    switch (type) {
-      case EventTypeEnum.BUTTON:
-        return this.handleButtonInteraction(event);
-      case EventTypeEnum.SELECT_MENU:
-        return this.handleSelectMenuInteraction(event as SelectMenuInteractionEvent);
-      case EventTypeEnum.MESSAGE:
-      case EventTypeEnum.MESSAGE_UPDATE:
-      case EventTypeEnum.MESSAGE_DELETE:
-      case EventTypeEnum.SLASH_COMMAND:
-        ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
-      default:
-        assertNever(type, EventTypeEnum)
-    }
+    return withEventContextAsync(event, async () => {
+      const type = event.type;
+      switch (type) {
+        case EventTypeEnum.BUTTON:
+          return this.handleButtonInteraction(event);
+        case EventTypeEnum.SELECT_MENU:
+          return this.handleSelectMenuInteraction(event as SelectMenuInteractionEvent);
+        case EventTypeEnum.MESSAGE:
+        case EventTypeEnum.MESSAGE_UPDATE:
+        case EventTypeEnum.MESSAGE_DELETE:
+        case EventTypeEnum.SLASH_COMMAND:
+          ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+        default:
+          assertNever(type, EventTypeEnum)
+      }
+    });
   }
 } 

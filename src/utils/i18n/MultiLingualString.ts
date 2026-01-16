@@ -1,6 +1,7 @@
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import Logger from "../application/Logger";
 import { LanguageTranslations } from "../../interfaces/application/i18n";
+import { getCurrentLanguage } from "../../middleware/EventContext";
 
 export const DEFAULT_LANGUAGE = LanguageEnum.EN;
 
@@ -14,8 +15,9 @@ export class MultiLingualString {
             this.replaceParameters(params);
     }
 
-    public getMessage(language: LanguageEnum = DEFAULT_LANGUAGE): string {
-        return this.translations[language] || this.translations[DEFAULT_LANGUAGE];        
+    public getMessage(language?: LanguageEnum): string {
+        const targetLanguage = language ?? getCurrentLanguage() ?? DEFAULT_LANGUAGE;
+        return this.translations[targetLanguage] || this.translations[DEFAULT_LANGUAGE];        
     }
 
     public toJSON(): Record<number, string> {

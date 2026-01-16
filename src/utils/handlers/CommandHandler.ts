@@ -1,7 +1,7 @@
 import { Command, CommandOptionFollowUpType } from "../../interfaces/application/Command";
 import { InteractionEvent, SlashCommandInteractionEvent, SelectMenuInteractionEvent } from "../../interfaces/application/Event";
 import { getCommandName } from "../collectors/CommandCollector";
-import { MultiLingualString } from "../i18n/MultiLingualString";
+import { DEFAULT_LANGUAGE, MultiLingualString } from "../i18n/MultiLingualString";
 import { isSelectMenuEmpty } from "../helpers/SelectMenu";
 import ComponentService from "../../services/application/ComponentService";
 import Logger from "../application/Logger";
@@ -13,64 +13,69 @@ import { REST } from "discord.js";
 import { Routes } from "discord.js";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 import { getConfigValue } from "../application/Config";
+import { withEventContextAsync } from "../../middleware/EventContext";
 
 export async function handleCommandAsync(command: Command, event: InteractionEvent): Promise<void> {
-    await command.executeAsync(event);
+    await withEventContextAsync(event, async () => {
+        await command.executeAsync(event);
+    });
 }
 
 export async function handleCommandOptionsAsync(event: SlashCommandInteractionEvent): Promise<void> {
-    if (event.command.options) {
-        for (const option of event.command.options) {
-            if (option.choices && option.choices.length > 0) {
-                const selectedOption = event.getOption(getCommandName(option.key));
-                const choice = option.choices.find(c => c.enumValue === selectedOption);
-                if (choice) {
-                    if (choice.validate) {
-                        const isValid = await choice.validate(event);
-                        if (!isValid)
-                            return await event.replyAsync(new MultiLingualString(option.key.noAction));
-                    }
-
-                    if (choice.followUps) {
-                        let allFollowUpsCompleted = true;
-                        let currentEvent: InteractionEvent = event;
-                        for (const followUp of choice.followUps) {
-                            if (followUp.type === CommandOptionFollowUpType.SELECT_MENU) {
-                                const selectMenu = await followUp.configAsync(event);
-
-                                if(isSelectMenuEmpty(selectMenu)) {
-                                    if (followUp.emptyReply) {
-                                        await event.addComponentAsync(ComponentService.createContainer({
-                                            description: followUp.emptyReply,
-                                        }));
-                                        await event.replyAsync();
-                                    }
-
-                                    return;
-                                }
-
-                                const selectMenuEvent: SelectMenuInteractionEvent | null = await currentEvent.getUserInputBySelectMenuAsync(selectMenu);
-                                if (selectMenuEvent) {
-                                    event.setFollowUpOption(followUp.key, selectMenuEvent.selected);
-                                    currentEvent = selectMenuEvent;
-                                } else {
-                                    allFollowUpsCompleted = false;
-                                    break;
-                                }
-                            }
+    return withEventContextAsync(event, async () => {
+        if (event.command.options) {
+            for (const option of event.command.options) {
+                if (option.choices && option.choices.length > 0) {
+                    const selectedOption = event.getOption(getCommandName(option.key, DEFAULT_LANGUAGE));
+                    const choice = option.choices.find(c => c.enumValue === selectedOption);
+                    if (choice) {
+                        if (choice.validate) {
+                            const isValid = await choice.validate(event);
+                            if (!isValid)
+                                return await event.replyAsync(new MultiLingualString(option.key.noAction));
                         }
 
-                        if (!allFollowUpsCompleted)
-                            return;
-                    }
+                        if (choice.followUps) {
+                            let allFollowUpsCompleted = true;
+                            let currentEvent: InteractionEvent = event;
+                            for (const followUp of choice.followUps) {
+                                if (followUp.type === CommandOptionFollowUpType.SELECT_MENU) {
+                                    const selectMenu = await followUp.configAsync(event);
 
-                    if (choice.handler)
-                        await choice.handler(event);
-                } else
-                    return await event.replyAsync(new MultiLingualString(option.key.noAction));
+                                    if(isSelectMenuEmpty(selectMenu)) {
+                                        if (followUp.emptyReply) {
+                                            await event.addComponentAsync(ComponentService.createContainer({
+                                                description: followUp.emptyReply,
+                                            }));
+                                            await event.replyAsync();
+                                        }
+
+                                        return;
+                                    }
+
+                                    const selectMenuEvent: SelectMenuInteractionEvent | null = await currentEvent.getUserInputBySelectMenuAsync(selectMenu);
+                                    if (selectMenuEvent) {
+                                        event.setFollowUpOption(followUp.key, selectMenuEvent.selected);
+                                        currentEvent = selectMenuEvent;
+                                    } else {
+                                        allFollowUpsCompleted = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!allFollowUpsCompleted)
+                                return;
+                        }
+
+                        if (choice.handler)
+                            await choice.handler(event);
+                    } else
+                        return await event.replyAsync(new MultiLingualString(option.key.noAction));
+                }
             }
         }
-    }
+    });
 }
 
 
