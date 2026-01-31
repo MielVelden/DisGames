@@ -40,8 +40,12 @@ function createGameProfileText(gameProfile: ProfileGameView): MultiLingualString
     if(gameProfile.gamePoints === 0)
         return new MultiLingualString(i18n.commands.profile.labels.notRanked);
 
-    return createInformationBlock([
+    const items: { key: MultiLingualString; value: string }[] = [];
+    if (gameProfile.username !== undefined)
+        items.push({ key: new MultiLingualString(i18n.commands.profile.labels.username), value: gameProfile.username });
+    items.push(
         { key: new MultiLingualString(i18n.tables.points.multiName), value: gameProfile.gamePoints.toString() },
         { key: new MultiLingualString(i18n.commands.profile.labels.position), value: gameProfile.gameRank.toString() + " / " + gameProfile.gameRankPlayerCount.toString() },
-    ]);
+    );
+    return createInformationBlock(items);
 }

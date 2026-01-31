@@ -550,6 +550,14 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Profile",
                     [LanguageEnum.NL]: "Profiel",
                 },
+                username: {
+                    [LanguageEnum.EN]: "Username",
+                    [LanguageEnum.NL]: "Gebruikersnaam",
+                },
+                badges: {
+                    [LanguageEnum.EN]: "Badges",
+                    [LanguageEnum.NL]: "Badges",
+                },
                 position: {
                     [LanguageEnum.EN]: "Position",
                     [LanguageEnum.NL]: "Positie",
@@ -558,14 +566,18 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Not ranked yet",
                     [LanguageEnum.NL]: "Nog niet gerankt",
                 },
-                globalUserRank: {
-                    [LanguageEnum.EN]: "Global User Rank",
-                    [LanguageEnum.NL]: "Globale Gebruikersrang",
-                },
-                globalPoints: {
-                    [LanguageEnum.EN]: "Global Points",
-                    [LanguageEnum.NL]: "Globale Punten",
-                },
+                globalUserRank: (rank: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Global User Rank: {rank}",
+                    [LanguageEnum.NL]: "Globale Gebruikersrang: {rank}",
+                }, { rank }),
+                globalPoints: (points: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Global Points: {points}",
+                    [LanguageEnum.NL]: "Globale Punten: {points}",
+                }, { points }),
+                joinedAt: (joinedAt: Date) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Joined at: {joinedAt}",
+                    [LanguageEnum.NL]: "Geregistreerd op: {joinedAt}",
+                }, { joinedAt }),
             }
         },
         settings: {

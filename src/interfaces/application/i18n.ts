@@ -143,10 +143,13 @@ export interface I18nTranslations {
             option: LanguageCommandOptionTranslations<ProfileCommandActionEnum>;
             labels: {
                 title: LanguageTranslations;
+                username: LanguageTranslations;
+                badges: LanguageTranslations;
                 position: LanguageTranslations;
                 notRanked: LanguageTranslations;
-                globalUserRank: LanguageTranslations;
-                globalPoints: LanguageTranslations;
+                globalUserRank: (rank: number) => MultiLingualString;
+                globalPoints: (points: number) => MultiLingualString;
+                joinedAt: (joinedAt: Date) => MultiLingualString;
             };
         },
         settings: {

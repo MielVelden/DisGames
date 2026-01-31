@@ -1,25 +1,45 @@
+import { isMultiLingualString } from "../../interfaces/application";
+import { LanguageTranslations } from "../../interfaces/application/i18n";
+import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { createMultiLingualString, MultiLingualString } from "../i18n/MultiLingualString";
+
+function resolveForKeyOrValue(item: string | MultiLingualString, lang: LanguageEnum): string {
+    if (typeof item === "string")
+        return item;
+    return item.getMessage(lang);
+}
 
 export function createBlockList(items: string[]): MultiLingualString {
     return createMultiLingualString(items.map(item => `\`${item}\``).join());
 }
 
-export function createBlock(content: string): string {
+export function createBlock(content: string): string;
+export function createBlock(content: MultiLingualString): MultiLingualString;
+export function createBlock(content: string | MultiLingualString): string | MultiLingualString {
+    if (isMultiLingualString(content))
+        return content.changeText((text) => `\`\`\`${text}\`\`\``);
     return `\`\`\`${content}\`\`\``;
 }
 
 export function createInformationBlock(items: { key: string | MultiLingualString, value: string | MultiLingualString }[]): MultiLingualString {
-    return createMultiLingualString(createBlock(items.map(item => `${item.key}: ${item.value}`).join("\n")));
+    const translations: LanguageTranslations = {} as LanguageTranslations;
+    for (const lang of [LanguageEnum.EN, LanguageEnum.NL]) {
+        const blockText = items.map(item => `${resolveForKeyOrValue(item.key, lang)}: ${resolveForKeyOrValue(item.value, lang)}`).join("\n");
+        translations[lang] = `\`\`\`${blockText}\`\`\``;
+    }
+    return new MultiLingualString(translations);
 }
 
-export function createTitle(title: MultiLingualString): MultiLingualString {
+export function createTitle(title: string | MultiLingualString): MultiLingualString {
+    if (isMultiLingualString(title))
+        return title.changeText((text) => `## ${text}`);
     return createMultiLingualString(`## ${title}`);
 }
 
 export function createSubtitle(subtitle: MultiLingualString): MultiLingualString {
-    return createMultiLingualString(`##${subtitle}`);
+    return subtitle.changeText((text) => `## ${text}`);
 }
 
 export function createBold(text: MultiLingualString): MultiLingualString {
-    return createMultiLingualString(`**${text}**`);
+    return text.changeText((t) => `**${t}**`);
 }

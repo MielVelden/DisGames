@@ -7,11 +7,15 @@ import Logger from "../../utils/application/Logger";
 
 class MediaService {
     private readonly imagesPath: string;
-    private readonly notFoundImage: string;
+    private readonly notFoundImage: Media;
 
     constructor() {
         this.imagesPath = path.join(process.cwd(), 'images');
-        this.notFoundImage = path.join(this.imagesPath, 'NotFound.png');
+        this.notFoundImage = { 
+            url: path.join(this.imagesPath, 'NotFound.png'),
+            name: 'NotFound',
+            type: MediaType.PNG
+        };
     }
 
     public getMedia(image: Media): string {
@@ -22,7 +26,7 @@ class MediaService {
         }
 
         Logger.logInfo(`Image not found: ${image.name}.${image.type}, using NotFound.png`);
-        return this.notFoundImage;
+        return this.notFoundImage.url;
     }
 
     public getMediaFromName(name: string, type: MediaType): string {
@@ -62,11 +66,7 @@ class MediaService {
         }
 
         Logger.logDebug(`Game image not found: ${gameImagePath}, using NotFound.png`);
-        return {
-            url: this.notFoundImage,
-            name: 'NotFound',
-            type: MediaType.PNG
-        };
+        return this.notFoundImage;
     }
 
     public getGameDataImage(gameId: GameTypeEnum, gameDataId: number): Media {
@@ -81,11 +81,7 @@ class MediaService {
         }
 
         Logger.logDebug(`Game image not found: ${gameImagePath}, using NotFound.png`);
-        return {
-            url: this.notFoundImage,
-            name: 'NotFound',
-            type: MediaType.PNG
-        };
+        return this.notFoundImage;
     }
 
     public getGameImageBuffer(gameName: GameTypeEnum): Buffer {
@@ -135,6 +131,21 @@ class MediaService {
             Logger.logError(`Error reading game directory ${gameDirectory}: ${error}`);
             return [];
         }
+    }
+
+    public getProfileContainerImage(): Media {
+        const profileContainerImagePath = path.join(this.imagesPath, `profile.${MediaType.PNG}`);
+
+        if (fs.existsSync(profileContainerImagePath)) {
+            return {
+                url: profileContainerImagePath,
+                name: 'profile',
+                type: MediaType.PNG
+            };
+        }
+
+        Logger.logDebug(`Profile image not found: ${profileContainerImagePath}, using NotFound.png`);
+        return this.notFoundImage;
     }
 }
 
