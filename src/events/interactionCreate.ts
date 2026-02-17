@@ -10,7 +10,6 @@ import { EventService } from '../services/application/EventService';
 import { handleErrorAsync } from '../utils/application/Error';
 import EventsService from '../services/domain/EventsService';
 import { EventsSaveModel } from '../interfaces/database';
-import { EventTypeEnum } from '../interfaces/enums';
 import { withEventContextAsync } from '../middleware/EventContext';
 
 export default {

@@ -59,6 +59,7 @@ export interface I18nTranslations {
             timedOut: LanguageTranslations;
             delete: LanguageTranslations;
             askQuestion: LanguageTranslations;
+            notEnoughPermissions: LanguageTranslations;
         },
         handleNever: (uniqueCase: string, origin: string) => MultiLingualString;
     },

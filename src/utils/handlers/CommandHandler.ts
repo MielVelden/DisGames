@@ -14,9 +14,12 @@ import { Routes } from "discord.js";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 import { getConfigValue } from "../application/Config";
 import { withEventContextAsync } from "../../middleware/EventContext";
+import { i18n } from "../i18n/i18n";
 
 export async function handleCommandAsync(command: Command, event: InteractionEvent): Promise<void> {
     await withEventContextAsync(event, async () => {
+        if(command.permissions && !event.user.hasPermissions(command.permissions))
+            return await event.replyAsync(new MultiLingualString(i18n.labels.common.notEnoughPermissions));
         await command.executeAsync(event);
     });
 }
@@ -29,6 +32,9 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
                     const selectedOption = event.getOption(getCommandName(option.key, DEFAULT_LANGUAGE));
                     const choice = option.choices.find(c => c.enumValue === selectedOption);
                     if (choice) {
+                        if (choice.permissions && !event.user.hasPermissions(choice.permissions))
+                            return await event.replyAsync(new MultiLingualString(i18n.labels.common.notEnoughPermissions));
+
                         if (choice.validate) {
                             const isValid = await choice.validate(event);
                             if (!isValid)

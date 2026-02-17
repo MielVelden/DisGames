@@ -41,6 +41,10 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.EN]: "Please answer the question",
                 [LanguageEnum.NL]: "Vul een antwoord in",
             },
+            notEnoughPermissions: {
+                [LanguageEnum.EN]: "You don't have the required permissions to execute this command",
+                [LanguageEnum.NL]: "Je hebt niet de benodigde rechten om dit commando uit te voeren",
+            },
         },
         handleNever: (uniqueCase: string, origin: string) => new MultiLingualString({
             [LanguageEnum.EN]: "Unhandled case {uniqueCase} in {origin}",

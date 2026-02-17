@@ -35,6 +35,7 @@ const optionsConfig = [
                     },
                     emptyReply: new MultiLingualString(i18n.commands.games.labels.noActiveGames)
                 }],
+                permissions: [Permission.ADMINISTRATOR],
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
                     const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
@@ -92,6 +93,7 @@ const optionsConfig = [
                         return createGamesSelectMenu(GameService.getGames());
                     }
                 }],
+                permissions: [Permission.ADMINISTRATOR],
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const gameTypeEnum = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)) as GameTypeEnum;
                     const gameModule = GameService.getGameByType(gameTypeEnum);
@@ -146,7 +148,6 @@ export class GamesCommand implements Command {
     description = new MultiLingualString(i18n.commands.games.description);
     isSlashCommand = true;
     isMessageCommand = false;
-    permissions = [Permission.ADMINISTRATOR];
     options = optionsConfig;
 
     async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {

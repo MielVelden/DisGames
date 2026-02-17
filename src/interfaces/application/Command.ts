@@ -30,6 +30,7 @@ export interface CommandOptionConfig<T extends string | number> {
 export interface CommandOptionChoiceConfig<T extends string | number> {
     enumValue: T;
     followUps?: CommandOptionFollowUpConfig<string>[];
+    permissions?: Permission[];
     validate?: (event: SlashCommandInteractionEvent) => Promise<boolean>;
     handler?: (event: SlashCommandInteractionEvent) => Promise<void>;
 }

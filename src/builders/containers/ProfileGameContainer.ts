@@ -1,7 +1,7 @@
 import { Component, ComponentType, Container } from "../../interfaces/application/Message";
 import { ProfileGameView } from "../../interfaces/view";
 import MediaService from "../../services/application/MediaService";
-import { createInformationBlock } from "../../utils/helpers/Markdown";
+import { createBlock, createInformationBlock } from "../../utils/helpers/Markdown";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
@@ -38,7 +38,7 @@ export function createProfileGameContainer(gameProfile: ProfileGameView): Compon
 
 function createGameProfileText(gameProfile: ProfileGameView): MultiLingualString {
     if(gameProfile.gamePoints === 0)
-        return new MultiLingualString(i18n.commands.profile.labels.notRanked);
+        return createBlock(new MultiLingualString(i18n.commands.profile.labels.notRanked));
 
     const items: { key: MultiLingualString; value: string }[] = [];
     if (gameProfile.username !== undefined)
