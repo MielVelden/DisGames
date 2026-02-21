@@ -39,6 +39,15 @@ export class SchemaUtils {
       .join('');
   }
 
+  static convertToPascalCaseEnumName(procedureName: string): string {
+    const words = procedureName
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .split('_')
+      .flatMap(part => part.split(/(?=[A-Z])/).filter(Boolean));
+    if (words.length === 0) return procedureName;
+    return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+  }
+
   static mapMySQLTypeToTypescript(columnName: string, mysqlType: string, enumMapping: Record<string, string>, tableName?: string): string {
     const lowercaseName = columnName.toLowerCase();
 

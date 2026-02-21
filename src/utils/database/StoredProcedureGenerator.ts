@@ -27,7 +27,7 @@ export class StoredProcedureGenerator {
 
     procedures.forEach((routine: any, index: number) => {
       const routineName = routine.ROUTINE_NAME;
-      const enumName = SchemaUtils.convertToEnumName(routineName);
+      const enumName = SchemaUtils.convertToPascalCaseEnumName(routineName);
       spEnumContent += `  ${enumName} = "${routineName}"`;
       if (index < procedures.length - 1) spEnumContent += ',';
       spEnumContent += '\n';
@@ -41,7 +41,7 @@ export class StoredProcedureGenerator {
 
     functions.forEach((routine: any, index: number) => {
       const routineName = routine.ROUTINE_NAME;
-      const enumName = SchemaUtils.convertToEnumName(routineName);
+      const enumName = SchemaUtils.convertToPascalCaseEnumName(routineName);
       fnEnumContent += `  ${enumName} = "${routineName}"`;
       if (index < functions.length - 1) fnEnumContent += ',';
       fnEnumContent += '\n';

@@ -1,7 +1,9 @@
 import { User } from "../../interfaces/domain";
 import { ChartEnum, ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";
 import { ChartDefinition } from "../../interfaces/application/Chart";
-import { assertNever } from "../../utils/application/Error";
+import { assertNever, ErrorHelper } from "../../utils/application/Error";
+import { RepositoryUtils } from "../../repositories/BaseRepository";
+import { ExceptionEnum, StoredProcedureEnum } from "../../interfaces/enums";
 
 class ChartService {
     public async getChartAsync(chartEnum: ChartTypeEnum, identity: User): Promise<ChartDefinition> {
@@ -12,10 +14,72 @@ class ChartService {
                 return this.getPieChartUserDeviceTypeAsync(identity);
             case ChartTypeEnum.LineChart_Server_NewServer:
                 return this.getLineChartServerNewServerAsync(identity);
+            case ChartTypeEnum.BarChart_Events_EventsByType:
+                return this.getBarChartEventsEventsByTypeAsync(identity);
+            case ChartTypeEnum.BarChart_Events_ActivityOverTime:
+                return this.getBarChartEventsActivityOverTimeAsync(identity);
+            case ChartTypeEnum.BarChart_Events_EventsPerHour:
+                return this.getBarChartEventsEventsPerHourAsync(identity);
             default:
                 assertNever(chartEnum, ChartTypeEnum);
         }
     }
+
+    // #region Bar Charts
+
+    private async getBarChartEventsEventsByTypeAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [null]);
+
+        return {
+            title: "Events by Type",
+            type: ChartEnum.Bar,
+            ...chartData,
+        };
+    }
+
+    private async getBarChartEventsActivityOverTimeAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsActivityOverTime, [null, 30]);
+
+        return {
+            title: "Activity over time",
+            type: ChartEnum.Bar,
+            ...chartData,
+        };
+    }
+
+    private async getBarChartEventsEventsPerHourAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsPerHour, [null, 7]);
+
+        return {
+            title: "Events per hour",
+            type: ChartEnum.Bar,
+            ...chartData,
+        };
+    }
+
+    // #endregion
+
+    // #region Helper Methods
+
+    private async getChartData(storedProcedureEnum: StoredProcedureEnum, params: any[]): Promise<Pick<ChartDefinition, 'data' | 'xAxisKey' | 'valueKeys'>> {
+        const chartData = await RepositoryUtils.CallStoredProcedureGeneric(storedProcedureEnum, params) ;
+        if (!chartData)
+            ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+
+        const chart = chartData?.[0]?.ChartDefinition as Partial<ChartDefinition>;
+        if(!chart.data || !chart.valueKeys || !chart.xAxisKey)
+            ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+
+        return {
+            data: chart.data,
+            xAxisKey: chart.xAxisKey,
+            valueKeys: chart.valueKeys,
+        };
+    }
+
+    // #endregion
+    
+    // #region TODO: CLEANUP OLD CHARTS
 
     private async getLineChartUserNewUserAsync(identity: User): Promise<ChartDefinition> {
         const chartData = [
@@ -150,6 +214,8 @@ class ChartService {
             type: ChartEnum.Line,
         };
     }
+
+    // #endregion
 }
 
 export default new ChartService();

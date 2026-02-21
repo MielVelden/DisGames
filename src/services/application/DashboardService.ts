@@ -21,6 +21,8 @@ class DashboardService {
                 return this.getUsersDashboardAsync(identity);
             case DashboardEnum.SERVERS:
                 return this.getServersDashboardAsync(identity);
+            case DashboardEnum.ANALYTICS:
+                return this.getAnalyticsDashboardAsync(identity);
             default:
                 assertNever(dashboardEnum, DashboardEnum)
         }
@@ -154,6 +156,48 @@ class DashboardService {
         }
     }
 
+    private async getAnalyticsDashboardAsync(identity: User): Promise<DashboardView> {
+        const timeFrame = calculateDuration(7, DurationEnum.DAY);
+        const servers = await ServerRepository.getAllAsync();
+        const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
+        const members = await ServerService.getTotalMembersAsync();
+
+        const barChartEventsByType = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsByType, identity);
+        const barChartActivityOverTime = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_ActivityOverTime, identity);
+        const barChartEventsPerHour = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsPerHour, identity);
+
+        return {
+            cards: [
+                this.createDashboardCard(
+                    "Total Servers",
+                    servers.length,
+                    "up",
+                    {
+                        primaryText: "Server base is growing",
+                        secondaryText: "Consistent increase in servers"
+                    }
+                ),
+                this.createDashboardCardWithTimeframe(
+                    "New Servers2",
+                    serversTimeFrame
+                ),
+                this.createDashboardCard(
+                    "Total Members",
+                    members,
+                    "up",
+                    {
+                        primaryText: "Member base is growing",
+                        secondaryText: "Consistent increase in members"
+                    }
+                )
+            ],
+            charts: [
+                barChartEventsByType,
+                barChartActivityOverTime,
+                barChartEventsPerHour
+            ]
+        }
+    }
 }
 
 export default new DashboardService();

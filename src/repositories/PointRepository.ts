@@ -47,7 +47,7 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
     }
 
     async getUserProfileAsync(userId: string): Promise<ProfileView> {
-        const model = await RepositoryUtils.CallStoredProcedureGeneric(StoredProcedureEnum.Getuserprofile, [userId]);
+        const model = await RepositoryUtils.CallStoredProcedureGeneric(StoredProcedureEnum.GetUserProfile, [userId]);
         return model[0] as ProfileView;
     }
 

@@ -14,7 +14,7 @@ export async function formatEmbedFieldValueAsync(value: unknown, table?: TableEn
 
     const str = String(value);
     if (table) {
-        const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.Getdisplayname, [table, value]);
+        const result = await RepositoryUtils.CallFunctionGeneric(FunctionEnum.GetDisplayName, [table, value]);
         return `${result} (${str})`;
     }
 
