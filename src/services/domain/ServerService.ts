@@ -1,9 +1,8 @@
-import { InteractionEvent } from "../../interfaces/application";
-import { ServersModel, ServersSaveModel } from "../../interfaces/database/TableInterfaces";
-import { ExceptionEnum } from "../../interfaces/enums";
+import { TimelineEvent } from "../../interfaces/application/Event";
+import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../../interfaces/database/TableInterfaces";
 import ServerRepository from "../../repositories/ServerRepository";
-import { ErrorHelper } from "../../utils/application/Error";
 import Logger from "../../utils/application/Logger";
+import { DEFAULT_LANGUAGE } from "../../utils/i18n/MultiLingualString";
 import { BaseDomainService } from "./BaseDomainService";
 import TimelineBuilder from "./TimelineBuilder";
 
@@ -24,8 +23,13 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
         return await this.repository.saveAsync(server);
     }
 
-    protected async performSaveAsync(savable: ServersSaveModel, event: InteractionEvent): Promise<ServersModel> {
-        const server = await this.repository.saveAsync(savable);
+    protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
+        savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
+        savable.validateIsNotNull(ServersModelFieldEnum.Points, 0);
+       
+        const server = await this.repository.saveAsync(savable);      
+        
+        event.server = server;
         await TimelineBuilder.forServerUpdateAsync({
             old: null,
             new: server,

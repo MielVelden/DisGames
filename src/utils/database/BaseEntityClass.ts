@@ -2,7 +2,7 @@ import { BaseEntity } from '../../interfaces/database/BaseEntity';
 import { ExceptionEnum, TableEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../application/Error';
 import { getEnumProperty } from '../helpers/EnumMetadata';
-import { EnumValue, MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
+import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
 
 type EnumValues<T> = T[keyof T];
 
@@ -49,14 +49,34 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
     return (this as any)[fieldName];
   }
 
-  validateIsNull(field: EnumValues<FieldEnum>): void {
+  private setFieldValue(field: EnumValues<FieldEnum>, value: any): void {
+    const fieldEnum = (this.constructor as typeof BaseEntityClass).fieldEnum;
+    if (!fieldEnum)
+      ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+
+    const fieldName = String(field);
+    if (!Object.values(fieldEnum).includes(fieldName))
+      ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
+
+    (this as any)[fieldName] = value;
+  }
+
+  validateIsNull(field: EnumValues<FieldEnum>, defaultValue?: any): void {
     const value = this.getFieldValue(field);
+
+    if (defaultValue !== null && defaultValue !== undefined)
+      return this.setFieldValue(field, defaultValue);
+
     if (value !== null && value !== undefined)
       ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
   }
 
-  validateIsNotNull(field: EnumValues<FieldEnum>): void {
+  validateIsNotNull(field: EnumValues<FieldEnum>, defaultValue?: any): void {
     const value = this.getFieldValue(field);
+
+    if (defaultValue !== null && defaultValue !== undefined)
+      return this.setFieldValue(field, defaultValue);
+
     if (value === null || value === undefined)
       ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
   }

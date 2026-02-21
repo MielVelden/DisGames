@@ -45,6 +45,16 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.EN]: "You don't have the required permissions to execute this command",
                 [LanguageEnum.NL]: "Je hebt niet de benodigde rechten om dit commando uit te voeren",
             },
+            welcome: {
+                title: {
+                    [LanguageEnum.EN]: "👋 Hi, I'm DisGames!",
+                    [LanguageEnum.NL]: "👋 Hallo, ik ben DisGames!",
+                },
+                message: {
+                    [LanguageEnum.EN]: "Step into a world of endless fun and excitement with DisGames, the ultimate minigame bot for Discord!\n\n Are you ready to keep your server members engaged and entertained like never before? Look no further. With me (DisGames), you'll dive into a collection of unique and captivating minigames carefully designed to bring your community together. From brain-teasing puzzles to thrilling action challenges, I have it all.\n\nElevate your server with DisGames today and redefine the way you connect and have fun!",
+                    [LanguageEnum.NL]: "Stap in een wereld van eindeloos plezier en spanning met DisGames, de ultieme minigame-bot voor Discord!\n\n Ben je klaar om je serverleden als nooit tevoren bezig en vermaakt te houden? Zoek niet verder. Met mij (DisGames) duik je in een verzameling unieke en boeiende minigames die zorgvuldig zijn ontworpen om je community samen te brengen. Van hersenkrakende puzzels tot spannende actie-uitdagingen, ik heb het allemaal.\n\n Til je server vandaag nog naar een hoger niveau met DisGames en geef een nieuwe invulling aan de manier waarop je contact maakt en plezier hebt!",
+                },
+            },
         },
         handleNever: (uniqueCase: string, origin: string) => new MultiLingualString({
             [LanguageEnum.EN]: "Unhandled case {uniqueCase} in {origin}",

@@ -6,7 +6,7 @@ import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/M
 import { i18n } from "../../utils/i18n/i18n";
 
 export function createProfileContainer(profile: ProfileView): Component {
-    const profileContainerImage = MediaService.getProfileContainerImage();
+    const profileContainerImage = MediaService.getBaseImage('profile');
 
     return {
         type: ComponentType.CONTAINER,

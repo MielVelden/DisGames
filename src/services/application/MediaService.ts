@@ -11,7 +11,7 @@ class MediaService {
 
     constructor() {
         this.imagesPath = path.join(process.cwd(), 'images');
-        this.notFoundImage = { 
+        this.notFoundImage = {
             url: path.join(this.imagesPath, 'NotFound.png'),
             name: 'NotFound',
             type: MediaType.PNG
@@ -133,18 +133,18 @@ class MediaService {
         }
     }
 
-    public getProfileContainerImage(): Media {
-        const profileContainerImagePath = path.join(this.imagesPath, `profile.${MediaType.PNG}`);
+    public getBaseImage(name: 'welcome' | 'profile'): Media {
+        const baseImagePath = path.join(this.imagesPath, `${name}.${MediaType.PNG}`);
 
-        if (fs.existsSync(profileContainerImagePath)) {
+        if (fs.existsSync(baseImagePath)) {
             return {
-                url: profileContainerImagePath,
-                name: 'profile',
+                url: baseImagePath,
+                name: name,
                 type: MediaType.PNG
             };
         }
 
-        Logger.logDebug(`Profile image not found: ${profileContainerImagePath}, using NotFound.png`);
+        Logger.logDebug(`Base image not found: ${baseImagePath}, using NotFound.png`);
         return this.notFoundImage;
     }
 }

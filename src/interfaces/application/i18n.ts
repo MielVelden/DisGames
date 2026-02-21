@@ -60,6 +60,10 @@ export interface I18nTranslations {
             delete: LanguageTranslations;
             askQuestion: LanguageTranslations;
             notEnoughPermissions: LanguageTranslations;
+            welcome: {
+                title: LanguageTranslations;
+                message: LanguageTranslations;
+            }
         },
         handleNever: (uniqueCase: string, origin: string) => MultiLingualString;
     },

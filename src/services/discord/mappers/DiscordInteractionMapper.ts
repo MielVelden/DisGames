@@ -8,9 +8,9 @@ import {
 } from 'discord.js';
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
-import { ServersModel, ServersSaveModel, UsersSaveModel } from '../../../interfaces/database/TableInterfaces';
-import ServerService from '../../domain/ServerService';
+import { ServersModel, UsersSaveModel } from '../../../interfaces/database/TableInterfaces';
 import { getCommandConfig } from '../../../utils/collectors/CommandCollector';
+import { getOrCreateServerAsync, getTempServer } from './DiscordServerMapper';
 import {
     SlashCommandDiscordEvent,
     MessageDiscordEvent,
@@ -20,7 +20,7 @@ import {
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
 import UserService from '../../domain/UserService';
-import { EventTypeEnum, ExceptionEnum, isMessageEventType, LanguageEnum } from '../../../interfaces/enums';
+import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../../interfaces/enums';
 import { ErrorHelper } from '../../../utils/application/Error';
 
 class DiscordInteractionMapper {
@@ -41,7 +41,7 @@ class DiscordInteractionMapper {
             const tempEvent = new SlashCommandDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
-                await this.getTempServer(interaction.guild as DiscordServer),
+                getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -64,7 +64,7 @@ class DiscordInteractionMapper {
             const tempEvent = new ButtonDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
-                await this.getTempServer(interaction.guild as DiscordServer),
+                getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -87,7 +87,7 @@ class DiscordInteractionMapper {
             const tempEvent = new SelectMenuDiscordEvent(
                 interaction as DiscordStringSelectMenuInteraction,
                 this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
-                this.getTempServer(interaction.guild as DiscordServer),
+                getTempServer(interaction.guild as DiscordServer),
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
@@ -124,7 +124,7 @@ class DiscordInteractionMapper {
         const tempEvent = new MessageDiscordEvent(
             message,
             this.getTempUser(message.author, message.member as DiscordGuildMember),
-            this.getTempServer(message.guild as DiscordServer),
+            getTempServer(message.guild as DiscordServer),
             message.channelId,
             message.guildId!,
             message.id,
@@ -189,32 +189,8 @@ class DiscordInteractionMapper {
     }
 
 
-    private getTempServer(discordServer: DiscordServer): ServersModel {
-        return new ServersModel({
-            Id: 0,
-            ServerId: discordServer.id,
-            Name: discordServer.name,
-            Points: 0,
-            LanguageEnum: LanguageEnum.EN,
-        });
-    }
-
     private async mapDiscordServerToServerAsync(discordServer: DiscordServer, event: InteractionEvent): Promise<ServersModel> {
-        let server = await ServerService.getByExternalIdAsync(discordServer.id).catch(() => undefined);
-        if (!server)
-            server = await ServerService.saveAsync(new ServersSaveModel({
-                ServerId: discordServer.id,
-                Name: discordServer.name,
-            }), event);
-
-        // Update the server name if it has changed
-        if (discordServer.name !== server.Name)
-            await ServerService.updateNameAsync(discordServer.id, discordServer.name);
-
-        if (discordServer.memberCount !== server.MemberCount && discordServer.memberCount !== undefined)
-            await ServerService.updateMemberCountAsync(discordServer.id, discordServer.memberCount);
-
-        return server;
+        return getOrCreateServerAsync(discordServer, event);
     }
 }
 

@@ -1,4 +1,5 @@
 import {
+    Guild as DiscordGuild,
     Interaction as DiscordInteraction,
     ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
     ButtonInteraction as DiscordButtonInteraction,
@@ -17,7 +18,7 @@ import {
 } from 'discord.js';
 import { SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
+import { InteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
 import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
@@ -27,8 +28,10 @@ import { ErrorHelper } from '../../utils/application/Error';
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';
 import DiscordComponentMapper from './mappers/DiscordComponentMapper';
+import DiscordGuildMapper from './mappers/DiscordGuildMapper';
 import DiscordInteractionMapper from './mappers/DiscordInteractionMapper';
 import DiscordMessageHandler from './handlers/DiscordMessageHandler';
+import { createWelcomeContainer } from '../../builders/containers/WelcomeContainer';
 
 export type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 export type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
@@ -61,6 +64,14 @@ class DiscordService {
     // Interaction Mapping
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
         return await DiscordInteractionMapper.mapInteractionToInteractionEventAsync(interaction);
+    }
+
+    public async handleGuildCreateAsync(guild: DiscordGuild): Promise<void> {
+        const event = await DiscordGuildMapper.mapGuildToGuildCreateEventAsync(guild);
+        if (event.systemChannelId) {
+            const components = createWelcomeContainer();
+            await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server.LanguageEnum);
+        }
     }
 
     public async mapMessageToInteractionEventAsync(message: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {

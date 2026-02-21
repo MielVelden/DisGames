@@ -4,6 +4,7 @@ import { ServersModel, TimelineEntriesSaveModel } from "../database/TableInterfa
 import {
     ButtonInteraction as DiscordButtonInteraction,
     ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
+    Guild as DiscordGuild,
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from "discord.js";
@@ -12,6 +13,20 @@ import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
 import { EventTypeEnum } from "../enums";
+
+export interface TimelineEvent {
+    user: User;
+    server: ServersModel;
+    timelineEntries: TimelineEntriesSaveModel[];
+    addTimelineEntry(entry: TimelineEntriesSaveModel): void;
+    commitTimelineAsync(): Promise<void>;
+}
+
+export interface GuildCreateEvent {
+    guild: DiscordGuild;
+    server: ServersModel;
+    systemChannelId: string | null;
+}
 
 export interface BaseInteractionEvent {
     customId: string;

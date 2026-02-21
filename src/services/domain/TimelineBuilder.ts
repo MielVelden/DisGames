@@ -2,7 +2,7 @@ import { ExceptionEnum, TableEnum, TimelineTypeEnum } from "../../interfaces/enu
 import { TimelineChanges } from "../../interfaces/domain/Timeline";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import { TimelineEntriesSaveModel } from "../../interfaces/database";
-import { InteractionEvent } from "../../interfaces/application/Event";
+import { TimelineEvent } from "../../interfaces/application/Event";
 import UserRepository from "../../repositories/UserRepository";
 import ServerRepository from "../../repositories/ServerRepository";
 import GameRepository from "../../repositories/GameRepository";
@@ -12,7 +12,7 @@ import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyE
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
 
 interface TimelineContext {
-   event: InteractionEvent;
+   event: TimelineEvent;
    old: any;
    new: any;
    objectId: number;

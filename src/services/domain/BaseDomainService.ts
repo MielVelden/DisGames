@@ -1,4 +1,4 @@
-import { InteractionEvent } from "../../interfaces/application";
+import { TimelineEvent } from "../../interfaces/application/Event";
 import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { ErrorHelper } from "../../utils/application/Error";
 import { Repository, RepositoryWithBase } from "../../interfaces/database/Repository";
@@ -42,15 +42,15 @@ export abstract class BaseDomainService<T extends BaseEntity & { getId(): number
 
     public abstract getAllAsync(): Promise<T[]>;
 
-    protected abstract performSaveAsync(savable: S, event: InteractionEvent): Promise<T>;
+    protected abstract performSaveAsync(savable: S, event: TimelineEvent): Promise<T>;
 
-    protected async beforeSaveAsync?(savable: S, event: InteractionEvent): Promise<void> {
+    protected async beforeSaveAsync?(savable: S, event: TimelineEvent): Promise<void> {
     }
 
-    protected async afterSaveAsync?(result: T, event: InteractionEvent): Promise<void> {
+    protected async afterSaveAsync?(result: T, event: TimelineEvent): Promise<void> {
     }
 
-    public async saveAsync(savable: S, event: InteractionEvent): Promise<T> {
+    public async saveAsync(savable: S, event: TimelineEvent): Promise<T> {
         ErrorHelper.throwIfNull(savable, ExceptionEnum.INVALID_ARGUMENT);
         ErrorHelper.throwIfNull(event, ExceptionEnum.INVALID_ARGUMENT);
 

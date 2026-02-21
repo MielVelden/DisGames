@@ -1,10 +1,11 @@
 import {
+    Guild as DiscordGuild,
     User as DiscordUser,
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
     ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction
 } from 'discord.js';
-import { InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent, isSlashCommandInteractionEvent } from '../../../interfaces/application/Event';
+import { BaseInteractionEvent, InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
 import {
     Component
@@ -18,6 +19,7 @@ import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordServ
 import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
 import { createDenyButton } from '../../../builders/buttons/DenyButton';
 import { EventTypeEnum, ExceptionEnum } from '../../../interfaces/enums';
+import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
 import { ErrorHelper } from '../../../utils/application/Error';
 
 class DiscordMessageHandler {
@@ -309,6 +311,21 @@ class DiscordMessageHandler {
             ErrorHelper.throw(ExceptionEnum.DISCORD_CHANNEL_NOT_FOUND);
 
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
+        if (!content)
+            return;
+
+        await channel.send(content);
+    }
+
+    public async sendToGuildChannelAsync(guild: DiscordGuild, channelId: string, components: Component[], language: LanguageEnum): Promise<void> {
+        const channel = await guild.channels.fetch(channelId).catch(() => null);
+        if (!channel || !channel.isTextBased())
+            return;
+
+        // TODO: Add actual event
+        const minimalEvent = { server: { LanguageEnum: language } } as BaseInteractionEvent;
+
+        const content = await DiscordComponentMapper.buildMessageContentAsync(minimalEvent, components);
         if (!content)
             return;
 

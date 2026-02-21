@@ -10,7 +10,7 @@ import {
     AttachmentBuilder
 } from 'discord.js';
 import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
-import { InteractionEvent } from '../../../interfaces/application/Event';
+import { BaseInteractionEvent, InteractionEvent } from '../../../interfaces/application/Event';
 import { ActionButton, ComponentType, Container, Content, Footer, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
@@ -386,7 +386,7 @@ class DiscordComponentMapper {
     }
     // #endregion
 
-    public async buildMessageContentAsync(event: InteractionEvent, components: Component[], message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
+    public async buildMessageContentAsync(event: BaseInteractionEvent, components: Component[], message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
         return withEventContextAsync(event, async () => {
             if(message) {
                 if(typeof message === 'string')

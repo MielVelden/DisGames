@@ -119,20 +119,30 @@ class ComponentService {
         ];
     }
     
-    public createImage(image: Media): Container {
-        return {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.MEDIA_GALLERY,
-                    items: [
-                        {
-                            media: image
-                        }
-                    ]
-                },
-            ]
-        } as Container;
+    public createImage(image: Media, includeContainer: boolean = true): Component {
+        if (includeContainer)
+            return {
+                type: ComponentType.CONTAINER,
+                components: [
+                    {
+                        type: ComponentType.MEDIA_GALLERY,
+                        items: [
+                            {
+                                media: image
+                            }
+                        ]
+                    },
+                ]
+            } as Container;
+        else
+            return {
+                type: ComponentType.MEDIA_GALLERY,
+                items: [
+                    {
+                        media: image
+                    }
+                ]
+            } as Component;
     }
 }
 
