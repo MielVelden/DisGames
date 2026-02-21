@@ -112,6 +112,7 @@ export interface DebugSaveModel {
 export class DebugSaveModel extends BaseEntityClass<DebugModelFieldEnum> implements DebugSaveModel {
   protected static fieldEnum = DebugModelFieldEnum;
   protected static tableEnum = enums.TableEnum.DEBUG;
+  protected static fieldToPropertyMap: Record<string, string> = { Data: "DataJSON" };
 
   CreatedAt?: Date;
   DataJSON?: Debug_Data;
@@ -181,6 +182,7 @@ export interface EventsSaveModel {
 export class EventsSaveModel extends BaseEntityClass<EventsModelFieldEnum> implements EventsSaveModel {
   protected static fieldEnum = EventsModelFieldEnum;
   protected static tableEnum = enums.TableEnum.EVENTS;
+  protected static fieldToPropertyMap: Record<string, string> = { Payload: "PayloadJSON" };
 
   CreatedAt?: Date;
   EventTypeEnum?: enums.EventTypeEnum;
@@ -346,6 +348,7 @@ export interface GamesSaveModel {
 export class GamesSaveModel extends BaseEntityClass<GamesModelFieldEnum> implements GamesSaveModel {
   protected static fieldEnum = GamesModelFieldEnum;
   protected static tableEnum = enums.TableEnum.GAMES;
+  protected static fieldToPropertyMap: Record<string, string> = { Settings: "SettingsJSON" };
 
   Answer?: string;
   ChannelId?: string;
@@ -366,18 +369,6 @@ export class GamesSaveModel extends BaseEntityClass<GamesModelFieldEnum> impleme
     if (data.ServerId !== undefined) this.ServerId = data.ServerId;
     if (data.SettingsJSON !== undefined) this.SettingsJSON = data.SettingsJSON;
   }
-}
-
-export interface GamesXDatasheetsModel {
-  DatasheetId: number;
-  GameId: number;
-  Id: number;
-}
-
-export enum GamesXDatasheetsModelFieldEnum {
-  DatasheetId = "DatasheetId",
-  GameId = "GameId",
-  Id = "Id"
 }
 
 export interface LanguageModel {
@@ -432,6 +423,7 @@ export interface MetricsSaveModel {
 export class MetricsSaveModel extends BaseEntityClass<MetricsModelFieldEnum> implements MetricsSaveModel {
   protected static fieldEnum = MetricsModelFieldEnum;
   protected static tableEnum = enums.TableEnum.METRICS;
+  protected static fieldToPropertyMap: Record<string, string> = { Metrics: "MetricsJSON" };
 
   Date?: Date;
   MetricsJSON?: Metrics_Metrics;
@@ -660,6 +652,7 @@ export interface TimelineEntriesSaveModel {
 export class TimelineEntriesSaveModel extends BaseEntityClass<TimelineEntriesModelFieldEnum> implements TimelineEntriesSaveModel {
   protected static fieldEnum = TimelineEntriesModelFieldEnum;
   protected static tableEnum = enums.TableEnum.TIMELINE_ENTRIES;
+  protected static fieldToPropertyMap: Record<string, string> = { Changes: "ChangesJSON" };
 
   ChangesJSON?: TimelineEntries_Changes;
   CreatedAt?: Date;

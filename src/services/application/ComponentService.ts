@@ -4,10 +4,11 @@ import { Media } from "../../interfaces/application/Media";
 import { ActionButton, Component, ComponentType, Container, ContainerBuilder, SelectMenu, TextDisplay } from "../../interfaces/application/Message";
 import { EventTypeEnum, GameTypeEnum } from "../../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { EventService } from "./EventService";
 import MediaService from "./MediaService";
 import Logger from "../../utils/application/Logger";
+import { toonEncode } from "../../utils/helpers/Toon";
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
@@ -90,7 +91,7 @@ class ComponentService {
         ];
     }
 
-    public createStartMessageAsync(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component[] {
+    public createStartMessage(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component[] {
         const gameImage = MediaService.getGameImage(gameTypeEnum);
 
         return [
@@ -143,6 +144,13 @@ class ComponentService {
                     }
                 ]
             } as Component;
+    }
+
+    public createDataDisplay(data: object): Component {
+        return {
+            type: ComponentType.TEXT_DISPLAY,
+            content: createMultiLingualString(toonEncode(data))
+        } as TextDisplay;
     }
 }
 

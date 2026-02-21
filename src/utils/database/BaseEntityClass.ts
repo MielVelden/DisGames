@@ -9,6 +9,7 @@ type EnumValues<T> = T[keyof T];
 export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implements BaseEntity {
   Id?: number;
   protected static fieldEnum: Record<string, string> | undefined;
+  protected static fieldToPropertyMap?: Record<string, string>;
   protected static tableEnum: TableEnum;
 
   constructor(data: BaseEntity) {
@@ -46,7 +47,9 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
     if (!Object.values(fieldEnum).includes(fieldName))
       ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
-    return (this as any)[fieldName];
+    const fieldToPropertyMap = (this.constructor as typeof BaseEntityClass).fieldToPropertyMap;
+    const propertyName = fieldToPropertyMap?.[fieldName] ?? fieldName;
+    return (this as any)[propertyName];
   }
 
   private setFieldValue(field: EnumValues<FieldEnum>, value: any): void {
@@ -58,7 +61,9 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
     if (!Object.values(fieldEnum).includes(fieldName))
       ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
-    (this as any)[fieldName] = value;
+    const fieldToPropertyMap = (this.constructor as typeof BaseEntityClass).fieldToPropertyMap;
+    const propertyName = fieldToPropertyMap?.[fieldName] ?? fieldName;
+    (this as any)[propertyName] = value;
   }
 
   validateIsNull(field: EnumValues<FieldEnum>, defaultValue?: any): void {

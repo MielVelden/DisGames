@@ -28,32 +28,37 @@ export class DebugCommand implements Command {
         // Handle debug record command
         const debugRecord = await DebugService.getByExternalIdAsync(uniqueCode);
 
-        if (!debugRecord || debugRecord.UpdatedAt === null)
+        if (!debugRecord || debugRecord.UpdatedAt !== null)
             return;
 
         // Collect data from the server
         debugRecord.ServerId = event.server.Id;
 
         const games = await GameRepository.getByServerIdAsync(event.server.ServerId);
-        debugRecord.Data = {
-            games: games.map(game => ({
-                id: game.Id,
-                name: game.GameTypeEnum,
-                channelId: game.ChannelId,
-                serverId: game.ServerId,
-                answer: typeof game.Answer === 'string' && game.Answer.length > 50
-                    ? game.Answer.slice(0, 50) + '…'
-                    : game.Answer,
-                settings: game.Settings
-            }))
-        };
+        const savable = new DebugSaveModel({
+            Id: debugRecord.Id,
+            ServerId: event.server.Id,
+            DataJSON: {
+                serverId: event.server.ServerId,
+                userId: event.user.userId,
+                channelId: event.channelId,
+                games: games.map(game => ({
+                    id: game.Id,
+                    name: game.GameTypeEnum,
+                    channelId: game.ChannelId,
+                    serverId: game.ServerId,
+                    answer: typeof game.Answer === 'string' && game.Answer.length > 50,
+                    settings: game.Settings
+                }))
+            }
+        });
 
         // Save debug record
-        await DebugService.saveAsync(debugRecord, event);
+        const entity = await DebugService.saveAsync(savable, event);
 
         // Create a new debug record
         const newDebugEvent = await DebugService.saveAsync(new DebugSaveModel({}), event);
-        await Logger.logDebugCommand(debugRecord, newDebugEvent.UniqueCode, { webhookType: WebhookType.DEBUG, sendToDiscord: true });
+        await Logger.logDebugCommand(entity, newDebugEvent.UniqueCode, { webhookType: WebhookType.DEBUG, sendToDiscord: true });
         await event.replyAsync(new MultiLingualString(i18n.commands.debug.labels.thanks));
     }
 }

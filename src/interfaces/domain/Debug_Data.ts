@@ -2,6 +2,9 @@ import { GameTypeEnum } from "../enums";
 import { Games_Settings } from "./GameSettings";
 
 export interface Debug_Data {
+    serverId: string;
+    userId: string;
+    channelId: string;
     games: {
         id: number;
         name: GameTypeEnum;

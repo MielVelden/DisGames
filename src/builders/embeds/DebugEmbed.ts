@@ -4,10 +4,11 @@ import { LogLevel, loggerColors, loggerEmojis } from "../../utils/application/Lo
 import { i18n } from "../../utils/i18n/i18n";
 import { EmbedConfig } from "../../interfaces/application/DiscordEmbed";
 import { formatEmbedFieldValueAsync } from "../../utils/helpers/Embed";
+import { toonEncode } from "../../utils/helpers/Toon";
 
 export async function createDebugEmbed(debugModel: DebugModel): Promise<EmbedConfig> {
-    const dataJson = JSON.stringify(debugModel.Data ?? {}, null, 2);
-    const clipped = dataJson.length > 1000 ? dataJson.slice(0, 1000) + '…' : dataJson;
+    const dataToon = toonEncode(debugModel.Data ?? {});
+    const clipped = dataToon.length > 1000 ? dataToon.slice(0, 1000) + '…' : dataToon;
 
     return {
         title: `${loggerEmojis[LogLevel.DEBUG]} ${LogLevel.DEBUG.toUpperCase()}`,

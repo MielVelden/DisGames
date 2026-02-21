@@ -6,8 +6,6 @@ import { InterfaceImportManager } from './InterfaceImportManager';
 import Logger from '../application/Logger';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { getEnumValue } from '../helpers/Enum';
-import { ExceptionEnum } from '../../interfaces/enums/application/ExpectionEnum';
-import { ErrorHelper } from '../application/Error';
 
 export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;
@@ -161,7 +159,21 @@ export class TableInterfaceGenerator {
       const saveModelInterfaceName = `${SchemaUtils.capitalize(tableName)}${this.saveSuffix}`;
       interfaceContent += `export class ${saveModelClassName} extends BaseEntityClass<${fieldEnumName}> implements ${saveModelInterfaceName} {\n`;
       interfaceContent += `  protected static fieldEnum = ${fieldEnumName};\n`;
-      interfaceContent += `  protected static tableEnum = enums.TableEnum.${tableEnumEnum};\n\n`;
+      interfaceContent += `  protected static tableEnum = enums.TableEnum.${tableEnumEnum};\n`;
+
+      const fieldToPropertyEntries: string[] = [];
+      filteredColumns.forEach((column: any) => {
+        const logicalName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
+        const propertyName = SchemaUtils.isJsonField(column.COLUMN_NAME)
+          ? column.COLUMN_NAME
+          : logicalName;
+        if (logicalName !== propertyName)
+          fieldToPropertyEntries.push(`${logicalName}: "${propertyName}"`);
+      });
+      if (fieldToPropertyEntries.length > 0) {
+        interfaceContent += `  protected static fieldToPropertyMap: Record<string, string> = { ${fieldToPropertyEntries.join(', ')} };\n`;
+      }
+      interfaceContent += `\n`;
 
       filteredColumns.forEach((column: any) => {
         const columnName = SchemaUtils.isJsonField(column.COLUMN_NAME)
