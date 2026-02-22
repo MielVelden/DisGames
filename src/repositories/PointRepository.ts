@@ -1,7 +1,7 @@
 import { PointsModel, PointsModelFieldEnum, PointsSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository, { RepositoryUtils } from "./BaseRepository";
 import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
-import { ProfileView } from "../interfaces/view";
+import { ProfileResponse } from "../interfaces/view";
 import { runQueryAsync, getTableName } from "./util/ConnectionHandler";
 
 class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel> {
@@ -46,9 +46,9 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
         return model[0];
     }
 
-    async getUserProfileAsync(userId: string): Promise<ProfileView> {
+    async getUserProfileAsync(userId: string): Promise<ProfileResponse> {
         const model = await RepositoryUtils.CallStoredProcedureGeneric(StoredProcedureEnum.GetUserProfile, [userId]);
-        return model[0] as ProfileView;
+        return model[0] as ProfileResponse;
     }
 
     async getGameRankAsync(userId: string, serverId: string, gameId: number): Promise<{ rank: number; total: number }> {

@@ -13,6 +13,7 @@ export enum EnvConfigEnum {
     TEST_ROLLBACK = "TEST_ROLLBACK",
     TEST_DISCORD_WEBHOOK_URL = "TEST_DISCORD_WEBHOOK_URL",
 	DISGAMES_DASHBOARD_API_KEYS = "DISGAMES_DASHBOARD_API_KEYS",
+	DISGAMES_SERVER_ID = "DISGAMES_SERVER_ID",
 }
 
 const configTypeDefaults = {
@@ -30,6 +31,7 @@ const configTypeDefaults = {
     [EnvConfigEnum.TEST_ROLLBACK]: false,
     [EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL]: "",
     [EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS]: "changeme1,changeme2",
+    [EnvConfigEnum.DISGAMES_SERVER_ID]: "",
 } as const satisfies Record<EnvConfigEnum, boolean | number | string | string[]>;
 
 type ConfigTypeDefaults = typeof configTypeDefaults;

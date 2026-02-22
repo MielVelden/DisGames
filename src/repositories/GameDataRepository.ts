@@ -28,6 +28,10 @@ class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSa
         await this.baseRepository.Delete(id);
     }
     
+    async getByDataSheetIdAsync(dataSheetId: number): Promise<GameDataModel[]> {
+        return this.baseRepository.Select().Where({ DataSheetId: dataSheetId }).Execute();
+    }
+
     async getByGameIdAsync(gameId: GameTypeEnum): Promise<GameDataModel[]> {
        const result = await this.baseRepository.Select().Where({ GameId: gameId }).Execute();
        return result;

@@ -1,11 +1,11 @@
 import { Component, ComponentType, Container } from "../../interfaces/application/Message";
-import { ProfileView } from "../../interfaces/view";
+import { ProfileResponse } from "../../interfaces/view";
 import MediaService from "../../services/application/MediaService";
 import { createBlock, createBlockList, createTitle } from "../../utils/helpers/Markdown";
 import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 
-export function createProfileContainer(profile: ProfileView): Component {
+export function createProfileContainer(profile: ProfileResponse): Component {
     const profileContainerImage = MediaService.getBaseImage('profile');
 
     return {

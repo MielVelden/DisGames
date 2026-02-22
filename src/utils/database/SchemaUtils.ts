@@ -23,6 +23,10 @@ export class SchemaUtils {
     return columnName.replace('MLS', '').replace('mls', '');
   }
 
+  static getMultiLingualStringColumnName(logicalName: string): string {
+    return logicalName + 'MLS';
+  }
+
   static isJsonField(columnName: string): boolean {
     return columnName.toLowerCase().endsWith('json');
   }

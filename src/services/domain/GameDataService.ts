@@ -23,6 +23,10 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
         return await this.repository.getRandomDataByGameIdAsync(gameId);
     }
 
+    public async getByDataSheetIdAsync(dataSheetId: number): Promise<GameDataModel[]> {
+        return await this.repository.getByDataSheetIdAsync(dataSheetId);
+    }
+
     public async getByGameIdAsync(gameId: GameTypeEnum): Promise<GameDataModel[]> {
         return await this.repository.getByGameIdAsync(gameId);
     }

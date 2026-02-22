@@ -12,7 +12,9 @@ export class DatabaseHelper {
     
     for (const [key, value] of Object.entries(serialized)) {
       if (isMultiLingualString(value)) {
-        serialized[key] = JSON.stringify(value.toJSON());
+        const dbColumnName = SchemaUtils.getMultiLingualStringColumnName(key);
+        serialized[dbColumnName] = JSON.stringify(value.toJSON());
+        delete serialized[key];
       }
     }
     

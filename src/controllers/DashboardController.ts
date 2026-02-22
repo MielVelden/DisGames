@@ -2,7 +2,7 @@ import { Controller } from "../interfaces/application/Controller";
 import { User } from "../interfaces/domain";
 import { ExceptionEnum } from "../interfaces/enums";
 import { DashboardEnum } from "../interfaces/enums/view/DashboardEnum";
-import { DashboardView } from "../interfaces/view/Dashboard";
+import { DashboardResponse } from "../interfaces/view/Dashboard";
 import DashboardService from "../services/application/DashboardService";
 import { ErrorHelper } from "../utils/application/Error";
 
@@ -15,7 +15,7 @@ class DashboardController implements Controller {
         ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
     }
 
-    async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardView> {
+    async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
         return await DashboardService.getDashboardAsync(dashboardEnum, identity);
     }
 }

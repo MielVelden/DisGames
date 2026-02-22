@@ -1,6 +1,6 @@
 import { GameTypeEnum } from "../enums";
 
-export interface ProfileView {
+export interface ProfileResponse {
     UserId: string;
     Username: string;
     UserRoleEnum: number;
@@ -10,7 +10,7 @@ export interface ProfileView {
     JoinedAt: Date;
 }
 
-export interface ProfileGameView {
+export interface ProfileGameResponse {
     gameType: GameTypeEnum;
     username?: string;
     gamePoints: number;

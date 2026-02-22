@@ -1,6 +1,6 @@
 import { UsersModel, UsersSaveModel } from "../../interfaces/database/TableInterfaces";
 import { UserRoleEnum } from "../../interfaces/enums";
-import { ProfileGameView, ProfileView } from "../../interfaces/view";
+import { ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import Logger from "../../utils/application/Logger";
@@ -39,11 +39,11 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
         return await UserRepository.saveAsync(user);
     }
 
-    public async getUserProfileAsync(userId: string): Promise<ProfileView> {
+    public async getUserProfileAsync(userId: string): Promise<ProfileResponse> {
         return await PointRepository.getUserProfileAsync(userId);
     }
 
-    public async getUserGameProfileAsync(userId: string, serverId: string, gameId: number): Promise<ProfileGameView> {
+    public async getUserGameProfileAsync(userId: string, serverId: string, gameId: number): Promise<ProfileGameResponse> {
         const entity = await this.getByExternalIdAsync(userId);
         const gamePoints = await PointRepository.getPointsByUserServerGameIdAsync(userId, serverId, gameId);
         const gameRank = await PointRepository.getGameRankAsync(userId, serverId, gameId);
@@ -54,7 +54,7 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
                 gamePoints: 0,
                 gameRank: gameRank.rank,
                 gameRankPlayerCount: gameRank.total,
-            } satisfies ProfileGameView;
+            } satisfies ProfileGameResponse;
 
         return {
             username: entity.Username,
@@ -62,7 +62,7 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
             gamePoints: gamePoints.Points,
             gameRank: gameRank.rank,
             gameRankPlayerCount: gameRank.total,
-        } satisfies ProfileGameView;
+        } satisfies ProfileGameResponse;
     }
 
     public async getSystemUserAsync(): Promise<User> {

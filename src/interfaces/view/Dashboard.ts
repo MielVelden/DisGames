@@ -1,7 +1,7 @@
 import { Duration } from "../application";
 import { ChartDefinition } from "../application/Chart";
 
-export interface DashboardView {
+export interface DashboardResponse {
     cards: DashboardSectionCardData[]
     charts?: ChartDefinition[];
 }

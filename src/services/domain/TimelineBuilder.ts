@@ -23,9 +23,8 @@ class TimelineBuilder {
     private detectChanges(oldObject: any, newObject: any): TimelineChanges {
         const changes: TimelineChanges = {};
         
-        if (!newObject) {
+        if (!newObject)
             return changes;
-        }
 
         if (!oldObject) {
             for (const key of Object.keys(newObject)) {

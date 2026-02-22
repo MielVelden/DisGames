@@ -131,6 +131,10 @@ function generateApiWrapper(endpoints: any[], allInterfaces: any[]): string {
     output += `  const response = await apiClient.get(path);\n`;
     output += `  return response.data as T;\n`;
     output += `}\n\n`;
+    output += `async function putJson<TResponse = unknown>(path: string, body: unknown): Promise<TResponse> {\n`;
+    output += `  const response = await apiClient.put(path, body);\n`;
+    output += `  return response.data as TResponse;\n`;
+    output += `}\n\n`;
 
     const groupedEndpoints = groupEndpointsByController(endpoints);
 
@@ -147,24 +151,31 @@ function generateApiWrapper(endpoints: any[], allInterfaces: any[]): string {
             const method = methods[j];
             const methodName = method.methodName.charAt(0).toLowerCase() + method.methodName.slice(1);
             const params = method.parameters;
+            const bodyParam = params.find((p: any) => p.name === 'body');
+            const pathParams = bodyParam ? params.filter((p: any) => p.name !== 'body') : params;
 
             const qualifiedParams = params.map((p: any) => {
                 const qualifiedType = qualifyTypeInString(p.type, allInterfaces);
                 return `${p.name}: ${qualifiedType}`;
             }).join(', ');
 
-            const paramsInUrl = params.map((p: any) =>
+            const paramsInUrl = pathParams.map((p: any) =>
                 `\${encodeURIComponent(String(${p.name}))}`
             ).join('/');
 
             const qualifiedReturnType = qualifyTypeInString(method.returnType, allInterfaces);
 
             let urlPath = `/${controller.toLowerCase()}/${methodName}`;
-            if (params.length > 0) {
+            if (pathParams.length > 0) {
                 urlPath += `/${paramsInUrl}`;
             }
 
-            output += `    ${methodName}: (${qualifiedParams}) => getJson<${qualifiedReturnType}>(\`${urlPath}\`)`;
+            if (bodyParam) {
+                const qualifiedBodyType = qualifyTypeInString(bodyParam.type, allInterfaces);
+                output += `    ${methodName}: (${qualifiedParams}) => putJson<${qualifiedReturnType}>(\`${urlPath}\`, ${bodyParam.name})`;
+            } else {
+                output += `    ${methodName}: (${qualifiedParams}) => getJson<${qualifiedReturnType}>(\`${urlPath}\`)`;
+            }
 
             if (j < methods.length - 1)
                 output += ',';

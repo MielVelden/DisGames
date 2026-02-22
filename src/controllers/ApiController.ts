@@ -7,6 +7,11 @@ import * as fs from "fs";
 import * as path from "path";
 import { ExceptionEnum } from "../interfaces/enums";
 import { ErrorHelper } from "../utils/application/Error";
+import TimelineBuilder from "../services/domain/TimelineBuilder";
+import { createBaseTimelineEvent } from "../utils/helpers/Timeline";
+import ServerService from "../services/domain/ServerService";
+import { getConfigValue } from "../utils/application/Config";
+import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();
@@ -17,7 +22,7 @@ export class ApiController {
 
 	private initializeControllers(): void {
 		this.controllers.set('api', this);
-		
+
 		const controllersPath = path.join(__dirname);
 		const controllerFiles = fs.readdirSync(controllersPath)
 			.filter(file => (file.endsWith('.js') || file.endsWith('.ts')) && !file.startsWith('ApiController.'));
@@ -25,13 +30,13 @@ export class ApiController {
 		for (const file of controllerFiles) {
 			const controllerModule = require(path.join(controllersPath, file));
 			const ControllerClass = controllerModule.default || controllerModule[Object.keys(controllerModule)[0]];
-			
+
 			if (ControllerClass) {
 				const controllerName = file.replace(/Controller\.(js|ts)$/, '').toLowerCase();
 				this.controllers.set(controllerName, new ControllerClass());
 			}
 		}
-		
+
 		Logger.logInfo(`Loaded ${this.controllers.size} controllers`);
 		Logger.logInfo(`Controllers: ${Array.from(this.controllers.keys()).join(', ')}`);
 	}
@@ -39,26 +44,26 @@ export class ApiController {
 	private async getAuthorizedIdentity(req: any): Promise<UsersModel | null> {
 		const access = req.res?.locals?.oauth?.access as string | undefined;
 		const userId = req.res?.locals?.oauth?.discordUserId as string | undefined;
-		
+
 		Logger.logInfo(`Authorize check for userId=${userId}`);
-		if (!userId) 
-			return null;
-		
-		const user = await UserService.getByExternalIdAsync(userId);
-		if (!user) 
+		if (!userId)
 			return null;
 
+		const user = await UserService.getByExternalIdAsync(userId);
+		if (!user)
+			return null;
+
+		// TODO: Uncomment this when we have a way to verify the OAuth2 access token
 		// if (access && user.OAuth2AccessToken === access) 
 		// 	return user;
-
-		return null;
+		return user;
 	}
 
 	async handleRequest(req: express.Request, res: express.Response): Promise<void> {
 		try {
 			const pathParts = req.path.split('/').filter(part => part);
 			const method = req.method.toLowerCase();
-			
+
 			// Extract controller name from path (first part after /)
 			const controllerName = pathParts[0]?.toLowerCase();
 			if (!controllerName) {
@@ -89,7 +94,7 @@ export class ApiController {
 			// Parameter validation and authorization happens here
 			const validatedParams = await this.validateAndExtractParameters(req, controllerName, methodName, pathParts);
 			const result = await controller[methodName](...validatedParams);
-			
+
 			res.json(result);
 		} catch (error) {
 			Logger.logError("Error in handleRequest:", error as Error);
@@ -112,7 +117,7 @@ export class ApiController {
 				const cleanMethod = MethodNameUtils.removeAsyncSuffix(method).toLowerCase();
 				return cleanMethod === methodNameFromPath.toLowerCase();
 			});
-			
+
 			if (methodWithoutAsync)
 				return methodWithoutAsync;
 		}
@@ -120,8 +125,8 @@ export class ApiController {
 		// Look for methods based on path structure
 		if (pathParts.length === 1) {
 			// Single resource: look for methods like getAll, getList, etc.
-			const collectionMethods = availableMethods.filter(method => 
-				method.toLowerCase().includes('all') || 
+			const collectionMethods = availableMethods.filter(method =>
+				method.toLowerCase().includes('all') ||
 				method.toLowerCase().includes('list') ||
 				method.toLowerCase().includes('get') && !method.toLowerCase().includes('by')
 			);
@@ -129,7 +134,7 @@ export class ApiController {
 				return collectionMethods[0];
 		} else if (pathParts.length === 2) {
 			// Resource with ID: look for methods like getById, findById, etc.
-			const byIdMethods = availableMethods.filter(method => 
+			const byIdMethods = availableMethods.filter(method =>
 				method.toLowerCase().includes('byid') ||
 				method.toLowerCase().includes('by') ||
 				method.toLowerCase().includes('find')
@@ -144,18 +149,18 @@ export class ApiController {
 
 	private async validateAndExtractParameters(req: express.Request, controllerName: string, methodName: string, pathParts: string[]): Promise<any[]> {
 		const controller = this.controllers.get(controllerName);
-		if (!controller) 
+		if (!controller)
 			return [];
 
 		// Get method signature to determine parameter types
 		const method = controller[methodName];
-		if (!method) 
+		if (!method)
 			return [];
 
 		// Get method parameter names from function signature
 		const methodString = method.toString();
 		const paramMatch = methodString.match(/\(([^)]*)\)/);
-		if (!paramMatch) 
+		if (!paramMatch)
 			return [];
 
 		const paramNames = paramMatch[1]
@@ -164,24 +169,36 @@ export class ApiController {
 			.filter((p: string) => p);
 
 		const params: any[] = [];
-		
+
 		let pathParamIndex = 2; // Start after controller and method name
-		
+
+		const identity = await this.getAuthorizedIdentity(req);
+		if (!identity)
+			ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
+
 		for (let i = 0; i < paramNames.length; i++) {
 			const paramName = paramNames[i];
-			
-			// Check if parameter is identity: User
-			if (paramName.includes('identity') && paramName.includes('User')) {
-				const identity = await this.getAuthorizedIdentity(req);
-				if (!identity) 
+
+			// Check if parameter is event: TimelineEvent
+			if (paramName.includes('timelineEvent')) {
+				const user = await UserService.toModelAsync(identity);
+				const server = await ServerService.getByExternalIdAsync(getConfigValue(EnvConfigEnum.DISGAMES_SERVER_ID));
+				const event = createBaseTimelineEvent(user, server);
+				if (!event)
 					ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
-				
+
+				params.push(event);
+				continue;
+			}
+
+			// Check if parameter is identity: User
+			if (paramName.includes('identity')) {
 				params.push(identity);
 				continue;
 			}
 
 			const cleanParamName = paramName.split(':')[0].trim();
-			
+
 			// Try to get parameter from URL path first (for path parameters)
 			if (pathParamIndex < pathParts.length) {
 				const pathParam = pathParts[pathParamIndex];
@@ -189,22 +206,22 @@ export class ApiController {
 				pathParamIndex++;
 				continue;
 			}
-			
+
 			if (req.params[cleanParamName]) {
 				params.push(req.params[cleanParamName]);
 				continue;
 			}
-			
+
 			if (req.query[cleanParamName]) {
 				params.push(req.query[cleanParamName]);
 				continue;
 			}
-			
+
 			if (req.body && req.body[cleanParamName]) {
 				params.push(req.body[cleanParamName]);
 				continue;
 			}
-			
+
 			// For POST/PUT requests, the entire body might be the parameter
 			if ((req.method.toLowerCase() === 'post' || req.method.toLowerCase() === 'put') && req.body) {
 				params.push(req.body);

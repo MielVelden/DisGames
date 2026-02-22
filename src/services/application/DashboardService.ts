@@ -1,7 +1,7 @@
 import { DurationEnum } from "../../interfaces/application";
 import { User } from "../../interfaces/domain";
 import { DashboardEnum } from "../../interfaces/enums/view/DashboardEnum";
-import { DashboardSectionCardData, DashboardView, TimeframeData, TrendDirection } from "../../interfaces/view/Dashboard";
+import { DashboardSectionCardData, DashboardResponse, TimeframeData, TrendDirection } from "../../interfaces/view/Dashboard";
 import EventsRepository from "../../repositories/EventsRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
@@ -13,7 +13,7 @@ import ServerRepository from "../../repositories/ServerRepository";
 import ServerService from "../domain/ServerService";
 
 class DashboardService {
-    public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardView> {
+    public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
         switch (dashboardEnum) {
             case DashboardEnum.HOME:
                 return this.getHomeDashboardAsync(identity);
@@ -65,7 +65,7 @@ class DashboardService {
         }
     }
 
-    private async getHomeDashboardAsync(identity: User): Promise<DashboardView> {
+    private async getHomeDashboardAsync(identity: User): Promise<DashboardResponse> {
         return {
             cards: [
                 this.createDashboardCard("Total Revenue", "$1,250.00", "up", { primaryText: "Trending up this month", secondaryText: "Visitors for the last 6 months" }),
@@ -76,7 +76,7 @@ class DashboardService {
         }
     }
 
-    private async getUsersDashboardAsync(identity: User): Promise<DashboardView> {
+    private async getUsersDashboardAsync(identity: User): Promise<DashboardResponse> {
         const timeFrame = calculateDuration(7, DurationEnum.DAY);
         const users = await UserRepository.getTotalUsersAsync();
         const usersTimeFrame = await TimelineRepository.getUsersTimeFrameAsync(timeFrame);
@@ -116,7 +116,7 @@ class DashboardService {
         }
     }
 
-    private async getServersDashboardAsync(identity: User): Promise<DashboardView> {
+    private async getServersDashboardAsync(identity: User): Promise<DashboardResponse> {
         const timeFrame = calculateDuration(7, DurationEnum.DAY);
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
@@ -156,7 +156,7 @@ class DashboardService {
         }
     }
 
-    private async getAnalyticsDashboardAsync(identity: User): Promise<DashboardView> {
+    private async getAnalyticsDashboardAsync(identity: User): Promise<DashboardResponse> {
         const timeFrame = calculateDuration(7, DurationEnum.DAY);
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);

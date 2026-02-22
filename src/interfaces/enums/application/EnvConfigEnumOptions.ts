@@ -11,6 +11,10 @@ SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_CLIENT_ID, /^[0-9]+$/);
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_OWNER_ID);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_OWNER_ID, /^[0-9]+$/);
 
+// Server ID
+SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISGAMES_SERVER_ID);
+SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISGAMES_SERVER_ID, /^[0-9]+$/);
+
 // Database URL
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DATABASE_URL);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DATABASE_URL, /^mysql:\/\/[\w-]+:[\w-]+@[\w-.]+:\d+\/[\w-]+$/);
