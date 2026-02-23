@@ -8,10 +8,11 @@ import Logger from './utils/application/Logger';
 import { startHttpServer } from './server';
 import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
+import { JobScheduler } from './services/application/JobScheduler';
 
 getConfig();
 
-const client = new DiscordClient({
+export const discordClient = new DiscordClient({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -20,18 +21,21 @@ const client = new DiscordClient({
   ],
 });
 
-client.once('ready', async () => {
-  Logger.logInfo(`Logged in as ${client.user?.tag}`);
+discordClient.once('ready', async () => {
+  Logger.logInfo(`Logged in as ${discordClient.user?.tag}`);
   await createConnectionAsync().then(async (success) => {
     if (success) {
-      await loadCommands(client);
-      await loadEvents(client);
+      await loadCommands(discordClient);
+      await loadEvents(discordClient);
       const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);
       startHttpServer(port);
+
+      // Initialize the job scheduler
+      JobScheduler.getInstance();
     } else {
       Logger.logError(`Failed to connect to database`);
     }
   });
 });
 
-client.login(getConfigValue(EnvConfigEnum.TOKEN));
+discordClient.login(getConfigValue(EnvConfigEnum.TOKEN));

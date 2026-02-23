@@ -60,7 +60,7 @@ export interface BaseInteractionEvent {
 }
 
 export interface ReplyInteractionEvent {
-    replyAsync(content?: MultiLingualString): Promise<void>;
+    replyAsync(content?: MultiLingualString, ephemeral?: boolean): Promise<void>;
 }
 
 export interface SlashCommandInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {

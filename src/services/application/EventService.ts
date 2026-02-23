@@ -5,6 +5,8 @@ import Logger from '../../utils/application/Logger';
 import { EventTypeEnum, ExceptionEnum } from '../../interfaces/enums';
 import { assertNever, ErrorHelper } from '../../utils/application/Error';
 import { withEventContextAsync } from '../../middleware/EventContext';
+import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
+import { i18n } from '../../utils/i18n/i18n';
 
 const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
 
@@ -89,9 +91,8 @@ export class EventService {
   public static async handleButtonInteraction(interaction: InteractionEvent): Promise<void> {
     const handler = EventService.buttonHandlers.get(interaction.customId);
     if (handler) {
-      if (handler.userId && handler.userId !== interaction.user.userId) {
-        return;
-      }
+      if (handler.userId && handler.userId !== interaction.user.userId)
+        return await interaction.replyAsync(new MultiLingualString(i18n.labels.common.notYourEvent), true);
 
       EventService.removeHandler(handler.id);
       await handler.handle(interaction);
@@ -104,9 +105,9 @@ export class EventService {
     const handler = EventService.selectMenuHandlers.get(interaction.customId);
     Logger.logDebug(`Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
-      if (handler.userId && handler.userId !== interaction.user.userId) {
-        return;
-      }
+      if (handler.userId && handler.userId !== interaction.user.userId)
+        return await interaction.replyAsync(new MultiLingualString(i18n.labels.common.notYourEvent), true);
+
       await interaction.deferReplyAsync();
 
       EventService.removeHandler(handler.id);

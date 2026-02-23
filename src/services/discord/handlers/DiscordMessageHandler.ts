@@ -27,8 +27,8 @@ class DiscordMessageHandler {
         await user.send(message);
     }
 
-    public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
+    public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined, ephemeral?: boolean): Promise<void> {
+        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, ephemeral);
         if (!content)
             return;
 
@@ -44,7 +44,8 @@ class DiscordMessageHandler {
 
     public async sendAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
-        if (!content) return;
+        if (!content) 
+            return;
 
         const guild = event.currentInteraction.guild;
         if (!guild)
@@ -130,10 +131,11 @@ class DiscordMessageHandler {
                 }
                 break;
             case EventTypeEnum.BUTTON:
-                await event.currentInteraction.update(content);
-                break;
             case EventTypeEnum.SELECT_MENU:
-                await event.currentInteraction.update(content);
+                if(content.ephemeral)
+                    await event.currentInteraction.reply(content);
+                else
+                    await event.currentInteraction.update(content);
                 break;
             default:
                 ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);

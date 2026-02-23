@@ -5,7 +5,7 @@ import { BaseDiscordEvent } from "./BaseDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 
 export abstract class BaseReplyDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> extends BaseDiscordEvent<TInteraction> implements ReplyInteractionEvent {
-    public async replyAsync(content?: MultiLingualString): Promise<void> { 
-        await DiscordMessageHandler.replyAsync(this as any, content);
+    public async replyAsync(content?: MultiLingualString, ephemeral?: boolean): Promise<void> { 
+        await DiscordMessageHandler.replyAsync(this as any, content, ephemeral);
     }
 } 

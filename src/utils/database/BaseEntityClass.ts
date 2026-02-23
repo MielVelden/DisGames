@@ -69,21 +69,25 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
   validateIsNull(field: EnumValues<FieldEnum>, defaultValue?: any): void {
     const value = this.getFieldValue(field);
 
+    if (value !== null && value !== undefined)
+      return;
+
     if (defaultValue !== null && defaultValue !== undefined)
       return this.setFieldValue(field, defaultValue);
 
-    if (value !== null && value !== undefined)
-      ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+    ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
   }
 
   validateIsNotNull(field: EnumValues<FieldEnum>, defaultValue?: any): void {
     const value = this.getFieldValue(field);
 
+    if(value !== null && value !== undefined)
+      return;
+
     if (defaultValue !== null && defaultValue !== undefined)
       return this.setFieldValue(field, defaultValue);
 
-    if (value === null || value === undefined)
-      ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+    ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
   }
 
   validateIsProvidedAndNotNull(field: EnumValues<FieldEnum>): void {

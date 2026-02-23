@@ -36,7 +36,7 @@ export default {
 
             for (const fileToDelete of filesToDelete) {
                 fs.unlinkSync(path.join(gameDirectory, fileToDelete));
-                Logger.logInfo(`Deleted game image: ${path.join(gameDirectory, fileToDelete)}`);
+                Logger.logDebug(`Deleted game image: ${path.join(gameDirectory, fileToDelete)}`);
 
                 processedFiles++;
                 progress(processedFiles, totalFiles, `Deleting ${fileToDelete}`);

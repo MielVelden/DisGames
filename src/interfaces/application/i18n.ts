@@ -60,6 +60,7 @@ export interface I18nTranslations {
             delete: LanguageTranslations;
             askQuestion: LanguageTranslations;
             notEnoughPermissions: LanguageTranslations;
+            notYourEvent: LanguageTranslations;
             welcome: {
                 title: LanguageTranslations;
                 message: LanguageTranslations;

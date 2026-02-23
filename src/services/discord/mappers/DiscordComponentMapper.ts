@@ -386,7 +386,7 @@ class DiscordComponentMapper {
     }
     // #endregion
 
-    public async buildMessageContentAsync(event: BaseInteractionEvent, components: Component[], message?: MultiLingualString | string): Promise<DiscordMessageContent | null> {
+    public async buildMessageContentAsync(event: BaseInteractionEvent, components: Component[], message?: MultiLingualString | string, ephemeral?: boolean): Promise<DiscordMessageContent | null> {
         return withEventContextAsync(event, async () => {
             if(message) {
                 if(typeof message === 'string')
@@ -403,15 +403,16 @@ class DiscordComponentMapper {
 
             const files: AttachmentBuilder[] = this.collectLocalAttachments(components);
 
-            return this.createReplyOptions(rootComponents, files);
+            return this.createReplyOptions(rootComponents, files, ephemeral);
         });
     }
 
-    public createReplyOptions(components: any[], files: AttachmentBuilder[]): DiscordMessageContent {
+    public createReplyOptions(components: any[], files: AttachmentBuilder[], ephemeral?: boolean): DiscordMessageContent {
         return {
             components: components,
             flags: DiscordMessageFlags.IsComponentsV2,
-            files: files.length > 0 ? files : undefined
+            files: files.length > 0 ? files : undefined,
+            ephemeral: ephemeral
         };
     }
 

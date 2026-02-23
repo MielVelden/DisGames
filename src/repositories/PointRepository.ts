@@ -88,6 +88,10 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
             total: result.Total || result.total || 0
         };
     }
+
+    async getTotalPointsAsync(): Promise<number> {
+        return await this.baseRepository.Select().Sum("Points");
+    }
 }
 
 export default new PointRepository();

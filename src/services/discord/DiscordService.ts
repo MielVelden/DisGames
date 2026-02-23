@@ -42,6 +42,7 @@ export interface DiscordMessageContent {
     components: DiscordActionRowBuilder<any>[];
     files?: any[];
     flags?: any;
+    ephemeral?: boolean;
 }
 
 class DiscordService {
