@@ -35,7 +35,7 @@ export const TYPE_EXCEPTIONS: TypeException[] = [
     },
     {
         typeName: 'BaseRepository',
-        customDefinition: 'export type BaseRepository<T extends DisGames.Interfaces.Database.BaseEntity, S extends DisGames.Interfaces.Database.BaseEntity> = any;'
+        customDefinition: 'export type BaseRepository<T extends DisGames.Interfaces.Database.BaseEntity, S extends DisGames.Interfaces.Database.BaseEntity, F extends Record<string, string> = Record<string, string>> = any;'
     },
     {
         typeName: 'ConfigValueTypeMap',

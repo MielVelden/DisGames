@@ -63,9 +63,9 @@ class GameDataController implements Controller {
         return list.map(toGameDataViewModel);
     }
 
-    async saveAsync(body: GameDataSaveRequest, timelineEvent: TimelineEvent, identity: User): Promise<GameDataResponse> {
+    async saveAsync(body: GameDataSaveRequest, event: TimelineEvent, identity: User): Promise<GameDataResponse> {
         const saveModel = toSaveModel(body);
-        const saved = await GameDataService.saveAsync(saveModel, timelineEvent);
+        const saved = await GameDataService.saveAsync(saveModel, event);
         return toGameDataViewModel(saved);
     }
 }

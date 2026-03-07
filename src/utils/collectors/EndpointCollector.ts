@@ -57,6 +57,7 @@ export class EndpointCollector {
         return parameterString.split(',')
             .map(param => param.trim())
             .filter(param => param)
+            .filter(param => !param.includes('event'))
             .map(param => {
                 const isIdentity = param.includes('identity') && param.includes('User');
                 const [name, type] = param.split(':').map(p => p.trim());

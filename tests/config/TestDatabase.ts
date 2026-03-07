@@ -1,5 +1,6 @@
 import Logger from '../../src/utils/application/Logger';
 import { DatabaseHelper } from '../../src/utils/database/DatabaseHelper';
+import { BaseEntityFieldType } from '../../src/interfaces/database/BaseEntity';
 import { ExceptionEnum, TableEnum } from '../../src/interfaces/enums';
 import { closeConnectionAsync, commitTransactionAsync, getTableName, rollbackTransactionAsync, runQueryAsync, startTransactionAsync, validateConnectionAsync } from '../../src/repositories/util/ConnectionHandler';
 import { ErrorHelper } from '../../src/utils/application/Error';
@@ -67,7 +68,8 @@ export class TestDatabase {
 
     public async insertAsync(tableName: TableEnum, data: any): Promise<any> {
         const tableNameString = getTableName(tableName);
-        const processedData = DatabaseHelper.processEntityForDatabase(data);
+        const fieldEnum = Object.fromEntries(Object.keys(data).map(k => [k, k]));
+        const processedData = DatabaseHelper.processEntityForDatabase(data, fieldEnum, () => BaseEntityFieldType.String);
         const keys = Object.keys(processedData).join(', ');
         const values = Object.values(processedData).map(() => '?').join(', ');
         const query = `INSERT INTO ${tableNameString} (${keys}) VALUES (${values})`;
@@ -83,7 +85,8 @@ export class TestDatabase {
 
     public async updateAsync(tableName: TableEnum, id: number, data: any): Promise<any> {
         const tableNameString = getTableName(tableName);
-        const processedData = DatabaseHelper.processEntityForDatabase(data);
+        const fieldEnum = Object.fromEntries(Object.keys(data).map(k => [k, k]));
+        const processedData = DatabaseHelper.processEntityForDatabase(data, fieldEnum, () => BaseEntityFieldType.String);
         const setClause = Object.keys(processedData)
             .filter(key => key !== 'Id')
             .map(key => `${key} = ?`)
