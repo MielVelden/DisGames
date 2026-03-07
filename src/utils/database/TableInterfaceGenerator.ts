@@ -11,7 +11,8 @@ export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;
   private static readonly saveSuffix = 'SaveModel' as string;
   private static readonly fieldEnumSuffix = 'ModelFieldEnum' as string;
-
+  private static readonly baseEntityFieldType = 'BaseEntityFieldType' as string;
+  ;
   private static generateFieldEnum(tableName: string, columns: any[]): string {
     let enumContent = `export enum ${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix} {\n`;
 
@@ -22,6 +23,22 @@ export class TableInterfaceGenerator {
       enumContent += '\n';
     });
 
+    enumContent += `}\n\n`;
+    return enumContent;
+  }
+
+  private static generateGetFieldTypeFunction(tableName: string, columns: any[], enumMapping: Record<string, string>): string {
+    let enumContent = `export function get${SchemaUtils.capitalize(tableName)}FieldType(field: ${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix}): ${this.baseEntityFieldType} {\n`;
+
+    enumContent += `  switch (field) {\n`;
+
+    columns.forEach((column: any) => {
+      const fieldName = SchemaUtils.formatColumnName(column.COLUMN_NAME);
+      enumContent += `    case ${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix}.${fieldName}:\n`;
+      enumContent += `      return ${this.baseEntityFieldType}.${SchemaUtils.mapMySQLTypeToBaseEntityFieldType(column.COLUMN_NAME, column.DATA_TYPE, enumMapping, tableName)};\n`;
+    });
+
+    enumContent += `  }\n`;
     enumContent += `}\n\n`;
     return enumContent;
   }
@@ -86,7 +103,7 @@ export class TableInterfaceGenerator {
     // Generate header with imports
     let interfaceContent = InterfaceImportManager.generateHeader(jsonInterfaceImports);
     interfaceContent += `import { BaseEntityClass } from '../../utils/database/BaseEntityClass';\n`;
-    interfaceContent += `import { BaseEntity } from '../../interfaces/database/BaseEntity';\n\n`;
+    interfaceContent += `import { BaseEntity, ${this.baseEntityFieldType} } from '../../interfaces/database/BaseEntity';\n\n`;
 
     for (const table of tables as any[]) {
       const tableName = table['TABLE_NAME'];
@@ -113,6 +130,8 @@ export class TableInterfaceGenerator {
       interfaceContent += `}\n\n`;
 
       interfaceContent += this.generateFieldEnum(tableName, filteredColumns);
+
+      interfaceContent += this.generateGetFieldTypeFunction(tableName, filteredColumns, enumMapping);
 
       const modelClassName = `${SchemaUtils.capitalize(tableName)}${this.suffix}`;
       const fieldEnumName = `${SchemaUtils.capitalize(tableName)}${this.fieldEnumSuffix}`;

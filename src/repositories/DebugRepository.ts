@@ -1,13 +1,13 @@
-import { DebugModel, DebugModelFieldEnum, DebugSaveModel } from "../interfaces/database/TableInterfaces";
+import { DebugModel, DebugModelFieldEnum, DebugSaveModel, getDebugFieldType } from "../interfaces/database/TableInterfaces";
 import { RepositoryWithBase } from "../interfaces/database/Repository";
 import BaseRepository from "./BaseRepository";
 import { TableEnum } from "../interfaces/enums/index";
 
-class DebugRepository implements RepositoryWithBase<DebugModel, DebugSaveModel> {
-    public readonly baseRepository: BaseRepository<DebugModel, DebugSaveModel>;
+class DebugRepository implements RepositoryWithBase<DebugModel, DebugSaveModel, typeof DebugModelFieldEnum> {
+    public readonly baseRepository: BaseRepository<DebugModel, DebugSaveModel, typeof DebugModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<DebugModel, DebugSaveModel>(TableEnum.DEBUG, DebugModelFieldEnum);
+        this.baseRepository = new BaseRepository<DebugModel, DebugSaveModel, typeof DebugModelFieldEnum>(TableEnum.DEBUG, DebugModelFieldEnum, getDebugFieldType);
     }
 
     async getByIdAsync(id: number): Promise<DebugModel | null> {

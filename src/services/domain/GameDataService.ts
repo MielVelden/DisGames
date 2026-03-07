@@ -1,7 +1,8 @@
 import { InteractionEvent } from "../../interfaces/application";
-import { GameDataModel, GameDataSaveModel } from "../../interfaces/database/TableInterfaces";
-import { GameTypeEnum } from "../../interfaces/enums";
+import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel } from "../../interfaces/database/TableInterfaces";
+import { ExceptionEnum, GameTypeEnum } from "../../interfaces/enums";
 import GameDataRepository from "../../repositories/GameDataRepository";
+import { ErrorHelper } from "../../utils/application/Error";
 import { BaseDomainService } from "./BaseDomainService";
 
 class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel, typeof GameDataRepository> {
@@ -12,6 +13,23 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
     }
 
     protected async performSaveAsync(savable: GameDataSaveModel, event: InteractionEvent): Promise<GameDataModel> {
+
+        if(savable.isUpdate()) {
+            const model = await this.repository.getByIdAsync(savable.getId()!);
+
+            savable.validateHasNotChanged(GameDataModelFieldEnum.DataSheetId, model?.DataSheetId);
+            savable.validateHasNotChanged(GameDataModelFieldEnum.GameId, model?.GameId);
+        } else {
+            // Check for duplicates
+            const gameId = savable.validateIsNotNull(GameDataModelFieldEnum.GameId);
+            const response = savable.validateIsNotNull(GameDataModelFieldEnum.Response);
+
+            const primaryValue = response?.getMessage();
+            const duplicates = await this.repository.getAllDuplicatesAsync(gameId, primaryValue);
+            if(duplicates.length > 0)
+                ErrorHelper.throw(ExceptionEnum.RECORD_IS_DUPLICATE);
+        }
+
         return await this.repository.saveAsync(savable);
     }
 

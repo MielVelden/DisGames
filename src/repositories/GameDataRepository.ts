@@ -1,15 +1,15 @@
-import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel } from "../interfaces/database/TableInterfaces";
+import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel, getGameDataFieldType } from "../interfaces/database/TableInterfaces";
 import { RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { GameTypeEnum } from "../interfaces/enums/database/GameTypeEnum";
 import { ErrorHelper } from "../utils/application/Error";
 
-class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSaveModel> {
-    public readonly baseRepository: BaseRepository<GameDataModel, GameDataSaveModel>;
+class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSaveModel, typeof GameDataModelFieldEnum> {
+    public readonly baseRepository: BaseRepository<GameDataModel, GameDataSaveModel, typeof GameDataModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel>(TableEnum.GAME_DATA, GameDataModelFieldEnum);
+        this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel, typeof GameDataModelFieldEnum>(TableEnum.GAME_DATA, GameDataModelFieldEnum, getGameDataFieldType);
     }
 
     async getByIdAsync(id: number): Promise<GameDataModel | null> {
@@ -47,6 +47,13 @@ class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSa
             ErrorHelper.throwWithParameters(ExceptionEnum.FUNCTION_RETURNED_INVALID_RESULT, { functionName: StoredProcedureEnum.GetRandomGameData.toString() });
 
         return result;
+    }
+
+    async getAllDuplicatesAsync(gameId: number, primaryValue: string): Promise<GameDataModel[]> {
+        return this.baseRepository.Select()
+            .Where({ GameId: gameId })
+            .WhereRaw('ResponseMLS->>\'$."1"\' = ?', [primaryValue])
+            .Execute();
     }
 }
 

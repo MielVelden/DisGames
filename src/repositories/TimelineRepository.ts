@@ -1,15 +1,15 @@
-import { TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSaveModel, RepositoryWithBase } from "../interfaces/database";
+import { getTimelineEntriesFieldType, TimelineEntriesModel, TimelineEntriesModelFieldEnum, TimelineEntriesSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, TimelineTypeEnum } from "../interfaces/enums/index";
 import { subtractDurationFromDate } from "../utils/helpers/Duration";
 import { Duration } from "../interfaces/application";
 import { TimeframeData as TimeFrameData } from "../interfaces/view/Dashboard";
 
-class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, TimelineEntriesSaveModel> {
-    public readonly baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>;
+class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, TimelineEntriesSaveModel, typeof TimelineEntriesModelFieldEnum> {
+    public readonly baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel, typeof TimelineEntriesModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel>(TableEnum.TIMELINE_ENTRIES, TimelineEntriesModelFieldEnum);
+        this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel, typeof TimelineEntriesModelFieldEnum>(TableEnum.TIMELINE_ENTRIES, TimelineEntriesModelFieldEnum, getTimelineEntriesFieldType);
     }
 
     async getByIdAsync(id: number): Promise<TimelineEntriesModel | null> {

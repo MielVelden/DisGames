@@ -7,7 +7,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { ExceptionEnum } from "../interfaces/enums";
 import { ErrorHelper } from "../utils/application/Error";
-import TimelineBuilder from "../services/domain/TimelineBuilder";
 import { createBaseTimelineEvent } from "../utils/helpers/Timeline";
 import ServerService from "../services/domain/ServerService";
 import { getConfigValue } from "../utils/application/Config";
@@ -173,14 +172,14 @@ export class ApiController {
 		let pathParamIndex = 2; // Start after controller and method name
 
 		const identity = await this.getAuthorizedIdentity(req);
-		if (!identity)
-			ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
 
 		for (let i = 0; i < paramNames.length; i++) {
 			const paramName = paramNames[i];
 
 			// Check if parameter is event: TimelineEvent
 			if (paramName.includes('timelineEvent')) {
+				if (!identity)
+					ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
 				const user = await UserService.toModelAsync(identity);
 				const server = await ServerService.getByExternalIdAsync(getConfigValue(EnvConfigEnum.DISGAMES_SERVER_ID));
 				const event = createBaseTimelineEvent(user, server);
@@ -193,6 +192,8 @@ export class ApiController {
 
 			// Check if parameter is identity: User
 			if (paramName.includes('identity')) {
+				if (!identity)
+					ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
 				params.push(identity);
 				continue;
 			}

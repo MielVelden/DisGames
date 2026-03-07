@@ -1,14 +1,14 @@
-import { PointsModel, PointsModelFieldEnum, PointsSaveModel, RepositoryWithBase } from "../interfaces/database";
+import { getPointsFieldType, PointsModel, PointsModelFieldEnum, PointsSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository, { RepositoryUtils } from "./BaseRepository";
 import { StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { ProfileResponse } from "../interfaces/view";
 import { runQueryAsync, getTableName } from "./util/ConnectionHandler";
 
-class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel> {
-    public readonly baseRepository: BaseRepository<PointsModel, PointsSaveModel>;
+class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum> {
+    public readonly baseRepository: BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel>(TableEnum.POINTS, PointsModelFieldEnum);
+        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>(TableEnum.POINTS, PointsModelFieldEnum, getPointsFieldType);
     }
 
     async getByIdAsync(id: number): Promise<PointsModel | null> {

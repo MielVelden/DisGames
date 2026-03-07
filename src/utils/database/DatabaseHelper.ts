@@ -1,19 +1,22 @@
 import { isMultiLingualString } from "../../interfaces/application";
+import { BaseEntityFieldType } from "../../interfaces/database/BaseEntity";
 import { MultiLingualString } from "../i18n/MultiLingualString";
 import { SchemaUtils } from "./SchemaUtils";
 
 export class DatabaseHelper {
   
-  public static serializeMultiLingualStrings(entity: any): any {
+  public static serializeMultiLingualStrings<FieldEnum extends Record<string, string>>(entity: any, fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any {
     if (!entity || typeof entity !== 'object') 
       return entity;
     
     const serialized = { ...entity };
     
     for (const [key, value] of Object.entries(serialized)) {
-      if (isMultiLingualString(value)) {
+      const field = fieldEnum[key as keyof FieldEnum];
+      if (isMultiLingualString(value) || fieldTypeFunction(field) === BaseEntityFieldType.MultiLingualString) {
         const dbColumnName = SchemaUtils.getMultiLingualStringColumnName(key);
-        serialized[dbColumnName] = JSON.stringify(value.toJSON());
+        const serializedValue = isMultiLingualString(value) ? value.toJSON() : value;
+        serialized[dbColumnName] = JSON.stringify(serializedValue);
         delete serialized[key];
       }
     }
@@ -134,11 +137,11 @@ export class DatabaseHelper {
     });
   }
 
-  public static processEntityForDatabase(entity: any): any {
+  public static processEntityForDatabase(entity: any, fieldEnum: Record<string, string>, fieldTypeFunction: (field: any) => BaseEntityFieldType): any {
     if (!entity || typeof entity !== 'object') 
         return entity;
     
-    let processed = this.serializeMultiLingualStrings(entity);
+    let processed = this.serializeMultiLingualStrings(entity, fieldEnum, fieldTypeFunction);
     processed = this.serializeJsonFields(processed);
     return processed;
   }

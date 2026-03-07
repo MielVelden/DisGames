@@ -8,6 +8,6 @@ export interface Repository<T> {
     purgeAsync(id: number): Promise<void>;
 }
 
-export interface RepositoryWithBase<T extends BaseEntity, S extends BaseEntity> extends Repository<T> {
-    readonly baseRepository: BaseRepository<T, S>;
+export interface RepositoryWithBase<T extends BaseEntity, S extends BaseEntity, F extends Record<string, string> = Record<string, string>> extends Repository<T> {
+    readonly baseRepository: BaseRepository<T, S, F>;
 }

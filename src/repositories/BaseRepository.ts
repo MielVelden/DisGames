@@ -5,7 +5,7 @@ import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 import { isValidEnumValue } from "../utils/helpers/Enum";
 import { ErrorHelper } from "../utils/application/Error";
-import { BaseEntity } from "../interfaces/database/BaseEntity";
+import { BaseEntity, BaseEntityFieldType } from "../interfaces/database/BaseEntity";
 
 type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE';
 
@@ -16,18 +16,20 @@ type WhereCondition<T> = {
   } | T[K];
 };
 
-class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
+class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, FieldEnum extends Record<string, string>> {
   public readonly tableEnum: TableEnum;
-  protected fieldEnum: Record<string, string>;
+  protected fieldEnum: FieldEnum;
+  protected fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType;
   protected table: string;
   protected query: string = '';
   protected params: any[] = [];
   protected cacheManager: CacheManager<Model>;
   protected hasLimit1: boolean = false;
 
-  constructor(table: TableEnum, fieldEnum: Record<string, string>) {
+  constructor(table: TableEnum, fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType) {
     this.tableEnum = table;
     this.fieldEnum = fieldEnum;
+    this.fieldTypeFunction = fieldTypeFunction;
     this.table = getTableName(table);
     this.cacheManager = new CacheManager<Model>(this.table);
   }
@@ -53,7 +55,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     return result;
   }
 
-  public Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel> {
+  public Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel, FieldEnum> {
     this.params = [];
     this.hasLimit1 = false;
     this.query = `SELECT ${fields.join(', ')} FROM ${this.table}`;
@@ -77,6 +79,16 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
     this.query += ` WHERE ${conditions.join(' AND ')}`;
     this.params.push(...values);
 
+    return this;
+  }
+
+  public WhereRaw(condition: string, params: any[] = []): this {
+    if (this.query.includes(' WHERE ')) {
+      this.query += ` AND (${condition})`;
+    } else {
+      this.query += ` WHERE (${condition})`;
+    }
+    this.params.push(...params);
     return this;
   }
 
@@ -215,7 +227,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity> {
 
   public async Save(entity: Partial<SaveModel>): Promise<Model> {
     // Serialize MultiLingualString and JSON fields before saving
-    const serializedEntity = DatabaseHelper.processEntityForDatabase(entity);
+    const serializedEntity = DatabaseHelper.processEntityForDatabase(entity, this.fieldEnum, this.fieldTypeFunction);
 
     if (serializedEntity.Id) {
       // UPDATE - invalidate cache for this ID and all query cache

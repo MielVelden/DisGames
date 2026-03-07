@@ -4,7 +4,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { Debug_Data, Events_Payload, Games_Settings, Metrics_Metrics, TimelineEntries_Changes } from "../domain";
 
 import { BaseEntityClass } from '../../utils/database/BaseEntityClass';
-import { BaseEntity } from '../../interfaces/database/BaseEntity';
+import { BaseEntity, BaseEntityFieldType } from '../../interfaces/database/BaseEntity';
 
 export interface DatasheetsModel {
   Description: MultiLingualString;
@@ -18,6 +18,19 @@ export enum DatasheetsModelFieldEnum {
   Id = "Id",
   Name = "Name",
   ServerId = "ServerId"
+}
+
+export function getDatasheetsFieldType(field: DatasheetsModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case DatasheetsModelFieldEnum.Description:
+      return BaseEntityFieldType.MultiLingualString;
+    case DatasheetsModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case DatasheetsModelFieldEnum.Name:
+      return BaseEntityFieldType.MultiLingualString;
+    case DatasheetsModelFieldEnum.ServerId:
+      return BaseEntityFieldType.Number;
+  }
 }
 
 export class DatasheetsModel extends BaseEntityClass<DatasheetsModelFieldEnum> implements DatasheetsModel {
@@ -77,6 +90,23 @@ export enum DebugModelFieldEnum {
   ServerId = "ServerId",
   UniqueCode = "UniqueCode",
   UpdatedAt = "UpdatedAt"
+}
+
+export function getDebugFieldType(field: DebugModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case DebugModelFieldEnum.CreatedAt:
+      return BaseEntityFieldType.Date;
+    case DebugModelFieldEnum.Data:
+      return BaseEntityFieldType.Json;
+    case DebugModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case DebugModelFieldEnum.ServerId:
+      return BaseEntityFieldType.Number;
+    case DebugModelFieldEnum.UniqueCode:
+      return BaseEntityFieldType.String;
+    case DebugModelFieldEnum.UpdatedAt:
+      return BaseEntityFieldType.Date;
+  }
 }
 
 export class DebugModel extends BaseEntityClass<DebugModelFieldEnum> implements DebugModel {
@@ -149,6 +179,23 @@ export enum EventsModelFieldEnum {
   UserId = "UserId"
 }
 
+export function getEventsFieldType(field: EventsModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case EventsModelFieldEnum.CreatedAt:
+      return BaseEntityFieldType.Date;
+    case EventsModelFieldEnum.EventTypeEnum:
+      return BaseEntityFieldType.Enum;
+    case EventsModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case EventsModelFieldEnum.Payload:
+      return BaseEntityFieldType.Json;
+    case EventsModelFieldEnum.ServerId:
+      return BaseEntityFieldType.Number;
+    case EventsModelFieldEnum.UserId:
+      return BaseEntityFieldType.Number;
+  }
+}
+
 export class EventsModel extends BaseEntityClass<EventsModelFieldEnum> implements EventsModel {
   protected static fieldEnum = EventsModelFieldEnum;
   protected static tableEnum = enums.TableEnum.EVENTS;
@@ -215,6 +262,21 @@ export enum GameDataModelFieldEnum {
   Id = "Id",
   Message = "Message",
   Response = "Response"
+}
+
+export function getGameDataFieldType(field: GameDataModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case GameDataModelFieldEnum.DataSheetId:
+      return BaseEntityFieldType.Number;
+    case GameDataModelFieldEnum.GameId:
+      return BaseEntityFieldType.Number;
+    case GameDataModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case GameDataModelFieldEnum.Message:
+      return BaseEntityFieldType.MultiLingualString;
+    case GameDataModelFieldEnum.Response:
+      return BaseEntityFieldType.MultiLingualString;
+  }
 }
 
 export class GameDataModel extends BaseEntityClass<GameDataModelFieldEnum> implements GameDataModel {
@@ -287,6 +349,29 @@ export enum GameTypesModelFieldEnum {
   sameUserAllowed = "sameUserAllowed"
 }
 
+export function getGameTypesFieldType(field: GameTypesModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case GameTypesModelFieldEnum.allowMessageChange:
+      return BaseEntityFieldType.Boolean;
+    case GameTypesModelFieldEnum.description:
+      return BaseEntityFieldType.Number;
+    case GameTypesModelFieldEnum.gameDisabled:
+      return BaseEntityFieldType.Number;
+    case GameTypesModelFieldEnum.gameName:
+      return BaseEntityFieldType.String;
+    case GameTypesModelFieldEnum.gameRules:
+      return BaseEntityFieldType.Number;
+    case GameTypesModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case GameTypesModelFieldEnum.pointPerGame:
+      return BaseEntityFieldType.Number;
+    case GameTypesModelFieldEnum.replyMessage:
+      return BaseEntityFieldType.Boolean;
+    case GameTypesModelFieldEnum.sameUserAllowed:
+      return BaseEntityFieldType.Boolean;
+  }
+}
+
 export interface GamesModel {
   Answer: string;
   ChannelId: string;
@@ -307,6 +392,27 @@ export enum GamesModelFieldEnum {
   MessageId = "MessageId",
   ServerId = "ServerId",
   Settings = "Settings"
+}
+
+export function getGamesFieldType(field: GamesModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case GamesModelFieldEnum.Answer:
+      return BaseEntityFieldType.String;
+    case GamesModelFieldEnum.ChannelId:
+      return BaseEntityFieldType.String;
+    case GamesModelFieldEnum.GameTypeEnum:
+      return BaseEntityFieldType.Enum;
+    case GamesModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case GamesModelFieldEnum.LastUser:
+      return BaseEntityFieldType.String;
+    case GamesModelFieldEnum.MessageId:
+      return BaseEntityFieldType.String;
+    case GamesModelFieldEnum.ServerId:
+      return BaseEntityFieldType.String;
+    case GamesModelFieldEnum.Settings:
+      return BaseEntityFieldType.Json;
+  }
 }
 
 export class GamesModel extends BaseEntityClass<GamesModelFieldEnum> implements GamesModel {
@@ -387,6 +493,21 @@ export enum LanguageModelFieldEnum {
   NL = "NL"
 }
 
+export function getLanguageFieldType(field: LanguageModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case LanguageModelFieldEnum.EN:
+      return BaseEntityFieldType.String;
+    case LanguageModelFieldEnum.ES:
+      return BaseEntityFieldType.String;
+    case LanguageModelFieldEnum.GE:
+      return BaseEntityFieldType.String;
+    case LanguageModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case LanguageModelFieldEnum.NL:
+      return BaseEntityFieldType.String;
+  }
+}
+
 export interface MetricsModel {
   Date: Date;
   Id: number;
@@ -397,6 +518,17 @@ export enum MetricsModelFieldEnum {
   Date = "Date",
   Id = "Id",
   Metrics = "Metrics"
+}
+
+export function getMetricsFieldType(field: MetricsModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case MetricsModelFieldEnum.Date:
+      return BaseEntityFieldType.Date;
+    case MetricsModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case MetricsModelFieldEnum.Metrics:
+      return BaseEntityFieldType.Json;
+  }
 }
 
 export class MetricsModel extends BaseEntityClass<MetricsModelFieldEnum> implements MetricsModel {
@@ -450,6 +582,21 @@ export enum PointsModelFieldEnum {
   Points = "Points",
   ServerId = "ServerId",
   UserId = "UserId"
+}
+
+export function getPointsFieldType(field: PointsModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case PointsModelFieldEnum.GameId:
+      return BaseEntityFieldType.Number;
+    case PointsModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case PointsModelFieldEnum.Points:
+      return BaseEntityFieldType.Number;
+    case PointsModelFieldEnum.ServerId:
+      return BaseEntityFieldType.String;
+    case PointsModelFieldEnum.UserId:
+      return BaseEntityFieldType.String;
+  }
 }
 
 export class PointsModel extends BaseEntityClass<PointsModelFieldEnum> implements PointsModel {
@@ -514,6 +661,23 @@ export enum ServersModelFieldEnum {
   Name = "Name",
   Points = "Points",
   ServerId = "ServerId"
+}
+
+export function getServersFieldType(field: ServersModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case ServersModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case ServersModelFieldEnum.LanguageEnum:
+      return BaseEntityFieldType.Enum;
+    case ServersModelFieldEnum.MemberCount:
+      return BaseEntityFieldType.Number;
+    case ServersModelFieldEnum.Name:
+      return BaseEntityFieldType.String;
+    case ServersModelFieldEnum.Points:
+      return BaseEntityFieldType.Number;
+    case ServersModelFieldEnum.ServerId:
+      return BaseEntityFieldType.String;
+  }
 }
 
 export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> implements ServersModel {
@@ -581,6 +745,19 @@ export enum StatisticsModelFieldEnum {
   Value = "Value"
 }
 
+export function getStatisticsFieldType(field: StatisticsModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case StatisticsModelFieldEnum.Date:
+      return BaseEntityFieldType.Date;
+    case StatisticsModelFieldEnum.GameId:
+      return BaseEntityFieldType.Number;
+    case StatisticsModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case StatisticsModelFieldEnum.Value:
+      return BaseEntityFieldType.Number;
+  }
+}
+
 export interface TableEnumsModel {
   Id: number;
   TableName: string;
@@ -589,6 +766,15 @@ export interface TableEnumsModel {
 export enum TableEnumsModelFieldEnum {
   Id = "Id",
   TableName = "TableName"
+}
+
+export function getTableEnumsFieldType(field: TableEnumsModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case TableEnumsModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case TableEnumsModelFieldEnum.TableName:
+      return BaseEntityFieldType.String;
+  }
 }
 
 export interface TimelineEntriesModel {
@@ -611,6 +797,27 @@ export enum TimelineEntriesModelFieldEnum {
   TableEnum = "TableEnum",
   TimelineType = "TimelineType",
   UserId = "UserId"
+}
+
+export function getTimelineEntriesFieldType(field: TimelineEntriesModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case TimelineEntriesModelFieldEnum.Changes:
+      return BaseEntityFieldType.Json;
+    case TimelineEntriesModelFieldEnum.CreatedAt:
+      return BaseEntityFieldType.Date;
+    case TimelineEntriesModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case TimelineEntriesModelFieldEnum.ObjectId:
+      return BaseEntityFieldType.Number;
+    case TimelineEntriesModelFieldEnum.ServerId:
+      return BaseEntityFieldType.Number;
+    case TimelineEntriesModelFieldEnum.TableEnum:
+      return BaseEntityFieldType.Enum;
+    case TimelineEntriesModelFieldEnum.TimelineType:
+      return BaseEntityFieldType.Number;
+    case TimelineEntriesModelFieldEnum.UserId:
+      return BaseEntityFieldType.Number;
+  }
 }
 
 export class TimelineEntriesModel extends BaseEntityClass<TimelineEntriesModelFieldEnum> implements TimelineEntriesModel {
@@ -689,6 +896,21 @@ export enum UsersModelFieldEnum {
   UserId = "UserId",
   Username = "Username",
   UserRoleEnum = "UserRoleEnum"
+}
+
+export function getUsersFieldType(field: UsersModelFieldEnum): BaseEntityFieldType {
+  switch (field) {
+    case UsersModelFieldEnum.CreatedAt:
+      return BaseEntityFieldType.Date;
+    case UsersModelFieldEnum.Id:
+      return BaseEntityFieldType.Number;
+    case UsersModelFieldEnum.UserId:
+      return BaseEntityFieldType.String;
+    case UsersModelFieldEnum.Username:
+      return BaseEntityFieldType.String;
+    case UsersModelFieldEnum.UserRoleEnum:
+      return BaseEntityFieldType.Enum;
+  }
 }
 
 export class UsersModel extends BaseEntityClass<UsersModelFieldEnum> implements UsersModel {

@@ -708,6 +708,10 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Record not found",
             [LanguageEnum.NL]: "Record niet gevonden",
         },
+        [ExceptionEnum.RECORD_IS_DUPLICATE]: {
+            [LanguageEnum.EN]: "Record is a duplicate",
+            [LanguageEnum.NL]: "Record is een duplicaat",
+        },
         [ExceptionEnum.USER_NOT_FOUND]: {
             [LanguageEnum.EN]: "User not found",
             [LanguageEnum.NL]: "Gebruiker niet gevonden",

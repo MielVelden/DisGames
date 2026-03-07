@@ -1,13 +1,13 @@
-import { ServersModel, ServersModelFieldEnum, ServersSaveModel, RepositoryWithBase } from "../interfaces/database";
+import { getServersFieldType, ServersModel, ServersModelFieldEnum, ServersSaveModel, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ComponentError } from "../utils/application/Error";
 
-class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveModel> {
-    public readonly baseRepository: BaseRepository<ServersModel, ServersSaveModel>;
+class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum> {
+    public readonly baseRepository: BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel>(TableEnum.SERVERS, ServersModelFieldEnum);
+        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>(TableEnum.SERVERS, ServersModelFieldEnum, getServersFieldType);
     }
 
     async getByIdAsync(id: number): Promise<ServersModel | null> {

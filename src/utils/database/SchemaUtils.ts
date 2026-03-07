@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { BaseEntityFieldType } from '../../interfaces/database/BaseEntity';
 
 export class SchemaUtils {
   static capitalize(str: string): string {
@@ -92,6 +93,46 @@ export class SchemaUtils {
         return 'boolean';
       default:
         return 'any';
+    }
+  }
+
+  static mapMySQLTypeToBaseEntityFieldType(columnName: string, mysqlType: string, enumMapping: Record<string, string>, tableName?: string): BaseEntityFieldType {
+    const lowercaseName = columnName.toLowerCase();
+
+    if (enumMapping[lowercaseName])
+      return BaseEntityFieldType.Enum;
+
+    if (SchemaUtils.isMultiLingualString(columnName))
+      return BaseEntityFieldType.MultiLingualString;
+
+    if (SchemaUtils.isJsonField(columnName) && tableName)
+      return BaseEntityFieldType.Json;
+
+    switch (mysqlType.toLowerCase()) {
+      case 'int':
+      case 'smallint':
+      case 'mediumint':
+      case 'bigint':
+      case 'float':
+      case 'double':
+      case 'decimal':
+        return BaseEntityFieldType.Number;
+      case 'varchar':
+      case 'text':
+      case 'char':
+      case 'tinytext':
+      case 'mediumtext':
+      case 'longtext':
+        return BaseEntityFieldType.String;
+      case 'date':
+      case 'datetime':
+      case 'timestamp':
+        return BaseEntityFieldType.Date;
+      case 'boolean':
+      case 'tinyint':
+        return BaseEntityFieldType.Boolean;
+      default:
+        return BaseEntityFieldType.Unknown;
     }
   }
 
