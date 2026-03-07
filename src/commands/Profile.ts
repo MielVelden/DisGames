@@ -20,7 +20,7 @@ const optionsConfig = [
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
                     const profileComponents = createProfileContainer(userProfile);
-                    await event.addComponentAsync(profileComponents);
+                    await event.addComponentsAsync(profileComponents);
 
                     // Add game switcher
                     const gameSelectMenu = createAllGamesSelectMenu({
@@ -32,7 +32,7 @@ const optionsConfig = [
                             const gameId = Number(interaction.selected);
                             const userGameProfile = await UserService.getUserGameProfileAsync(event.user.userId, event.server.ServerId, gameId);
                             const profileGameComponents = createProfileGameContainer(userGameProfile);
-                            await interaction.addComponentAsync(profileGameComponents);
+                            await interaction.addComponentsAsync(profileGameComponents);
                             await interaction.editAsync();
                         }
                     });
@@ -45,7 +45,7 @@ const optionsConfig = [
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
                     const profileComponents = createProfileContainer(userProfile);
-                    await event.addComponentAsync(profileComponents);
+                    await event.addComponentsAsync(profileComponents);
                     await event.replyAsync();
                 }
             },

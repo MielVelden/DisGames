@@ -168,6 +168,16 @@ export interface I18nTranslations {
                 clickHereToChangeLanguage: LanguageTranslations;
             };
         },
+        aboutme: {
+            description: LanguageTranslations;
+            labels: {
+                title: LanguageTranslations;
+                description: LanguageTranslations;
+                github: LanguageTranslations;
+                invite: LanguageTranslations;
+                version: (version: string) => MultiLingualString;
+            };
+        },
         impersonate: {
             description: LanguageTranslations;
         },

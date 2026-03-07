@@ -626,6 +626,34 @@ export const i18n: I18nTranslations = {
                 },
             },
         },
+        aboutme: {
+            description: {
+                [LanguageEnum.EN]: "Show information about the bot",
+                [LanguageEnum.NL]: "Toon informatie over de bot",
+            },
+            labels: {
+                title: {
+                    [LanguageEnum.EN]: "DisGames",
+                    [LanguageEnum.NL]: "DisGames",
+                },
+                description: {
+                    [LanguageEnum.EN]: "Step into a world of endless fun with DisGames, the ultimate minigame bot for Discord. Dive into a collection of unique, captivating minigames made to bring your community together. From brain-teasing puzzles to thrilling action challenges, there is something for everyone. User-friendly slashcommands (/) make playing these games effortless and intuitive.\n\nDisGames offers a wide array of minigames for every taste and fosters camaraderie and competition. Challenge friends and fellow gamers, or team up in co-op games. Adding the bot to your Discord server is quick and easy. Elevate your server today and redefine how you connect and have fun.",
+                    [LanguageEnum.NL]: "Stap in een wereld van eindeloze fun met DisGames, de ultieme minigame-bot voor Discord. Duik in een collectie unieke, meeslepende minigames die je community samenbrengen. Van hersenkrakers tot spannende actie-uitdagingen: voor ieder wat wils. Gebruiksvriendelijke slashcommands (/) maken het spelen van deze spellen moeiteloos en intuïtief.\n\nDisGames biedt een breed scala aan minigames voor elke smaak en stimuleert kameraadschap en competitie. Daag vrienden en medespelers uit, of werk samen in co-op games. De bot toevoegen aan je Discord-server gaat snel en eenvoudig. Hef je server vandaag naar een hoger niveau en herdefinieer hoe je verbindt en plezier hebt.",
+                },
+                github: {
+                    [LanguageEnum.EN]: "GitHub",
+                    [LanguageEnum.NL]: "GitHub",
+                },
+                invite: {
+                    [LanguageEnum.EN]: "Invite",
+                    [LanguageEnum.NL]: "Uitnodigen",
+                },
+                version: (version: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Version: {version}",
+                    [LanguageEnum.NL]: "Versie: {version}",
+                }, { version }),
+            },
+        },
         impersonate: {
             description: {
                 [LanguageEnum.EN]: "Impersonate another user",

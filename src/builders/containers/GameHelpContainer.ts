@@ -1,54 +1,24 @@
-import GameService from "../../services/domain/GameService";
+import { Component } from "../../interfaces/application/Message";
 import { GameTypeEnum } from "../../interfaces/enums";
-import { Component, ComponentType, Container } from "../../interfaces/application/Message";
+import ComponentService from "../../services/application/ComponentService";
+import MediaService from "../../services/application/MediaService";
+import GameService from "../../services/domain/GameService";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
-import MediaService from "../../services/application/MediaService";
+import { createTitle } from "../../utils/helpers/Markdown";
 
 export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
-    const gameModule = GameService.getGameByType(gameType);
+    GameService.getGameByType(gameType);
     const gameImage = MediaService.getGameImage(gameType);
     const gameInfo = i18n.commands.games.types[gameType];
 
     return [
-        {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.MEDIA_GALLERY,
-                    items: [
-                        {
-                            media: gameImage
-                        }
-                    ]
-                },
-            ]
-        } as Container,
-        {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.TITLE,
-                    content: new MultiLingualString(gameInfo.name)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: new MultiLingualString(gameInfo.longDescription)
-                },
-                {
-                    type: ComponentType.SEPARATOR,
-                    divider: true,
-                    spacing: 1
-                },
-                {
-                    type: ComponentType.TITLE,
-                    content: new MultiLingualString(i18n.commands.games.labels.howToPlay)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: new MultiLingualString(gameInfo.howToPlay)
-                },
-            ]
-        } as Container
+        ComponentService.createImage(gameImage, false),
+        ComponentService.createSeparator(),
+        ComponentService.createContent(createTitle(new MultiLingualString(gameInfo.name))),
+        ComponentService.createContent(new MultiLingualString(gameInfo.longDescription)),
+        ComponentService.createSeparator(),
+        ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.labels.howToPlay))),
+        ComponentService.createContent(new MultiLingualString(gameInfo.howToPlay)),
     ];
 }

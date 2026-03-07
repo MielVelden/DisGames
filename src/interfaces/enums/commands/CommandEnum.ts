@@ -5,4 +5,5 @@ export enum CommandEnum {
     IMPERSONATE = 'impersonate',
     RESTARTGAME = 'restartgame',
     SETTINGS = "settings",
+    ABOUTME = "aboutme",
 }

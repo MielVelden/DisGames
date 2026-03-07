@@ -133,7 +133,7 @@ class MediaService {
         }
     }
 
-    public getBaseImage(name: 'welcome' | 'profile'): Media {
+    public getBaseImage(name: 'welcome' | 'profile' | 'aboutme'): Media {
         const baseImagePath = path.join(this.imagesPath, `${name}.${MediaType.PNG}`);
 
         if (fs.existsSync(baseImagePath)) {

@@ -1,7 +1,7 @@
 import { CommandOption, CommandOptionChoice, CommandOptionChoiceConfig, CommandOptionConfig } from "../../interfaces/application/Command";
 import { ButtonHandler, HandlerConfig, SelectMenuHandler } from "../../interfaces/application/Event";
 import { Media } from "../../interfaces/application/Media";
-import { ActionButton, Component, ComponentType, Container, ContainerBuilder, SelectMenu, TextDisplay } from "../../interfaces/application/Message";
+import { ActionButton, Component, ComponentType, Container, ContainerBuilder, LinkButton, SelectMenu, Separator, TextDisplay } from "../../interfaces/application/Message";
 import { EventTypeEnum, GameTypeEnum } from "../../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../../utils/i18n/i18n";
 import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -17,6 +17,14 @@ class ComponentService {
             custom_id: crypto.randomUUID(),
             ...config,
         }, EventTypeEnum.BUTTON, handlerConfig);
+    }
+
+    public createLinkButton(config: Omit<LinkButton, "type" | "custom_id">): LinkButton {
+        return this.createComponent({
+            type: ComponentType.BUTTON,
+            custom_id: crypto.randomUUID(),
+            ...config,
+        }, EventTypeEnum.BUTTON);
     }
 
     public createSelectMenu(config: SelectMenu, handlerConfig?: HandlerConfig): SelectMenu {
@@ -151,6 +159,14 @@ class ComponentService {
             type: ComponentType.TEXT_DISPLAY,
             content: createMultiLingualString(toonEncode(data))
         } as TextDisplay;
+    }
+
+    public createSeparator(): Separator {
+        return {
+            type: ComponentType.SEPARATOR,
+            divider: true,
+            spacing: 1,
+        } as Separator;
     }
 }
 

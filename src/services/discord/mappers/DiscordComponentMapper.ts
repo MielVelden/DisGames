@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { BaseInteractionEvent, InteractionEvent } from '../../../interfaces/application/Event';
-import { ActionButton, ComponentType, Container, Content, Footer, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
+import { ActionButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -129,11 +129,13 @@ class DiscordComponentMapper {
         }
     }
 
-    public async mapButtonToDiscordButtonAsync(button: ActionButton): Promise<DiscordButtonBuilder> {
+    public async mapButtonToDiscordButtonAsync(button: ActionButton | LinkButton): Promise<DiscordButtonBuilder> {
         const discordButton = new DiscordButtonBuilder()
-            .setCustomId(button.custom_id)
             .setLabel(button.label?.getMessage() || "Button")
             .setStyle(DiscordEnumMapper.mapButtonStyleToDiscordButtonStyle(button.style));
+
+        if (button.style !== ButtonStyle.LINK)
+            discordButton.setCustomId(button.custom_id);
 
         if (button.emoji) {
             if (typeof button.emoji === "string")
@@ -145,6 +147,9 @@ class DiscordComponentMapper {
                     animated: button.emoji.animated
                 });
         }
+
+        if (button.style === ButtonStyle.LINK)
+            discordButton.setURL(button.url);
 
         if (button.disabled)
             discordButton.setDisabled(true);
@@ -184,7 +189,7 @@ class DiscordComponentMapper {
 
     private excludeComponentsInContainers(components: Component[]): Component[] {
         const componentsInContainers: Set<Component> = new Set();
-        
+
         // Find all components that are inside containers
         const findComponentsInContainers = (comps: Component[]): void => {
             for (const component of comps) {
@@ -197,9 +202,9 @@ class DiscordComponentMapper {
                 }
             }
         };
-        
+
         findComponentsInContainers(components);
-        
+
         // Return only components that are not inside containers
         return components.filter(component => !componentsInContainers.has(component));
     }
@@ -207,32 +212,32 @@ class DiscordComponentMapper {
     public async mapActionRowComponentsAsync(components: Component[]): Promise<DiscordActionRowBuilder<any>[]> {
         // Exclude buttons that are already inside containers
         const componentsToProcess = this.excludeComponentsInContainers(components);
-        
+
         const discordComponents = await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)));
-        
+
         // Group components by type - only including ActionRow-compatible components
         const buttons = discordComponents.filter(c => c instanceof DiscordButtonBuilder);
-        const selectMenus = discordComponents.filter(c => 
-            c instanceof DiscordStringSelectMenuBuilder || 
-            c instanceof DiscordUserSelectMenuBuilder || 
-            c instanceof DiscordRoleSelectMenuBuilder || 
-            c instanceof DiscordMentionableSelectMenuBuilder || 
+        const selectMenus = discordComponents.filter(c =>
+            c instanceof DiscordStringSelectMenuBuilder ||
+            c instanceof DiscordUserSelectMenuBuilder ||
+            c instanceof DiscordRoleSelectMenuBuilder ||
+            c instanceof DiscordMentionableSelectMenuBuilder ||
             c instanceof DiscordChannelSelectMenuBuilder);
-        
+
         const actionRows: DiscordActionRowBuilder<any>[] = [];
-        
+
         // Create ActionRow for each type if there are components
         if (buttons.length > 0) {
             actionRows.push(this.createActionRowWithComponents(buttons));
         }
-        
+
         if (selectMenus.length > 0) {
             // Each select menu must be in its own ActionRow
             selectMenus.forEach(menu => {
                 actionRows.push(this.createActionRowWithComponents(menu));
             });
         }
-        
+
         return actionRows;
     }
 
@@ -241,14 +246,14 @@ class DiscordComponentMapper {
         const actionRowComponents = await this.mapActionRowComponentsAsync(components.filter(
             component => DiscordEnumMapper.isActionRowComponent(component)
         ));
-        
+
         // Non-ActionRow components (TextDisplay, MediaGallery, Container)
         const otherComponentPromises = components
             .filter(component => !DiscordEnumMapper.isActionRowComponent(component))
             .map(component => this.mapComponentToDiscordComponentAsync(component));
-        
+
         const otherComponents = await Promise.all(otherComponentPromises);
-        
+
         // Return all components together (with type cast to any[] to resolve type incompatibility)
         return [...otherComponents, ...actionRowComponents];
     }
@@ -271,17 +276,17 @@ class DiscordComponentMapper {
 
     private async mapSeparatorToDiscordSeparatorAsync(separator: Separator): Promise<DiscordSeparatorBuilder> {
         const discordSeparator = new DiscordSeparatorBuilder();
-        
+
         if (separator.divider !== undefined) {
             discordSeparator.setDivider(separator.divider);
         }
-        
+
         if (separator.spacing !== undefined) {
             // Map spacing values 1 -> Small, 2 -> Large (based on Discord's enum)
             const spacingSize = separator.spacing === 1 ? 1 : 2; // SeparatorSpacingSize.Small : SeparatorSpacingSize.Large
             discordSeparator.setSpacing(spacingSize);
         }
-        
+
         return discordSeparator;
     }
 
@@ -290,7 +295,7 @@ class DiscordComponentMapper {
             .addItems(mediaGallery.items.map(item => {
                 const galleryItem = new DiscordMediaGalleryItemBuilder()
                     .setSpoiler(item.spoiler || false);
-                
+
                 // Handle local disk path
                 if (item.media.url.startsWith('http:') || item.media.url.startsWith('https:')) {
                     galleryItem.setURL(item.media.url);
@@ -305,7 +310,7 @@ class DiscordComponentMapper {
                 } else {
                     galleryItem.setDescription("No description");
                 }
-                
+
                 return galleryItem;
             }));
     }
@@ -323,7 +328,7 @@ class DiscordComponentMapper {
         let i = 0;
         while (i < container.components.length) {
             const component = container.components[i];
-            
+
             if (!component || !component.type) {
                 i++;
                 continue;
@@ -333,19 +338,19 @@ class DiscordComponentMapper {
                 // Collect consecutive buttons
                 const consecutiveButtons: ActionButton[] = [];
                 let j = i;
-                
-                while (j < container.components.length && 
-                       container.components[j]?.type === ComponentType.BUTTON) {
+
+                while (j < container.components.length &&
+                    container.components[j]?.type === ComponentType.BUTTON) {
                     consecutiveButtons.push(container.components[j] as ActionButton);
                     j++;
                 }
-                
+
                 // Map all consecutive buttons and group them in one ActionRow
                 const buttonPromises = consecutiveButtons.map(btn => this.mapButtonToDiscordButtonAsync(btn));
                 const discordButtons = await Promise.all(buttonPromises);
                 const buttonActionRow = this.createActionRowWithComponents(discordButtons);
                 discordContainer.addActionRowComponents([buttonActionRow]);
-                
+
                 i = j; // Skip processed buttons
             } else {
                 // Process other component types individually
@@ -388,15 +393,15 @@ class DiscordComponentMapper {
 
     public async buildMessageContentAsync(event: BaseInteractionEvent, components: Component[], message?: MultiLingualString | string, ephemeral?: boolean): Promise<DiscordMessageContent | null> {
         return withEventContextAsync(event, async () => {
-            if(message) {
-                if(typeof message === 'string')
+            if (message) {
+                if (typeof message === 'string')
                     message = createMultiLingualString(message);
 
                 components.push(ComponentService.createContent(message));
             }
 
             const rootComponents = await this.mapRootComponentsAsync(components);
-            
+
             if (rootComponents.length === 0) {
                 return null;
             }
@@ -418,7 +423,7 @@ class DiscordComponentMapper {
 
     private collectLocalAttachments(components: Component[]): AttachmentBuilder[] {
         const files: AttachmentBuilder[] = [];
-        
+
         const findMediaGalleries = (components: Component[]): void => {
             for (const component of components) {
                 if (!component || !component.type)
@@ -426,7 +431,7 @@ class DiscordComponentMapper {
 
                 if (component.type === ComponentType.MEDIA_GALLERY) {
                     const mediaGallery = component as MediaGallery;
-                    
+
                     for (const item of mediaGallery.items) {
                         if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:')) {
                             try {
@@ -454,7 +459,7 @@ class DiscordComponentMapper {
                 }
             }
         };
-        
+
         findMediaGalleries(components);
         return files;
     }
