@@ -4,6 +4,7 @@ import { ExceptionEnum } from "../../interfaces/enums";
 import PointRepository from "../../repositories/PointRepository";
 import { ErrorHelper } from "../../utils/application/Error";
 import { BaseDomainService } from "./BaseDomainService";
+import Logger from "../../utils/application/Logger";
 
 class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeof PointRepository> {
     protected readonly repository = PointRepository;
@@ -14,7 +15,6 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
 
     protected async performSaveAsync(savable: PointsSaveModel, event: InteractionEvent): Promise<PointsModel> {
         if (savable.isUpdate()) {
-            // Update the record
             const entity = await this.repository.getByIdAsync(savable.getId()!);
             if (!entity)
                 ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
@@ -25,32 +25,37 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
             savable.validateHasNotChanged(PointsModelFieldEnum.GameId, entity.GameId);
 
             entity.Points += savable.Points!;
-            return await this.repository.saveAsync(entity);
+            const updated = await this.repository.saveAsync(entity);
+            Logger.logInfo(`Updated points for user ${updated.UserId} on server ${updated.ServerId} in game ${updated.GameId}: delta ${savable.Points}, total ${updated.Points}`);
+            return updated;
         } else {
             savable.validateIsNotNull(PointsModelFieldEnum.UserId);
             savable.validateIsNotNull(PointsModelFieldEnum.ServerId);
             savable.validateIsNotNull(PointsModelFieldEnum.GameId);
             savable.validateIsNotNull(PointsModelFieldEnum.Points);
 
-            // Check if the record already exists
             const entity = await this.repository.getPointsByUserServerGameIdAsync(savable.UserId!, savable.ServerId!, savable.GameId!);
             if (entity) {
                 entity.Points += savable.Points!;
-                return await this.repository.saveAsync(entity);
+                const updated = await this.repository.saveAsync(entity);
+                Logger.logInfo(`Updated points for user ${updated.UserId} on server ${updated.ServerId} in game ${updated.GameId}: delta ${savable.Points}, total ${updated.Points}`);
+                return updated;
             }
 
-            // Create new record
-            return await this.repository.saveAsync(new PointsSaveModel({
+            const created = await this.repository.saveAsync(new PointsSaveModel({
                 UserId: savable.UserId,
                 ServerId: savable.ServerId,
                 Points: savable.Points,
                 GameId: savable.GameId,
             }));
+            Logger.logInfo(`Created points record for user ${created.UserId} on server ${created.ServerId} in game ${created.GameId}: points ${created.Points}`);
+            return created;
         }
     }
 
-    public purgeAsync(id: number): Promise<void> {
-        return this.repository.purgeAsync(id);
+    public async purgeAsync(id: number): Promise<void> {
+        await this.repository.purgeAsync(id);
+        Logger.logInfo(`Purged points record with id ${id}`);
     }
 }
 

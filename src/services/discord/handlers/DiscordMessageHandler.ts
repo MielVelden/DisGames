@@ -20,7 +20,8 @@ import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
 import { createDenyButton } from '../../../builders/buttons/DenyButton';
 import { EventTypeEnum, ExceptionEnum } from '../../../interfaces/enums';
 import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
-import { ErrorHelper } from '../../../utils/application/Error';
+import { assertNever, ErrorHelper } from '../../../utils/application/Error';
+import Logger from '../../../utils/application/Logger';
 
 class DiscordMessageHandler {
     public async sendMessageAsync(user: DiscordUser, message: string): Promise<void> {
@@ -28,7 +29,13 @@ class DiscordMessageHandler {
     }
 
     public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined, ephemeral?: boolean): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, ephemeral);
+        let content: DiscordMessageContent | null;
+        try {
+            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, ephemeral);
+        } catch (error) {
+            await Logger.logError(`Failed to build reply content for event type ${event.type}`, error as Error);
+            throw error;
+        }
         if (!content)
             return;
 
@@ -43,7 +50,15 @@ class DiscordMessageHandler {
     }
 
     public async sendAsync(event: InteractionEvent, message: MultiLingualString | undefined): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
+        let content: DiscordMessageContent | null;
+        
+        try {
+            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
+        } catch (error) {
+            await Logger.logError(`Failed to build send content for event type ${event.type}`, error as Error);
+            throw error;
+        }
+
         if (!content) 
             return;
 
@@ -65,7 +80,15 @@ class DiscordMessageHandler {
     }
 
     public async editAsync(event: InteractionEvent, message?: MultiLingualString | string): Promise<void> {
-        const content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
+        let content: DiscordMessageContent | null;
+        
+        try {
+            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message);
+        } catch (error) {
+            await Logger.logError(`Failed to build edit content for event type ${event.type}`, error as Error);
+            throw error;
+        }
+        
         if (!content)
             return;
 

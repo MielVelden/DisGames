@@ -9,6 +9,7 @@ import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component, Container } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
+import { compareStrings } from "../../utils/helpers/String";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");
@@ -67,7 +68,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.userInput === event.getGameDataAnswer();
+            return compareStrings(event.userInput as string, event.getGameDataAnswer());
         },
 
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {

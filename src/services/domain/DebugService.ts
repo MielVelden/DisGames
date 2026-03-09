@@ -5,6 +5,7 @@ import DebugRepository from "../../repositories/DebugRepository";
 import { ErrorHelper } from "../../utils/application/Error";
 import { UniqueCodes } from "../../utils/helpers/UniqueCodes";
 import { BaseDomainService } from "./BaseDomainService";
+import Logger from "../../utils/application/Logger";
 
 class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof DebugRepository> {
     protected readonly repository = DebugRepository;
@@ -24,16 +25,21 @@ class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof 
             savable.validateIsNotNull(DebugModelFieldEnum.ServerId);
             savable.validateIsNotNull(DebugModelFieldEnum.Data);
             
-            return await this.repository.saveAsync(savable);
+            const updated = await this.repository.saveAsync(savable);
+            Logger.logInfo(`Updated debug record with id ${updated.Id} and code ${updated.UniqueCode}`);
+            return updated;
         } else {
             savable.validateIsNull(DebugModelFieldEnum.UniqueCode);
             savable.UniqueCode = UniqueCodes.generateUUID();
-            return await this.repository.saveAsync(savable);
+            const created = await this.repository.saveAsync(savable);
+            Logger.logInfo(`Created debug record with id ${created.Id} and code ${created.UniqueCode}`);
+            return created;
         }
     }
 
     public async purgeAsync(id: number): Promise<void> {
         await this.repository.purgeAsync(id);
+        Logger.logInfo(`Purged debug record with id ${id}`);
     }
 }
 

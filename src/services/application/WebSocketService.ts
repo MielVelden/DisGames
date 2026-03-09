@@ -2,6 +2,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { WebSocketEvent, WebSocketMessage, JobProgressData } from "../../interfaces/application/WebSocket";
 import { assertNever, ErrorHelper } from "../../utils/application/Error";
+import Logger from "../../utils/application/Logger";
 
 type Subscription = { table: TableEnum; objectId?: number };
 type JobSubscription = { executionId: string };
@@ -13,7 +14,8 @@ export class WebSocketService {
 		wss.on("connection", (socket) => {
 			const id = Math.random().toString(36).slice(2);
 			this.clients.set(id, { socket, subs: [], jobSubs: [] });
-			
+			Logger.logInfo(`WebSocket client connected: ${id}`);
+
 			socket.send(JSON.stringify({
 				event: 'CLIENT_ID',
 				data: { clientId: id }
@@ -31,17 +33,22 @@ export class WebSocketService {
 						case WebSocketEvent.DELETE_RECORD:
 						case WebSocketEvent.JOB_PROGRESS:
 						case WebSocketEvent.CLIENT_ID:
-							// Explicitly ignored events
 							break;
 						default: 
 							assertNever(msg.event, WebSocketEvent)
 					}
 
-				} catch {
-					/* ignore */
+				} catch (error) {
+					Logger.logError("Failed to parse WebSocket message", error as Error);
 				}
 			});
-			socket.once("close", () => this.clients.delete(id));
+			socket.on("error", (error) => {
+				Logger.logError(`WebSocket error for client ${id}`, error as Error);
+			});
+			socket.once("close", () => {
+				this.clients.delete(id);
+				Logger.logInfo(`WebSocket client disconnected: ${id}`);
+			});
 		});
 	}
 
@@ -91,8 +98,8 @@ export class WebSocketService {
 			if (isSubscribed) {
 				try {
 					client.socket.send(JSON.stringify(message));
-				} catch {
-					
+				} catch (error) {
+					Logger.logError(`Failed to send job progress to client ${clientId}`, error as Error);
 				}
 			}
 		}

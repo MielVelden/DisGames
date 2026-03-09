@@ -24,6 +24,7 @@ import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
+import Logger from '../../utils/application/Logger';
 
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';
@@ -69,6 +70,7 @@ class DiscordService {
 
     public async handleGuildCreateAsync(guild: DiscordGuild): Promise<void> {
         const event = await DiscordGuildMapper.mapGuildToGuildCreateEventAsync(guild);
+        Logger.logInfo(`Joined Discord guild ${guild.name} (${guild.id})`);
         if (event.systemChannelId) {
             const components = createWelcomeContainer();
             await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server.LanguageEnum);
@@ -137,6 +139,11 @@ class DiscordService {
     public getOption(interaction: DiscordChatInputCommandInteraction, name: string): string | number | boolean | undefined {
         const option = interaction.options.get(name);
         return option?.value;
+    }
+
+    public async handleRateLimitAsync(info: { timeout: number; limit: number; method: string; path: string; route: string }): Promise<void> {
+        const { timeout, limit, method, path, route } = info;
+        Logger.logWarning(`Discord rate limit hit: ${method} ${path} (route: ${route}), limit ${limit}, retry in ${timeout}ms`);
     }
 
     // #endregion

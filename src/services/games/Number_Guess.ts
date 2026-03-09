@@ -6,7 +6,11 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 import ComponentService from "../application/ComponentService";
 
-const MAX_NUMBER = 100;
+const MAX_NUMBER = 1000;
+
+function generateRandomNumber(): number {
+    return Math.floor(Math.random() * MAX_NUMBER) + 1;
+}
 
 export default {
     config: {
@@ -67,8 +71,8 @@ export default {
         },
 
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
-            const newAnswer = (Math.floor(Math.random() * MAX_NUMBER) + 1).toString();
-            event.setGameDataAnswer(newAnswer);
+            const newAnswer = generateRandomNumber();
+            event.setGameDataAnswer(newAnswer.toString());
 
             // Add the new answer to the event
             event.addAction({

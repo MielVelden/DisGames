@@ -6,6 +6,8 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
+import { compareStrings } from "../../utils/helpers/String";
+import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 
 export default {
     config: {
@@ -25,7 +27,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return event.userInput === event.getGameDataAnswer();
+            return compareStrings(event.userInput as string, event.getGameDataAnswer());
         },
 
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
@@ -52,5 +54,13 @@ export default {
                     description: i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].startMessage(firstQuestion)
                 })];
         },
+
+        async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
+            event.addAction({
+                enum: GameActionEnum.REACTION,
+                priority: GameActionPriorityEnum.HIGH,
+                component: DEFAULT_WRONG_ANSWER_EMOJI
+            })
+        }
     } as GameFunctions
 } as GameModule;
