@@ -3,12 +3,14 @@ import TestConfig from '../config/TestConfig';
 import { createConnectionAsync, getTableName } from '../../src/repositories/util/ConnectionHandler';
 import { CLEANUP_ORDER } from './TableNameMapping';
 import Logger from '../../src/utils/application/Logger';
+import { initAsync } from '../../src/utils/handlers/InitHandler';
 
 export class DatabaseTestHelper {
     private static isTestModeEnabled: boolean = false;
 
     public static async setupForTestAsync(): Promise<void> {
         await createConnectionAsync();
+        await initAsync();
         this.enableTestMode();
     }
 

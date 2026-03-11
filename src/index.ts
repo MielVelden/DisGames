@@ -9,6 +9,7 @@ import { startHttpServer } from './server';
 import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
 import { JobScheduler } from './services/application/JobScheduler';
+import { initAsync } from './utils/handlers/InitHandler';
 
 getConfig();
 
@@ -25,6 +26,7 @@ discordClient.once('ready', async () => {
   Logger.logInfo(`Logged in as ${discordClient.user?.tag}`);
   await createConnectionAsync().then(async (success) => {
     if (success) {
+      await initAsync();
       await loadCommands(discordClient);
       await loadEvents(discordClient);
       const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);

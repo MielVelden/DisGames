@@ -38,11 +38,11 @@ import DataSheetService from "./DataSheetService";
 class GameService {
     private games: GameModule[] = [];
 
-    constructor() {
-        this.loadGames();
+    public async initAsync(): Promise<void> {
+        await this.loadGamesAsync();
     }
 
-    private loadGames(): void {
+    private async loadGamesAsync(): Promise<void> {
         const gamesPath = path.join(__dirname, '..', 'games');
 
         try {
@@ -56,7 +56,7 @@ class GameService {
                     const gameModule = require(gamePath).default as GameModule;
 
                     if (gameModule && gameModule.config && gameModule.functions) {
-                        this.completeGameConfigAsync(gameModule.config);
+                        await this.completeGameConfigAsync(gameModule.config);
                         this.games.push(gameModule);
                     }
                 } catch (error) {
