@@ -115,6 +115,16 @@ export function SetValidateRegex(
     });
 }
 
+export function SetIsRequiredInTestMode(
+    enumObject: EnumType,
+    enumValue: EnumValue,
+): void {
+    queueRegistration(() => {
+        const metadataMap = ensureMetadataMap(enumObject, enumValue);
+        metadataMap.set(MetadataKeyEnum.IsRequiredInTestMode, true);
+    });
+}
+
 export function SetEmoji(
     enumObject: EnumType,
     enumValue: EnumValue,

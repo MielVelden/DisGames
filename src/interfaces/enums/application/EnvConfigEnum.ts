@@ -1,7 +1,6 @@
 export enum EnvConfigEnum {
     DISGAMES_API_PORT = "DISGAMES_API_PORT",
     DATABASE_URL = "DATABASE_URL",
-    TEST_DATABASE_URL = "TEST_DATABASE_URL",
     DEBUG_DISCORD_WEBHOOK_URL = "DEBUG_DISCORD_WEBHOOK_URL",
     DEBUG_MODE = "DEBUG_MODE",
     DISCORD_CLIENT_ID = "DISCORD_CLIENT_ID",
@@ -19,7 +18,6 @@ export enum EnvConfigEnum {
 const configTypeDefaults = {
     [EnvConfigEnum.DISGAMES_API_PORT]: 3600,
     [EnvConfigEnum.DATABASE_URL]: "",
-    [EnvConfigEnum.TEST_DATABASE_URL]: "",
     [EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL]: "",
     [EnvConfigEnum.DEBUG_MODE]: false,
     [EnvConfigEnum.DISCORD_CLIENT_ID]: "",

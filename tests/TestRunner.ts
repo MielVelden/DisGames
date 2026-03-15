@@ -1,11 +1,16 @@
 #!/usr/bin/env ts-node
 
+import TestMode from '../src/utils/application/TestMode';
+TestMode.enable();
+
 import * as fs from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 import TestConfig from './config/TestConfig';
-import TestMode from '../src/utils/application/TestMode';
 import DatabaseTestHelper from './helpers/DatabaseTestHelper';
 import Logger from '../src/utils/application/Logger';
+import { getConfigValue } from '../src/utils/application/Config';
+import { EnvConfigEnum } from '../src/interfaces/enums/application/EnvConfigEnum';
 import { TestSuite, TestResult, TestRunResults, TestCase } from './interfaces/TestRunnerInterface';
 
 export class TestRunner {
@@ -67,17 +72,7 @@ export class TestRunner {
 
         const totalDuration = Date.now() - startTime;
 
-        // Print final results
-        this.printFinalResults({
-            total: totalTests,
-            passed: passedTests,
-            failed: failedTests,
-            skipped: skippedTests,
-            duration: totalDuration,
-            results: this.results
-        });
-
-        return {
+        const finalResults: TestRunResults = {
             total: totalTests,
             passed: passedTests,
             failed: failedTests,
@@ -85,6 +80,11 @@ export class TestRunner {
             duration: totalDuration,
             results: this.results
         };
+
+        this.printFinalResults(finalResults);
+        await this.sendResultsToWebhookAsync(finalResults);
+
+        return finalResults;
     }
 
     private async runSuiteAsync(suite: TestSuite): Promise<TestResult[]> {
@@ -244,10 +244,47 @@ export class TestRunner {
             Logger.logInfo(`⏭️ Skipped: ${skipped}`);
     }
 
+    private async sendResultsToWebhookAsync(results: TestRunResults): Promise<void> {
+        const webhookUrl = getConfigValue(EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL);
+        if (!webhookUrl)
+            return;
+
+        const { total, passed, failed, skipped, duration } = results;
+        const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+        const lines: string[] = [
+            '# :abacus: Final Test Results',
+            '',
+            `**Total Tests:** ${total}`,
+            `> Passed: **${passed}** *(${passRate}%)*`,
+            `> Failed: **${failed}**`,
+            `> Skipped: **${skipped}**`,
+            `> Duration: *${duration}ms*`,
+        ];
+
+        if (failed > 0) {
+            lines.push('');
+            lines.push('**Failed Tests:**');
+            results.results
+                .filter(r => !r.success && r.error?.message !== 'Test skipped')
+                .forEach(result => {
+                    lines.push(`> ${result.suite} → ${result.test}`);
+                    lines.push(`> *${result.error?.message}*`);
+                });
+        }
+
+        lines.push('');
+        lines.push(failed === 0 ? '*All tests passed!*' : '*Some tests failed.*');
+
+        try {
+            await axios.post(webhookUrl, { content: lines.join('\n') });
+        } catch (error) {
+            Logger.logError('Failed to send test results to webhook:', error as Error);
+        }
+    }
+
     private printFinalResults(results: TestRunResults): void {
-        Logger.logInfo('=====================================');
-        Logger.logInfo('📈 Final Test Results');
-        Logger.logInfo('=====================================');
+        Logger.logInfo('# Test Results');
 
         const { total, passed, failed, skipped, duration } = results;
         const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
@@ -318,7 +355,6 @@ export class TestRunner {
 async function main(): Promise<void> {
     const args = process.argv.slice(2);
     const runner = new TestRunner();
-    TestMode.enable();
 
     try {
         // Debug mode
@@ -329,18 +365,11 @@ async function main(): Promise<void> {
         }
 
         // Load test files based on arguments
-        if (args.includes('--unit'))
-            await runner.loadTestFiles(path.join(__dirname, 'unit'));
-        else if (args.includes('--integration'))
-            await runner.loadTestFiles(path.join(__dirname, 'integration'));
-        else if (args.includes('--performance'))
+        await runner.loadTestFiles(path.join(__dirname, 'unit'));
+        await runner.loadTestFiles(path.join(__dirname, 'integration'));
+        
+        if (args.includes('--performance') || args.includes('--all'))
             await runner.loadTestFiles(path.join(__dirname, 'performance'));
-        else {
-            // Load all tests
-            await runner.loadTestFiles(path.join(__dirname, 'unit'));
-            await runner.loadTestFiles(path.join(__dirname, 'integration'));
-            // await runner.loadTestFiles(path.join(__dirname, 'performance')); // Disabled for now
-        }
 
         // Run all loaded tests
         const results = await runner.runAllAsync();

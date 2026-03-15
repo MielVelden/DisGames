@@ -15,7 +15,7 @@ export class TestConfig {
     private constructor() {
         this._environment = {
             isTestMode: true,
-            databaseUrl: getConfigValue(EnvConfigEnum.TEST_DATABASE_URL) || getConfigValue(EnvConfigEnum.DATABASE_URL) || '',
+            databaseUrl: getConfigValue(EnvConfigEnum.DATABASE_URL) || '',
             logLevel: LogLevel.ERROR,
             testTimeout: getConfigValue(EnvConfigEnum.TEST_TIMEOUT) as number,
             rollbackTransactions: getConfigValue(EnvConfigEnum.TEST_ROLLBACK) as boolean ?? true
@@ -37,7 +37,7 @@ export class TestConfig {
 
     private validateConfig(): void {
         if (!this._environment.databaseUrl)
-            throw new Error('DATABASE_URL or TEST_DATABASE_URL must be set in environment variables');
+            throw new Error('DATABASE_URL must be set in environment variables');
     }
 
     public static reset(): void {

@@ -3,7 +3,8 @@ export enum MetadataKeyEnum {
     ExternalIdField = "ExternalIdField",
     IsRequired = "IsRequired",
     ValidateRegex = "ValidateRegex",
-    Emoji = "Emoji"
+    Emoji = "Emoji",
+    IsRequiredInTestMode = "IsRequiredInTestMode"
 }
 
 export type EnumValue = string | number;

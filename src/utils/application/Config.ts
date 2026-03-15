@@ -5,6 +5,7 @@ import { getEnumAsList } from "../helpers/Enum";
 import { getEnumProperty } from "../helpers/EnumMetadata";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import { assertNever, ErrorHelper } from "./Error";
+import TestMode from "./TestMode";
 
 type ConfigSchemaShape = {
     [K in EnvConfigEnum]: ZodTypeAny;
@@ -22,7 +23,15 @@ function createSchemaShape(): ConfigSchemaShape {
         const validateRegex = getEnumProperty(EnvConfigEnum, enumValue, MetadataKeyEnum.ValidateRegex) as string | undefined;
 
         const validator = buildValidator(enumValue, validateRegex);
-        schemaShape[enumValue] = isRequired ? validator : validator.optional();
+        if(TestMode.isEnabled()) {
+            const isRequiredInTestMode = (getEnumProperty(EnvConfigEnum, enumValue, MetadataKeyEnum.IsRequiredInTestMode) as boolean | undefined) ?? false;
+            if(isRequiredInTestMode)
+                schemaShape[enumValue] = validator;
+            else
+                schemaShape[enumValue] = validator.optional();
+        }
+        else
+            schemaShape[enumValue] = isRequired ? validator : validator.optional();
     });
 
     return schemaShape;

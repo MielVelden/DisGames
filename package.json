@@ -16,11 +16,9 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "ts-node --project tests/tsconfig.json tests/TestRunner.ts",
-    "test:unit": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --unit",
-    "test:integration": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --integration",
     "test:performance": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --performance",
-    "test:coverage": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --coverage",
-    "test:debug": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --debug"
+    "test:debug": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --debug",
+    "test:all": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --all"
   },
   "dependencies": {
     "@discordjs/builders": "^1.7.0",
