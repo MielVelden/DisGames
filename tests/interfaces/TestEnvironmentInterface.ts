@@ -5,5 +5,4 @@ export interface TestEnvironment {
     databaseUrl: string;
     logLevel: LogLevel;
     testTimeout: number;
-    rollbackTransactions: boolean;
 }

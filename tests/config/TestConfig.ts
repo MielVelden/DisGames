@@ -18,7 +18,6 @@ export class TestConfig {
             databaseUrl: getConfigValue(EnvConfigEnum.DATABASE_URL) || '',
             logLevel: LogLevel.ERROR,
             testTimeout: getConfigValue(EnvConfigEnum.TEST_TIMEOUT) as number,
-            rollbackTransactions: getConfigValue(EnvConfigEnum.TEST_ROLLBACK) as boolean ?? true
         };
 
         this.validateConfig();

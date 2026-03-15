@@ -72,7 +72,7 @@ export async function runQueryAsync(query: string, params?: any[]): Promise<any[
             ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
 
         Logger.logDebug(params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
-        const [rows] = await pool!.query(query, params);
+        const [rows] = await connection!.query(query, params);
         return rows as any[];
     } catch (err) {
         Logger.logError(`Error while running database query`, err as Error);

@@ -15,15 +15,11 @@ export class DatabaseTestHelper {
     }
 
     public static async startTestCaseAsync(): Promise<void> {
-        if (TestConfig.environment.rollbackTransactions) {
-            await TestDatabase.startTransactionAsync();
-        }
+        await TestDatabase.startTransactionAsync();
     }
 
     public static async endTestCaseAsync(): Promise<void> {
-        if (TestConfig.environment.rollbackTransactions && TestDatabase.isInTransaction()) {
-            await TestDatabase.rollbackTransactionAsync();
-        }
+        await TestDatabase.rollbackTransactionAsync();
     }
 
     public static async teardownAsync(): Promise<void> {
