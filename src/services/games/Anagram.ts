@@ -1,15 +1,17 @@
 import { GameActionEnum, GameActionPriorityEnum, GameFunctions, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
-import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
+import { GameTypeEnum } from "../../interfaces/enums";
 import { GameSettingsEnum } from "../../interfaces/enums";
 import { DifficultyEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
-import { Component, Container } from "../../interfaces/application/Message";
+import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import { compareStrings } from "../../utils/helpers/String";
+import { addPrefix, createBlock, createFooter, createTitle } from "../../utils/helpers/Markdown";
+import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");
@@ -40,6 +42,7 @@ export default {
         settings: [
             {
                 key: GameSettingsEnum.DIFFICULTY,
+                disabled: true,
                 type: GameSettingType.ENUM,
                 label: new MultiLingualString(i18n.commands.games.settings.difficulty.label),
                 description: new MultiLingualString(i18n.commands.games.settings.difficulty.description),
@@ -81,18 +84,37 @@ export default {
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContainer({
-                    description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambledMessage)
-                })
+                component: [
+                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name), event.gameConfig.emoji))),
+                    ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].howToPlay)),
+                    ComponentService.createContent(i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!()),
+                    ComponentService.createContent(createBlock(createMultiLingualString(scrambledMessage))),
+                    ComponentService.createSeparator(),
+                    ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer))),
+                ]
             });
 
             event.setGameDataAnswer(nextAnswerMessage);
         },
 
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
-            return [ComponentService.createContainer({
-                description: i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!(scrambleWord(gameData[0].Response.getMessage(server.LanguageEnum)))
-            })];
+            return [
+                ComponentService.createSeparator(),
+                ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name), "🔍"))),
+                ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].howToPlay)),
+                ComponentService.createContent(i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!()),
+                ComponentService.createContent(createBlock(createMultiLingualString(scrambleWord(gameData[0].Response.getMessage(server.LanguageEnum))))),
+                ComponentService.createSeparator(),
+                ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer)))
+            ];
+        },
+
+        async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
+            event.addAction({
+                enum: GameActionEnum.REACTION,
+                priority: GameActionPriorityEnum.HIGH,
+                component: DEFAULT_WRONG_ANSWER_EMOJI
+            })
         }
     } as GameFunctions
 } as GameModule;

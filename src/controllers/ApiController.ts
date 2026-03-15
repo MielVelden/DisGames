@@ -177,7 +177,7 @@ export class ApiController {
 			const paramName = paramNames[i];
 
 			// Check if parameter is event: TimelineEvent
-			if (paramName.includes('timelineEvent')) {
+			if (paramName.includes('event')) {
 				if (!identity)
 					ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
 				const user = await UserService.toModelAsync(identity);

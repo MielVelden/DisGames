@@ -118,7 +118,6 @@ export default {
         expectedType: "string",
         addCorrectReaction: true,
         hasImages: false,
-        hasDataSheets: true,
         options: {
             [GameOptionEnum.IS_INACTIVE]: false,
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: false,

@@ -13,6 +13,14 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.EN]: "All set",
                 [LanguageEnum.NL]: "Klaar",
             },
+            enabled: {
+                [LanguageEnum.EN]: "Enabled",
+                [LanguageEnum.NL]: "Ingeschakeld",
+            },
+            disabled: {
+                [LanguageEnum.EN]: "Disabled",
+                [LanguageEnum.NL]: "Uitgeschakeld",
+            },
             cancel: {
                 [LanguageEnum.EN]: "Dismiss",
                 [LanguageEnum.NL]: "Annuleer",
@@ -168,14 +176,6 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Choose a channel",
                     [LanguageEnum.NL]: "Kies een kanaal",
                 },
-                confirmSetupTitle: {
-                    [LanguageEnum.EN]: "Confirm Game Setup",
-                    [LanguageEnum.NL]: "Bevestig Spel Instelling",
-                },
-                confirmSetupDescription: (gameName: string, channelName: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Game: `{gameName}`\nChannel: `{channelName}`",
-                    [LanguageEnum.NL]: "Spel: `{gameName}`\nKanaal: `{channelName}`",
-                }, { gameName, channelName }),
                 movedToChannel: (channel: string) => new MultiLingualString({
                     [LanguageEnum.EN]: "Moved to {channel}",
                     [LanguageEnum.NL]: "Verplaatst naar {channel}",
@@ -280,6 +280,24 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Kies de datasheets voor dit spel",
                     },
                 },
+                confirm: {
+                    title: {
+                        [LanguageEnum.EN]: "Confirm Game Setup",
+                        [LanguageEnum.NL]: "Bevestig Spel Instelling",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Validate all the options below and confirm the setup",
+                        [LanguageEnum.NL]: "Valideer alle opties hieronder en bevestig de instelling",
+                    },
+                    gameName: (gameName: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "> Game: `{gameName}`",
+                        [LanguageEnum.NL]: "> Spel: `{gameName}`",
+                    }, { gameName }),
+                    channelName: (channelName: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "> Channel: `{channelName}`",
+                        [LanguageEnum.NL]: "> Kanaal: `{channelName}`",
+                    }, { channelName }),
+                },
             },
             buttons: {
                 delete: {
@@ -362,8 +380,8 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.NL]: "Eerste letter: {firstAnswer}",
                     }, { firstAnswer }),
                     nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "Next word: {nextAnswer}",
-                        [LanguageEnum.NL]: "Volgend woord: {nextAnswer}",
+                        [LanguageEnum.EN]: "> I'm thinking of a word with the letters:",
+                        [LanguageEnum.NL]: "> Ik denk aan een woord met de letters:",
                     }, { nextAnswer: nextAnswer || "" }),
                 },
                 [GameTypeEnum.NUMBER_GUESS]: {

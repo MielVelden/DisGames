@@ -6,7 +6,7 @@ import { InteractionEvent } from "../../interfaces/application/Event";
 import { createGenericButton } from "./GenericButton";
 
 export function createCancelButton(userId: string): BaseButton {
-    return createGenericButton(new MultiLingualString(i18n.labels.common.cancel), ButtonStyle.SECONDARY, "❌", userId, async (event: InteractionEvent) => {
+    return createGenericButton(new MultiLingualString(i18n.labels.common.cancel), ButtonStyle.SECONDARY, "🔻", userId, async (event: InteractionEvent) => {
         await event.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.labels.common.cancel)));
     });
 }

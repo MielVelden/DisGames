@@ -42,7 +42,7 @@ export interface BaseInteractionEvent {
 
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
-    getConfirmationFromUser(container: Component): Promise<InteractionEvent | null>;
+    getConfirmationFromUser(container: Component[]): Promise<InteractionEvent | null>;
     getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null>;
 
     getChannelNameAsync(channelId: string): Promise<string>;

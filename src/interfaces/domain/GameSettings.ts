@@ -17,6 +17,7 @@ export interface GameSettingOption {
 
 export interface BaseGameSetting {
     key: GameSettingsEnum;
+    disabled?: boolean;
     label: MultiLingualString;
     description?: MultiLingualString;
     required?: boolean;

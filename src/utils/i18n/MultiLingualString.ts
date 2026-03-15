@@ -69,6 +69,23 @@ export class MultiLingualString {
         this.translations = processedTranslations;
     }
 
+    public static combine(strings: MultiLingualString[], separator: string = '\n'): MultiLingualString {
+        const keys = new Set<number>();
+        for (const s of strings) {
+            Object.keys(s.toJSON()).forEach(k => keys.add(parseInt(k)));
+        }
+
+        const combined: Record<number, string> = {};
+        for (const key of keys) {
+            const parts = strings
+                .map(s => s.toJSON()[key])
+                .filter((t): t is string => t != null && t.trim() !== '');
+            combined[key] = parts.join(separator);
+        }
+        
+        return MultiLingualString.fromJSON(combined) ?? new MultiLingualString({} as LanguageTranslations);
+    }
+
     public static fromJSON(json: string | Record<number, string> | null): MultiLingualString | null {
         if (!json) return null;
 

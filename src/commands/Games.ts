@@ -30,6 +30,14 @@ const optionsConfig = [
                 followUps: [{
                     key: GamesCommandFollowUpKeysEnum.ACTIVE_GAMES,
                     type: CommandOptionFollowUpType.SELECT_MENU,
+                    isRequiredAsync: async (event: SlashCommandInteractionEvent) => {
+                        const game = await GameService.getGameByChannelIdAsync(event.channelId);
+                        if(game) {
+                            event.setFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES, game.GameTypeEnum);
+                            return false;
+                        }
+                        return true;
+                    },
                     configAsync: async (event: SlashCommandInteractionEvent): Promise<SelectMenu> => {
                         return createGamesSelectMenu(await GameService.getActiveGamesAsync(event.server.ServerId));
                     },
@@ -65,7 +73,7 @@ const optionsConfig = [
                             }));
                         })
                     ], game.Settings, event.server.LanguageEnum));
-                    await event.editAsync();
+                    await event.replyAsync();
                 }
             },
             {
@@ -102,7 +110,7 @@ const optionsConfig = [
                     let gameSettings: Games_Settings = {};
                     
                     // Check if game has settings and show settings configuration
-                    if (gameModule?.config.settings) {
+                    if (gameModule?.config.settings && gameModule.config.settings.length > 0) {
                         const defaultSettings = GameService.getDefaultSettings(gameModule.config.settings);
                         
                         // Use the new interactive settings container

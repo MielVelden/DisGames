@@ -52,6 +52,8 @@ export interface I18nTranslations {
     labels: {
         common: {
             success: LanguageTranslations;
+            enabled: LanguageTranslations;
+            disabled: LanguageTranslations;
             cancel: LanguageTranslations;
             accept: LanguageTranslations;
             deny: LanguageTranslations;
@@ -99,8 +101,6 @@ export interface I18nTranslations {
                 selectGame: LanguageTranslations;
                 deleteSuccess: LanguageTranslations;
                 chooseChannel: LanguageTranslations;
-                confirmSetupTitle: LanguageTranslations;
-                confirmSetupDescription: (gameName: string, channelName: string) => MultiLingualString;
                 movedToChannel: (channel: string) => MultiLingualString;
                 skipAnswer: LanguageTranslations;
                 howToPlay: LanguageTranslations;
@@ -133,6 +133,12 @@ export interface I18nTranslations {
                     label: LanguageTranslations;
                     description: LanguageTranslations;
                 };
+                confirm: {
+                    title: LanguageTranslations;
+                    description: LanguageTranslations;
+                    gameName: (gameName: string) => MultiLingualString;
+                    channelName: (channelName: string) => MultiLingualString;
+                }
             },
             buttons: {
                 delete: LanguageTranslations;

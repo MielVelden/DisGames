@@ -17,6 +17,7 @@ import ComponentService from "../../services/application/ComponentService";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import { ButtonInteractionEvent } from "../../interfaces/application/Event";
+import { isMultiLingualString } from "../../interfaces/application/i18n";
 
 export class GameSettingsContainer {
 
@@ -173,23 +174,39 @@ export class GameSettingsContainer {
     static createReadOnlyDisplay(config: GameSettingsDisplayConfig): Component[] {
         const components: Component[] = [];
 
+        const format = (label: string, status: string) => `> ${label}: **${status}**`;
+        const mls = (label: MultiLingualString, status: string | boolean | MultiLingualString) => {
+            if (typeof status === "boolean") {
+                const statusLabel = status ? i18n.labels.common.enabled : i18n.labels.common.disabled;
+                return new MultiLingualString({
+                    [LanguageEnum.EN]: format(label.getMessage(LanguageEnum.EN), statusLabel[LanguageEnum.EN]),
+                    [LanguageEnum.NL]: format(label.getMessage(LanguageEnum.NL), statusLabel[LanguageEnum.NL]),
+                })
+            }
+            else if (isMultiLingualString(status)) {
+                return new MultiLingualString({
+                    [LanguageEnum.EN]: format(label.getMessage(LanguageEnum.EN), status.getMessage(LanguageEnum.EN)),
+                    [LanguageEnum.NL]: format(label.getMessage(LanguageEnum.NL), status.getMessage(LanguageEnum.NL)),
+                })
+            }
+
+            return new MultiLingualString({
+                [LanguageEnum.EN]: format(label.getMessage(LanguageEnum.EN), status),
+                [LanguageEnum.NL]: format(label.getMessage(LanguageEnum.NL), status),
+            })
+        };
+
         config.settingsSchema.forEach((setting) => {
             const currentValue = config.settings[setting.key];
-            let displayEn = "";
-            let displayNl = "";
+            let display: MultiLingualString | undefined;
 
             if (setting.type === GameSettingType.BOOLEAN) {
-                const statusEmoji = currentValue ? "🟢" : "🔴";
-                const label = setting.label.getMessage(config.languageEnum);
-                displayEn = `${statusEmoji} ${label}`;
-                displayNl = `${statusEmoji} ${label}`;
+                const statusLabel = currentValue ? "Enabled" : "Disabled";
+                display = mls(setting.label, statusLabel);
             } else if (setting.type === GameSettingType.ENUM) {
                 const enumSetting = setting as EnumGameSetting;
-                const hasValue = enumSetting.options.some(opt => opt.value === currentValue);
-                const statusEmoji = hasValue ? "🟢" : "🔴";
-                const label = setting.label.getMessage(config.languageEnum);
-                displayEn = `${statusEmoji} ${label}`;
-                displayNl = `${statusEmoji} ${label}`;
+                const option = enumSetting.options.find(opt => opt.value === currentValue);
+                display = mls(setting.label, option?.label || new MultiLingualString(i18n.commands.games.settings.unknown));
             } else if (setting.type === GameSettingType.LIST) {
                 const listValues = Array.isArray(currentValue)
                     ? (currentValue as number[])
@@ -205,25 +222,29 @@ export class GameSettingsContainer {
                 });
 
                 const hasAny = selectedOptions.length > 0;
-                const statusEmoji = hasAny ? "🟢" : "🔴";
-                const label = setting.label.getMessage(config.languageEnum);
+                const statusLabel = hasAny ? i18n.labels.common.enabled : i18n.labels.common.disabled;
+                // TODO: Improve this
+                const labelEn = setting.label.getMessage(LanguageEnum.EN);
+                const labelNl = setting.label.getMessage(LanguageEnum.NL);
                 const valuesEn = selectedOptions.map(opt => opt.label.getMessage(LanguageEnum.EN)).join(", ");
                 const valuesNl = selectedOptions.map(opt => opt.label.getMessage(LanguageEnum.NL)).join(", ");
 
-                displayEn = hasAny
-                    ? `${statusEmoji} ${label}: ${valuesEn}`
-                    : `${statusEmoji} ${label}`;
-                displayNl = hasAny
-                    ? `${statusEmoji} ${label}: ${valuesNl}`
-                    : `${statusEmoji} ${label}`;
+                display = new MultiLingualString({
+                    [LanguageEnum.EN]: hasAny
+                        ? format(labelEn, `${statusLabel[LanguageEnum.EN]} ${valuesEn}`)
+                        : format(labelEn, statusLabel[LanguageEnum.EN]),
+                    [LanguageEnum.NL]: hasAny
+                        ? format(labelNl, `${statusLabel[LanguageEnum.NL]} ${valuesNl}`)
+                        : format(labelNl, statusLabel[LanguageEnum.NL]),
+                });
             }
+
+            if (!display)
+                return;
 
             components.push({
                 type: ComponentType.TEXT_DISPLAY,
-                content: new MultiLingualString({
-                    [LanguageEnum.EN]: displayEn,
-                    [LanguageEnum.NL]: displayNl,
-                })
+                content: display
             } as TextDisplay);
         });
 

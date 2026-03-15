@@ -46,6 +46,12 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
                             let currentEvent: InteractionEvent = event;
                             for (const followUp of choice.followUps) {
                                 if (followUp.type === CommandOptionFollowUpType.SELECT_MENU) {
+                                    if(followUp.isRequiredAsync) {
+                                        const isRequired = await followUp.isRequiredAsync(event);
+                                        if(!isRequired)
+                                            continue;
+                                    }
+
                                     const selectMenu = await followUp.configAsync(event);
 
                                     if(isSelectMenuEmpty(selectMenu)) {

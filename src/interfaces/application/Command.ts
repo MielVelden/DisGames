@@ -42,6 +42,7 @@ export enum CommandOptionFollowUpType {
 export interface CommandOptionFollowUpConfig<TKey extends string = string> {
     type: CommandOptionFollowUpType;
     key: TKey;
+    isRequiredAsync?: (event: SlashCommandInteractionEvent) => Promise<boolean>;
     configAsync(event: SlashCommandInteractionEvent): Promise<SelectMenu>;
     emptyReply?: MultiLingualString;
 }

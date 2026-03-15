@@ -40,6 +40,20 @@ export function createSubtitle(subtitle: MultiLingualString): MultiLingualString
     return subtitle.changeText((text) => `## ${text}`);
 }
 
+export function createFooter(footer: string | MultiLingualString): MultiLingualString {
+    if (isMultiLingualString(footer))
+        return footer.changeText((text) => `-# ${text}`);
+    return createMultiLingualString(`-# ${footer}`);
+}
+
 export function createBold(text: MultiLingualString): MultiLingualString {
     return text.changeText((t) => `**${t}**`);
+}
+
+export function addPrefix(text: MultiLingualString, prefix: string): MultiLingualString {
+    return text.changeText((t) => `${prefix} ${t}`);
+}
+
+export function addSuffix(text: MultiLingualString, suffix: string): MultiLingualString {
+    return text.changeText((t) => `${t} ${suffix}`);
 }

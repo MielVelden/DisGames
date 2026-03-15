@@ -72,18 +72,20 @@ class GameService {
         if (!gameConfig.settings)
             gameConfig.settings = [];
 
+        gameConfig.settings = gameConfig.settings.filter(s => !s.disabled);
+        
         if (gameConfig.hasDataSheets) {
             try {
                 const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
                 if (datasheets.length > 0) {
-                gameConfig.settings.push({
-                    key: GameSettingsEnum.DATASHEETS,
-                    type: GameSettingType.LIST,
-                    label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
-                    description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
-                    options: datasheets.map((datasheet: DatasheetsModel) => ({
-                        value: datasheet.Id,
-                        label: datasheet.Name,
+                    gameConfig.settings.push({
+                        key: GameSettingsEnum.DATASHEETS,
+                        type: GameSettingType.LIST,
+                        label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
+                        description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
+                        options: datasheets.map((datasheet: DatasheetsModel) => ({
+                            value: datasheet.Id,
+                            label: datasheet.Name,
                             description: datasheet.Description,
                         }))
                     });
@@ -144,11 +146,11 @@ class GameService {
             if (Array.isArray(gameData)) {
                 for (const data of gameData) {
                     const image = MediaService.getGameDataImage(game.GameTypeEnum, data.Id);
-                    components.push(ComponentService.createImage(image));
+                    components.push(ComponentService.createImage(image, false));
                 }
             } else {
                 const image = MediaService.getGameDataImage(game.GameTypeEnum, gameData.Id);
-                components.push(ComponentService.createImage(image));
+                components.push(ComponentService.createImage(image, false));
             }
         }
 
@@ -437,7 +439,12 @@ class GameService {
                 await event.reactAsync(action.component as string);
                 break;
             case GameActionEnum.COMPONENT:
-                event.addComponentAsync(action.component as Component);
+                if (Array.isArray(action.component)) {
+                    for (const component of action.component) {
+                        event.addComponentAsync(component);
+                    }
+                } else
+                    event.addComponentAsync(action.component as Component);
                 break;
             default:
                 assertNever(action.enum, GameActionEnum)
@@ -574,7 +581,7 @@ class GameService {
     ): Component[] {
         const components: Component[] = [];
 
-        schema.forEach((setting) => {
+        schema.filter(s => !s.disabled).forEach((setting) => {
             const currentValue = values[setting.key];
 
             // Title for setting

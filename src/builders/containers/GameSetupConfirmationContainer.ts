@@ -7,18 +7,25 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import GameService from "../../services/domain/GameService";
 import { GameSettingsContainer } from "./GameSettingsContainer";
+import MediaService from "../../services/application/MediaService";
+import { createTitle } from "../../utils/helpers/Markdown";
 
 export function createGameSetupConfirmationContainer(
     gameName: string, 
     channelName: string, 
-    gameTypeEnum?: GameTypeEnum,
+    gameTypeEnum: GameTypeEnum,
     settings?: GameSettingsValues,
     languageEnum: LanguageEnum = LanguageEnum.NL
-): Component {
-    const baseContainer = ComponentService.createContainer({
-        title: new MultiLingualString(i18n.commands.games.labels.confirmSetupTitle),
-        description: i18n.commands.games.labels.confirmSetupDescription(gameName, channelName)
-    });
+): Component[] {
+    const gameImage = MediaService.getGameImage(gameTypeEnum);
+
+    const components: Component[] = [
+        ComponentService.createImage(gameImage, false),
+        ComponentService.createSeparator(),
+        ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.settings.confirm.title))),
+        ComponentService.createContent(new MultiLingualString(i18n.commands.games.settings.confirm.description)),
+        ComponentService.createContent([i18n.commands.games.settings.confirm.gameName(gameName), i18n.commands.games.settings.confirm.channelName(channelName)]),
+    ];
 
     // If game has settings, add them to the confirmation
     if (gameTypeEnum && settings) {
@@ -31,20 +38,13 @@ export function createGameSetupConfirmationContainer(
             });
             
             // Combine both containers
-            return {
-                type: ComponentType.CONTAINER,
-                components: [
-                    ...baseContainer.components,
-                    {
-                        type: ComponentType.SEPARATOR,
-                        divider: true,
-                        spacing: 1
-                    },
-                    ...compactSettingsDisplay
-                ]
-            } as Container;
+            components.push(...compactSettingsDisplay);
         }
     }
 
-    return baseContainer;
+
+    return [
+        ...components,
+        ComponentService.createSeparator()
+    ];
 }

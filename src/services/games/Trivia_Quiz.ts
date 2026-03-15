@@ -19,7 +19,6 @@ export default {
         isCalculated: false,
         expectedType: "string",
         addCorrectReaction: true,
-        hasDataSheets: true,
         options: {
             [GameOptionEnum.ALLOW_SKIPPING]: true,
         }

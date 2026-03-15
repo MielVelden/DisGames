@@ -83,7 +83,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         return await DiscordMessageHandler.getUserInputByButtonsAsync(this as unknown as InteractionEvent, question, buttons);
     }
 
-    public async getConfirmationFromUser(container: Component): Promise<InteractionEvent | null> {
+    public async getConfirmationFromUser(container: Component[]): Promise<InteractionEvent | null> {
         return await DiscordMessageHandler.getConfirmationFromUser(this as unknown as InteractionEvent, container);
     }
 

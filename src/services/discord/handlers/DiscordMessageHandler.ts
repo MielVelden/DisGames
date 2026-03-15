@@ -281,7 +281,7 @@ class DiscordMessageHandler {
         });
     }
 
-    public async getConfirmationFromUser(event: InteractionEvent, container: Component): Promise<InteractionEvent | null> {
+    public async getConfirmationFromUser(event: InteractionEvent, components: Component[]): Promise<InteractionEvent | null> {
         return new Promise(async (resolve) => {
             const acceptButton = createAcceptButton(event.user.userId, async (btnEvent: InteractionEvent) => {
                 resolve(btnEvent);
@@ -294,31 +294,26 @@ class DiscordMessageHandler {
                 resolve(null);
             });
 
-            const discordAcceptButton = await DiscordComponentMapper.mapButtonToDiscordButtonAsync(acceptButton);
-            const discordDenyButton = await DiscordComponentMapper.mapButtonToDiscordButtonAsync(denyButton);
-
-            const discordContainer = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(container);
-
-            const replyOptions = DiscordComponentMapper.createReplyOptions(
-                [discordContainer, DiscordComponentMapper.createActionRowWithComponents([discordAcceptButton, discordDenyButton])],
-                []
-            );
+            components.push(...[acceptButton, denyButton]);
+            const replyContent = await DiscordComponentMapper.buildMessageContentAsync(event, components);
+            if (!replyContent)
+                return null;
 
             switch (event.type) {
                 case EventTypeEnum.SLASH_COMMAND:
                     if (event.currentInteraction.replied)
-                        await event.currentInteraction.editReply(replyOptions);
+                        await event.currentInteraction.editReply(replyContent);
                     else
-                        await event.currentInteraction.reply(replyOptions);
+                        await event.currentInteraction.reply(replyContent);
                     break;
                 case EventTypeEnum.MESSAGE:
                 case EventTypeEnum.MESSAGE_UPDATE:
                 case EventTypeEnum.MESSAGE_DELETE:
-                    await event.currentInteraction.reply(replyOptions);
+                    await event.currentInteraction.reply(replyContent);
                     break;
                 case EventTypeEnum.BUTTON:
                 case EventTypeEnum.SELECT_MENU:
-                    await event.currentInteraction.update(replyOptions);
+                    await event.currentInteraction.update(replyContent);
                     break;
                 default:
                     ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);

@@ -31,10 +31,14 @@ class ComponentService {
         return this.createComponent(config, EventTypeEnum.SELECT_MENU, handlerConfig);
     }
 
-    public createContent(content: MultiLingualString): TextDisplay {
+    public createContent(content: MultiLingualString | MultiLingualString[]): TextDisplay {
+        const resolved = Array.isArray(content)
+            ? MultiLingualString.combine(content)
+            : content;
+
         return {
             type: ComponentType.TEXT_DISPLAY,
-            content: content
+            content: resolved
         };
     }
 
@@ -103,31 +107,11 @@ class ComponentService {
         const gameImage = MediaService.getGameImage(gameTypeEnum);
 
         return [
-            {
-                type: ComponentType.CONTAINER,
-                components: [
-                    {
-                        type: ComponentType.MEDIA_GALLERY,
-                        items: [
-                            {
-                                media: gameImage
-                            }
-                        ]
-                    },
-                ]
-            } as Container,
-            {
-                type: ComponentType.CONTAINER,
-                components: [
-                    {
-                        type: ComponentType.TEXT_DISPLAY,
-                        content: i18n.commands.games.types[gameTypeEnum].startMessage(firstAnswer)
-                    }
-                ]
-            } as Container
+            this.createImage(gameImage, false),
+            this.createContent(i18n.commands.games.types[gameTypeEnum].startMessage(firstAnswer))
         ];
     }
-    
+
     public createImage(image: Media, includeContainer: boolean = true): Component {
         if (includeContainer)
             return {
