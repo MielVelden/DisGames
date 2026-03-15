@@ -29,7 +29,7 @@
       "name": "Debug Tests",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/tests/TestRunner.ts",
+      "program": "${workspaceFolder}/tests/Run.ts",
       "args": ["--debug"],
       "runtimeArgs": ["-r", "ts-node/register"],
       "env": {

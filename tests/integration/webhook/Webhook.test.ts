@@ -5,7 +5,7 @@ import { getConfigValue } from '../../../src/utils/application/Config';
 import { EnvConfigEnum } from '../../../src/interfaces/enums/application/EnvConfigEnum';
 
 export default function registerWebhookTests(runner: TestRunner): void {
-    const testWebhookUrl = getConfigValue(EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL);
+    const debugWebhookUrl = getConfigValue(EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL);
 
     const suite: TestSuite = {
         name: 'Discord Webhook',
@@ -14,10 +14,10 @@ export default function registerWebhookTests(runner: TestRunner): void {
             {
                 name: 'should send a test webhook message successfully',
                 description: 'sends a simple content payload to the test-webhook URL',
-                skip: !testWebhookUrl,
+                skip: !debugWebhookUrl,
                 timeout: 10000,
                 testFunction: async () => {
-                    const url = testWebhookUrl as string;
+                    const url = debugWebhookUrl as string;
 
                     const response = await axios.post(url, {
                         content: 'DisGames webhook integration test: hello from tests ✅'

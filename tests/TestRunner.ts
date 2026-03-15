@@ -1,11 +1,9 @@
 #!/usr/bin/env ts-node
 
-import TestMode from '../src/utils/application/TestMode';
-TestMode.enable();
-
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import TestMode from '../src/utils/application/TestMode';
 import TestConfig from './config/TestConfig';
 import DatabaseTestHelper from './helpers/DatabaseTestHelper';
 import Logger from '../src/utils/application/Logger';
@@ -255,6 +253,8 @@ export class TestRunner {
         const lines: string[] = [
             '# :abacus: Final Test Results',
             '',
+            `**When:** <t:${Math.floor(Date.now() / 1000)}:R>`,
+            '',
             `**Total Tests:** ${total}`,
             `> Passed: **${passed}** *(${passRate}%)*`,
             `> Failed: **${failed}**`,
@@ -351,8 +351,7 @@ export class TestRunner {
     }
 }
 
-// Main execution function
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
     const args = process.argv.slice(2);
     const runner = new TestRunner();
 
@@ -387,10 +386,4 @@ async function main(): Promise<void> {
     }
 }
 
-// Export for programmatic use
 export default TestRunner;
-
-// Run if this is the main module
-if (require.main === module) {
-    main();
-}

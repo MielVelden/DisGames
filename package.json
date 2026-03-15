@@ -15,10 +15,10 @@
     "db:down": "ts-node src/utils/database/GenerateSchema.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "test": "ts-node --project tests/tsconfig.json tests/TestRunner.ts",
-    "test:performance": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --performance",
-    "test:debug": "ts-node --project tests/tsconfig.json tests/TestRunner.ts --debug",
-    "test:all": "tsx --tsconfig tests/tsconfig.json tests/TestRunner.ts --all"
+    "test": "ts-node --project tests/tsconfig.json tests/Run.ts",
+    "test:performance": "ts-node --project tests/tsconfig.json tests/Run.ts --performance",
+    "test:debug": "ts-node --project tests/tsconfig.json tests/Run.ts --debug",
+    "test:all": "tsx --tsconfig tests/tsconfig.json tests/Run.ts --all"
   },
   "dependencies": {
     "@discordjs/builders": "^1.7.0",

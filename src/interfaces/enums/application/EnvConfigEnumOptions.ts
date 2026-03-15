@@ -27,6 +27,7 @@ SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_WEBHOOK_URL, /^https:\/\/(
 
 SetIsRequiredInTestMode(EnvConfigEnum, EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL, /^https:\/\/(ptb\.|canary\.)?discord\.com\/api\/webhooks\/\d+\/[\w-]+$/);
+SetIsRequiredInTestMode(EnvConfigEnum, EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL, /^https:\/\/(ptb\.|canary\.)?discord\.com\/api\/webhooks\/\d+\/[\w-]+$/);
 
 // Dashboard API Keys
