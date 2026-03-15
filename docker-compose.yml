@@ -1,0 +1,9 @@
+services:
+  test:
+    build: .
+    restart: "no"
+    command: ["npm", "run", "test:all"]
+    env_file:
+      - .env.test
+    environment:
+      - NODE_ENV=test
