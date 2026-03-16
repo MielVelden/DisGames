@@ -36,9 +36,8 @@ export type LanguageGameTypeTranslations<T extends GameTypeEnum> = {
         description: LanguageTranslations;
         longDescription: LanguageTranslations;
         howToPlay: LanguageTranslations;
-        startMessage: (firstAnswer: string) => MultiLingualString;
+        startMessage: (firstAnswer?: string) => MultiLingualString;
         nextAnswer?: (nextAnswer?: string | number) => MultiLingualString;
-        start?: () => MultiLingualString;
         incorrectAnswer?: () => MultiLingualString;
         gameComplete?: () => MultiLingualString;
     }

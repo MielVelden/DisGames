@@ -11,6 +11,7 @@ import { ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum"
 import ChartService from "./ChartService";
 import ServerRepository from "../../repositories/ServerRepository";
 import ServerService from "../domain/ServerService";
+import CacheRegistry from "../../repositories/util/CacheRegistry";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
@@ -23,6 +24,8 @@ class DashboardService {
                 return this.getServersDashboardAsync(identity);
             case DashboardEnum.ANALYTICS:
                 return this.getAnalyticsDashboardAsync(identity);
+            case DashboardEnum.PERFORMANCE:
+                return this.getCachePerformanceDashboardAsync();
             default:
                 assertNever(dashboardEnum, DashboardEnum)
         }
@@ -154,6 +157,34 @@ class DashboardService {
                 lineChart
             ]
         }
+    }
+
+    private getCachePerformanceDashboardAsync(): DashboardResponse {
+        const stats = CacheRegistry.getAggregateStats();
+        const footer = {
+            primaryText: `${stats.hits.toLocaleString()} hits / ${stats.totalRequests.toLocaleString()} requests`,
+            secondaryText: `${stats.misses.toLocaleString()} misses`
+        };
+
+        return {
+            cards: [
+                this.createDashboardCard(
+                    "Cache Hit Rate",
+                    `${stats.hitRatePercent}%`,
+                    stats.hitRatePercent >= 50 ? "up" : "down",
+                    footer
+                ),
+                this.createDashboardCard(
+                    "Total Cache Requests",
+                    stats.totalRequests,
+                    undefined,
+                    {
+                        primaryText: `${stats.hits.toLocaleString()} hits`,
+                        secondaryText: `${stats.misses.toLocaleString()} misses`
+                    }
+                )
+            ]
+        };
     }
 
     private async getAnalyticsDashboardAsync(identity: User): Promise<DashboardResponse> {

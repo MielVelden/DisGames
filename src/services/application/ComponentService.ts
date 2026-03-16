@@ -9,6 +9,7 @@ import { EventService } from "./EventService";
 import MediaService from "./MediaService";
 import Logger from "../../utils/application/Logger";
 import { toonEncode } from "../../utils/helpers/Toon";
+import { addPrefix, createBlock, createTitle } from "../../utils/helpers/Markdown";
 
 class ComponentService {
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
@@ -103,12 +104,16 @@ class ComponentService {
         ];
     }
 
-    public createStartMessage(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component[] {
+    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string): Component[] {
         const gameImage = MediaService.getGameImage(gameTypeEnum);
 
         return [
             this.createImage(gameImage, false),
-            this.createContent(i18n.commands.games.types[gameTypeEnum].startMessage(firstAnswer))
+            this.createSeparator(),
+            this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[gameTypeEnum].name), gameEmoji))),
+            this.createContent(new MultiLingualString(i18n.commands.games.types[gameTypeEnum].howToPlay)),
+            this.createContent(i18n.commands.games.types[gameTypeEnum].startMessage!()),
+            this.createContent(createBlock(createMultiLingualString(firstAnswer))),
         ];
     }
 

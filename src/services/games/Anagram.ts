@@ -85,12 +85,7 @@ export default {
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
                 component: [
-                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name), event.gameConfig.emoji))),
-                    ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].howToPlay)),
-                    ComponentService.createContent(i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!()),
                     ComponentService.createContent(createBlock(createMultiLingualString(scrambledMessage))),
-                    ComponentService.createSeparator(),
-                    ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer))),
                 ]
             });
 
@@ -99,13 +94,7 @@ export default {
 
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createSeparator(),
-                ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name), "🔍"))),
-                ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].howToPlay)),
-                ComponentService.createContent(i18n.commands.games.types[GameTypeEnum.ANAGRAM].nextAnswer!()),
                 ComponentService.createContent(createBlock(createMultiLingualString(scrambleWord(gameData[0].Response.getMessage(server.LanguageEnum))))),
-                ComponentService.createSeparator(),
-                ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer)))
             ];
         },
 

@@ -3,6 +3,7 @@ import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { compareStrings } from "../../utils/helpers/String";
 
 export default {
     config: {
@@ -24,13 +25,22 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            return typeof event.userInput === 'string' && 
-                   typeof event.getGameDataAnswer() === 'string' &&
-                   event.userInput.toLowerCase().charAt(0) === event.getGameDataAnswer().toLowerCase();
+            if (typeof event.userInput != 'string' || typeof event.getGameDataAnswer() != 'string')
+                return false;
+
+            const input = event.userInput.trim();
+
+            if (input.length <= 1)
+                return false;
+
+            if (!/^[A-Za-z]+$/.test(input))
+                return false;
+
+            return compareStrings(input.charAt(0), event.getGameDataAnswer());
         },
 
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
-            if (!event.userInput) 
+            if (!event.userInput)
                 return;
             const lastAnswer = event.userInput.toString().toLowerCase();
             const lastLetter = lastAnswer.charAt(lastAnswer.length - 1);

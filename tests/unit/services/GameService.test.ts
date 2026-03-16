@@ -88,23 +88,23 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 name: 'should validate game settings',
                 testFunction: async () => {
                     // Arrange
-                    const anagramGame = GameService.getGameByType(GameTypeEnum.ANAGRAM);
-                    AssertionHelpers.assertNotNull(anagramGame, 'Anagram game should exist');
+                    const countingGame = GameService.getGameByType(GameTypeEnum.COUNTING);
+                    AssertionHelpers.assertNotNull(countingGame, 'Counting game should exist');
                     
                     const validSettings: GameSettingsValues = {
-                        difficulty: 'medium',
+                        resetOnFail: true,
                     };
                     
                     const invalidSettings: GameSettingsValues = {
-                        difficulty: 'invalid',
+                        resetOnFail: 'invalid',
                     };
                     
                     // Act & Assert
-                    if (anagramGame?.config.settings) {
-                        const validResult = GameService.validateSettings(anagramGame.config.settings, validSettings);
+                    if (countingGame?.config.settings) {
+                        const validResult = GameService.validateSettings(countingGame.config.settings, validSettings);
                         AssertionHelpers.assertEqual(validResult.isValid, true, 'Valid settings should pass validation');
                         
-                        const invalidResult = GameService.validateSettings(anagramGame.config.settings, invalidSettings);
+                        const invalidResult = GameService.validateSettings(countingGame.config.settings, invalidSettings);
                         AssertionHelpers.assertEqual(invalidResult.isValid, false, 'Invalid settings should fail validation');
                     }
                 }

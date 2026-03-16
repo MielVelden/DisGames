@@ -2,6 +2,7 @@ import { REPOSITORY_CACHE_TTL } from "../../constants";
 import { durationToMilliseconds } from "../../utils/helpers/Duration";
 import Logger from "../../utils/application/Logger";
 import { BaseEntity } from "../../interfaces/database/BaseEntity";
+import CacheRegistry from "./CacheRegistry";
 
 interface CacheEntry<T> {
   data: T;
@@ -18,10 +19,13 @@ export class CacheManager<Model extends BaseEntity> {
   private queryCache: Map<string, QueryCacheEntry<Model>> = new Map();
   private inFlightQueries: Map<string, Promise<Model[]>> = new Map();
   private tableName: string;
+  private hits: number = 0;
+  private misses: number = 0;
 
   constructor(tableName: string) {
     this.tableName = tableName;
     Logger.logDebug(`CacheManager initialized for table: ${tableName}`);
+    CacheRegistry.register(this);
   }
 
   private isValidCacheEntry<T>(entry: CacheEntry<T>): boolean {
@@ -34,39 +38,51 @@ export class CacheManager<Model extends BaseEntity> {
 
   public setCacheEntry(id: number, data: Model): void {
     const expiry = Date.now() + durationToMilliseconds(REPOSITORY_CACHE_TTL);
-    this.cache.set(id, { data, expiry });
+    this.cache.set(id, { data: structuredClone(data), expiry });
   }
 
   public setQueryCacheEntry(queryHash: string, data: Model[]): void {
     const expiry = Date.now() + durationToMilliseconds(REPOSITORY_CACHE_TTL);
-    this.queryCache.set(queryHash, { data, expiry });
+    this.queryCache.set(queryHash, { data: structuredClone(data), expiry });
   }
 
   public getCacheEntry(id: number): Model | null {
     const entry = this.cache.get(id);
-    if (!entry)
-      return null;
-    
-    if (!this.isValidCacheEntry(entry)) {
-      this.cache.delete(id);
+    if (!entry) {
+      this.misses++;
       return null;
     }
-    
-    return entry.data;
+
+    if (!this.isValidCacheEntry(entry)) {
+      this.cache.delete(id);
+      this.misses++;
+      return null;
+    }
+
+    this.hits++;
+    return structuredClone(entry.data);
   }
 
   public getQueryCacheEntry(queryHash: string): Model[] | null {
     const entry = this.queryCache.get(queryHash);
-    if (!entry)
-      return null;
-    
-    if (!this.isValidQueryCacheEntry(entry)) {
-      this.queryCache.delete(queryHash);
+    if (!entry) {
+      this.misses++;
       return null;
     }
-    
+
+    if (!this.isValidQueryCacheEntry(entry)) {
+      this.queryCache.delete(queryHash);
+      this.misses++;
+      return null;
+    }
+
+    this.hits++;
     Logger.logDebug(`Cache HIT [${this.tableName}] - Returning cached query result`);
-    return entry.data;
+    return structuredClone(entry.data);
+  }
+
+  public getHitMissStats(): { hits: number; misses: number } {
+    return { hits: this.hits, misses: this.misses };
   }
 
   public generateQueryHash(query: string, params: any[]): string {
@@ -81,7 +97,7 @@ export class CacheManager<Model extends BaseEntity> {
   public invalidateCache(id: number): void {
     const existed = this.cache.has(id);
     this.cache.delete(id);
-    
+
     if (existed)
       Logger.logDebug(`Cache INVALIDATE [${this.tableName}] ID: ${id}`);
   }
@@ -117,7 +133,7 @@ export class CacheManager<Model extends BaseEntity> {
 
     return stats;
   }
-  
+
   public getDetailedStats(): {
     idCacheSize: number;
     queryCacheSize: number;
@@ -127,22 +143,22 @@ export class CacheManager<Model extends BaseEntity> {
     // Count expired entries without removing them
     let expiredCount = 0;
     const now = Date.now();
-    
+
     for (const entry of this.cache.values()) {
       if (now >= entry.expiry) expiredCount++;
     }
-    
+
     for (const entry of this.queryCache.values()) {
       if (now >= entry.expiry) expiredCount++;
     }
-    
+
     const stats = {
       idCacheSize: this.cache.size,
       queryCacheSize: this.queryCache.size,
       expiredEntries: expiredCount,
       tableName: this.tableName
     };
-    
+
     return stats;
   }
 } 

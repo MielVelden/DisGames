@@ -8,6 +8,7 @@ import { GameDataModel, ServersModel } from "../../interfaces/database/TableInte
 import { Component } from "../../interfaces/application/Message";
 import { compareStrings } from "../../utils/helpers/String";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { createBlock } from "../../utils/helpers/Markdown";
 
 export default {
     config: {
@@ -33,23 +34,13 @@ export default {
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
             const nextAnswer = await event.getNextAnswerAsync();
             const nextAnswerMessage = nextAnswer[0].Response.getMessage(event.server.LanguageEnum);
-            event.addAction({
-                enum: GameActionEnum.COMPONENT,
-                priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContainer({
-                    title: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
-                    description: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
-                })
-            })
-
             event.setGameDataAnswer(nextAnswerMessage);
         },
 
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createContainer({
-                    description: i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].start!()
-                })];
+                ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
+            ];
         },
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {

@@ -1,6 +1,6 @@
 import { Component } from "../application/Message";
 import { User } from "./User";
-import { EventTypeEnum } from "../enums";
+import { EventTypeEnum, GameTypeEnum } from "../enums";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { LanguageEnum } from "../enums";
 import { GameSettingsSchema } from "./GameSettings";
@@ -34,7 +34,7 @@ export interface IGameEvent {
 
 // Game configuration interface
 export interface GameConfig {
-    id: number;
+    id: GameTypeEnum;
     emoji: string;
     name: MultiLingualString;
     description: MultiLingualString;

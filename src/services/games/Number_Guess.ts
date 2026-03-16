@@ -2,11 +2,14 @@ import { GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } fr
 import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 import ComponentService from "../application/ComponentService";
+import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
+import { createBlock } from "../../utils/helpers/Markdown";
+import { Component } from "../../interfaces/application/Message";
 
-const MAX_NUMBER = 1000;
+const MAX_NUMBER = 10000;
 
 function generateRandomNumber(): number {
     return Math.floor(Math.random() * MAX_NUMBER) + 1;
@@ -21,7 +24,7 @@ export default {
         points: 1,
         isCalculated: true,
         expectedType: "number",
-        firstAnswer: "1",
+        firstAnswer: "5112",
         addCorrectReaction: false,
         options: {
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: true,
@@ -47,6 +50,24 @@ export default {
             return false;
         },
 
+        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
+            const newAnswer = generateRandomNumber();
+            event.setGameDataAnswer(newAnswer.toString());
+
+            // Add the new answer to the event
+            event.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.HIGH,
+                component: ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
+            });
+        },
+
+        async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
+            return [
+                ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
+            ];
+        },
+
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
             const answer = Number(event.getGameDataAnswer());
             const userAnswer = Number(event.userInput);
@@ -68,20 +89,6 @@ export default {
                     component: "🔽"
                 });
             }
-        },
-
-        async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
-            const newAnswer = generateRandomNumber();
-            event.setGameDataAnswer(newAnswer.toString());
-
-            // Add the new answer to the event
-            event.addAction({
-                enum: GameActionEnum.COMPONENT,
-                priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContainer({
-                    description: i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].nextAnswer!(MAX_NUMBER.toString())
-                })
-            });
         }
     }
 } as GameModule;

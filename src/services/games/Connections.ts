@@ -10,6 +10,7 @@ import GameImageService from "../image/GameImageService";
 import { STRING_DELIMITER } from "../../constants";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
+import { createBlock, createTitle } from "../../utils/helpers/Markdown";
 
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];
@@ -102,7 +103,7 @@ async function createGameImage(gameState: ConnectionsGameState, serverId: string
             gameState.solvedCategories
         );
 
-        return ComponentService.createImage(media);
+        return ComponentService.createImage(media, false);
     } else
         ErrorHelper.throw(ExceptionEnum.GAME_STATE_NOT_VALID);
 }
@@ -176,6 +177,15 @@ export default {
                     const nextGameState = createGameState(nextAnswer);
                     event.setGameDataAnswer(serializeGameState(nextGameState));
 
+                    event.addAction({
+                        enum: GameActionEnum.COMPONENT,
+                        priority: GameActionPriorityEnum.HIGH,
+                        component: [
+                            ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.CONNECTIONS].gameComplete!())),
+                            ComponentService.createSeparator()
+                        ]
+                    });
+
                     // New game image
                     event.addAction({
                         enum: GameActionEnum.COMPONENT,
@@ -190,9 +200,7 @@ export default {
             const gameState = createGameState(gameData)
             return [
                 await createGameImage(gameState, server.ServerId, server.LanguageEnum),
-                ComponentService.createContainer({
-                    description: i18n.commands.games.types[GameTypeEnum.CONNECTIONS].start!()
-                })];
+            ];
         },
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {

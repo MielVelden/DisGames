@@ -2,12 +2,13 @@ import { GameActionEnum, GameActionPriorityEnum, GameFunctions, GameModule, Game
 import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
 import { compareStrings } from "../../utils/helpers/String";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { addPrefix, createBlock, createFooter, createTitle } from "../../utils/helpers/Markdown";
 
 export default {
     config: {
@@ -33,15 +34,15 @@ export default {
             const nextAnswer = await event.getNextAnswerAsync();
             const nextQuestion = nextAnswer[0].Message;
             const nextAnswerMessage = nextAnswer[0].Response.getMessage(event.server.LanguageEnum);
+            
+            // Add the next question to the event
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContainer({
-                    title: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].name),
-                    description: nextQuestion,
-                    footer: new MultiLingualString(i18n.commands.games.labels.skipAnswer)
-                })
-            })
+                component: [
+                    ComponentService.createContent(createBlock(nextQuestion)),
+                ]
+            });
 
             event.setGameDataAnswer(nextAnswerMessage);
         },
@@ -49,9 +50,8 @@ export default {
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
             const firstQuestion = gameData[0].Message.getMessage(server.LanguageEnum);
             return [
-                ComponentService.createContainer({
-                    description: i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].startMessage(firstQuestion)
-                })];
+                ComponentService.createContent(createBlock(createMultiLingualString(firstQuestion))),
+            ];
         },
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {

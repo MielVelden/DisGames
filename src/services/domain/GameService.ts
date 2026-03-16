@@ -34,6 +34,7 @@ import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
+import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
 
 class GameService {
     private games: GameModule[] = [];
@@ -73,7 +74,7 @@ class GameService {
             gameConfig.settings = [];
 
         gameConfig.settings = gameConfig.settings.filter(s => !s.disabled);
-        
+
         if (gameConfig.hasDataSheets) {
             try {
                 const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
@@ -132,13 +133,20 @@ class GameService {
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
-        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, game.Answer as string);
+        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string);
 
         if (gameModule.functions.getStartComponentsAsync) {
             const server = await ServerService.getByExternalIdAsync(game.ServerId);
             const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
             components.pop();
             components = components.concat(startComponents);
+        }
+
+        if (gameModule.config.options[GameOptionEnum.ALLOW_SKIPPING]) {
+            components.push(
+                ComponentService.createSeparator(),
+                ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer)))
+            );
         }
 
         if (gameModule.config.hasImages && gameData) {
@@ -360,9 +368,32 @@ class GameService {
                 gameEvent.addAction({
                     enum: GameActionEnum.COMPONENT,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: ComponentService.createImage(image)
+                    component: ComponentService.createImage(image, false)
                 })
             }
+        }
+
+        if (!gameEvent.gameConfig.isCalculated) {
+            gameEvent.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.CRITICAL,
+                component: [
+                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[gameEvent.gameConfig.id].name), gameEvent.gameConfig.emoji))),
+                    ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[gameEvent.gameConfig.id].howToPlay)),
+                    ComponentService.createContent(i18n.commands.games.types[gameEvent.gameConfig.id].nextAnswer!()),
+                ]
+            })
+        }
+
+        if (gameEvent.gameConfig.options[GameOptionEnum.ALLOW_SKIPPING]) {
+            gameEvent.addAction({
+                enum: GameActionEnum.COMPONENT,
+                priority: GameActionPriorityEnum.LOW,
+                component: [
+                    ComponentService.createSeparator(),
+                    ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer)))
+                ]
+            })
         }
 
         if (gameEvent.getUpdatedGameAnswerAsync)

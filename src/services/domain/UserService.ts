@@ -1,4 +1,4 @@
-import { UsersModel, UsersSaveModel } from "../../interfaces/database/TableInterfaces";
+import { UsersModel, UsersSaveModel, UsersModelFieldEnum } from "../../interfaces/database/TableInterfaces";
 import { UserRoleEnum } from "../../interfaces/enums";
 import { ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
@@ -14,6 +14,9 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
     protected readonly repository = UserRepository;
 
     protected async performSaveAsync(savable: UsersSaveModel, event: InteractionEvent): Promise<UsersModel> {
+        savable.validateIsProvidedAndNotNull(UsersModelFieldEnum.UserId);
+        savable.UserRoleEnum = UserRoleEnum.USER;
+
         const user = await UserRepository.saveAsync(savable);
         await TimelineBuilder.forUserUpdateAsync({
             old: null,

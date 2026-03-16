@@ -3,4 +3,5 @@ export enum DashboardEnum {
     USERS = "users",
     SERVERS = "servers",
     ANALYTICS = "statistics",
+    PERFORMANCE = "performance",
 }

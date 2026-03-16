@@ -181,8 +181,8 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.NL]: "Verplaatst naar {channel}",
                 }, { channel }),
                 skipAnswer: {
-                    [LanguageEnum.EN]: "Not familiar with the word? Enter '?'",
-                    [LanguageEnum.NL]: "Niet bekend met het woord? Voer '?' in",
+                    [LanguageEnum.EN]: "Not familiar with the answer? Enter '?'",
+                    [LanguageEnum.NL]: "Niet bekend met het antwoord? Voer '?' in",
                 },
                 howToPlay: {
                     [LanguageEnum.EN]: "How to Play",
@@ -331,10 +331,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Players take turns sending the next number in sequence. Start from the given number and count upward. Each player can only send one number at a time, and the sequence must be continuous.",
                         [LanguageEnum.NL]: "Spelers nemen om de beurt het volgende nummer in de reeks. Begin vanaf het gegeven nummer en tel omhoog. Elke speler kan maar één nummer per keer versturen, en de reeks moet doorlopend zijn.",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                    startMessage: (firstAnswer?: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "Start with {firstAnswer}",
                         [LanguageEnum.NL]: "We beginnen met {firstAnswer}",
-                    }, { firstAnswer }),
+                    }, { firstAnswer: firstAnswer || "" }),
                 },
                 [GameTypeEnum.WORD_SNAKE]: {
                     name: {
@@ -353,10 +353,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Start with the given letter and create a word. The next player must create a word that starts with the last letter of your word. Continue the chain as long as possible. No repeating words!",
                         [LanguageEnum.NL]: "Begin met de gegeven letter en maak een woord. De volgende speler moet een woord maken dat begint met de laatste letter van jouw woord. Ga zo lang mogelijk door met de keten. Geen herhalende woorden!",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First letter: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste letter: {firstAnswer}",
-                    }, { firstAnswer }),
+                    startMessage: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "> Try to create a word starting with the letter:",
+                        [LanguageEnum.NL]: "> Probeer een woord te maken dat begint met de letter:",
+                    })                    
                 },
                 [GameTypeEnum.ANAGRAM]: {
                     name: {
@@ -375,10 +375,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "You'll receive a set of scrambled letters. Rearrange them to form a valid word. Type your answer when you think you've solved it. The faster you solve it, the more points you earn!",
                         [LanguageEnum.NL]: "Je krijgt een set gemengde letters. Herschik ze om een geldig woord te vormen. Typ je antwoord wanneer je denkt dat je het hebt opgelost. Hoe sneller je het oplost, hoe meer punten je verdient!",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
+                    startMessage: (firstAnswer?: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "First letter: {firstAnswer}",
                         [LanguageEnum.NL]: "Eerste letter: {firstAnswer}",
-                    }, { firstAnswer }),
+                    }, { firstAnswer: firstAnswer || "" }),
                     nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
                         [LanguageEnum.EN]: "> I'm thinking of a word with the letters:",
                         [LanguageEnum.NL]: "> Ik denk aan een woord met de letters:",
@@ -401,13 +401,13 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "A secret number is chosen within a specific range. Make guesses and receive hints like 'higher' or 'lower' to guide your next attempt. Keep guessing until you find the correct number!",
                         [LanguageEnum.NL]: "Er wordt een geheim getal gekozen binnen een specifiek bereik. Doe gissingen en ontvang hints zoals 'hoger' of 'lager' om je volgende poging te begeleiden. Blijf raden tot je het juiste getal vindt!",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First number: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste getal: {firstAnswer}",
-                    }, { firstAnswer }),
+                    startMessage: (firstAnswer?: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The number is between 1 and {firstAnswer}",
+                        [LanguageEnum.NL]: "Het getal is tussen 1 en {firstAnswer}",
+                    }, { firstAnswer: firstAnswer || "10000" }),
                     nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "I'm thinking of a number between 1 and {nextAnswer}. Can you guess it?",
-                        [LanguageEnum.NL]: "Ik denk aan een getal tussen 1 en {nextAnswer}. Kun je het raden?",
+                        [LanguageEnum.EN]: "> I'm thinking of a number, can you guess it?",
+                        [LanguageEnum.NL]: "> Ik denk aan een getal, kan je het raden?",
                     }, { nextAnswer: nextAnswer || "" }),
                 },
                 [GameTypeEnum.TRIVIA_QUIZ]: {
@@ -427,10 +427,14 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Read each trivia question carefully and submit your answer. Questions cover various topics and difficulty levels. The first person to answer correctly wins the round and earns points.",
                         [LanguageEnum.NL]: "Lees elke trivia-vraag zorgvuldig en verstuur je antwoord. Vragen beslaan verschillende onderwerpen en moeilijkheidsgraden. De eerste persoon die correct antwoordt wint de ronde en verdient punten.",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First question: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste vraag: {firstAnswer}",
-                    }, { firstAnswer }),
+                    startMessage: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "First question:",
+                        [LanguageEnum.NL]: "Eerste vraag:",
+                    }),
+                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
+                        [LanguageEnum.EN]: "> I'm thinking of a trivia question:",
+                        [LanguageEnum.NL]: "> Ik denk aan een trivia vraag:",
+                    }, { nextAnswer: nextAnswer || "" }),
                 },
                 [GameTypeEnum.GUESS_THE_PRICE]: {
                     name: {
@@ -449,10 +453,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "You'll be shown a product with its description. Study it carefully and submit your price estimate. The player with the closest guess without going over wins the round. Currency is usually in local format.",
                         [LanguageEnum.NL]: "Je krijgt een product met bijbehorende beschrijving te zien. Bestudeer het zorgvuldig en verstuur je prijsschatting. De speler met de dichtste gissing zonder over te gaan wint de ronde. Valuta is meestal in lokaal formaat.",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First price: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste prijs: {firstAnswer}",
-                    }, { firstAnswer }),
+                    startMessage: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "First price:",
+                        [LanguageEnum.NL]: "Eerste prijs:",
+                    }),
                 },
                 [GameTypeEnum.MATH_QUIZ]: {
                     name: {
@@ -471,10 +475,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Solve the mathematical equation presented to you. Problems can include addition, subtraction, multiplication, division, and more advanced operations. Submit your numerical answer as quickly as possible for maximum points.",
                         [LanguageEnum.NL]: "Los de wiskundige vergelijking op die aan je wordt voorgelegd. Problemen kunnen optellen, aftrekken, vermenigvuldigen, delen en meer geavanceerde bewerkingen bevatten. Verstuur je numerieke antwoord zo snel mogelijk voor maximale punten.",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First problem: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste opgave: {firstAnswer}",
-                    }, { firstAnswer }),
+                    startMessage: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "First problem:",
+                        [LanguageEnum.NL]: "Eerste opgave:",
+                    }),
                 },
                 [GameTypeEnum.GUESS_THE_FLAG]: {
                     name: {
@@ -493,18 +497,14 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "You'll be shown a country's flag and need to identify which nation it represents. Type the country name as your answer. Flags range from well-known to more obscure nations, so sharpen those geography skills!",
                         [LanguageEnum.NL]: "Je krijgt de vlag van een land te zien en moet herkennen welke natie deze vertegenwoordigt. Typ de landnaam als je antwoord. Vlaggen variëren van bekende tot meer obscure landen, dus scherp die aardrijkskundevaardigheden aan!",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "Let’s start, the first flag is: {firstAnswer}",
-                        [LanguageEnum.NL]: "We beginnen, de eerste vlag is: {firstAnswer}",
-                    }, { firstAnswer }),
+                    startMessage: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "You can start guessing the flag by typing the country name",
+                        [LanguageEnum.NL]: "Je kan beginnen met raden aan de vlag door de landnaam te typen",
+                    }),
                     nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "Can you guess the flag?",
-                        [LanguageEnum.NL]: "Kun jij de vlag raden?",
-                    }),
-                    start: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "Let’s start, you can start guessing the flag by typing the country name. When you're not sure, you can skip the answer by typing '?'",
-                        [LanguageEnum.NL]: "We beginnen, je kan beginnen met raden aan de vlag door de landnaam te typen. Wanneer je niet zeker bent, kan je het antwoord overslaan door '?' te typen",
-                    }),
+                        [LanguageEnum.EN]: "> Can you guess the flag?",
+                        [LanguageEnum.NL]: "> Kun jij de vlag raden?",
+                    })
                 },
                 [GameTypeEnum.CONNECTIONS]: {
                     name: {
@@ -523,25 +523,17 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "You'll see 16 words arranged in a grid. Find groups of 4 words that belong together and submit them by typing the 4 words separated by commas or spaces. Each correct group will be highlighted. Find all 4 categories to win!",
                         [LanguageEnum.NL]: "Je ziet 16 woorden in een raster. Vind groepen van 4 woorden die bij elkaar horen en dien ze in door de 4 woorden te typen gescheiden door komma's of spaties. Elke juiste groep wordt gemarkeerd. Vind alle 4 categorieën om te winnen!",
                     },
-                    startMessage: (firstAnswer: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "Find groups of 4 related words. Type 4 words separated by commas to submit a group.",
-                        [LanguageEnum.NL]: "Vind groepen van 4 gerelateerde woorden. Typ 4 woorden gescheiden door komma's om een groep in te dienen.",
-                    }, { firstAnswer }),
-                    start: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "🔗 **Connections Game Started!** 🔗\n\nFind groups of 4 words that belong together. Type your guess as: `word1, word2, word3, word4`",
-                        [LanguageEnum.NL]: "🔗 **Verbindingen Spel Gestart!** 🔗\n\nVind groepen van 4 woorden die bij elkaar horen. Typ je gok als: `woord1, woord2, woord3, woord4`",
+                    startMessage: () => new MultiLingualString({
+                        [LanguageEnum.EN]: "> Find groups of 4 related words. Type your guess as: `word1, word2, word3, word4`",
+                        [LanguageEnum.NL]: "> Vind groepen van 4 gerelateerde woorden. Typ je gok als: `woord1, woord2, woord3, woord4`",
                     }),
                     nextAnswer: (remaining?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: `Great! You found a category! ${remaining} categories remaining. Keep looking for groups of 4 related words.`,
-                        [LanguageEnum.NL]: `Geweldig! Je hebt een categorie gevonden! Nog ${remaining} categorieën over. Blijf zoeken naar groepen van 4 gerelateerde woorden.`,
-                    }),
-                    incorrectAnswer: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "❌ That's not a valid group. Try again! Remember: you need exactly 4 words that belong to the same category.",
-                        [LanguageEnum.NL]: "❌ Dat is geen geldige groep. Probeer opnieuw! Onthoud: je hebt precies 4 woorden nodig die tot dezelfde categorie behoren.",
+                        [LanguageEnum.EN]: "> Great! You found a category! Keep looking for groups of 4 related words.",
+                        [LanguageEnum.NL]: "> Geweldig! Je hebt een categorie gevonden! Blijf zoeken naar groepen van 4 gerelateerde woorden.",
                     }),
                     gameComplete: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "🎉 **Congratulations!** 🎉\n\nYou found all 4 categories! Excellent word association skills!",
-                        [LanguageEnum.NL]: "🎉 **Gefeliciteerd!** 🎉\n\nJe hebt alle 4 categorieën gevonden! Uitstekende woordassociatievaardigheden!",
+                        [LanguageEnum.EN]: "You found all 4 categories! Excellent word association skills!",
+                        [LanguageEnum.NL]: "Je hebt alle 4 categorieën gevonden! Uitstekende woordassociatievaardigheden!",
                     }),
                 },
             },

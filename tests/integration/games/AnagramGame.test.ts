@@ -70,8 +70,9 @@ export default function registerAnagramGameTests(runner: TestRunner): void {
                     // Assert
                     AssertionHelpers.assertGameFlowSuccess(result, 'Game flow should handle wrong answers');
                     AssertionHelpers.assertNotNull(result.game, 'Game should exist');
-                    AssertionHelpers.assertAnyMessageWasDeleted(result.trackedMessages);
+                    AssertionHelpers.assertNoMessageWasDeleted(result.trackedMessages, testGame.channelId);
                     AssertionHelpers.assertReactionCount(result.trackedReactions, DEFAULT_ACCEPT_EMOJI, 1);
+                    AssertionHelpers.assertReactionCount(result.trackedReactions, DEFAULT_WRONG_ANSWER_EMOJI, 2);
                 }
             }
         ]

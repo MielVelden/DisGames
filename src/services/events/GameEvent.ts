@@ -73,7 +73,7 @@ export class GameEvent implements IGameEvent {
     }
 
     public get actions(): GameAction[] {
-        return this._actions;
+        return this._actions.sort((a, b) => b.priority - a.priority);
     }
 
     public set actions(actions: GameAction[]) {
