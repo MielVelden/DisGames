@@ -1,9 +1,16 @@
 services:
+  app:
+    build: .
+    restart: unless-stopped
+    command: ["npm", "start"]
+    environment:
+      NODE_ENV: production
+
   test:
+    profiles:
+      - test
     build: .
     restart: "no"
     command: ["npm", "run", "test:all"]
-    env_file:
-      - .env.test
     environment:
-      - NODE_ENV=test
+      NODE_ENV: test
