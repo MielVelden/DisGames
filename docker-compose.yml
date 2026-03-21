@@ -2,9 +2,11 @@ services:
   app:
     build: .
     restart: unless-stopped
-    command: ["npm", "start"]
+    command: ["sh", "-c", "npm run deploy && npm start"]
     environment:
       NODE_ENV: production
+    volumes:
+      - game_images:/app/images/games
 
   test:
     profiles:
@@ -14,3 +16,6 @@ services:
     command: ["npm", "run", "test:all"]
     environment:
       NODE_ENV: test
+
+volumes:
+  game_images:
