@@ -70,8 +70,8 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         await DiscordMessageHandler.editAsync(this as unknown as InteractionEvent, content);
     }
 
-    public async editWithComponentAsync(component: Component): Promise<void> {
-        await DiscordMessageHandler.editWithComponentAsync(this as unknown as InteractionEvent, component);
+    public async editWithComponentsAsync(components: Component[]): Promise<void> {
+        await DiscordMessageHandler.editWithComponentsAsync(this as unknown as InteractionEvent, components);
     }
 
     public async getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null> {
@@ -141,8 +141,9 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                     const selectMenu: StringSelect = {
                         type: ComponentType.STRING_SELECT,
                         custom_id: crypto.randomUUID(),
+                        title: enumSetting.label,
                         placeholder: enumSetting.label,
-                        question: enumSetting.label,
+                        description: enumSetting.label,
                         options: enumSetting.options.map((option: GameSettingOption): SelectOption => ({
                             label: option.label,
                             value: option.value.toString(),
@@ -175,9 +176,9 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                 const container = GameSettingsContainer.createInteractiveContainer(config, handlers);
                 
                 if (btnEvent) {
-                    await btnEvent.editWithComponentAsync(container);
+                    await btnEvent.editWithComponentsAsync([container]);
                 } else {
-                    await this.editWithComponentAsync(container);
+                    await this.editWithComponentsAsync([container]);
                 }
             };
             

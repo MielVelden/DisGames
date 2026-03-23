@@ -18,6 +18,7 @@ import { createGameHelpContainer } from "../builders/containers/GameHelpContaine
 import { createMoveButton } from "../builders/buttons/MoveButton";
 import { createGameSetupConfirmationContainer } from "../builders/containers/GameSetupConfirmationContainer";
 import { GamesSaveModel } from "../interfaces/database";
+import { createTitle } from "../utils/helpers/Markdown";
 
 const optionsConfig = [
     {
@@ -59,18 +60,15 @@ const optionsConfig = [
                                     Id: game.Id,
                                     ChannelId: channelEvent.selected
                                 }), channelEvent);
-                                await channelEvent.addComponentAsync(ComponentService.createContainer({
-                                    description: i18n.commands.games.labels.movedToChannel(channelName)
-                                }));
+                                await channelEvent.addComponentAsync(ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.labels.movedToChannel.title))));
+                                await channelEvent.addComponentAsync(ComponentService.createContent(i18n.commands.games.labels.movedToChannel.description(channelName)));
                                 await channelEvent.editAsync();
                             }
                         }),
                         createDeleteButton(event.user.userId, async (btnEvent) => {
                             await GameService.deleteAsync(game.Id!);
                             await btnEvent.clearComponentsAsync();
-                            await btnEvent.editWithComponentAsync(ComponentService.createContainer({
-                                description: new MultiLingualString(i18n.commands.games.labels.deleteSuccess)
-                            }));
+                            await btnEvent.editWithComponentsAsync([ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.labels.deleteSuccess.title))), ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess.description))]);
                         })
                     ], game.Settings, event.server.LanguageEnum));
                     await event.replyAsync();

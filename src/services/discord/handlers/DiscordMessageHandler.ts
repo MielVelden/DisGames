@@ -20,8 +20,9 @@ import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
 import { createDenyButton } from '../../../builders/buttons/DenyButton';
 import { EventTypeEnum, ExceptionEnum } from '../../../interfaces/enums';
 import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
-import { assertNever, ErrorHelper } from '../../../utils/application/Error';
+import { ErrorHelper } from '../../../utils/application/Error';
 import Logger from '../../../utils/application/Logger';
+import { createTitle } from '../../../utils/helpers/Markdown';
 
 class DiscordMessageHandler {
     public async sendMessageAsync(user: DiscordUser, message: string): Promise<void> {
@@ -36,6 +37,7 @@ class DiscordMessageHandler {
             await Logger.logError(`Failed to build reply content for event type ${event.type}`, error as Error);
             throw error;
         }
+
         if (!content)
             return;
 
@@ -73,9 +75,9 @@ class DiscordMessageHandler {
         await channel.send(content);
     }
 
-    public async editWithComponentAsync(event: InteractionEvent, component: Component): Promise<void> {
+    public async editWithComponentsAsync(event: InteractionEvent, components: Component[]): Promise<void> {
         event.clearComponentsAsync();
-        await event.addComponentAsync(component);
+        await event.addComponentsAsync(components);
         await this.editAsync(event);
     }
 
@@ -196,13 +198,9 @@ class DiscordMessageHandler {
 
         // Clear the components and add the select menu back to the components
         await event.clearComponentsAsync();
-        await event.addComponentAsync(ComponentService.createContainer({
-            description: new MultiLingualString(i18n.labels.common.timedOut)
-        }));
-
+        await event.addComponentAsync(ComponentService.createContent(createTitle(new MultiLingualString(i18n.labels.common.timedOut.title))));
+        await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.labels.common.timedOut.description)));
         await event.addComponentAsync(selectMenu);
-
-        // Edit the message to show the timeout
         await this.editAsync(event);
         resolve(null);
     }
@@ -219,13 +217,13 @@ class DiscordMessageHandler {
             });
 
             // Map and send select menu
-            const message = ComponentService.createContainer({
-                description: selectMenu.question ?? new MultiLingualString(i18n.labels.common.askQuestion)
-            });
+            const title = ComponentService.createContent(createTitle(selectMenu.title ?? new MultiLingualString(i18n.labels.common.askQuestion)));
+            const message = ComponentService.createContent(selectMenu.description ?? new MultiLingualString(i18n.labels.common.askQuestion));
 
+            const discordTitle = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(title);
             const discordMessage = await DiscordComponentMapper.mapComponentToDiscordComponentAsync(message);
             const discordSelectMenu = await DiscordComponentMapper.mapSelectMenuToDiscordSelectMenuAsync(selectMenuHandler);
-            const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
+            const replyOptions = DiscordComponentMapper.createReplyOptions([discordTitle, discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordSelectMenu)], []);
 
             switch (event.type) {
                 case EventTypeEnum.SLASH_COMMAND:
@@ -288,9 +286,7 @@ class DiscordMessageHandler {
             });
 
             const denyButton = createDenyButton(event.user.userId, async (btnEvent: InteractionEvent) => {
-                await btnEvent.editWithComponentAsync(ComponentService.createContainer({
-                    description: new MultiLingualString(i18n.labels.common.cancelled)
-                }));
+                await btnEvent.editWithComponentsAsync([ComponentService.createContent(createTitle(new MultiLingualString(i18n.labels.common.cancelled)))]);    
                 resolve(null);
             });
 

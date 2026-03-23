@@ -5,5 +5,5 @@ import { i18n } from "../../utils/i18n/i18n";
 import { createGenericButton } from "./GenericButton";
 
 export function createMoveButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
-    return createGenericButton(new MultiLingualString(i18n.commands.games.buttons.move), ButtonStyle.SECONDARY, "🔄", userId, handle);
-}   
+    return createGenericButton(new MultiLingualString(i18n.commands.games.buttons.move), ButtonStyle.SECONDARY, "🔸", userId, handle);
+}

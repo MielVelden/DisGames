@@ -100,8 +100,8 @@ class DiscordService {
         return await DiscordMessageHandler.editAsync(event, message);
     }
 
-    public async editWithComponentAsync(event: InteractionEvent, component: Component): Promise<void> {
-        return await DiscordMessageHandler.editWithComponentAsync(event, component);
+    public async editWithComponentsAsync(event: InteractionEvent, components: Component[]): Promise<void> {
+        return await DiscordMessageHandler.editWithComponentsAsync(event, components);
     }
 
     public async deleteAsync(event: InteractionEvent): Promise<void> {

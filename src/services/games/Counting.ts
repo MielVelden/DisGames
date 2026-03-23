@@ -31,7 +31,7 @@ export default {
             {
                 key: GameSettingsEnum.RESET_ON_FAIL,
                 type: GameSettingType.BOOLEAN,
-                label: new MultiLingualString(i18n.commands.games.settings.resetOnFail.label),
+                label: new MultiLingualString(i18n.commands.games.settings.resetOnFail.title),
                 description: new MultiLingualString(i18n.commands.games.settings.resetOnFail.description),
                 defaultValue: false
             }

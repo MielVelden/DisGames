@@ -108,7 +108,8 @@ export type SelectMenu = StringSelect | UserSelect | RoleSelect | MentionableSel
 
 export interface BaseSelectMenu extends Component {
     custom_id: string;
-    question?: MultiLingualString;
+    title?: MultiLingualString;
+    description?: MultiLingualString;
     placeholder?: MultiLingualString;
     min_values?: number;
     max_values?: number;

@@ -56,9 +56,7 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
 
                                     if(isSelectMenuEmpty(selectMenu)) {
                                         if (followUp.emptyReply) {
-                                            await event.addComponentAsync(ComponentService.createContainer({
-                                                description: followUp.emptyReply,
-                                            }));
+                                            await event.addComponentAsync(ComponentService.createContent(followUp.emptyReply));
                                             await event.replyAsync();
                                         }
 

@@ -57,15 +57,18 @@ export interface I18nTranslations {
             accept: LanguageTranslations;
             deny: LanguageTranslations;
             cancelled: LanguageTranslations;
-            timedOut: LanguageTranslations;
             delete: LanguageTranslations;
             askQuestion: LanguageTranslations;
             notEnoughPermissions: LanguageTranslations;
             notYourEvent: LanguageTranslations;
             welcome: {
                 title: LanguageTranslations;
-                message: LanguageTranslations;
-            }
+                description: LanguageTranslations;
+            },
+            timedOut: {
+                title: LanguageTranslations;
+                description: LanguageTranslations;
+            };
         },
         handleNever: (uniqueCase: string, origin: string) => MultiLingualString;
     },
@@ -97,13 +100,24 @@ export interface I18nTranslations {
             labels: {
                 noActiveGames: LanguageTranslations;
                 success: LanguageTranslations;
-                selectGame: LanguageTranslations;
-                deleteSuccess: LanguageTranslations;
+                selectGame: {
+                    title: LanguageTranslations;
+                    description: LanguageTranslations;
+                };
+                deleteSuccess: {
+                    title: LanguageTranslations;
+                    description: LanguageTranslations;
+                };
                 chooseChannel: LanguageTranslations;
-                movedToChannel: (channel: string) => MultiLingualString;
+                movedToChannel: {
+                    title: LanguageTranslations;
+                    description: (channel: string) => MultiLingualString;
+                };
                 skipAnswer: LanguageTranslations;
                 howToPlay: LanguageTranslations;
                 incorrectAnswer: LanguageTranslations;
+                gameName: (gameName: string) => MultiLingualString;
+                channelName: (channelName: string) => MultiLingualString;
             },
             settings: {
                 title: LanguageTranslations;
@@ -115,7 +129,7 @@ export interface I18nTranslations {
                 gameDescription: LanguageTranslations;
                 currentChannel: LanguageTranslations;
                 resetOnFail: {
-                    label: LanguageTranslations;
+                    title: LanguageTranslations;
                     description: LanguageTranslations;
                 };
                 difficulty: {
@@ -135,8 +149,6 @@ export interface I18nTranslations {
                 confirm: {
                     title: LanguageTranslations;
                     description: LanguageTranslations;
-                    gameName: (gameName: string) => MultiLingualString;
-                    channelName: (channelName: string) => MultiLingualString;
                 }
             },
             buttons: {
