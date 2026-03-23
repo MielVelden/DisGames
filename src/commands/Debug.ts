@@ -21,7 +21,12 @@ export class DebugCommand implements Command {
     options = optionsConfig;
 
     async executeAsync(event: MessageInteractionEvent): Promise<void> {
-        const uniqueCode = event.content.split(' ')[1];
+        const content = typeof event.content === 'string' ? event.content.trim() : '';
+        if (!content)
+            return;
+
+        const parts = content.split(/\s+/);
+        const uniqueCode = parts[1];
         if (!uniqueCode)
             return;
         

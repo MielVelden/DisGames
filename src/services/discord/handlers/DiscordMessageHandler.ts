@@ -165,6 +165,27 @@ class DiscordMessageHandler {
         return discordError.code === 10008 && discordError.status === 404;
     }
 
+    private isUnknownMessageReferenceError(error: unknown): boolean {
+        if (!error || typeof error !== 'object')
+            return false;
+
+        const discordError = error as {
+            code?: number;
+            status?: number;
+            rawError?: {
+                errors?: {
+                    message_reference?: {
+                        _errors?: Array<{ code?: string }>;
+                    };
+                };
+            };
+        };
+
+        const referenceErrors = discordError.rawError?.errors?.message_reference?._errors;
+        const hasUnknownReference = !!referenceErrors?.some(referenceError => referenceError.code === 'MESSAGE_REFERENCE_UNKNOWN_MESSAGE');
+        return discordError.code === 50035 && discordError.status === 400 && hasUnknownReference;
+    }
+
     public async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {
         if (interaction instanceof DiscordMessage)
             await interaction.react(emoji);
@@ -199,7 +220,20 @@ class DiscordMessageHandler {
                 if (event.currentInteraction.resolved) {
                     await event.currentInteraction.edit(content);
                 } else {
-                    await event.currentInteraction.reply(content);
+                    try {
+                        await event.currentInteraction.reply(content);
+                    } catch (error) {
+                        if (this.isUnknownMessageReferenceError(error)) {
+                            const channel = event.currentInteraction.channel;
+                            if (channel && channel.isTextBased() && 'send' in channel) {
+                                await Logger.logWarning(`Referenced message ${event.currentInteraction.id} no longer exists in channel ${event.channelId}, sending without reference`);
+                                await channel.send(content);
+                                return;
+                            }
+                        }
+
+                        throw error;
+                    }
                 }
                 break;
             case EventTypeEnum.BUTTON:
