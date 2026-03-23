@@ -186,6 +186,14 @@ class DiscordMessageHandler {
         return discordError.code === 50035 && discordError.status === 400 && hasUnknownReference;
     }
 
+    private isInteractionAlreadyRepliedError(error: unknown): boolean {
+        if (!error || typeof error !== 'object')
+            return false;
+
+        const discordError = error as { code?: string; name?: string };
+        return discordError.code === 'InteractionAlreadyReplied' || discordError.name === 'InteractionAlreadyReplied';
+    }
+
     public async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {
         if (interaction instanceof DiscordMessage)
             await interaction.react(emoji);
@@ -238,10 +246,24 @@ class DiscordMessageHandler {
                 break;
             case EventTypeEnum.BUTTON:
             case EventTypeEnum.SELECT_MENU:
-                if(content.ephemeral)
-                    await event.currentInteraction.reply(content);
-                else
-                    await event.currentInteraction.update(content);
+                try {
+                    if(content.ephemeral)
+                        await event.currentInteraction.reply(content);
+                    else
+                        await event.currentInteraction.update(content);
+                } catch (error) {
+                    if (this.isInteractionAlreadyRepliedError(error)) {
+                        if (event.currentInteraction.deferred || event.currentInteraction.replied) {
+                            await event.currentInteraction.editReply(content);
+                            return;
+                        }
+
+                        await event.currentInteraction.followUp(content);
+                        return;
+                    }
+
+                    throw error;
+                }
                 break;
             default:
                 ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
