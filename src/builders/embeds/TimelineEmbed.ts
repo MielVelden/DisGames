@@ -14,7 +14,7 @@ export async function createTimelineEmbed(timeline: TimelineEntriesModel): Promi
         fields: [
             {
                 name: 'TableEnum-ObjectID',
-                value: `${await formatEmbedFieldValueAsync(getEnumValueByIndex(TableEnum, timeline.TimelineType))} (${await formatEmbedFieldValueAsync(timeline.TableEnum)}), Row: ${await formatEmbedFieldValueAsync(timeline.ObjectId)}`,
+                value: `${await formatEmbedFieldValueAsync(getEnumValueByIndex(TableEnum, timeline.TableEnum))} (${await formatEmbedFieldValueAsync(timeline.TableEnum)}), Row: ${await formatEmbedFieldValueAsync(timeline.ObjectId)}`,
                 inline: false
             },
             {

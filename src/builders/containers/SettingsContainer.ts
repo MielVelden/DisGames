@@ -1,22 +1,13 @@
-import { ActionButton, Component, ComponentType, Container } from "../../interfaces/application/Message";
+import { ActionButton, Component } from "../../interfaces/application/Message";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
+import ComponentService from "../../services/application/ComponentService";
+import { createTitle } from "../../utils/helpers/Markdown";
 
 export function createSettingsContainer(actions: ActionButton[]): Component[] {
     return [
-        {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.TITLE,
-                    content: new MultiLingualString(i18n.commands.settings.labels.title)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: new MultiLingualString(i18n.commands.settings.labels.description)
-                }
-            ]
-        } as Container,
-        ...actions
+        ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.settings.labels.title))),
+        ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.description)),
+        ...actions,
     ] as Component[];
 }

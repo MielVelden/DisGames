@@ -867,8 +867,8 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.NL]: "Ongeldig argument",
         },
         [ExceptionEnum.FIELD_IS_NULL]: {
-            [LanguageEnum.EN]: "Field cannot be null",
-            [LanguageEnum.NL]: "Veld mag niet null zijn",
+            [LanguageEnum.EN]: "Field {field} cannot be null",
+            [LanguageEnum.NL]: "Veld {field} mag niet null zijn",
         },
         [ExceptionEnum.FIELD_HAS_CHANGED]: {
             [LanguageEnum.EN]: "Field has changed",

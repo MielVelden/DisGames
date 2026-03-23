@@ -24,6 +24,9 @@ interface GridItem {
     categoryName?: string;
 }
 
+const LONG_WORD_MIN_LENGTH = 10;
+const MIN_CELL_FONT_SIZE = 12;
+
 interface GameImageConfig {
     canvasSize: number;
     gridSize: number;
@@ -273,13 +276,19 @@ class GameImageService {
 
         // Text
         ctx.fillStyle = config.textColor;
-        ctx.font = `bold ${config.fontSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Wrap text if it is too long
         const maxWidth = size - (config.cellPadding * 2);
-        this.drawWrappedText(ctx, gridItem.text, x + size / 2, y + size / 2, maxWidth, config.fontSize);
+        this.drawWrappedTextFitted(
+            ctx,
+            gridItem.text,
+            x + size / 2,
+            y + size / 2,
+            maxWidth,
+            config.fontSize,
+            (fontSize) => `bold ${fontSize}px Arial`
+        );
     }
 
     private drawCategoryBar(
@@ -328,23 +337,78 @@ class GameImageService {
             const wordsY = y + height / 2 + smallFontSize / 2;
             
             const maxWidth = width - (config.cellPadding * 2);
-            this.drawWrappedText(ctx, words, x + width / 2, wordsY, maxWidth, smallFontSize);
+            this.drawWrappedTextFitted(
+                ctx,
+                words,
+                x + width / 2,
+                wordsY,
+                maxWidth,
+                smallFontSize,
+                (fontSize) => `${fontSize}px Arial`
+            );
         }
     }
 
-    private drawWrappedText(
-        ctx: CanvasRenderingContext2D, 
-        text: string, 
-        x: number, 
-        y: number, 
-        maxWidth: number, 
-        fontSize: number
-    ): void {
-        // Split first on new lines
+    private allWordsFitAtWidth(
+        ctx: CanvasRenderingContext2D,
+        text: string,
+        maxWidth: number
+    ): boolean {
         const paragraphs = text.split('\n');
-        let allLines: string[] = [];
+        for (const paragraph of paragraphs) {
+            if (paragraph.trim() === '') continue;
+            for (const word of paragraph.split(/\s+/)) {
+                if (word === '') continue;
+                if (ctx.measureText(word).width > maxWidth) return false;
+            }
+        }
+        return true;
+    }
 
-        paragraphs.forEach(paragraph => {
+    private hyphenateWordToFit(
+        word: string,
+        ctx: CanvasRenderingContext2D,
+        maxWidth: number
+    ): string {
+        if (ctx.measureText(word).width <= maxWidth) return word;
+        if (word.length < 2) return word;
+        const mid = Math.floor(word.length / 2);
+        const left = word.slice(0, mid);
+        const right = word.slice(mid);
+        return `${this.hyphenateWordToFit(left, ctx, maxWidth)}-${this.hyphenateWordToFit(right, ctx, maxWidth)}`;
+    }
+
+    private applyHyphenationToLongOverflowWords(
+        text: string,
+        ctx: CanvasRenderingContext2D,
+        maxWidth: number
+    ): string {
+        const paragraphs = text.split('\n');
+        const out: string[] = [];
+        for (const paragraph of paragraphs) {
+            if (paragraph.trim() === '') {
+                out.push(paragraph);
+                continue;
+            }
+            const pieces = paragraph.split(' ').map((token) => {
+                if (token.length < LONG_WORD_MIN_LENGTH) return token;
+                if (ctx.measureText(token).width <= maxWidth) return token;
+                return this.hyphenateWordToFit(token, ctx, maxWidth);
+            });
+            out.push(pieces.join(' '));
+        }
+        return out.join('\n');
+    }
+
+    private computeWrappedLines(
+        ctx: CanvasRenderingContext2D,
+        text: string,
+        maxWidth: number
+    ): string[] {
+        const paragraphs = text.split('\n');
+        const allLines: string[] = [];
+
+        paragraphs.forEach((paragraph) => {
             if (paragraph.trim() === '') {
                 allLines.push('');
                 return;
@@ -355,8 +419,7 @@ class GameImageService {
 
             for (let n = 0; n < words.length; n++) {
                 const testLine = line + words[n] + ' ';
-                const metrics = ctx.measureText(testLine);
-                const testWidth = metrics.width;
+                const testWidth = ctx.measureText(testLine).width;
 
                 if (testWidth > maxWidth && n > 0) {
                     allLines.push(line.trim());
@@ -370,12 +433,55 @@ class GameImageService {
             }
         });
 
-        // Draw lines centered
+        return allLines;
+    }
+
+    private drawWrappedTextFitted(
+        ctx: CanvasRenderingContext2D,
+        text: string,
+        x: number,
+        y: number,
+        maxWidth: number,
+        baseFontSize: number,
+        getFont: (fontSize: number) => string
+    ): void {
+        let fontSize = baseFontSize;
+        let displayText = text;
+
+        while (fontSize >= MIN_CELL_FONT_SIZE) {
+            ctx.font = getFont(fontSize);
+            displayText = text;
+            if (!this.allWordsFitAtWidth(ctx, displayText, maxWidth)) {
+                fontSize -= 1;
+                continue;
+            }
+            const lines = this.computeWrappedLines(ctx, displayText, maxWidth);
+            const linesOk = lines.every((line) => line === '' || ctx.measureText(line).width <= maxWidth);
+            if (linesOk) {
+                this.drawWrappedLineBlocks(ctx, lines, x, y, fontSize);
+                return;
+            }
+            fontSize -= 1;
+        }
+
+        ctx.font = getFont(MIN_CELL_FONT_SIZE);
+        displayText = this.applyHyphenationToLongOverflowWords(text, ctx, maxWidth);
+        const lines = this.computeWrappedLines(ctx, displayText, maxWidth);
+        this.drawWrappedLineBlocks(ctx, lines, x, y, MIN_CELL_FONT_SIZE);
+    }
+
+    private drawWrappedLineBlocks(
+        ctx: CanvasRenderingContext2D,
+        lines: string[],
+        x: number,
+        y: number,
+        fontSize: number
+    ): void {
         const lineHeight = fontSize * 1.2;
-        const totalHeight = allLines.length * lineHeight;
+        const totalHeight = lines.length * lineHeight;
         const startY = y - totalHeight / 2 + lineHeight / 2;
 
-        allLines.forEach((line, index) => {
+        lines.forEach((line, index) => {
             ctx.fillText(line, x, startY + index * lineHeight);
         });
     }

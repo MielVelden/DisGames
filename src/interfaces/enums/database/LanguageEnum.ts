@@ -1,4 +1,4 @@
-import { SetEmoji } from "../../../utils/helpers/EnumMetadata";
+import { SetEmoji, SetIsRequired } from "../../../utils/helpers/EnumMetadata";
 
 export enum LanguageEnum {
     EN = 1,
@@ -6,6 +6,9 @@ export enum LanguageEnum {
     ES = 3,
     DE = 4,
 }
+
+SetIsRequired(LanguageEnum, LanguageEnum.EN);
+SetIsRequired(LanguageEnum, LanguageEnum.NL);
 
 SetEmoji(LanguageEnum, LanguageEnum.EN, "🇺🇸");
 SetEmoji(LanguageEnum, LanguageEnum.NL, "🇳🇱");
