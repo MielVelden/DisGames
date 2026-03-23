@@ -16,16 +16,17 @@ export function getTempServer(discordGuild: DiscordGuild): ServersModel {
 }
 
 export async function getOrCreateServerAsync(discordGuild: DiscordGuild, event: TimelineEvent): Promise<ServersModel> {
+    const normalizedGuildName = await ServerService.normalizeNameForStorageAsync(discordGuild.name);
     let server = await ServerService.getByExternalIdAsync(discordGuild.id).catch(() => undefined);
     if (!server)
         server = await ServerService.saveAsync(new ServersSaveModel({
             ServerId: discordGuild.id,
-            Name: discordGuild.name,
+            Name: normalizedGuildName,
             MemberCount: discordGuild.memberCount
         }), event);
 
-    if (discordGuild.name !== server.Name)
-        await ServerService.updateNameAsync(discordGuild.id, discordGuild.name);
+    if (normalizedGuildName !== server.Name)
+        await ServerService.updateNameAsync(discordGuild.id, normalizedGuildName);
 
     if (discordGuild.memberCount !== undefined && discordGuild.memberCount !== server.MemberCount)
         await ServerService.updateMemberCountAsync(discordGuild.id, discordGuild.memberCount);

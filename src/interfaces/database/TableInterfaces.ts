@@ -326,49 +326,21 @@ export class GameDataSaveModel extends BaseEntityClass<GameDataModelFieldEnum> i
 }
 
 export interface GameTypesModel {
-  allowMessageChange: boolean;
-  description: number;
-  gameDisabled: number;
   gameName: string;
-  gameRules: number;
   Id: number;
-  pointPerGame: number;
-  replyMessage: boolean;
-  sameUserAllowed: boolean;
 }
 
 export enum GameTypesModelFieldEnum {
-  allowMessageChange = "allowMessageChange",
-  description = "description",
-  gameDisabled = "gameDisabled",
   gameName = "gameName",
-  gameRules = "gameRules",
-  Id = "Id",
-  pointPerGame = "pointPerGame",
-  replyMessage = "replyMessage",
-  sameUserAllowed = "sameUserAllowed"
+  Id = "Id"
 }
 
 export function getGameTypesFieldType(field: GameTypesModelFieldEnum): BaseEntityFieldType {
   switch (field) {
-    case GameTypesModelFieldEnum.allowMessageChange:
-      return BaseEntityFieldType.Boolean;
-    case GameTypesModelFieldEnum.description:
-      return BaseEntityFieldType.Number;
-    case GameTypesModelFieldEnum.gameDisabled:
-      return BaseEntityFieldType.Number;
     case GameTypesModelFieldEnum.gameName:
       return BaseEntityFieldType.String;
-    case GameTypesModelFieldEnum.gameRules:
-      return BaseEntityFieldType.Number;
     case GameTypesModelFieldEnum.Id:
       return BaseEntityFieldType.Number;
-    case GameTypesModelFieldEnum.pointPerGame:
-      return BaseEntityFieldType.Number;
-    case GameTypesModelFieldEnum.replyMessage:
-      return BaseEntityFieldType.Boolean;
-    case GameTypesModelFieldEnum.sameUserAllowed:
-      return BaseEntityFieldType.Boolean;
   }
 }
 
@@ -474,37 +446,6 @@ export class GamesSaveModel extends BaseEntityClass<GamesModelFieldEnum> impleme
     if (data.MessageId !== undefined) this.MessageId = data.MessageId;
     if (data.ServerId !== undefined) this.ServerId = data.ServerId;
     if (data.SettingsJSON !== undefined) this.SettingsJSON = data.SettingsJSON;
-  }
-}
-
-export interface LanguageModel {
-  EN: string;
-  ES: string;
-  GE: string;
-  Id: number;
-  NL: string;
-}
-
-export enum LanguageModelFieldEnum {
-  EN = "EN",
-  ES = "ES",
-  GE = "GE",
-  Id = "Id",
-  NL = "NL"
-}
-
-export function getLanguageFieldType(field: LanguageModelFieldEnum): BaseEntityFieldType {
-  switch (field) {
-    case LanguageModelFieldEnum.EN:
-      return BaseEntityFieldType.String;
-    case LanguageModelFieldEnum.ES:
-      return BaseEntityFieldType.String;
-    case LanguageModelFieldEnum.GE:
-      return BaseEntityFieldType.String;
-    case LanguageModelFieldEnum.Id:
-      return BaseEntityFieldType.Number;
-    case LanguageModelFieldEnum.NL:
-      return BaseEntityFieldType.String;
   }
 }
 
