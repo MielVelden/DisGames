@@ -186,6 +186,14 @@ class DiscordMessageHandler {
         return discordError.code === 50035 && discordError.status === 400 && hasUnknownReference;
     }
 
+    private isUnknownInteractionError(error: unknown): boolean {
+        if (!error || typeof error !== 'object')
+            return false;
+
+        const discordError = error as { code?: number; status?: number };
+        return discordError.code === 10062 && discordError.status === 404;
+    }
+
     private isInteractionAlreadyRepliedError(error: unknown): boolean {
         if (!error || typeof error !== 'object')
             return false;
@@ -219,7 +227,16 @@ class DiscordMessageHandler {
                         content: null
                     });
                 } else {
-                    await event.currentInteraction.reply(content);
+                    try {
+                        await event.currentInteraction.reply(content);
+                    } catch (error) {
+                        if (this.isUnknownInteractionError(error)) {
+                            await Logger.logWarning(`Interaction ${event.currentInteraction.id} expired before slash command reply in channel ${event.channelId}`);
+                            return;
+                        }
+
+                        throw error;
+                    }
                 }
                 break;
             case EventTypeEnum.MESSAGE:
@@ -339,7 +356,17 @@ class DiscordMessageHandler {
                     await event.currentInteraction.editReply(replyOptions);
                     break;
                 case EventTypeEnum.BUTTON:
-                    await event.currentInteraction.update(replyOptions);
+                    try {
+                        await event.currentInteraction.update(replyOptions);
+                    } catch (error) {
+                        if (this.isUnknownInteractionError(error)) {
+                            await Logger.logWarning(`Interaction ${event.currentInteraction.id} expired before button update in channel ${event.channelId}`);
+                            resolve(null);
+                            return;
+                        }
+
+                        throw error;
+                    }
                     break;
                 default:
                     ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);

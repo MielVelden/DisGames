@@ -8,7 +8,7 @@ import { withEventContextAsync } from '../../middleware/EventContext';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { i18n } from '../../utils/i18n/i18n';
 
-const DEFAULT_TIMEOUT = calculateDuration(10, DurationEnum.SECOND);
+const DEFAULT_TIMEOUT = calculateDuration(1, DurationEnum.MINUTE);
 
 export class EventService {
   private static buttonHandlers: Map<string, ButtonHandler> = new Map();

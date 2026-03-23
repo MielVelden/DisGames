@@ -15,6 +15,7 @@ export function createLanguageSelectMenu(handlerConfig?: HandlerConfig): SelectM
         placeholder: new MultiLingualString(i18n.commands.settings.labels.clickHereToChangeLanguage),
         options: Object.keys(LanguageEnum)
             .filter(key => isNaN(Number(key)))
+            .filter(key => getEnumProperty(LanguageEnum, LanguageEnum[key as keyof typeof LanguageEnum], MetadataKeyEnum.IsRequired))
             .map((key: string): SelectOption => {
                 const language = LanguageEnum[key as keyof typeof LanguageEnum];
                 return {

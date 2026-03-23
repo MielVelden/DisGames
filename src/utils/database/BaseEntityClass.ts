@@ -69,13 +69,13 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
   validateIsNull(field: EnumValues<FieldEnum>, defaultValue?: any): void {
     const value = this.getFieldValue(field);
 
-    if (value !== null && value !== undefined)
+    if (value === null || value === undefined)
       return;
 
     if (defaultValue !== null && defaultValue !== undefined)
       return this.setFieldValue(field, defaultValue);
 
-    ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+    ErrorHelper.throwWithParameters(ExceptionEnum.FIELD_IS_NULL, { field: String(field) });
   }
 
   validateIsNotNull<K extends keyof this | EnumValues<FieldEnum>>(field: K, defaultValue?: K extends keyof this ? this[K] : any): K extends keyof this ? NonNullable<this[K]> : void {
@@ -89,13 +89,13 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
       return defaultValue as K extends keyof this ? NonNullable<this[K]> : void;
     }
 
-    ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+    ErrorHelper.throwWithParameters(ExceptionEnum.FIELD_IS_NULL, { field: String(field) });
   }
 
   validateIsProvidedAndNotNull(field: EnumValues<FieldEnum>): void {
     const value = this.getFieldValue(field);
     if (value === null || value === undefined)
-      ErrorHelper.throw(ExceptionEnum.FIELD_IS_NULL);
+      ErrorHelper.throwWithParameters(ExceptionEnum.FIELD_IS_NULL, { field: String(field) });
   }
 
   validateHasNotChanged(field: EnumValues<FieldEnum>, value: any): void {

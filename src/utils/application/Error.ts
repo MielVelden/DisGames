@@ -4,7 +4,7 @@ import { Component } from "../../interfaces/application/Message";
 import { ExceptionEnum } from "../../interfaces/enums";
 import ComponentService from "../../services/application/ComponentService";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import Logger from "./Logger";
 
 export class ComponentError extends Error {
@@ -12,6 +12,7 @@ export class ComponentError extends Error {
     public readonly errorKey: ExceptionEnum;
     public readonly cause?: unknown;
     public readonly silently?: boolean;
+    public readonly parameters?: { [key: string]: string | number };
 
     constructor(options: ComponentErrorOptions) {
         const translated = new MultiLingualString(i18n.exceptions[options.message]);
@@ -23,6 +24,7 @@ export class ComponentError extends Error {
         this.components = options.components;
         this.errorKey = options.message;
         this.silently = options.silently ?? false;
+        this.parameters = options.parameters;
 
         if (options.cause)
             this.cause = options.cause;
@@ -32,6 +34,13 @@ export class ComponentError extends Error {
 
     public hasComponents(): boolean {
         return Array.isArray(this.components) && this.components.length > 0;
+    }
+
+    public getMessage(): string {
+        const errorMessage = new MultiLingualString(i18n.exceptions[this.errorKey]);
+        if (this.parameters)
+            errorMessage.replaceParameters(this.parameters);
+        return errorMessage.getMessage();
     }
 
     public shouldAnnounceError(): boolean {
@@ -84,14 +93,14 @@ export function assertNever(x: never, origin: { [key: string]: string | number }
 export async function handleErrorAsync(error: unknown, event: InteractionEvent): Promise<void> {
     if (error instanceof ComponentError) {
         if (error.hasComponents()) {
-            const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
+            const errorMessage = createMultiLingualString(error.getMessage());
             event.clearComponentsAsync();
             event.addComponentAsync(ComponentService.createContent(errorMessage));
             for (const component of error.components!) {
                 await event.addComponentAsync(component);
             }
         } else if (error.shouldAnnounceError()) {
-            const errorMessage = new MultiLingualString(i18n.exceptions[error.errorKey]);
+            const errorMessage = createMultiLingualString(error.getMessage());
             await event.addComponentAsync(ComponentService.createContent(errorMessage));
         }
 
