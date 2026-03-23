@@ -8,10 +8,17 @@ import TimelineBuilder from "./TimelineBuilder";
 
 class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
     protected readonly repository = ServerRepository;
-    private static readonly SERVER_NAME_MAX_LENGTH = 100;
+    private static readonly SERVER_NAME_MAX_LENGTH = 25;
 
     public normalizeName(name: string): string {
-        return Array.from(name).slice(0, ServerService.SERVER_NAME_MAX_LENGTH).join('');
+        // Replace all non-ASCII characters with '?', then normalize
+        const asciiName = Array.from(name)
+            .map(char => char.charCodeAt(0) <= 127 ? char : '?')
+            .slice(0, ServerService.SERVER_NAME_MAX_LENGTH)
+            .join('')
+            .trim()
+            .replace(/\s+/g, ' ');
+        return asciiName;
     }
 
     public async updateNameAsync(serverId: string, name: string): Promise<ServersModel> {
