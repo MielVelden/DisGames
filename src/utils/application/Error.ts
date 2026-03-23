@@ -99,7 +99,7 @@ export async function handleErrorAsync(error: unknown, event: InteractionEvent):
             await event.replyAsync();
 
         if(!error.silently)
-            Logger.logError(`Error handling message`, error as Error);
+            Logger.logError(`Error handling message`, error as Error, { includeStackTrace: false });
     } else {
         Logger.logError(`Error handling message`, error as Error);
     }

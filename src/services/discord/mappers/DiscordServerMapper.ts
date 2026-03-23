@@ -16,7 +16,7 @@ export function getTempServer(discordGuild: DiscordGuild): ServersModel {
 }
 
 export async function getOrCreateServerAsync(discordGuild: DiscordGuild, event: TimelineEvent): Promise<ServersModel> {
-    const normalizedGuildName = await ServerService.normalizeNameForStorageAsync(discordGuild.name);
+    const normalizedGuildName = ServerService.normalizeName(discordGuild.name);
     let server = await ServerService.getByExternalIdAsync(discordGuild.id).catch(() => undefined);
     if (!server)
         server = await ServerService.saveAsync(new ServersSaveModel({
