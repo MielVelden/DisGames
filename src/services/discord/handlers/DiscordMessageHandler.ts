@@ -108,6 +108,13 @@ class DiscordMessageHandler {
                 event.messageDeleted = true;
                 EventService.markMessageAsInternallyDeleted(event.currentInteraction.id);
             } catch (error) {
+                if (this.isUnknownMessageError(error)) {
+                    event.messageDeleted = true;
+                    EventService.markMessageAsInternallyDeleted(event.currentInteraction.id);
+                    await Logger.logWarning(`Message ${event.currentInteraction.id} was already deleted in channel ${event.channelId}`);
+                    return;
+                }
+
                 if (this.isMissingPermissionsError(error)) {
                     await Logger.logWarning(`Missing permissions while deleting message ${event.currentInteraction.id} in channel ${event.channelId}`);
                     return;
@@ -124,6 +131,13 @@ class DiscordMessageHandler {
                 try {
                     await event.currentInteraction.deleteReply();
                 } catch (error) {
+                    if (this.isUnknownMessageError(error)) {
+                        if (event.currentInteraction.message)
+                            EventService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
+                        await Logger.logWarning(`Reply message was already deleted in channel ${event.channelId}`);
+                        return;
+                    }
+
                     if (this.isMissingPermissionsError(error)) {
                         await Logger.logWarning(`Missing permissions while deleting reply in channel ${event.channelId}`);
                         return;
@@ -141,6 +155,14 @@ class DiscordMessageHandler {
 
         const discordError = error as { code?: number; status?: number };
         return discordError.code === 50013 && discordError.status === 403;
+    }
+
+    private isUnknownMessageError(error: unknown): boolean {
+        if (!error || typeof error !== 'object')
+            return false;
+
+        const discordError = error as { code?: number; status?: number };
+        return discordError.code === 10008 && discordError.status === 404;
     }
 
     public async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {
