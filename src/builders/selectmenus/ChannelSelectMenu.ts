@@ -7,7 +7,7 @@ export function createChannelSelectMenu(): SelectMenu {
     return ComponentService.createSelectMenu({
         custom_id: "move-to-channel",
         type: ComponentType.CHANNEL_SELECT,
-        question: new MultiLingualString(i18n.commands.games.labels.chooseChannel),
+        description: new MultiLingualString(i18n.commands.games.labels.chooseChannel),
         placeholder: new MultiLingualString(i18n.commands.games.labels.chooseChannel),
     });
 }

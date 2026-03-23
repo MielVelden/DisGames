@@ -10,8 +10,9 @@ export function createGamesSelectMenu(gameModules: GameModule[], handlerConfig?:
     return ComponentService.createSelectMenu({
         custom_id: "game",
         type: ComponentType.STRING_SELECT,
-        question: new MultiLingualString(i18n.commands.games.labels.selectGame),
-        placeholder: new MultiLingualString(i18n.commands.games.labels.selectGame),
+        title: new MultiLingualString(i18n.commands.games.labels.selectGame.title),
+        description: new MultiLingualString(i18n.commands.games.labels.selectGame.description),
+        placeholder: new MultiLingualString(i18n.commands.games.labels.selectGame.description),
         options: gameModules.map(game => ({
             label: game.config.name,
             emoji: game.config.emoji,

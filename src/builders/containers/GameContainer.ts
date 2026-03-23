@@ -2,11 +2,15 @@ import GameService from "../../services/domain/GameService";
 import { GamesModel } from "../../interfaces/database/TableInterfaces";
 import { ActionButton } from "../../interfaces/application/Message";
 import { GameSettingsValues } from "../../interfaces/domain/GameSettings";
-import { LanguageEnum } from "../../interfaces/enums";
-import { Component, ComponentType, Container } from "../../interfaces/application/Message";
+import { ExceptionEnum, LanguageEnum } from "../../interfaces/enums";
+import { Component } from "../../interfaces/application/Message";
 import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import MediaService from "../../services/application/MediaService";
+import ComponentService from "../../services/application/ComponentService";
+import { createTitle } from "../../utils/helpers/Markdown";
+import { GameSettingsContainer } from "./GameSettingsContainer";
+import { ErrorHelper } from "../../utils/application/Error";
 
 export function createGameContainer(
     game: GamesModel, 
@@ -15,54 +19,27 @@ export function createGameContainer(
     languageEnum: LanguageEnum = LanguageEnum.NL
 ): Component[] {
     const gameModule = GameService.getGameByType(game.GameTypeEnum);
+    if (!gameModule || !gameModule.config)
+        ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
     const gameImage = MediaService.getGameImage(game.GameTypeEnum);
+    const gameName = i18n.commands.games.labels.gameName(gameModule.config.name.getMessage(languageEnum));
+    const gameDescription = gameModule.config.description || new MultiLingualString(i18n.commands.games.settings.gameDescription);
+    const gameChannel = i18n.commands.games.labels.channelName(game.ChannelId);
 
     return [
-        {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.MEDIA_GALLERY,
-                    items: [
-                        {
-                            media: gameImage
-                        }
-                    ]
-                },
-            ]
-        } as Container,
-        {
-            type: ComponentType.CONTAINER,
-            components: [
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: gameModule?.config.description || new MultiLingualString(i18n.commands.games.settings.gameDescription)
-                },
-                {
-                    type: ComponentType.TITLE,
-                    content: createMultiLingualString(`Channel`)
-                },
-                {
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: new MultiLingualString(i18n.commands.games.settings.currentChannel)
-                },
-                
-                // Add game settings if available
-                ...(gameModule?.config.settings && settings ? [
-                    {
-                        type: ComponentType.SEPARATOR,
-                        divider: true,
-                        spacing: 1
-                    },
-                    ...GameService.createSettingsDisplayComponents(
-                        gameModule.config.settings,
-                        settings,
-                        languageEnum,
-                        true
-                    )
-                ] : [])
-            ]
-        } as Container,
+        ComponentService.createImage(gameImage, false),
+        ComponentService.createSeparator(),
+        ComponentService.createContent(createTitle(gameModule.config.name)),
+        ComponentService.createContent(gameDescription),
+        ComponentService.createContent([gameName, gameChannel]),
+        ...(gameModule.config.settings && settings ? [
+            ...GameSettingsContainer.createReadOnlyDisplay({
+                settingsSchema: gameModule.config.settings,
+                settings: settings,
+                languageEnum: languageEnum
+            })
+        ] : []),
+        ComponentService.createSeparator(),
         ...actions
     ];
 }

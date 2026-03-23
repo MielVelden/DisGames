@@ -38,8 +38,14 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.NL]: "Dit verzoek is geannuleerd",
             },
             timedOut: {
-                [LanguageEnum.EN]: "Something went wrong, please try again",
-                [LanguageEnum.NL]: "Er ging iets mis, probeer het opnieuw",
+                title: {
+                    [LanguageEnum.EN]: "The request has timed out",
+                    [LanguageEnum.NL]: "Het verzoek is verlopen",
+                },
+                description: {
+                    [LanguageEnum.EN]: "Please try again",
+                    [LanguageEnum.NL]: "Probeer het opnieuw",
+                },
             },
             delete: {
                 [LanguageEnum.EN]: "Remove",
@@ -62,7 +68,7 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "👋 Hi, I'm DisGames!",
                     [LanguageEnum.NL]: "👋 Hallo, ik ben DisGames!",
                 },
-                message: {
+                description: {
                     [LanguageEnum.EN]: "Step into a world of endless fun and excitement with DisGames, the ultimate minigame bot for Discord!\n\n Are you ready to keep your server members engaged and entertained like never before? Look no further. With me (DisGames), you'll dive into a collection of unique and captivating minigames carefully designed to bring your community together. From brain-teasing puzzles to thrilling action challenges, I have it all.\n\nElevate your server with DisGames today and redefine the way you connect and have fun!",
                     [LanguageEnum.NL]: "Stap in een wereld van eindeloos plezier en spanning met DisGames, de ultieme minigame-bot voor Discord!\n\n Ben je klaar om je serverleden als nooit tevoren bezig en vermaakt te houden? Zoek niet verder. Met mij (DisGames) duik je in een verzameling unieke en boeiende minigames die zorgvuldig zijn ontworpen om je community samen te brengen. Van hersenkrakende puzzels tot spannende actie-uitdagingen, ik heb het allemaal.\n\n Til je server vandaag nog naar een hoger niveau met DisGames en geef een nieuwe invulling aan de manier waarop je contact maakt en plezier hebt!",
                 },
@@ -165,21 +171,39 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.NL]: "Spel succesvol ingesteld",
                 },
                 selectGame: {
-                    [LanguageEnum.EN]: "Choose a game",
-                    [LanguageEnum.NL]: "Kies een spel",
+                    title: {
+                        [LanguageEnum.EN]: "Choose a game",
+                        [LanguageEnum.NL]: "Kies een spel",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Choose a game from the list",
+                        [LanguageEnum.NL]: "Kies een spel uit de lijst",
+                    },
                 },
                 deleteSuccess: {
-                    [LanguageEnum.EN]: "Game removed",
-                    [LanguageEnum.NL]: "Spel verwijderd",
+                    title: {
+                        [LanguageEnum.EN]: "Game successfully removed",
+                        [LanguageEnum.NL]: "Spel succesvol verwijderd",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "The game has been successfully removed. The game will no work within this server anymore.",
+                        [LanguageEnum.NL]: "Het spel is succesvol verwijderd. Het spel zal niet meer werken binnen deze server.",
+                    },
                 },
                 chooseChannel: {
                     [LanguageEnum.EN]: "Choose a channel",
                     [LanguageEnum.NL]: "Kies een kanaal",
                 },
-                movedToChannel: (channel: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Moved to {channel}",
-                    [LanguageEnum.NL]: "Verplaatst naar {channel}",
-                }, { channel }),
+                movedToChannel: {
+                    title: {
+                        [LanguageEnum.EN]: "Successfully moved to a new channel",
+                        [LanguageEnum.NL]: "Succesvol verplaatst naar een nieuw kanaal",
+                    },
+                    description: (channel: string) => new MultiLingualString({
+                        [LanguageEnum.EN]: "The game has been moved to the channel: {channel}",
+                        [LanguageEnum.NL]: "Het spel is verplaatst naar het kanaal: {channel}",
+                    }, { channel }),
+                },
                 skipAnswer: {
                     [LanguageEnum.EN]: "Not familiar with the answer? Enter '?'",
                     [LanguageEnum.NL]: "Niet bekend met het antwoord? Voer '?' in",
@@ -192,6 +216,14 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "The answer is incorrect. The counter has been reset to 1.",
                     [LanguageEnum.NL]: "Het antwoord is incorrect. De teller is teruggezet naar 1.",
                 },
+                gameName: (gameName: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "> Game: `{gameName}`",
+                    [LanguageEnum.NL]: "> Spel: `{gameName}`",
+                }, { gameName }),
+                channelName: (channelName: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "> Channel: `{channelName}`",
+                    [LanguageEnum.NL]: "> Kanaal: `{channelName}`",
+                }, { channelName }),
             },
             settings: {
                 title: {
@@ -227,7 +259,7 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.NL]: "Huidige spelkanaal",
                 },
                 resetOnFail: {
-                    label: {
+                    title: {
                         [LanguageEnum.EN]: "Reset on Wrong Answer",
                         [LanguageEnum.NL]: "Reset bij fout antwoord",
                     },
@@ -289,14 +321,6 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Validate all the options below and confirm the setup",
                         [LanguageEnum.NL]: "Valideer alle opties hieronder en bevestig de instelling",
                     },
-                    gameName: (gameName: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> Game: `{gameName}`",
-                        [LanguageEnum.NL]: "> Spel: `{gameName}`",
-                    }, { gameName }),
-                    channelName: (channelName: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> Channel: `{channelName}`",
-                        [LanguageEnum.NL]: "> Kanaal: `{channelName}`",
-                    }, { channelName }),
                 },
             },
             buttons: {
@@ -356,7 +380,7 @@ export const i18n: I18nTranslations = {
                     startMessage: () => new MultiLingualString({
                         [LanguageEnum.EN]: "> Try to create a word starting with the letter:",
                         [LanguageEnum.NL]: "> Probeer een woord te maken dat begint met de letter:",
-                    })                    
+                    })
                 },
                 [GameTypeEnum.ANAGRAM]: {
                     name: {

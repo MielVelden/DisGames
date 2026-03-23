@@ -11,6 +11,6 @@ export function createWelcomeContainer(): Component[] {
         ComponentService.createImage(welcomeImage, false),
         ComponentService.createSeparator(),
         ComponentService.createContent(createTitle(new MultiLingualString(i18n.labels.common.welcome.title))),
-        ComponentService.createContent(new MultiLingualString(i18n.labels.common.welcome.message))
+        ComponentService.createContent(new MultiLingualString(i18n.labels.common.welcome.description))
     ];
 }

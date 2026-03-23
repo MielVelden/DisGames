@@ -24,7 +24,7 @@ export function createGameSetupConfirmationContainer(
         ComponentService.createSeparator(),
         ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.settings.confirm.title))),
         ComponentService.createContent(new MultiLingualString(i18n.commands.games.settings.confirm.description)),
-        ComponentService.createContent([i18n.commands.games.settings.confirm.gameName(gameName), i18n.commands.games.settings.confirm.channelName(channelName)]),
+        ComponentService.createContent([i18n.commands.games.labels.gameName(gameName), i18n.commands.games.labels.channelName(channelName)]),
     ];
 
     // If game has settings, add them to the confirmation
@@ -41,7 +41,6 @@ export function createGameSetupConfirmationContainer(
             components.push(...compactSettingsDisplay);
         }
     }
-
 
     return [
         ...components,

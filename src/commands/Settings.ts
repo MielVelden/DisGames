@@ -33,7 +33,7 @@ export class SettingsCommand implements Command {
                     Id: server.Id,
                     LanguageEnum: language
                 }), languageEvent);
-                await languageEvent.editWithComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.languageChanged)));
+                await languageEvent.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.languageChanged))]);
             }
         });
 

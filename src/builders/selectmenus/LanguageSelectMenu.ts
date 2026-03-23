@@ -11,7 +11,7 @@ export function createLanguageSelectMenu(handlerConfig?: HandlerConfig): SelectM
     return ComponentService.createSelectMenu({
         custom_id: "language",
         type: ComponentType.STRING_SELECT,
-        question: new MultiLingualString(i18n.commands.settings.labels.changeLanguage),
+        description: new MultiLingualString(i18n.commands.settings.labels.changeLanguage),
         placeholder: new MultiLingualString(i18n.commands.settings.labels.clickHereToChangeLanguage),
         options: Object.keys(LanguageEnum)
             .filter(key => isNaN(Number(key)))

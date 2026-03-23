@@ -38,7 +38,7 @@ export interface BaseInteractionEvent {
 
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
     editAsync(content?: string): Promise<void>;
-    editWithComponentAsync(component: Component): Promise<void>;
+    editWithComponentsAsync(components: Component[]): Promise<void>;
 
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
