@@ -422,7 +422,7 @@ class GameService {
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 
-                        if (!isInternalDeleteEvent) {
+                        if (!isInternalDeleteEvent && gameEvent.getGameData().MessageId === gameEvent.messageId) {
                             gameEvent.addAction({
                                 enum: GameActionEnum.COMPONENT,
                                 priority: GameActionPriorityEnum.HIGH,

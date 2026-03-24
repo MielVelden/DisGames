@@ -10,7 +10,7 @@ export default {
     id: 'collect-metrics',
     name: 'Collect Metrics',
     description: 'Collect metrics',
-    isEnabled: true,
+    isEnabled: false,
     cronExpression: '0 0 2 * * *',
 
     handler: async (progress): Promise<void> => {
