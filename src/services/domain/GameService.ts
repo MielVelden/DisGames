@@ -35,6 +35,7 @@ import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
+import { EventService } from "../application/EventService";
 
 class GameService {
     private games: GameModule[] = [];
@@ -423,9 +424,11 @@ class GameService {
                     ErrorHelper.throw(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
-                        if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE) {
+                        const isInternalDeleteEvent = gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE && EventService.isMessageInternallyDeleted(gameEvent.messageId);
+                        if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 
+                        if (!isInternalDeleteEvent) {
                             gameEvent.addAction({
                                 enum: GameActionEnum.COMPONENT,
                                 priority: GameActionPriorityEnum.HIGH,
@@ -433,8 +436,9 @@ class GameService {
                             });
 
                             await this.handleGameActionsAsync(gameEvent, event);
-                            ErrorHelper.throw(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                         }
+
+                        ErrorHelper.throwSilently(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
                     }
                     break;
                 case GameOptionEnum.SAME_USER_DISABLED:
@@ -443,7 +447,7 @@ class GameService {
 
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId) {
                         gameEvent.deleteMessage();
-                        ErrorHelper.throw(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
+                        ErrorHelper.throwSilently(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
                     } else {
                         gameEvent.getGameData().LastUser = gameEvent.user.userId;
                         gameEvent.getGameData().MessageId = gameEvent.messageId;
@@ -453,14 +457,14 @@ class GameService {
                 case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
                     if (!gameEvent.validateAnswer(gameEvent) && !gameModule?.functions.onIncorrectAnswerAsync) {
                         gameEvent.deleteMessage();
-                        ErrorHelper.throw(ExceptionEnum.WRONG_ANSWER);
+                        ErrorHelper.throwSilently(ExceptionEnum.WRONG_ANSWER);
                     }
                     break;
                 case GameOptionEnum.ALLOW_SKIPPING:
                     if (gameEvent.userInput === "?") {
                         await this.handleValidAnswerAsync(gameEvent);
                         await this.handleGameActionsAsync(gameEvent, event);
-                        ErrorHelper.throw(ExceptionEnum.ANSWER_SKIPPED);
+                        ErrorHelper.throwSilently(ExceptionEnum.ANSWER_SKIPPED);
                     }
                     break;
                 default:

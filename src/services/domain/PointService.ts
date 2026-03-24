@@ -26,7 +26,7 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
 
             entity.Points += savable.Points!;
             const updated = await this.repository.saveAsync(entity);
-            Logger.logInfo(`Updated points for user ${updated.UserId} on server ${updated.ServerId} in game ${updated.GameId}: delta ${savable.Points}, total ${updated.Points}`);
+            Logger.logDebug(`Updated points for user ${updated.UserId} on server ${updated.ServerId} in game ${updated.GameId}: delta ${savable.Points}, total ${updated.Points}`);
             return updated;
         } else {
             savable.validateIsNotNull(PointsModelFieldEnum.UserId);
@@ -38,7 +38,7 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
             if (entity) {
                 entity.Points += savable.Points!;
                 const updated = await this.repository.saveAsync(entity);
-                Logger.logInfo(`Updated points for user ${updated.UserId} on server ${updated.ServerId} in game ${updated.GameId}: delta ${savable.Points}, total ${updated.Points}`);
+                Logger.logDebug(`Updated points for user ${updated.UserId} on server ${updated.ServerId} in game ${updated.GameId}: delta ${savable.Points}, total ${updated.Points}`);
                 return updated;
             }
 
@@ -48,14 +48,14 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
                 Points: savable.Points,
                 GameId: savable.GameId,
             }));
-            Logger.logInfo(`Created points record for user ${created.UserId} on server ${created.ServerId} in game ${created.GameId}: points ${created.Points}`);
+            Logger.logDebug(`Created points record for user ${created.UserId} on server ${created.ServerId} in game ${created.GameId}: points ${created.Points}`);
             return created;
         }
     }
 
     public async purgeAsync(id: number): Promise<void> {
         await this.repository.purgeAsync(id);
-        Logger.logInfo(`Purged points record with id ${id}`);
+        Logger.logDebug(`Purged points record with id ${id}`);
     }
 }
 

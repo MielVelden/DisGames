@@ -1,6 +1,6 @@
 import { GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
-import { GameTypeEnum } from "../../interfaces/enums";
+import { ExceptionEnum, GameTypeEnum } from "../../interfaces/enums";
 import { GameSettingsEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -8,6 +8,7 @@ import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../domain/GameService";
 import ComponentService from "../application/ComponentService";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { ErrorHelper } from "../../utils/application/Error";
 
 export default {
     config: {
@@ -50,7 +51,7 @@ export default {
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
             // Get the resetOnFail setting value from GameService
             const resetOnFail = GameService.getSettingValue<boolean>(event.getGameData(), GameSettingsEnum.RESET_ON_FAIL);
-            
+
             if (resetOnFail) {
                 // Reset the counter back to 1
                 event.setGameDataAnswer(event.gameConfig.firstAnswer);
@@ -60,12 +61,15 @@ export default {
                     priority: GameActionPriorityEnum.HIGH,
                     component: DEFAULT_WRONG_ANSWER_EMOJI
                 });
-                
+
                 event.addAction({
                     enum: GameActionEnum.COMPONENT,
                     priority: GameActionPriorityEnum.HIGH,
                     component: ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.incorrectAnswer))
                 });
+            } else {
+                event.deleteMessage();
+                ErrorHelper.throwSilently(ExceptionEnum.WRONG_ANSWER);
             }
         }
     }
