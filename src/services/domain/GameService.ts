@@ -447,6 +447,7 @@ class GameService {
                     } else {
                         gameEvent.getGameData().LastUser = gameEvent.user.userId;
                         gameEvent.getGameData().MessageId = gameEvent.messageId;
+                        gameEvent.requireUpdateModel = true;
                     }
                     break;
                 case GameOptionEnum.REMOVE_ON_WRONG_ANSWER:
