@@ -1,9 +1,7 @@
-import { decode, encode } from '@toon-format/toon'
-
 export function toonEncode(data: any): string {
-    return encode(data);
+    return JSON.stringify(data);
 }
 
 export function toonDecode(data: string): any {
-    return decode(data);
+    return JSON.parse(data);
 }

@@ -51,6 +51,7 @@ export class ComponentError extends Error {
             case ExceptionEnum.RECORD_NOT_FOUND:
             case ExceptionEnum.MESSAGE_CHANGE_DISABLED:
             case ExceptionEnum.ANSWER_SKIPPED:
+            case ExceptionEnum.SAME_USER_ALREADY_ANSWERED:
                 return false;
             default:
                 return true;
@@ -107,7 +108,7 @@ export async function handleErrorAsync(error: unknown, event: InteractionEvent):
         if (isReplyInteractionEvent(event))
             await event.replyAsync();
 
-        if(!error.silently)
+        if (!error.silently)
             Logger.logError(`Error handling message`, error as Error, { includeStackTrace: false });
     } else {
         Logger.logError(`Error handling message`, error as Error);

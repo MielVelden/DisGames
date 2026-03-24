@@ -423,20 +423,24 @@ class GameService {
                     ErrorHelper.throw(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
-                        if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
+                        if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE) {
                             gameEvent.deleteMessage();
 
-                        gameEvent.addAction({
-                            enum: GameActionEnum.COMPONENT,
-                            priority: GameActionPriorityEnum.HIGH,
-                            component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.userInput as string))
-                        });
+                            gameEvent.addAction({
+                                enum: GameActionEnum.COMPONENT,
+                                priority: GameActionPriorityEnum.HIGH,
+                                component: ComponentService.createContent(i18n.commands.games.event.messageChanged(gameEvent.user.username, gameEvent.userInput as string))
+                            });
 
-                        await this.handleGameActionsAsync(gameEvent, event);
-                        ErrorHelper.throw(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
+                            await this.handleGameActionsAsync(gameEvent, event);
+                            ErrorHelper.throw(ExceptionEnum.MESSAGE_CHANGE_DISABLED);
+                        }
                     }
                     break;
                 case GameOptionEnum.SAME_USER_DISABLED:
+                    if (gameEvent.eventType !== EventTypeEnum.MESSAGE)
+                        break;
+
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId) {
                         gameEvent.deleteMessage();
                         ErrorHelper.throw(ExceptionEnum.SAME_USER_ALREADY_ANSWERED);
