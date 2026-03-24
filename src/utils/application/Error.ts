@@ -53,6 +53,7 @@ export class ComponentError extends Error {
             case ExceptionEnum.ANSWER_SKIPPED:
             case ExceptionEnum.SAME_USER_ALREADY_ANSWERED:
             case ExceptionEnum.INVALID_NUMBER:
+            case ExceptionEnum.GAME_MODULE_NOT_FOUND:
                 return false;
             default:
                 return true;

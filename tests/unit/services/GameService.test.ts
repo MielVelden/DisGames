@@ -73,8 +73,8 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 name: 'should get game by type',
                 testFunction: async () => {
                     // Act
-                    const anagramGame = GameService.getGameByTypeAsync(GameTypeEnum.ANAGRAM);
-                    const numberGuessGame = GameService.getGameByTypeAsync(GameTypeEnum.NUMBER_GUESS);
+                    const anagramGame = await GameService.getGameByTypeAsync(GameTypeEnum.ANAGRAM);
+                    const numberGuessGame = await GameService.getGameByTypeAsync(GameTypeEnum.NUMBER_GUESS);
                     
                     // Assert
                     AssertionHelpers.assertNotNull(anagramGame, 'Anagram game module should exist');
@@ -88,7 +88,7 @@ export default function registerGameServiceTests(runner: TestRunner): void {
                 name: 'should validate game settings',
                 testFunction: async () => {
                     // Arrange
-                    const countingGame = GameService.getGameByTypeAsync(GameTypeEnum.COUNTING);
+                    const countingGame = await GameService.getGameByTypeAsync(GameTypeEnum.COUNTING);
                     AssertionHelpers.assertNotNull(countingGame, 'Counting game should exist');
                     
                     const validSettings: GameSettingsValues = {

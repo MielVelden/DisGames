@@ -203,10 +203,21 @@ class DiscordMessageHandler {
     }
 
     public async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {
-        if (interaction instanceof DiscordMessage)
-            await interaction.react(emoji);
-        else
-            await interaction.message.react(emoji);
+        try {
+            if (interaction instanceof DiscordMessage)
+                await interaction.react(emoji);
+            else
+                await interaction.message.react(emoji);
+        } catch (error) {
+            if (this.isMissingPermissionsError(error)) {
+                const messageId = interaction instanceof DiscordMessage ? interaction.id : interaction.message.id;
+                const channelId = interaction instanceof DiscordMessage ? interaction.channelId : interaction.channelId;
+                await Logger.logWarning(`Missing permissions while reacting to message ${messageId} in channel ${channelId}`);
+                return;
+            }
+
+            throw error;
+        }
     }
 
     public async deferUpdateAsync(interaction: DiscordStringSelectMenuInteraction | DiscordChannelSelectMenuInteraction): Promise<void> {

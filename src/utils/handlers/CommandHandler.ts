@@ -18,7 +18,7 @@ import { i18n } from "../i18n/i18n";
 
 export async function handleCommandAsync(command: Command, event: InteractionEvent): Promise<void> {
     await withEventContextAsync(event, async () => {
-        if(command.permissions && !event.user.hasPermissions(command.permissions))
+        if (command.permissions && !event.user.hasPermissions(command.permissions))
             return await event.replyAsync(new MultiLingualString(i18n.labels.common.notEnoughPermissions));
         await command.executeAsync(event);
     });
@@ -46,15 +46,15 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
                             let currentEvent: InteractionEvent = event;
                             for (const followUp of choice.followUps) {
                                 if (followUp.type === CommandOptionFollowUpType.SELECT_MENU) {
-                                    if(followUp.isRequiredAsync) {
+                                    if (followUp.isRequiredAsync) {
                                         const isRequired = await followUp.isRequiredAsync(event);
-                                        if(!isRequired)
+                                        if (!isRequired)
                                             continue;
                                     }
 
                                     const selectMenu = await followUp.configAsync(event);
 
-                                    if(isSelectMenuEmpty(selectMenu)) {
+                                    if (isSelectMenuEmpty(selectMenu)) {
                                         if (followUp.emptyReply) {
                                             await event.addComponentAsync(ComponentService.createContent(followUp.emptyReply));
                                             await event.replyAsync();
@@ -98,6 +98,9 @@ export async function deployCommands(): Promise<void> {
     const commandsForRegistration: any[] = [];
 
     for (const command of loadedCommands) {
+        if (!command.isSlashCommand)
+            continue;
+
         const slashCommandBuilder = DiscordService.mapCommandToSlashCommandBuilder(command as Command);
         commandsForRegistration.push(slashCommandBuilder.toJSON());
         Logger.logInfo(`Command added for registration: ${command.name}`);

@@ -23,7 +23,9 @@ export const discordClient = new DiscordClient({
 });
 
 discordClient.once('ready', async () => {
-  Logger.logInfo(`Logged in as ${discordClient.user?.tag}`);
+  Logger.logInfo(`Logged in as ${discordClient.user?.tag}`, {
+    sendToDiscord: true
+  });
   await createConnectionAsync().then(async (success) => {
     if (success) {
       await initAsync();

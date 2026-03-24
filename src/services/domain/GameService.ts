@@ -1,4 +1,4 @@
-import { InteractionEvent, isMessageInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
+import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
 import { DatasheetsModel, GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
@@ -214,7 +214,7 @@ class GameService {
             GameRepository.getByServerAndGameIdAsync(savable.ServerId, savable.GameTypeEnum as GameTypeEnum)
         ]);
 
-        const handleReplaceAsync = async (existingGame: GamesModel, event: MessageInteractionEvent) => {
+        const handleReplaceAsync = async (existingGame: GamesModel, event: ButtonInteractionEvent) => {
             await GameRepository.purgeAsync(existingGame.Id);
             await this.saveAsync(savable, event);
             await event.editAsync();
@@ -225,7 +225,7 @@ class GameService {
             ErrorHelper.throwWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_CHANNEL,
                 [createMoveButtonAsync(event.user.userId, async (event: InteractionEvent) => {
-                    if (!isMessageInteractionEvent(event))
+                    if (!isButtonInteractionEvent(event))
                         return;
                     await handleReplaceAsync(activeChannelGame, event);
                 }),
@@ -238,7 +238,7 @@ class GameService {
             ErrorHelper.throwWithComponents(
                 ExceptionEnum.WANT_TO_REPLACE_GAME,
                 [createMoveButtonAsync(event.user.userId, async (event: InteractionEvent) => {
-                    if (!isMessageInteractionEvent(event))
+                    if (!isButtonInteractionEvent(event))
                         return;
                     await handleReplaceAsync(activeServerGame, event);
                 }),
