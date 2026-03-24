@@ -2,6 +2,7 @@ import { GamesModel, GamesSaveModel } from '../../src/interfaces/database/TableI
 import { TableEnum } from '../../src/interfaces/enums';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
 import Logger from '../../src/utils/application/Logger';
+import { createMultiLingualString } from '../../src/utils/i18n/MultiLingualString';
 import TestInputSimulator from '../builders/TestInputSimulator';
 import TestDatabase from '../config/TestDatabase';
 import { GameFlowTestConfig } from '../interfaces/GameFlowInterface';
@@ -140,44 +141,20 @@ export function createConnectionsGameData(): string {
     const gameData = {
         gameDataArray: [
             {
-                Response: {
-                    EN: "CAT;DOG;BIRD;FISH",
-                    NL: "KAT;HOND;VOGEL;VIS"
-                },
-                Message: {
-                    EN: "Animals",
-                    NL: "Dieren"
-                }
+                Response: createMultiLingualString("CAT;DOG;BIRD;FISH"),
+                Message: createMultiLingualString("Animals")
             },
             {
-                Response: {
-                    EN: "RED;BLUE;GREEN;YELLOW",
-                    NL: "ROOD;BLAUW;GROEN;GEEL"
-                },
-                Message: {
-                    EN: "Colors",
-                    NL: "Kleuren"
-                }
+                Response: createMultiLingualString("RED;BLUE;GREEN;YELLOW"),
+                Message: createMultiLingualString("Colors")
             },
             {
-                Response: {
-                    EN: "APPLE;BANANA;ORANGE;GRAPE",
-                    NL: "APPEL;BANAAN;SINAASAPPEL;DRUIF"
-                },
-                Message: {
-                    EN: "Fruits",
-                    NL: "Fruit"
-                }
+                Response: createMultiLingualString("APPLE;BANANA;ORANGE;GRAPE"),
+                Message: createMultiLingualString("Fruits")
             },
             {
-                Response: {
-                    EN: "CAR;BIKE;PLANE;BOAT",
-                    NL: "AUTO;FIETS;VLIEGTUIG;BOOT"
-                },
-                Message: {
-                    EN: "Vehicles",
-                    NL: "Voertuigen"
-                }
+                Response: createMultiLingualString("CAR;BIKE;PLANE;BOAT"),
+                Message: createMultiLingualString("Vehicles")
             }
         ],
         solvedCategories: []

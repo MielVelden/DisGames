@@ -172,8 +172,8 @@ export default {
                 });
                 
                 // If all 4 categories are solved, start new game
-                const nextAnswer = await event.getNextAnswerAsync();
-                if (gameState.solvedCategories.length === 4 && nextAnswer) {
+                if (gameState.solvedCategories.length === 4) {
+                    const nextAnswer = await event.getNextAnswerAsync();
                     const nextGameState = createGameState(nextAnswer);
                     event.setGameDataAnswer(serializeGameState(nextGameState));
 
