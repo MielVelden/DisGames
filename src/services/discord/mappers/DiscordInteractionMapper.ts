@@ -34,7 +34,7 @@ class DiscordInteractionMapper {
         let event: InteractionEvent;
 
         if (interaction.isChatInputCommand()) {
-            const command = getCommandConfig(interaction.commandName);
+            const command = getCommandConfig(interaction.commandName, "Slash");
             if (!command)
                 throw new Error(`Command not found: ${interaction.commandName}`);
 
@@ -119,7 +119,7 @@ class DiscordInteractionMapper {
         if (!isMessageEventType(eventType))
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         
-        const command = getCommandConfig(message.content.split(' ')[0].toLowerCase()) ?? undefined;
+        const command = getCommandConfig(message.content.split(' ')[0].toLowerCase(), "Message") ?? undefined;
         
         const tempEvent = new MessageDiscordEvent(
             message,

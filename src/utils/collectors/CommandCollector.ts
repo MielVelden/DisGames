@@ -33,9 +33,9 @@ export async function loadCommands(client?: DiscordClient): Promise<Command[]> {
     return loadedCommands;
 }
 
-export function getCommandConfig(commandName: string): Command | null {
+export function getCommandConfig(commandName: string, type: "Slash" | "Message"): Command | null {
     commandName = commandName.toLowerCase();
-    const command = commands.find(c => c.name === commandName);
+    const command = commands.find(c => c.name === commandName && c[type === "Slash" ? "isSlashCommand" : "isMessageCommand"] === true);
     if (!command)
         return null;
     

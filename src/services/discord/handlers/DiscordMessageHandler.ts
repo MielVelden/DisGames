@@ -298,13 +298,41 @@ class DiscordMessageHandler {
                 await event.currentInteraction.edit(content);
                 break;
             case EventTypeEnum.BUTTON:
-                await event.currentInteraction.update(content);
+                try {
+                    await event.currentInteraction.update(content);
+                } catch (error) {
+                    if (this.isInteractionAlreadyRepliedError(error) || this.isUnknownInteractionError(error)) {
+                        if (event.currentInteraction.deferred || event.currentInteraction.replied) {
+                            await event.currentInteraction.editReply(content);
+                            return;
+                        }
+
+                        await Logger.logWarning(`Interaction ${event.currentInteraction.id} could not be updated during edit in channel ${event.channelId}`);
+                        return;
+                    }
+
+                    throw error;
+                }
                 break;
             case EventTypeEnum.SELECT_MENU:
                 if (event.currentInteraction.deferred) {
                     await event.currentInteraction.editReply(content);
                 } else {
-                    await event.currentInteraction.update(content);
+                    try {
+                        await event.currentInteraction.update(content);
+                    } catch (error) {
+                        if (this.isInteractionAlreadyRepliedError(error) || this.isUnknownInteractionError(error)) {
+                            if (event.currentInteraction.deferred || event.currentInteraction.replied) {
+                                await event.currentInteraction.editReply(content);
+                                return;
+                            }
+
+                            await Logger.logWarning(`Interaction ${event.currentInteraction.id} could not be updated during select menu edit in channel ${event.channelId}`);
+                            return;
+                        }
+
+                        throw error;
+                    }
                 }
                 break;
             default:
