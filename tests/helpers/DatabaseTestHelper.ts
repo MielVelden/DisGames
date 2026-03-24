@@ -1,5 +1,4 @@
 import TestDatabase from '../config/TestDatabase';
-import TestConfig from '../config/TestConfig';
 import { createConnectionAsync, getTableName } from '../../src/repositories/util/ConnectionHandler';
 import { CLEANUP_ORDER } from './TableNameMapping';
 import Logger from '../../src/utils/application/Logger';

@@ -10,7 +10,7 @@ import { GameDataModel, ServersModel } from "../../interfaces/database/TableInte
 import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import { compareStrings } from "../../utils/helpers/String";
-import { addPrefix, createBlock, createFooter, createTitle } from "../../utils/helpers/Markdown";
+import { createBlock } from "../../utils/helpers/Markdown";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 
 function scrambleWord(word: string): string {

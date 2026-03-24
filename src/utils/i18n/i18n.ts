@@ -525,7 +525,7 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "You can start guessing the flag by typing the country name",
                         [LanguageEnum.NL]: "Je kan beginnen met raden aan de vlag door de landnaam te typen",
                     }),
-                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
+                    nextAnswer: (_nextAnswer?: string | number) => new MultiLingualString({
                         [LanguageEnum.EN]: "> Can you guess the flag?",
                         [LanguageEnum.NL]: "> Kun jij de vlag raden?",
                     })
@@ -551,7 +551,7 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "> Find groups of 4 related words. Type your guess as: `word1, word2, word3, word4`",
                         [LanguageEnum.NL]: "> Vind groepen van 4 gerelateerde woorden. Typ je gok als: `woord1, woord2, woord3, woord4`",
                     }),
-                    nextAnswer: (remaining?: string | number) => new MultiLingualString({
+                    nextAnswer: (_remaining?: string | number) => new MultiLingualString({
                         [LanguageEnum.EN]: "> Great! You found a category! Keep looking for groups of 4 related words.",
                         [LanguageEnum.NL]: "> Geweldig! Je hebt een categorie gevonden! Blijf zoeken naar groepen van 4 gerelateerde woorden.",
                     }),

@@ -10,7 +10,7 @@ import GameImageService from "../image/GameImageService";
 import { STRING_DELIMITER } from "../../constants";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
-import { createBlock, createTitle } from "../../utils/helpers/Markdown";
+import { createBlock } from "../../utils/helpers/Markdown";
 
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];

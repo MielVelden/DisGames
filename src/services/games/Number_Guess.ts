@@ -2,7 +2,7 @@ import { GameActionEnum, GameActionPriorityEnum, GameModule, GameOptionEnum } fr
 import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
 import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
@@ -62,7 +62,7 @@ export default {
             });
         },
 
-        async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
+        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
             return [
                 ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
             ];

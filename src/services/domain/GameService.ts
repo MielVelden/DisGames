@@ -107,16 +107,10 @@ class GameService {
         return this.games.filter(game => activeGames.some(activeGame => activeGame.GameTypeEnum === game.config.id));
     }
 
-    public getGameByType(gameTypeEnum: GameTypeEnum): GameModule | undefined {
+    public async getGameByTypeAsync(gameTypeEnum: GameTypeEnum): Promise<GameModule | undefined> {
+        if(this.games.length === 0)
+            await this.loadGamesAsync();
         return this.games.find(game => game.config.id === gameTypeEnum);
-    }
-
-    public getGameNameByType(gameTypeEnum: GameTypeEnum): MultiLingualString {
-        const gameModule = this.getGameByType(gameTypeEnum);
-        if (!gameModule)
-            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
-
-        return gameModule.config.name;
     }
 
     public async getGameByChannelIdAsync(channelId: string): Promise<GamesModel> {
@@ -130,7 +124,7 @@ class GameService {
     }
 
     public async getStartMessageAsync(game: GamesModel, gameData?: GameDataModel | GameDataModel[]): Promise<Component[]> {
-        const gameModule = this.getGameByType(game.GameTypeEnum);
+        const gameModule = await this.getGameByTypeAsync(game.GameTypeEnum);
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
@@ -175,7 +169,7 @@ class GameService {
             if (!model)
                 ErrorHelper.throwSilently(ExceptionEnum.GAME_NOT_FOUND);
 
-            const gameModule = this.getGameByType(model.GameTypeEnum as GameTypeEnum);
+            const gameModule = await this.getGameByTypeAsync(model.GameTypeEnum as GameTypeEnum);
             if (!gameModule)
                 ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
@@ -253,7 +247,7 @@ class GameService {
         }
 
         // Get the game module
-        const gameModule = this.getGameByType(savable.GameTypeEnum as GameTypeEnum);
+        const gameModule = await this.getGameByTypeAsync(savable.GameTypeEnum as GameTypeEnum);
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
@@ -332,7 +326,7 @@ class GameService {
             });
         } else if (gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Answer is incorrect - handle via game module if available
-            const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
+            const gameModule = await this.getGameByTypeAsync(gameEvent.getGameData().GameTypeEnum);
             if (gameModule && gameModule.functions && gameModule.functions.onIncorrectAnswerAsync) {
                 await gameModule.functions.onIncorrectAnswerAsync(gameEvent);
                 await this.handleUpdateGameDataAsync(gameEvent);
@@ -411,7 +405,7 @@ class GameService {
     }
 
     private async handleGameOptionsAsync(gameEvent: GameEvent, event: MessageInteractionEvent): Promise<void> {
-        const gameModule = this.getGameByType(gameEvent.getGameData().GameTypeEnum);
+        const gameModule = await this.getGameByTypeAsync(gameEvent.getGameData().GameTypeEnum);
         const options = Object.entries(gameEvent.gameConfig.options)
             .filter(([_, value]) => value === true)
             .map(([key]) => Number(key))
@@ -498,7 +492,7 @@ class GameService {
         if (!game)
             ErrorHelper.throwSilently(ExceptionEnum.GAME_CHANNEL_NOT_FOUND);
 
-        const gameModule = this.getGameByType(game.GameTypeEnum);
+        const gameModule = await this.getGameByTypeAsync(game.GameTypeEnum);
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
@@ -593,8 +587,8 @@ class GameService {
         return defaultValues;
     }
 
-    public getSettingValue<T = any>(game: GamesModel, settingKey: GameSettingsEnum): T | undefined {
-        const gameModule = this.getGameByType(game.GameTypeEnum);
+    public async getSettingValueAsync<T = any>(game: GamesModel, settingKey: GameSettingsEnum): Promise<T | undefined> {
+        const gameModule = await this.getGameByTypeAsync(game.GameTypeEnum);
         if (!gameModule?.config.settings)
             return undefined;
 

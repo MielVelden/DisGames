@@ -8,7 +8,7 @@ import { GameDataModel, ServersModel } from "../../interfaces/database/TableInte
 import { Component } from "../../interfaces/application/Message";
 import { compareStrings } from "../../utils/helpers/String";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
-import { addPrefix, createBlock, createFooter, createTitle } from "../../utils/helpers/Markdown";
+import { createBlock } from "../../utils/helpers/Markdown";
 
 export default {
     config: {

@@ -12,7 +12,7 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
         return this.repository.getAllAsync();
     }
 
-    protected async performSaveAsync(savable: GameDataSaveModel, event: InteractionEvent): Promise<GameDataModel> {
+    protected async performSaveAsync(savable: GameDataSaveModel, _event: InteractionEvent): Promise<GameDataModel> {
 
         if(savable.isUpdate()) {
             const model = await this.repository.getByIdAsync(savable.getId()!);

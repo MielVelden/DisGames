@@ -2,7 +2,7 @@ import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnu
 import { GameFlowTestHelper } from '../../helpers/GameFlowTestHelper';
 import { TestInputSimulator } from '../../builders/TestInputSimulator';
 import { createGameFlowTestConfig } from '../../fixtures/games';
-import { createTestUserAsync, createTestUserByNameAsync } from '../../fixtures/users';
+import { createTestUserByNameAsync } from '../../fixtures/users';
 import AssertionHelpers from '../../helpers/AssertionHelpers';
 import { DEFAULT_ACCEPT_EMOJI } from '../../../src/utils/constants/Emojis';
 import TestRunner from '../../TestRunner';

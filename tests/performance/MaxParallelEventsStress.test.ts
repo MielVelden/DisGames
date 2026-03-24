@@ -55,7 +55,7 @@ export default function registerMaxParallelEventsStressTests(runner: TestRunner)
                     
                     // Log detailed results
                     Logger.logTest('\n📋 Detailed Results:');
-                    stressResult.results.forEach((result, index) => {
+                    stressResult.results.forEach((result) => {
                         const status = result.success ? '✅' : '❌';
                         Logger.logTest(`${status} Concurrency ${result.concurrency}: ${result.eventsPerSecond.toFixed(2)} events/sec, ${result.averageResponseTime.toFixed(2)}ms avg response, ${(result.errorRate * 100).toFixed(1)}% errors`);
                     });

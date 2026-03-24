@@ -272,7 +272,6 @@ export class PerformanceTestHelper {
         const channel = await createTestChannelAsync();
 
         // Create a test game for MESSAGE events if needed
-        let gameCreated = false;
         if (config.eventTypes.includes(EventTypeEnum.MESSAGE)) {
             try {
                 await createTestGameAsync({
@@ -282,7 +281,6 @@ export class PerformanceTestHelper {
                     Answer: 'test',
                     SettingsJSON: { difficulty: DifficultyEnum.MEDIUM }
                 });
-                gameCreated = true;
                 Logger.logDebug(`Created test game for channel: ${channel}`);
             } catch (error) {
                 Logger.logDebug(`Failed to create test game: ${(error as Error).message}`);

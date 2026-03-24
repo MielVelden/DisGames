@@ -10,7 +10,7 @@ class EventsService extends BaseDomainService<EventsModel, EventsSaveModel, type
         return this.repository.getAllAsync();
     }
 
-    protected async performSaveAsync(savable: EventsSaveModel, event: InteractionEvent): Promise<EventsModel> {
+    protected async performSaveAsync(savable: EventsSaveModel, _event: InteractionEvent): Promise<EventsModel> {
         return await this.repository.saveAsync(savable);
     }
 

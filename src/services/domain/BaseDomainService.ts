@@ -44,24 +44,11 @@ export abstract class BaseDomainService<T extends BaseEntity & { getId(): number
 
     protected abstract performSaveAsync(savable: S, event: TimelineEvent): Promise<T>;
 
-    protected async beforeSaveAsync?(savable: S, event: TimelineEvent): Promise<void> {
-    }
-
-    protected async afterSaveAsync?(result: T, event: TimelineEvent): Promise<void> {
-    }
-
     public async saveAsync(savable: S, event: TimelineEvent): Promise<T> {
         ErrorHelper.throwIfNull(savable, ExceptionEnum.INVALID_ARGUMENT);
         ErrorHelper.throwIfNull(event, ExceptionEnum.INVALID_ARGUMENT);
 
-        if (this.beforeSaveAsync)
-            await this.beforeSaveAsync(savable, event);
-
         const result = await this.performSaveAsync(savable, event);
-
-        if (this.afterSaveAsync)
-            await this.afterSaveAsync(result, event);
-
         await event.commitTimelineAsync();
 
         return result;

@@ -107,7 +107,7 @@ class Logger {
         }
     }
 
-    public async logTimeline(timeline: TimelineEntriesModel, options?: LoggerOptions): Promise<void> {
+    public async logTimeline(timeline: TimelineEntriesModel): Promise<void> {
         const embed = await createTimelineEmbed(timeline);
         await Webhook.sendDiscordEmbed(embed);
     }

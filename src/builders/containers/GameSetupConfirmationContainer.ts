@@ -1,4 +1,4 @@
-import { Component, ComponentType, Container } from "../../interfaces/application/Message";
+import { Component } from "../../interfaces/application/Message";
 import { GameSettingsValues } from "../../interfaces/domain/GameSettings";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { LanguageEnum } from "../../interfaces/enums";
@@ -10,13 +10,13 @@ import { GameSettingsContainer } from "./GameSettingsContainer";
 import MediaService from "../../services/application/MediaService";
 import { createTitle } from "../../utils/helpers/Markdown";
 
-export function createGameSetupConfirmationContainer(
+export async function createGameSetupConfirmationContainerAsync(
     gameName: string, 
     channelName: string, 
     gameTypeEnum: GameTypeEnum,
     settings?: GameSettingsValues,
     languageEnum: LanguageEnum = LanguageEnum.NL
-): Component[] {
+): Promise<Component[]> {
     const gameImage = MediaService.getGameImage(gameTypeEnum);
 
     const components: Component[] = [
@@ -29,7 +29,7 @@ export function createGameSetupConfirmationContainer(
 
     // If game has settings, add them to the confirmation
     if (gameTypeEnum && settings) {
-        const gameModule = GameService.getGameByType(gameTypeEnum);
+        const gameModule = await GameService.getGameByTypeAsync(gameTypeEnum);
         if (gameModule?.config.settings) {
             const compactSettingsDisplay = GameSettingsContainer.createReadOnlyDisplay({
                 settingsSchema: gameModule.config.settings,

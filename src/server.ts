@@ -6,7 +6,6 @@ import { apiKeyMiddleware } from "./middleware/ApiKeyMiddleware";
 import { withRequestContext } from "./middleware/RequestContext";
 import { ApiController } from "./controllers/ApiController";
 import Logger from "./utils/application/Logger";
-import { TypeGeneratorController } from "./controllers/TypeGeneratorController";
 
 const app = express();
 app.use(cors());

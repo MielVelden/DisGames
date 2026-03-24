@@ -1,4 +1,4 @@
-import { InteractionEvent, isReplyInteractionEvent, MessageInteractionEvent, SlashCommandInteractionEvent } from "../../interfaces/application";
+import { InteractionEvent, isReplyInteractionEvent } from "../../interfaces/application";
 import { ComponentErrorOptions } from "../../interfaces/application/Error";
 import { Component } from "../../interfaces/application/Message";
 import { ExceptionEnum } from "../../interfaces/enums";

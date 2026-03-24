@@ -12,7 +12,7 @@ class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSave
         return this.repository.getAllAsync();
     }
 
-    protected async performSaveAsync(savable: DatasheetsSaveModel, event: InteractionEvent): Promise<DatasheetsModel> {
+    protected async performSaveAsync(savable: DatasheetsSaveModel, _event: InteractionEvent): Promise<DatasheetsModel> {
         return await this.repository.saveAsync(savable);
     }
 

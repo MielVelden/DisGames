@@ -5,7 +5,6 @@ import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import Logger from "../../utils/application/Logger";
 import { User } from "../../interfaces/domain";
-import GameService from "./GameService";
 import TimelineBuilder from "./TimelineBuilder";
 import { InteractionEvent } from "../../interfaces/application";
 import { BaseDomainService } from "./BaseDomainService";

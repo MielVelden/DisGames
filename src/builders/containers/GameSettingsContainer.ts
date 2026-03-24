@@ -16,7 +16,7 @@ import {
 import ComponentService from "../../services/application/ComponentService";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
-import { ButtonInteractionEvent } from "../../interfaces/application/Event";
+import { ButtonInteractionEvent, InteractionEvent } from "../../interfaces/application/Event";
 import { isMultiLingualString } from "../../interfaces/application/i18n";
 
 export class GameSettingsContainer {
@@ -67,9 +67,9 @@ export class GameSettingsContainer {
                     label: new MultiLingualString(boolValue ? i18n.commands.games.settings.enabled : i18n.commands.games.settings.disabled),
                 }, {
                     userId: config.userId,
-                    handle: async (btnEvent: any) => {
+                    handle: async (btnEvent: InteractionEvent) => {
                         if (handlers?.onBooleanClick)
-                            await handlers.onBooleanClick(btnEvent, setting.key, boolValue);
+                            await handlers.onBooleanClick(btnEvent as ButtonInteractionEvent, setting.key, boolValue);
                         else if (config.onSettingChange)
                             config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, !boolValue);
                     }
@@ -83,9 +83,9 @@ export class GameSettingsContainer {
                     label: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown),
                 }, {
                     userId: config.userId,
-                    handle: async (btnEvent: any) => {
+                    handle: async (btnEvent: InteractionEvent) => {
                         if (handlers?.onEnumClick)
-                            await handlers.onEnumClick(btnEvent, setting.key, setting, currentValue);
+                            await handlers.onEnumClick(btnEvent as ButtonInteractionEvent, setting.key, setting, currentValue);
                     }
                 }));
             }
@@ -108,13 +108,13 @@ export class GameSettingsContainer {
                         label: option.label,
                     }, {
                         userId: config.userId,
-                        handle: async (btnEvent: any) => {
+                        handle: async (btnEvent: InteractionEvent) => {
                             const newValues = isSelected
                                 ? listValues.filter(v => v !== optionValue)
                                 : [...listValues, optionValue];
 
                             if (handlers?.onListClick) {
-                                await handlers.onListClick(btnEvent, setting.key, setting, optionValue, !isSelected, newValues);
+                                await handlers.onListClick(btnEvent as ButtonInteractionEvent, setting.key, setting, optionValue, !isSelected, newValues);
                             } else if (config.onSettingChange) {
                                 config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, newValues);
                             }
@@ -138,7 +138,7 @@ export class GameSettingsContainer {
                 label: new MultiLingualString(i18n.labels.common.accept),
             }, {
                 userId: config.userId,
-                handle: async (btnEvent) => {
+                handle: async (btnEvent: InteractionEvent) => {
                     if (handlers?.onAcceptClick) {
                         await handlers.onAcceptClick(btnEvent as ButtonInteractionEvent);
                     } else if (config.onAccept) {

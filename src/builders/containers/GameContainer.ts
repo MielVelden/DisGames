@@ -4,7 +4,7 @@ import { ActionButton } from "../../interfaces/application/Message";
 import { GameSettingsValues } from "../../interfaces/domain/GameSettings";
 import { ExceptionEnum, LanguageEnum } from "../../interfaces/enums";
 import { Component } from "../../interfaces/application/Message";
-import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import MediaService from "../../services/application/MediaService";
 import ComponentService from "../../services/application/ComponentService";
@@ -12,13 +12,13 @@ import { createTitle } from "../../utils/helpers/Markdown";
 import { GameSettingsContainer } from "./GameSettingsContainer";
 import { ErrorHelper } from "../../utils/application/Error";
 
-export function createGameContainer(
+export async function createGameContainerAsync(
     game: GamesModel, 
     actions: ActionButton[], 
     settings?: GameSettingsValues,
     languageEnum: LanguageEnum = LanguageEnum.NL
-): Component[] {
-    const gameModule = GameService.getGameByType(game.GameTypeEnum);
+): Promise<Component[]> {
+    const gameModule = await GameService.getGameByTypeAsync(game.GameTypeEnum);
     if (!gameModule || !gameModule.config)
         ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
     const gameImage = MediaService.getGameImage(game.GameTypeEnum);

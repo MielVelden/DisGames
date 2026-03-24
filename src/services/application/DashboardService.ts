@@ -85,7 +85,6 @@ class DashboardService {
         const usersTimeFrame = await TimelineRepository.getUsersTimeFrameAsync(timeFrame);
         const messagesSentTimeFrame = await EventsRepository.getMessagesSentTimeFrameAsync(timeFrame);
         const gamesPlayedTimeFrame = await TimelineRepository.getGamesPlayedTimeFrameAsync(timeFrame);
-        const averageGamesPlayedPerUser = gamesPlayedTimeFrame.currentValue / users;
 
         // Get the charts
         const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_User_NewUser, identity);

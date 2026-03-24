@@ -7,7 +7,7 @@ import { GamesCommandActionEnum, GamesCommandFollowUpKeysEnum } from "../interfa
 import ComponentService from "../services/application/ComponentService";
 import GameService from "../services/domain/GameService";
 import { createDeleteButton } from "../builders/buttons/DeleteButton";
-import { createGameContainer } from "../builders/containers/GameContainer";
+import { createGameContainerAsync } from "../builders/containers/GameContainer";
 import { createChannelSelectMenu } from "../builders/selectmenus/ChannelSelectMenu";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
@@ -16,7 +16,7 @@ import { Games_Settings } from "../interfaces/domain/GameSettings";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { createGameHelpContainer } from "../builders/containers/GameHelpContainer";
 import { createMoveButton } from "../builders/buttons/MoveButton";
-import { createGameSetupConfirmationContainer } from "../builders/containers/GameSetupConfirmationContainer";
+import { createGameSetupConfirmationContainerAsync } from "../builders/containers/GameSetupConfirmationContainer";
 import { GamesSaveModel } from "../interfaces/database";
 import { createTitle } from "../utils/helpers/Markdown";
 
@@ -49,7 +49,7 @@ const optionsConfig = [
                     const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
                     const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
                     
-                    await event.addComponentsAsync(createGameContainer(game, [
+                    await event.addComponentsAsync(await createGameContainerAsync(game, [
                         createMoveButton(event.user.userId, async (btnEvent) => {
                             const channelSelectMenu = createChannelSelectMenu();
                             const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);
@@ -102,7 +102,7 @@ const optionsConfig = [
                 permissions: [Permission.ADMINISTRATOR],
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const gameTypeEnum = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)) as GameTypeEnum;
-                    const gameModule = GameService.getGameByType(gameTypeEnum);
+                    const gameModule = await GameService.getGameByTypeAsync(gameTypeEnum);
                     const channelName = await event.getChannelNameAsync(event.channelId);
                     
                     let gameSettings: Games_Settings = {};
@@ -122,7 +122,7 @@ const optionsConfig = [
                         }
                     }
                     
-                    const confirmationContainer = createGameSetupConfirmationContainer(
+                    const confirmationContainer = await createGameSetupConfirmationContainerAsync(
                         gameModule?.config.name.getMessage(event.server.LanguageEnum) || 'Unknown',
                         channelName,
                         gameTypeEnum,
@@ -130,7 +130,7 @@ const optionsConfig = [
                         event.server.LanguageEnum
                     );
 
-                    const confirmedEvent = await event.getConfirmationFromUser(confirmationContainer);
+                    const confirmedEvent = await event.getConfirmationFromUserAsync(confirmationContainer);
                     
                     if (confirmedEvent) {
                         // Save the game with settings

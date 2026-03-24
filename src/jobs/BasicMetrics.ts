@@ -4,7 +4,6 @@ import Logger from "../utils/application/Logger";
 import { WebhookType } from "../interfaces/enums/application/Webhook";
 import UserRepository from "../repositories/UserRepository";
 import ServerRepository from "../repositories/ServerRepository";
-import GameRepository from "../repositories/GameRepository";
 import PointRepository from "../repositories/PointRepository";
 
 export default {

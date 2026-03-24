@@ -13,7 +13,7 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
         return this.repository.getAllAsync();
     }
 
-    protected async performSaveAsync(savable: PointsSaveModel, event: InteractionEvent): Promise<PointsModel> {
+    protected async performSaveAsync(savable: PointsSaveModel, _event: InteractionEvent): Promise<PointsModel> {
         if (savable.isUpdate()) {
             const entity = await this.repository.getByIdAsync(savable.getId()!);
             if (!entity)

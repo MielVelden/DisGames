@@ -1,5 +1,5 @@
 import { User } from "../../../interfaces/domain/User";
-import { Component, BaseSelectMenu } from "../../../interfaces/application/Message";
+import { Component, BaseSelectMenu, SelectMenu } from "../../../interfaces/application/Message";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
@@ -75,7 +75,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
     }
 
     public async getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null> {
-        const result = await DiscordMessageHandler.getUserInputBySelectMenuAsync(this as unknown as InteractionEvent, selectMenu as any);
+        const result = await DiscordMessageHandler.getUserInputBySelectMenuAsync(this as unknown as InteractionEvent, selectMenu as SelectMenu);
         return result as SelectMenuInteractionEvent | null;
     }
 
@@ -83,7 +83,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         return await DiscordMessageHandler.getUserInputByButtonsAsync(this as unknown as InteractionEvent, question, buttons);
     }
 
-    public async getConfirmationFromUser(container: Component[]): Promise<InteractionEvent | null> {
+    public async getConfirmationFromUserAsync(container: Component[]): Promise<InteractionEvent | null> {
         return await DiscordMessageHandler.getConfirmationFromUser(this as unknown as InteractionEvent, container);
     }
 

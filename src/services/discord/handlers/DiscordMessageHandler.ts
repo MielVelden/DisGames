@@ -386,7 +386,7 @@ class DiscordMessageHandler {
                     onTimeout: async () => {
                         resolve(null);
                     },
-                    handle: async (event: InteractionEvent) => {
+                    handle: async (_event: InteractionEvent) => {
                         resolve(button.getMessage() ?? null);
                     }
                 })

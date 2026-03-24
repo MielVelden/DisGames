@@ -1,5 +1,4 @@
 import {
-    Client,
     Events,
     Message,
 } from 'discord.js';
@@ -11,7 +10,7 @@ import Logger from '../utils/application/Logger';
 export default {
     name: Events.MessageDelete,
 
-    async execute(message: Message, client: Client): Promise<void> {
+    async execute(message: Message): Promise<void> {
         // Check if this message was deleted internally
         if (EventService.isMessageInternallyDeleted(message.id)) {
             Logger.logDebug(`Skipping internally deleted message: ${message.id}`);

@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction, GuildMember as DiscordGuildMember } from "discord.js";
+import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction } from "discord.js";
 import { MessageInteractionEvent } from "../../interfaces/application/Event";
 import { CommandEnum } from "../../interfaces/enums/commands/CommandEnum";
 import DiscordMemberService from "../../services/discord/DiscordMemberService";
@@ -99,7 +99,7 @@ export async function impersonateSlashCommandAsync(
             }
 
             if (prop === 'deferReply') {
-                return async (options?: any) => {
+                return async (_options?: any) => {
                     deferred = true;
                     replied = true;
                     return Promise.resolve();

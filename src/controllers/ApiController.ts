@@ -41,7 +41,7 @@ export class ApiController {
 	}
 
 	private async getAuthorizedIdentity(req: any): Promise<UsersModel | null> {
-		const access = req.res?.locals?.oauth?.access as string | undefined;
+		// const access = req.res?.locals?.oauth?.access as string | undefined;
 		const userId = req.res?.locals?.oauth?.discordUserId as string | undefined;
 
 		Logger.logInfo(`Authorize check for userId=${userId}`);

@@ -37,7 +37,7 @@ export class DatabaseHelper {
           if (multiLingualString) {
             deserialized[SchemaUtils.removeMultiLingualStringSuffix(key)] = multiLingualString;
           }
-        } catch (error) {
+        } catch {
           // Silently continue if parsing fails
         }
       }
@@ -97,7 +97,7 @@ export class DatabaseHelper {
         try {
           const parsedValue = JSON.parse(value);
           deserialized[SchemaUtils.removeJsonSuffix(key)] = parsedValue;
-        } catch (error) {
+        } catch {
           // Silently continue if parsing fails
         }
       }

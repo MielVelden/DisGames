@@ -10,7 +10,6 @@ import ComponentService from "../services/application/ComponentService";
 import ServerService from "../services/domain/ServerService";
 import { ServersSaveModel } from "../interfaces/database";
 import { LanguageEnum } from "../interfaces/enums";
-import { getEnumValue, isValidEnumValue } from "../utils/helpers/Enum";
 import { createLanguageSelectMenu } from "../builders/selectmenus/LanguageSelectMenu";
 
 export class SettingsCommand implements Command {

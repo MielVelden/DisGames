@@ -278,8 +278,4 @@ export function getTableName(tableEnumValue: TableEnum): string {
     return enumValue;
 }
 
-function getTableEnum(tableName: string): { Id: number, TableName: string } | undefined {
-    return table_enums.find(tableEnum => tableEnum.TableName === tableName);
-}
-
 //#endregion

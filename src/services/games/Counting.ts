@@ -50,7 +50,7 @@ export default {
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {
             // Get the resetOnFail setting value from GameService
-            const resetOnFail = GameService.getSettingValue<boolean>(event.getGameData(), GameSettingsEnum.RESET_ON_FAIL);
+            const resetOnFail = await GameService.getSettingValueAsync<boolean>(event.getGameData(), GameSettingsEnum.RESET_ON_FAIL);
 
             if (resetOnFail) {
                 // Reset the counter back to 1

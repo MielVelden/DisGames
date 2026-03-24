@@ -1,4 +1,4 @@
-import { Component, ComponentType, ButtonStyle, Separator } from "../../interfaces/application/Message";
+import { Component, ButtonStyle } from "../../interfaces/application/Message";
 import ComponentService from "../../services/application/ComponentService";
 import MediaService from "../../services/application/MediaService";
 import { createTitle } from "../../utils/helpers/Markdown";

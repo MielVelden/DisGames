@@ -3,7 +3,6 @@ import {
     Events,
 } from 'discord.js';
 import DiscordService from '../services/discord/DiscordService';
-import { DiscordClient } from '../interfaces/application/DiscordClient';
 import { InteractionEvent, isSlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
 import { EventService } from '../services/application/EventService';
@@ -15,7 +14,7 @@ import { withEventContextAsync } from '../middleware/EventContext';
 export default {
     name: Events.InteractionCreate,
 
-    async execute(interaction: Interaction, client: DiscordClient): Promise<void> {
+    async execute(interaction: Interaction): Promise<void> {
         // Map the interaction to the InteractionEvent interface
         const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction);
 

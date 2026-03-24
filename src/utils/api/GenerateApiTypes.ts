@@ -1,6 +1,6 @@
 import { InterfaceCollector } from '../collectors/InterfaceCollector';
 import { EndpointCollector } from '../collectors/EndpointCollector';
-import { cleanupQualifiedTypes, isException, getExceptionDefinition, collectExceptionDefinitions } from './Exceptions';
+import { cleanupQualifiedTypes, isException, collectExceptionDefinitions } from './Exceptions';
 
 export async function generateDisGamesTypes(): Promise<string> {
     const interfaces = await InterfaceCollector.collectAllInterfacesAsync();

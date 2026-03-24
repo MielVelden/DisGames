@@ -1,5 +1,4 @@
 import {
-    Client,
     Events,
     Message,
 } from 'discord.js';
@@ -16,7 +15,7 @@ import { withEventContextAsync } from '../middleware/EventContext';
 export default {
     name: Events.MessageCreate,
 
-    async execute(message: Message, client: Client): Promise<void> {
+    async execute(message: Message): Promise<void> {
         await handleDiscordMessageAsync(message, EventTypeEnum.MESSAGE);
     },
 };

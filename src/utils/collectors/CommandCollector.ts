@@ -3,7 +3,7 @@ import { DiscordClient } from "../../interfaces/application/DiscordClient";
 import path from "path";
 import fs from "fs";
 import Logger from "../application/Logger";
-import { DEFAULT_LANGUAGE, MultiLingualString } from "../i18n/MultiLingualString";
+import { MultiLingualString } from "../i18n/MultiLingualString";
 import { LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
 import { resolvePath } from "../helpers/PathResolver";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
