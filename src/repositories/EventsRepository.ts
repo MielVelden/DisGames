@@ -40,6 +40,19 @@ class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveMode
             previousValue: previousMessages
         }
     }
+
+    async getEventsTimeFrameAsync(duration: Duration): Promise<TimeframeData> {
+        const startDate = subtractDurationFromDate(duration, new Date());
+        const previousStartDate = subtractDurationFromDate(duration, startDate);
+        const currentEvents = await this.baseRepository.Select().Where({ CreatedAt: { operator: '>=', value: startDate } }).Count();
+        const previousEvents = await this.baseRepository.Select().Where({ CreatedAt: { operator: '>=', value: previousStartDate } }).Count();
+
+        return {
+            timeFrame: duration,
+            currentValue: currentEvents,
+            previousValue: previousEvents
+        }
+    }
 }
 
 export default new EventsRepository();

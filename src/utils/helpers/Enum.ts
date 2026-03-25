@@ -1,4 +1,4 @@
-import { EnumKey, EnumType, EnumValue } from "../../interfaces/application/EnumType";
+import { EnumType, EnumValue } from "../../interfaces/application/EnumType";
 
 export function isValidEnumValue<T extends EnumType>(enumObj: T, value: string | number): boolean {
     const enumValues = Object.values(enumObj);

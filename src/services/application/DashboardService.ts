@@ -1,11 +1,11 @@
-import { DurationEnum } from "../../interfaces/application";
+import { DurationEnum, DurationGranularityEnum } from "../../interfaces/application";
 import { User } from "../../interfaces/domain";
 import { DashboardEnum } from "../../interfaces/enums/view/DashboardEnum";
 import { DashboardSectionCardData, DashboardResponse, TimeframeData, TrendDirection } from "../../interfaces/view/Dashboard";
 import EventsRepository from "../../repositories/EventsRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
-import { calculateDuration } from "../../utils/helpers/Duration";
+import { calculateDuration, humanizeDuration } from "../../utils/helpers/Duration";
 import { assertNever } from "../../utils/application/Error";
 import { ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";
 import ChartService from "./ChartService";
@@ -63,13 +63,14 @@ class DashboardService {
             },
             footer: {
                 primaryText: timeframe.currentValue > timeframe.previousValue ? "Trending up" : "Trending down",
-                secondaryText: `From ${timeframe.timeFrame.toString()} ago`
+                secondaryText: `Compared to ${humanizeDuration(timeframe.timeFrame, DurationGranularityEnum.HOUR)} ago`
             }
         }
     }
 
     private async getHomeDashboardAsync(identity: User): Promise<DashboardResponse> {
         return {
+            title: "Home",
             cards: [
                 this.createDashboardCard("Total Revenue", "$1,250.00", "up", { primaryText: "Trending up this month", secondaryText: "Visitors for the last 6 months" }),
                 this.createDashboardCard("New Customers", 1234, "down", { primaryText: "Down 20% this period", secondaryText: "Acquisition needs attention" }),
@@ -91,6 +92,7 @@ class DashboardService {
         const pieChart = await ChartService.getChartAsync(ChartTypeEnum.PieChart_User_DeviceType, identity);
         
         return {
+            title: "Users",
             cards: [
                 this.createDashboardCard(
                     "Total Users",
@@ -128,6 +130,7 @@ class DashboardService {
         const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_Server_NewServer, identity);
 
         return {
+            title: "Servers",
             cards: [
                 this.createDashboardCard(
                     "Total Servers",
@@ -166,6 +169,7 @@ class DashboardService {
         };
 
         return {
+            title: "Cache Performance",
             cards: [
                 this.createDashboardCard(
                     "Cache Hit Rate",
@@ -187,16 +191,18 @@ class DashboardService {
     }
 
     private async getAnalyticsDashboardAsync(identity: User): Promise<DashboardResponse> {
-        const timeFrame = calculateDuration(7, DurationEnum.DAY);
+        const timeFrame = calculateDuration(2, DurationEnum.DAY);
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
         const members = await ServerService.getTotalMembersAsync();
+        const events = await EventsRepository.getEventsTimeFrameAsync(timeFrame);
 
         const barChartEventsByType = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsByType, identity);
         const barChartActivityOverTime = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_ActivityOverTime, identity);
         const barChartEventsPerHour = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsPerHour, identity);
 
         return {
+            title: "Analytics",
             cards: [
                 this.createDashboardCard(
                     "Total Servers",
@@ -208,7 +214,7 @@ class DashboardService {
                     }
                 ),
                 this.createDashboardCardWithTimeframe(
-                    "New Servers2",
+                    "New Servers",
                     serversTimeFrame
                 ),
                 this.createDashboardCard(
@@ -219,6 +225,10 @@ class DashboardService {
                         primaryText: "Member base is growing",
                         secondaryText: "Consistent increase in members"
                     }
+                ),
+                this.createDashboardCardWithTimeframe(
+                    "Total Events",
+                    events
                 )
             ],
             charts: [

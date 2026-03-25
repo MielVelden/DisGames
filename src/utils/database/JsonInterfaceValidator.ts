@@ -18,6 +18,7 @@ export class JsonInterfaceValidator {
 
     if (missingInterfaces.length > 0) {
       const errorMessage = this.createErrorMessage(missingInterfaces);
+      Logger.logError(errorMessage);
       ErrorHelper.throw(ExceptionEnum.JSON_INTERFACE_VALIDATION_FAILED);
     }
   }
@@ -32,11 +33,11 @@ export class JsonInterfaceValidator {
     // Search in existing domain files
     try {
       const domainFiles = fs.readdirSync(this.DOMAIN_PATH).filter(file => file.endsWith('.ts'));
-      
+
       for (const file of domainFiles) {
         const filePath = path.join(this.DOMAIN_PATH, file);
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        
+
         // Look for the interface definition (not commented out)
         const interfaceRegex = new RegExp(`^\\s*export\\s+interface\\s+${interfaceName}\\s*{`, 'm');
         if (interfaceRegex.test(fileContent)) {

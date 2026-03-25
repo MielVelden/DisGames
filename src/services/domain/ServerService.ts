@@ -2,28 +2,17 @@ import { TimelineEvent } from "../../interfaces/application/Event";
 import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../../interfaces/database/TableInterfaces";
 import ServerRepository from "../../repositories/ServerRepository";
 import Logger from "../../utils/application/Logger";
+import { normalizeString } from "../../utils/helpers/String";
 import { DEFAULT_LANGUAGE } from "../../utils/i18n/MultiLingualString";
 import { BaseDomainService } from "./BaseDomainService";
 import TimelineBuilder from "./TimelineBuilder";
 
 class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
-    protected readonly repository = ServerRepository;
-    private static readonly SERVER_NAME_MAX_LENGTH = 25;
-
-    public normalizeName(name: string): string {
-        // Replace all non-ASCII characters with '?', then normalize
-        const asciiName = Array.from(name)
-            .map(char => char.charCodeAt(0) <= 127 ? char : '?')
-            .slice(0, ServerService.SERVER_NAME_MAX_LENGTH)
-            .join('')
-            .trim()
-            .replace(/\s+/g, ' ');
-        return asciiName;
-    }
+    protected readonly repository = ServerRepository; 
 
     public async updateNameAsync(serverId: string, name: string): Promise<ServersModel> {
         const server = await this.getByExternalIdAsync(serverId);
-        const normalizedName = this.normalizeName(name);
+        const normalizedName = normalizeString(name);
         server.Name = normalizedName;
         Logger.logDebug(`Updated server name to ${normalizedName} for server ${serverId}`);
         return await this.repository.saveAsync(server);
@@ -39,18 +28,20 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
     protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
         savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
         savable.validateIsNotNull(ServersModelFieldEnum.Points, 0);
-        if (savable.Name !== undefined)
-            savable.Name = this.normalizeName(savable.Name);
+        
+        if (savable.isProvided(ServersModelFieldEnum.Name))
+            savable.Name = normalizeString(savable.Name);
        
         const server = await this.repository.saveAsync(savable);      
-        
         event.server = server;
+
         await TimelineBuilder.forServerUpdateAsync({
             old: null,
             new: server,
             objectId: server.Id,
             event: event
         });
+        
         return server;
     }
     

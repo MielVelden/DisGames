@@ -5,7 +5,7 @@ import { MethodNameUtils } from "../utils/helpers/MethodNames";
 import UserService from "../services/domain/UserService";
 import * as fs from "fs";
 import * as path from "path";
-import { ExceptionEnum } from "../interfaces/enums";
+import { ExceptionEnum, UserRoleEnum } from "../interfaces/enums";
 import { ErrorHelper } from "../utils/application/Error";
 import { createBaseTimelineEvent } from "../utils/helpers/Timeline";
 import ServerService from "../services/domain/ServerService";
@@ -41,10 +41,9 @@ export class ApiController {
 	}
 
 	private async getAuthorizedIdentity(req: any): Promise<UsersModel | null> {
-		// const access = req.res?.locals?.oauth?.access as string | undefined;
 		const userId = req.res?.locals?.oauth?.discordUserId as string | undefined;
 
-		Logger.logInfo(`Authorize check for userId=${userId}`);
+		Logger.logDebug(`Authorize check for userId=${userId}`);
 		if (!userId)
 			return null;
 
@@ -52,9 +51,9 @@ export class ApiController {
 		if (!user)
 			return null;
 
-		// TODO: Uncomment this when we have a way to verify the OAuth2 access token
-		// if (access && user.OAuth2AccessToken === access) 
-		// 	return user;
+		if(user.UserRoleEnum !== UserRoleEnum.SYSTEM && user.UserRoleEnum !== UserRoleEnum.ADMIN)
+			ErrorHelper.throwSilently(ExceptionEnum.UNAUTHORIZED);
+
 		return user;
 	}
 

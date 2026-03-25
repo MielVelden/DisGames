@@ -360,7 +360,36 @@ class DiscordMessageHandler {
         await event.addComponentAsync(ComponentService.createContent(createTitle(new MultiLingualString(i18n.labels.common.timedOut.title))));
         await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.labels.common.timedOut.description)));
         await event.addComponentAsync(selectMenu);
-        await this.editAsync(event);
+
+        try {
+            await this.editAsync(event);
+        } catch (error) {
+            if (!this.isUnknownMessageError(error))
+                throw error;
+
+            const discordContent = await DiscordComponentMapper.buildMessageContentAsync(event, event.components);
+            if (!discordContent)
+                return resolve(null);
+
+            if (discordContent.ephemeral)
+                return resolve(null);
+
+            const channel = (event.currentInteraction as any).channel;
+            if (!channel || !channel.messages || typeof channel.messages.fetch !== 'function')
+                return resolve(null);
+
+            try {
+                const message = await channel.messages.fetch(event.messageId);
+                await message.edit({
+                    components: discordContent.components,
+                    files: discordContent.files,
+                    flags: discordContent.flags
+                });
+            } catch {
+                // Ignore - message might already be deleted or unreachable
+            }
+        }
+
         resolve(null);
     }
 

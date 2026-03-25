@@ -171,7 +171,6 @@ function generateApiWrapper(endpoints: any[], allInterfaces: any[]): string {
             }
 
             if (bodyParam) {
-                const qualifiedBodyType = qualifyTypeInString(bodyParam.type, allInterfaces);
                 output += `    ${methodName}: (${qualifiedParams}) => putJson<${qualifiedReturnType}>(\`${urlPath}\`, ${bodyParam.name})`;
             } else {
                 output += `    ${methodName}: (${qualifiedParams}) => getJson<${qualifiedReturnType}>(\`${urlPath}\`)`;

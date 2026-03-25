@@ -116,7 +116,7 @@ export class JobScheduler {
             await jobModule.handler(noOpProgress);
 
             const duration = Date.now() - startTime;
-            await Logger.logDebug(`Job '${jobModule.name}' completed in ${duration}ms`, {
+            await Logger.logInfo(`Job '${jobModule.name}' completed in ${duration}ms`, {
                 webhookType: WebhookType.DEBUG,
                 sendToDiscord: false
             });

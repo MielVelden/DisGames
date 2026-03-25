@@ -106,4 +106,9 @@ export abstract class BaseEntityClass<FieldEnum = Record<string, string>> implem
     if (currentValue !== value)
       ErrorHelper.throw(ExceptionEnum.FIELD_HAS_CHANGED);
   }
+
+  isProvided<const K extends (keyof this | EnumValues<FieldEnum>) & PropertyKey>(field: K): this is this & { [P in Extract<K, keyof this>]: NonNullable<this[P]> } {
+    const value = this.getFieldValue(field as EnumValues<FieldEnum>);
+    return value !== null && value !== undefined;
+  }
 }

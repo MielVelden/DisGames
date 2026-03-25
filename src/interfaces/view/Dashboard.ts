@@ -2,8 +2,9 @@ import { Duration } from "../application";
 import { ChartDefinition } from "../application/Chart";
 
 export interface DashboardResponse {
-    cards: DashboardSectionCardData[]
-    charts?: ChartDefinition[];
+  title: string;
+  cards: DashboardSectionCardData[];
+  charts?: ChartDefinition[];
 }
 
 export type TrendDirection = "up" | "down";

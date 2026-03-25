@@ -1,7 +1,7 @@
 import { GameTypeEnum } from '../../../src/interfaces/enums/database/GameTypeEnum';
 import { TestInputSimulator } from '../../builders/TestInputSimulator';
 import { createTestGameAsync } from '../../fixtures/games';
-import { createTestUserAsync, createTestUserByNameAsync } from '../../fixtures/users';
+import { createTestUserAsync } from '../../fixtures/users';
 import { createTestServerAsync } from '../../fixtures/servers';
 import { createTestChannelAsync } from '../../fixtures/channels';
 import AssertionHelpers from '../../helpers/AssertionHelpers';

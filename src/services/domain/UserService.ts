@@ -23,6 +23,7 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
             objectId: user.Id,
             event: event
         });
+        
         return user;
     }
 

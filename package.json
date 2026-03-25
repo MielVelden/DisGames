@@ -32,6 +32,7 @@
     "discord.js": "^14.19.3",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
+    "humanize-duration": "^3.33.2",
     "mysql2": "^3.14.2",
     "node-schedule": "^2.1.1",
     "reflect-metadata": "^0.2.1",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/humanize-duration": "^3.27.4",
     "@types/node": "^20.10.0",
     "@types/node-schedule": "^2.1.7",
     "@typescript-eslint/eslint-plugin": "^8.45.0",

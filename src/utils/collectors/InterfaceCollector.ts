@@ -62,7 +62,7 @@ export class InterfaceCollector {
         let match;
 
         while ((match = interfaceRegex.exec(content)) !== null) {
-            const type = match[1];
+            // Match = export interface InterfaceName
             const name = match[2];
             
             // Extract only the specific interface/enum/type definition

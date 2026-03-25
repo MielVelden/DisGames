@@ -1,4 +1,4 @@
-import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
+import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
 import { DatasheetsModel, GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
