@@ -37,7 +37,7 @@ class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, Tim
         return {
             timeFrame: duration,
             currentValue: currentGamesPlayed,
-            previousValue: previousGamesPlayed
+            previousValue: previousGamesPlayed - currentGamesPlayed
         }
     }
 
@@ -50,7 +50,7 @@ class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, Tim
         return {
             timeFrame: duration,
             currentValue: currentUsers,
-            previousValue: previousUsers
+            previousValue: previousUsers - currentUsers
         }
     }
 
@@ -63,7 +63,7 @@ class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, Tim
         return {
             timeFrame: duration,
             currentValue: currentServers,
-            previousValue: previousServers
+            previousValue: previousServers - currentServers
         }
     }
 }

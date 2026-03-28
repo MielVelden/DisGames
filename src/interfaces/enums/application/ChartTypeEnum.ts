@@ -5,6 +5,7 @@ export enum ChartTypeEnum {
     BarChart_Events_EventsByType = "BarChart_Events_EventsByType",
     BarChart_Events_ActivityOverTime = "BarChart_Events_ActivityOverTime",
     BarChart_Events_EventsPerHour = "BarChart_Events_EventsPerHour",
+    PieChart_Server_LanguageDistribution = "PieChart_Server_LanguageDistribution",
 }
 
 export enum ChartEnum {

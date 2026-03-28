@@ -37,7 +37,7 @@ class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveMode
         return {
             timeFrame: duration,
             currentValue: currentMessages,
-            previousValue: previousMessages
+            previousValue: previousMessages - currentMessages
         }
     }
 
@@ -50,7 +50,7 @@ class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveMode
         return {
             timeFrame: duration,
             currentValue: currentEvents,
-            previousValue: previousEvents
+            previousValue: previousEvents - currentEvents
         }
     }
 }

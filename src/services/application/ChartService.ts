@@ -20,6 +20,8 @@ class ChartService {
                 return this.getBarChartEventsActivityOverTimeAsync(identity);
             case ChartTypeEnum.BarChart_Events_EventsPerHour:
                 return this.getBarChartEventsEventsPerHourAsync(identity);
+            case ChartTypeEnum.PieChart_Server_LanguageDistribution:
+                return this.getPieChartServerLanguageDistributionAsync(identity);
             default:
                 assertNever(chartEnum, ChartTypeEnum);
         }
@@ -28,7 +30,7 @@ class ChartService {
     // #region Bar Charts
 
     private async getBarChartEventsEventsByTypeAsync(identity: User): Promise<ChartDefinition> {
-        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [null]);
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [1, null]);
 
         return {
             title: "Events by Type",
@@ -57,17 +59,26 @@ class ChartService {
         };
     }
 
+    private async getPieChartServerLanguageDistributionAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.PieChartServerLanguageDistribution, []);
+
+        return {
+            title: "Server Language Distribution",
+            type: ChartEnum.Pie,
+            ...chartData,
+        };
+    }
     // #endregion
 
     // #region Helper Methods
 
     private async getChartData(storedProcedureEnum: StoredProcedureEnum, params: any[]): Promise<Pick<ChartDefinition, 'data' | 'xAxisKey' | 'valueKeys'>> {
-        const chartData = await RepositoryUtils.CallStoredProcedureGeneric(storedProcedureEnum, params) ;
+        const chartData = await RepositoryUtils.CallStoredProcedureGeneric(storedProcedureEnum, params);
         if (!chartData)
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
         const chart = chartData?.[0]?.ChartDefinition as Partial<ChartDefinition>;
-        if(!chart.data || !chart.valueKeys || !chart.xAxisKey)
+        if (!chart.data || !chart.valueKeys || !chart.xAxisKey)
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
 
         return {
@@ -78,7 +89,7 @@ class ChartService {
     }
 
     // #endregion
-    
+
     // #region TODO: CLEANUP OLD CHARTS
 
     private async getLineChartUserNewUserAsync(identity: User): Promise<ChartDefinition> {

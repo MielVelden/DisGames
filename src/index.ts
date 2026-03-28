@@ -22,6 +22,10 @@ export const discordClient = new DiscordClient({
   ],
 });
 
+discordClient.on('error', (error: Error) => {
+  void Logger.logError('Discord client error', error);
+});
+
 discordClient.once('ready', async () => {
   Logger.logInfo(`Logged in as ${discordClient.user?.tag}`, {
     sendToDiscord: true

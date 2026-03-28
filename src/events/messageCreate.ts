@@ -49,7 +49,7 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
 }
 
 export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
-    if (message.author.bot)
+    if (!message.author || message.author.bot)
         return;
     
     if (!isMessageEventType(eventType))

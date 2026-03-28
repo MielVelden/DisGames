@@ -128,6 +128,7 @@ class DashboardService {
 
         // Get the chart
         const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_Server_NewServer, identity);
+        const pieChart = await ChartService.getChartAsync(ChartTypeEnum.PieChart_Server_LanguageDistribution, identity);
 
         return {
             title: "Servers",
@@ -156,7 +157,8 @@ class DashboardService {
                 )
             ],
             charts: [
-                lineChart
+                lineChart,
+                pieChart
             ]
         }
     }
