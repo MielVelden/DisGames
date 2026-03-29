@@ -22,6 +22,8 @@ class ChartService {
                 return this.getBarChartEventsEventsPerHourAsync(identity);
             case ChartTypeEnum.PieChart_Server_LanguageDistribution:
                 return this.getPieChartServerLanguageDistributionAsync(identity);
+            case ChartTypeEnum.PieChart_Games_GamesByType:
+                return this.getPieChartGamesGamesByTypeAsync(identity);
             default:
                 assertNever(chartEnum, ChartTypeEnum);
         }
@@ -64,6 +66,16 @@ class ChartService {
 
         return {
             title: "Server Language Distribution",
+            type: ChartEnum.Pie,
+            ...chartData,
+        };
+    }
+
+    private async getPieChartGamesGamesByTypeAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.PieChartGamesGamesByType, [null]);
+
+        return {
+            title: "Games by Type",
             type: ChartEnum.Pie,
             ...chartData,
         };

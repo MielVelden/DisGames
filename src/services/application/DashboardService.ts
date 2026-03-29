@@ -12,6 +12,10 @@ import ChartService from "./ChartService";
 import ServerRepository from "../../repositories/ServerRepository";
 import ServerService from "../domain/ServerService";
 import CacheRegistry from "../../repositories/util/CacheRegistry";
+import GameRepository from "../../repositories/GameRepository";
+import { GameTypeEnum } from "../../interfaces/enums/database/GameTypeEnum";
+import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
+import { i18n } from "../../utils/i18n/i18n";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
@@ -24,6 +28,8 @@ class DashboardService {
                 return this.getServersDashboardAsync(identity);
             case DashboardEnum.ANALYTICS:
                 return this.getAnalyticsDashboardAsync(identity);
+            case DashboardEnum.GAMES:
+                return this.getGamesDashboardAsync(identity);
             case DashboardEnum.PERFORMANCE:
                 return this.getCachePerformanceDashboardAsync();
             default:
@@ -125,6 +131,8 @@ class DashboardService {
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
         const members = await ServerService.getTotalMembersAsync();
+        const averageMemberCount =
+            servers.length > 0 ? Math.round((members / servers.length) * 10) / 10 : 0;
 
         // Get the chart
         const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_Server_NewServer, identity);
@@ -153,6 +161,15 @@ class DashboardService {
                     {
                         primaryText: "Member base is growing",
                         secondaryText: "Consistent increase in members"
+                    }
+                ),
+                this.createDashboardCard(
+                    "Average Member Count",
+                    averageMemberCount,
+                    undefined,
+                    {
+                        primaryText: "Mean members per server",
+                        secondaryText: "Total members divided by server count"
                     }
                 )
             ],
@@ -239,6 +256,68 @@ class DashboardService {
                 barChartEventsPerHour
             ]
         }
+    }
+
+    private getGameTypeDisplayName(gameType: GameTypeEnum): string {
+        const def = i18n.commands.games.types[gameType];
+        if (!def?.name)
+            return String(gameType);
+        return def.name[LanguageEnum.EN];
+    }
+
+    private async getGamesDashboardAsync(identity: User): Promise<DashboardResponse> {
+        const timeFrame = calculateDuration(2, DurationEnum.DAY);
+        const gamesPlayedTimeFrame = await TimelineRepository.getGamesPlayedTimeFrameAsync(timeFrame);
+        const barChartGamesByType = await ChartService.getChartAsync(ChartTypeEnum.PieChart_Games_GamesByType, identity);
+
+        const totalGames = await GameRepository.getTotalCountAsync();
+        const distinctServersWithGames = await GameRepository.getDistinctServerCountAsync();
+        const averageGamesPerServer =
+            distinctServersWithGames > 0
+                ? Math.round((totalGames / distinctServersWithGames) * 10) / 10
+                : 0;
+
+        const topGameType = await GameRepository.getMostPopularGameTypeAsync();
+        const mostPopularGameLabel =
+            topGameType !== null ? this.getGameTypeDisplayName(topGameType) : "—";
+
+        return {
+            title: "Games",
+            cards: [
+                this.createDashboardCard(
+                    "Average Games per Server",
+                    averageGamesPerServer,
+                    undefined,
+                    {
+                        primaryText: "Mean active games",
+                        secondaryText: "Per server with at least one configured game"
+                    }
+                ),
+                this.createDashboardCard(
+                    "Total Games",
+                    totalGames,
+                    undefined,
+                    {
+                        primaryText: "Rows in the games table",
+                        secondaryText: "All active game instances"
+                    }
+                ),
+                this.createDashboardCard(
+                    "Most Popular Game",
+                    mostPopularGameLabel,
+                    undefined,
+                    {
+                        primaryText: "By number of instances",
+                        secondaryText: "Most common game type in the table"
+                    }
+                ),
+                this.createDashboardCardWithTimeframe(
+                    "Games Played",
+                    gamesPlayedTimeFrame
+                )
+            ],
+            charts: [barChartGamesByType]
+        };
     }
 }
 
