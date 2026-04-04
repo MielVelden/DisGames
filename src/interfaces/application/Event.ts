@@ -13,6 +13,7 @@ import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
 import { EventTypeEnum } from "../enums";
+import { AppEntitlement } from "./Entitlement";
 
 export interface TimelineEvent {
     user: User;
@@ -30,6 +31,9 @@ export interface GuildCreateEvent {
 
 export interface BaseInteractionEvent {
     customId: string;
+
+    readonly entitlements: readonly AppEntitlement[];
+    hasEntitlementForSku(skuId: string): boolean;
 
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;

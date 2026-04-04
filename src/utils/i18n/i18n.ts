@@ -1,5 +1,6 @@
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
 import { ProfileCommandActionEnum } from "../../interfaces/enums/commands/Profile";
+import { TestPremiumActionEnum } from "../../interfaces/enums/commands/TestPremium";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
@@ -698,6 +699,81 @@ export const i18n: I18nTranslations = {
             description: {
                 [LanguageEnum.EN]: "Restart the game",
                 [LanguageEnum.NL]: "Het spel opnieuw starten",
+            },
+        },
+        testPremium: {
+            description: {
+                [LanguageEnum.EN]: "Create or revoke test Discord entitlements (owner only)",
+                [LanguageEnum.NL]: "Test Discord-entitlements aanmaken of intrekken (alleen eigenaar)",
+            },
+            option: {
+                action: {
+                    [LanguageEnum.EN]: "action",
+                    [LanguageEnum.NL]: "actie",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "What to do with test entitlements",
+                    [LanguageEnum.NL]: "Wat te doen met test-entitlements",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "Choose an action",
+                    [LanguageEnum.NL]: "Kies een actie",
+                },
+                choices: {
+                    [TestPremiumActionEnum.GRANT_USER]: {
+                        [LanguageEnum.EN]: "Grant user test entitlement",
+                        [LanguageEnum.NL]: "Gebruiker test-entitlement geven",
+                    },
+                    [TestPremiumActionEnum.GRANT_GUILD]: {
+                        [LanguageEnum.EN]: "Grant guild test entitlement",
+                        [LanguageEnum.NL]: "Server test-entitlement geven",
+                    },
+                    [TestPremiumActionEnum.REVOKE]: {
+                        [LanguageEnum.EN]: "Revoke test entitlement by id",
+                        [LanguageEnum.NL]: "Test-entitlement intrekken op id",
+                    },
+                },
+            },
+            optionTarget: {
+                action: {
+                    [LanguageEnum.EN]: "target",
+                    [LanguageEnum.NL]: "doel",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "User id, guild id, or entitlement id (optional for grant; required for revoke)",
+                    [LanguageEnum.NL]: "Gebruikers-id, server-id of entitlement-id (optioneel bij grant; verplicht bij revoke)",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "Invalid target",
+                    [LanguageEnum.NL]: "Ongeldig doel",
+                },
+                choices: {},
+            },
+            labels: {
+                created: {
+                    [LanguageEnum.EN]: "Test entitlement created: `{id}`",
+                    [LanguageEnum.NL]: "Test entitlement aangemaakt: `{id}`",
+                },
+                deleted: {
+                    [LanguageEnum.EN]: "Test entitlement revoked.",
+                    [LanguageEnum.NL]: "Test entitlement ingetrokken.",
+                },
+                missingSku: {
+                    [LanguageEnum.EN]: "Set DISCORD_PREMIUM_SKU_ID in your environment.",
+                    [LanguageEnum.NL]: "Zet DISCORD_PREMIUM_SKU_ID in je omgeving.",
+                },
+                missingTarget: {
+                    [LanguageEnum.EN]: "Provide the entitlement id in `target` to revoke.",
+                    [LanguageEnum.NL]: "Geef het entitlement-id op in `target` om in te trekken.",
+                },
+                missingGuild: {
+                    [LanguageEnum.EN]: "No guild context and no guild id in `target`.",
+                    [LanguageEnum.NL]: "Geen server-context en geen server-id in `target`.",
+                },
+                clientNotReady: {
+                    [LanguageEnum.EN]: "Discord client is not ready yet.",
+                    [LanguageEnum.NL]: "Discord-client is nog niet klaar.",
+                },
             },
         },
     },
