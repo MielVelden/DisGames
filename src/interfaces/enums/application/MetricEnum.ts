@@ -6,12 +6,12 @@ export enum MetricTypeEnum {
 }
 
 export enum MetricEnum {
-    ActiveGames = "ActiveGames",
-    Servers = "Servers",
-    Guilds = "Guilds",
-    Users = "Users",
-    Points = "Points",
-    Events = "Events",
+    ActiveGames = 1,
+    Servers = 2,
+    Guilds = 3,
+    Users = 4,
+    Points = 5,
+    Events = 6,
 }
 
 SetMetricType(MetricEnum, MetricEnum.ActiveGames, MetricTypeEnum.Push);

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { TimelineEvent } from "../../interfaces/application/Event";
 import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { ErrorHelper } from "../../utils/application/Error";
@@ -5,9 +6,20 @@ import { Repository, RepositoryWithBase } from "../../interfaces/database/Reposi
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
 import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyEnum";
 import { BaseEntity } from "../../interfaces/database/BaseEntity";
+import { registerPull } from "../../utils/application/MetricRegistry";
+import { METRIC_PULL_KEY } from '../../interfaces/domain';
 
 export abstract class BaseDomainService<T extends BaseEntity & { getId(): number | undefined; getExternalId(): string | number | undefined; }, S extends BaseEntity, R extends Repository<T> = Repository<T>> {
     protected abstract readonly repository: R;
+
+    constructor() {
+        const proto = Object.getPrototypeOf(this);
+        for (const key of Object.getOwnPropertyNames(proto)) {
+            const metric = Reflect.getMetadata(METRIC_PULL_KEY, proto, key);
+            if (metric !== undefined)
+                registerPull(metric, () => (this as any)[key]());
+        }
+    }
 
     public async getByIdAsync(id: number): Promise<T> {
         const entity = await this.repository.getByIdAsync(id);

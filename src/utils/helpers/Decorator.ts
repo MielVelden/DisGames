@@ -1,3 +1,4 @@
+import { METRIC_PULL_KEY } from "../../interfaces/domain";
 import { MetricEnum } from "../../interfaces/enums/application/MetricEnum";
 import MetricService from "../../services/domain/MetricService";
 
@@ -21,16 +22,10 @@ export function TrackMetric(metric: MetricEnum, amount = 1) {
 export function TrackMetricPull(metric: MetricEnum) {
     return function (
         target: any,
-        _propertyKey: string,
+        propertyKey: string,
         descriptor: PropertyDescriptor
     ) {
-        const original = descriptor.value;
-
-        MetricService.registerPull(metric, () => {
-            const instance = target.constructor.instance;
-            return original.call(instance);
-        });
-
+        Reflect.defineMetadata(METRIC_PULL_KEY, metric, target, propertyKey);
         return descriptor;
     };
 }

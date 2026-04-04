@@ -1,32 +1,27 @@
-import { InteractionEvent } from "../../interfaces/application";
+import { InteractionEvent, WebSocketEvent } from "../../interfaces/application";
 import { MetricsModel, MetricsSaveModel } from "../../interfaces/database/TableInterfaces";
-import { MetricPullRegistration } from "../../interfaces/domain";
-import { ExceptionEnum } from "../../interfaces/enums";
 import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyEnum";
 import { MetricEnum, MetricTypeEnum } from "../../interfaces/enums/application/MetricEnum";
 import MetricRepository from "../../repositories/MetricRepository";
-import { ErrorHelper } from "../../utils/application/Error";
 import { getEnumAsList } from "../../utils/helpers/Enum";
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
+import { getPullRegistrations } from "../../utils/application/MetricRegistry";
 import { BaseDomainService } from "./BaseDomainService";
+import { getSystemEventAsync } from "../../utils/helpers/Timeline";
+import { wsService } from "../../server";
 
 class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, typeof MetricRepository> {
     protected readonly repository = MetricRepository;
-    private registrations: MetricPullRegistration[] = [];
 
     public getAllAsync(): Promise<MetricsModel[]> {
         return this.repository.getAllAsync();
     }
 
     protected async performSaveAsync(savable: MetricsSaveModel, event: InteractionEvent): Promise<MetricsModel> {
-        if (!savable.Date)
-            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
+        const entity = await this.repository.saveAsync(savable);
 
-        const metrics = await this.repository.getByDateAsync(savable.Date);
-        if (metrics)
-            ErrorHelper.throw(ExceptionEnum.RECORD_ALREADY_EXISTS);
-
-        return await this.repository.saveAsync(savable);
+        wsService.broadcastMessageAsync(WebSocketEvent.UPDATE_METRIC, entity);
+        return entity;
     }
 
     public purgeAsync(id: number): Promise<void> {
@@ -40,22 +35,35 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
         const metricsPush = getEnumAsList(MetricEnum).filter(metric => getEnumProperty(MetricEnum, metric, MetadataKeyEnum.MetricType) === MetricTypeEnum.Push);
         console.log('metricsPush ', metricsPush);
 
+        const date = new Date();
+        const event = await getSystemEventAsync();
         await Promise.all(
-            this.registrations.map(async (x) => {
-                const value = await x.fnAsync();
-                console.log(x.metric, ' : ', value);
+            getPullRegistrations().map(async (pullRegistration) => {
+                const value = await pullRegistration.fnAsync();
+                this.saveAsync(new MetricsSaveModel({
+                    MetricEnum: pullRegistration.metric,
+                    Datetime: date,
+                    Value: value
+                }), event)
             })
         );
     }
 
     public async incrementAsync(metric: MetricEnum, amount: number = 1) {
-        console.log('increment: ', metric, ' : ', amount)
+        const entity = await this.repository.getLatestByMetricAsync(metric);
+        const newValue = entity?.Value ? entity.Value + amount : amount;
+
+        const event = await getSystemEventAsync();
+        this.saveAsync(new MetricsSaveModel({
+            MetricEnum: metric,
+            Datetime: new Date(),
+            Value: newValue
+        }), event);
     }
 
-    public registerPull(metric: MetricEnum, fnAsync: () => Promise<number>): void {
-        this.registrations.push({ metric, fnAsync });
+    public async getLatestByMetricAsync(metric: MetricEnum) {
+        return this.repository.getLatestByMetricAsync(metric);
     }
-
 }
 
 export default new MetricService();

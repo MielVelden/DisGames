@@ -1,5 +1,6 @@
 import { Duration } from "../application";
 import { ChartDefinition } from "../application/Chart";
+import { MetricEnum } from "../enums";
 
 export interface DashboardResponse {
   title: string;
@@ -11,6 +12,7 @@ export type TrendDirection = "up" | "down";
 
 export type DashboardSectionCardData = {
   id: string
+  metricEnum?: MetricEnum
   title: string
   description?: string
   value: string | number

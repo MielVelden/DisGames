@@ -24,11 +24,11 @@ export class JobController {
                 message
             };
 
-            wsService.broadcastJobProgress(progressData);
+            wsService.broadcastJobProgressAsync(progressData);
         });
 
         if (clientId && result.executionId)
-            await wsService.subscribeToJob(clientId, result.executionId);
+            await wsService.subscribeToJobAsync(clientId, result.executionId);
 
         return result;
     }

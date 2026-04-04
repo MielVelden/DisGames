@@ -6,7 +6,7 @@ import EventRepository from "../../repositories/EventRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
 import { calculateDuration, humanizeDuration } from "../../utils/helpers/Duration";
-import { assertNever } from "../../utils/application/Error";
+import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import { ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";
 import ChartService from "./ChartService";
 import ServerRepository from "../../repositories/ServerRepository";
@@ -16,6 +16,9 @@ import GameRepository from "../../repositories/GameRepository";
 import { GameTypeEnum } from "../../interfaces/enums/database/GameTypeEnum";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { i18n } from "../../utils/i18n/i18n";
+import { ExceptionEnum, MetricEnum } from "../../interfaces/enums";
+import MetricService from "../domain/MetricService";
+import { humanizeDateFromNow } from "../../utils/helpers/Date";
 
 class DashboardService {
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
@@ -74,6 +77,25 @@ class DashboardService {
         }
     }
 
+    private async createDashboardCardByMetricAsync(metric: MetricEnum): Promise<DashboardSectionCardData> {
+        const model = await MetricService.getLatestByMetricAsync(metric);
+        if (!model)
+            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
+
+        return {
+            id: metric.toString().toLowerCase(),
+            metricEnum: metric,
+            title: i18n.metrics[metric][LanguageEnum.EN],
+            description: i18n.metrics[metric][LanguageEnum.EN],
+            value: model.Value,
+            trend: undefined,
+            footer: {
+                primaryText: 'titel',
+                secondaryText: `Recorded ${humanizeDateFromNow(model.Datetime)} ago`
+            }
+        }
+    }
+
     private async getHomeDashboardAsync(identity: User): Promise<DashboardResponse> {
         return {
             title: "Home",
@@ -96,7 +118,7 @@ class DashboardService {
         // Get the charts
         const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_User_NewUser, identity);
         const pieChart = await ChartService.getChartAsync(ChartTypeEnum.PieChart_User_DeviceType, identity);
-        
+
         return {
             title: "Users",
             cards: [
@@ -214,7 +236,7 @@ class DashboardService {
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
         const members = await ServerService.getTotalMembersAsync();
-        const events = await EventRepository.getEventsTimeFrameAsync(timeFrame);
+        //const events = await EventRepository.getEventsTimeFrameAsync(timeFrame);
 
         const barChartEventsByType = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsByType, identity);
         const barChartActivityOverTime = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_ActivityOverTime, identity);
@@ -245,10 +267,7 @@ class DashboardService {
                         secondaryText: "Consistent increase in members"
                     }
                 ),
-                this.createDashboardCardWithTimeframe(
-                    "Total Events",
-                    events
-                )
+                await this.createDashboardCardByMetricAsync(MetricEnum.Events)
             ],
             charts: [
                 barChartEventsByType,

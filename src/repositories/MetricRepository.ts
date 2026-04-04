@@ -1,7 +1,6 @@
 import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel, getMetricsFieldType, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
-import { ErrorHelper } from "../utils/application/Error";
+import { MetricEnum, TableEnum } from "../interfaces/enums/index";
 
 class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum> {
     public readonly baseRepository: BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>;
@@ -26,10 +25,8 @@ class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveMo
         await this.baseRepository.Delete(id);
     }
 
-    async getByDateAsync(date: Date): Promise<MetricsModel> {
-        const model = await this.baseRepository.Select().Where({ Date: date }).Limit(1).Execute();
-        if (!model || model.length === 0)
-            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
+    async getLatestByMetricAsync(metric: MetricEnum): Promise<MetricsModel> {
+        const model = await this.baseRepository.Select().Where({ MetricEnum: metric }).OrderBy("Datetime", "DESC").Limit(1).Execute();
         return model[0];
     }
 }
