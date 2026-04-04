@@ -112,10 +112,19 @@ export class JobScheduler {
         const startTime = Date.now();
 
         try {
-            const noOpProgress = (current: number, total: number, message?: string) => {};
-            await jobModule.handler(noOpProgress);
+            let completed = false;
+            const progressCallback = (current: number, total: number, _message?: string) => {
+                if (current >= total) 
+                    completed = true;
+            };
+
+            await jobModule.handler(progressCallback);
 
             const duration = Date.now() - startTime;
+
+            if (!completed)
+                progressCallback(1, 1, `Job '${jobModule.name}' completed in ${duration}ms`);
+
             await Logger.logInfo(`Job '${jobModule.name}' completed in ${duration}ms`, {
                 webhookType: WebhookType.DEBUG,
                 sendToDiscord: false

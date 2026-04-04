@@ -1,10 +1,10 @@
 import { InteractionEvent } from "../../interfaces/application";
 import { EventsModel, EventsSaveModel } from "../../interfaces/database/TableInterfaces";
-import EventsRepository from "../../repositories/EventsRepository";
+import EventRepository from "../../repositories/EventRepository";
 import { BaseDomainService } from "./BaseDomainService";
 
-class EventsService extends BaseDomainService<EventsModel, EventsSaveModel, typeof EventsRepository> {
-    protected readonly repository = EventsRepository;
+class EventService extends BaseDomainService<EventsModel, EventsSaveModel, typeof EventRepository> {
+    protected readonly repository = EventRepository;
 
     public getAllAsync(): Promise<EventsModel[]> {
         return this.repository.getAllAsync();
@@ -19,4 +19,4 @@ class EventsService extends BaseDomainService<EventsModel, EventsSaveModel, type
     }
 }
 
-export default new EventsService();
+export default new EventService();

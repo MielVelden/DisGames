@@ -35,7 +35,7 @@ import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
-import { EventService } from "../application/EventService";
+import { InteractionService } from "../application/InteractionService";
 
 class GameService {
     private games: GameModule[] = [];
@@ -418,7 +418,7 @@ class GameService {
                     ErrorHelper.throw(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
-                        const isInternalDeleteEvent = gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE && EventService.isMessageInternallyDeleted(gameEvent.messageId);
+                        const isInternalDeleteEvent = gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE && InteractionService.isMessageInternallyDeleted(gameEvent.messageId);
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 

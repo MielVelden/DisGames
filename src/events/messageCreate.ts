@@ -7,7 +7,7 @@ import { InteractionEvent, isMessageInteractionEvent } from '../interfaces/appli
 import GameService from '../services/domain/GameService';
 import { handleErrorAsync } from '../utils/application/Error';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
-import EventsService from '../services/domain/EventsService';
+import EventService from '../services/domain/EventService';
 import { EventTypeEnum, isMessageEventType } from '../interfaces/enums';
 import { EventsSaveModel } from '../interfaces/database';
 import { withEventContextAsync } from '../middleware/EventContext';
@@ -24,7 +24,7 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
     if (!isMessageInteractionEvent(event))
         return;
     return withEventContextAsync(event, async () => {
-        await EventsService.saveAsync(new EventsSaveModel({
+        await EventService.saveAsync(new EventsSaveModel({
             UserId: event.user.id,
             ServerId: event.server.Id,
             EventTypeEnum: event.type,

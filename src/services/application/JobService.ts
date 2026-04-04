@@ -69,13 +69,20 @@ class JobService {
         const executionId = UniqueCodes.generateTimestampCode();
         const startedAt = new Date();
         
+        let completed = false;
         const wrappedProgressCallback: JobProgressCallback = (current: number, total: number, message?: string) => {
-            if (progressCallback) {
+            if (current >= total) 
+                completed = true;
+            
+            if (progressCallback)
                 progressCallback(executionId, job.id, current, total, message);
-            }
         };
 
         job.handler(wrappedProgressCallback)
+            .then(() => {
+                if (!completed)
+                    wrappedProgressCallback(1, 1, 'Completed');
+            })
             .catch((error: Error) => {
                 Logger.logError(`Job ${jobId} (execution: ${executionId}) failed:`, error);
             });

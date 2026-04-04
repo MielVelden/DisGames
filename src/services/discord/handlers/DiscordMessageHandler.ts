@@ -12,7 +12,7 @@ import {
 } from '../../../interfaces/application/Message';
 import ComponentService from '../../application/ComponentService';
 import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
-import { EventService } from '../../application/EventService';
+import { InteractionService } from '../../application/InteractionService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
@@ -106,11 +106,11 @@ class DiscordMessageHandler {
             try {
                 await event.currentInteraction.delete();
                 event.messageDeleted = true;
-                EventService.markMessageAsInternallyDeleted(event.currentInteraction.id);
+                InteractionService.markMessageAsInternallyDeleted(event.currentInteraction.id);
             } catch (error) {
                 if (this.isUnknownMessageError(error)) {
                     event.messageDeleted = true;
-                    EventService.markMessageAsInternallyDeleted(event.currentInteraction.id);
+                    InteractionService.markMessageAsInternallyDeleted(event.currentInteraction.id);
                     await Logger.logWarning(`Message ${event.currentInteraction.id} was already deleted in channel ${event.channelId}`);
                     return;
                 }
@@ -125,7 +125,7 @@ class DiscordMessageHandler {
         } else {
             // For button interactions, we can get the message ID
             if (isButtonInteractionEvent(event) && event.currentInteraction.message)
-                EventService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
+                InteractionService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
 
             if (isButtonInteractionEvent(event)) {
                 try {
@@ -133,7 +133,7 @@ class DiscordMessageHandler {
                 } catch (error) {
                     if (this.isUnknownMessageError(error)) {
                         if (event.currentInteraction.message)
-                            EventService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
+                            InteractionService.markMessageAsInternallyDeleted(event.currentInteraction.message.id);
                         await Logger.logWarning(`Reply message was already deleted in channel ${event.channelId}`);
                         return;
                     }

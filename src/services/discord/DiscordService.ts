@@ -33,6 +33,8 @@ import DiscordGuildMapper from './mappers/DiscordGuildMapper';
 import DiscordInteractionMapper from './mappers/DiscordInteractionMapper';
 import DiscordMessageHandler from './handlers/DiscordMessageHandler';
 import { createWelcomeContainer } from '../../builders/containers/WelcomeContainer';
+import { TrackMetric } from '../../utils/helpers/Decorator';
+import { MetricEnum } from '../../interfaces/enums/application/MetricEnum';
 
 export type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 export type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
@@ -77,6 +79,7 @@ class DiscordService {
         }
     }
 
+    @TrackMetric(MetricEnum.Events)
     public async mapMessageToInteractionEventAsync(message: DiscordMessage, eventType: EventTypeEnum): Promise<InteractionEvent> {
         if (!isMessageEventType(eventType))
             ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);

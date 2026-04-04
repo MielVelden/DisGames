@@ -3,7 +3,7 @@ import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ErrorHelper } from "../utils/application/Error";
 
-class MetricsRepository implements RepositoryWithBase<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum> {
+class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum> {
     public readonly baseRepository: BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>;
 
     constructor() {
@@ -34,4 +34,4 @@ class MetricsRepository implements RepositoryWithBase<MetricsModel, MetricsSaveM
     }
 }
 
-export default new MetricsRepository();
+export default new MetricRepository();

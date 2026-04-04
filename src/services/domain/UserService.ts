@@ -12,6 +12,16 @@ import { BaseDomainService } from "./BaseDomainService";
 class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
     protected readonly repository = UserRepository;
 
+    public async initAsync(): Promise<void> {
+        const systemUser = await UserRepository.getSystemUserAsync();
+        if (!systemUser)
+            await UserRepository.saveAsync(new UsersSaveModel({
+                UserId: 'SYSTEM',
+                Username: 'System',
+                UserRoleEnum: UserRoleEnum.SYSTEM,
+            }));
+    }
+
     protected async performSaveAsync(savable: UsersSaveModel, event: InteractionEvent): Promise<UsersModel> {
         savable.validateIsProvidedAndNotNull(UsersModelFieldEnum.UserId);
         savable.UserRoleEnum = UserRoleEnum.USER;

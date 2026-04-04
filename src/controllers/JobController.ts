@@ -27,9 +27,8 @@ export class JobController {
             wsService.broadcastJobProgress(progressData);
         });
 
-        if (clientId && result.executionId) {
+        if (clientId && result.executionId)
             await wsService.subscribeToJob(clientId, result.executionId);
-        }
 
         return result;
     }

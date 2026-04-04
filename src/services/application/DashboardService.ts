@@ -2,7 +2,7 @@ import { DurationEnum, DurationGranularityEnum } from "../../interfaces/applicat
 import { User } from "../../interfaces/domain";
 import { DashboardEnum } from "../../interfaces/enums/view/DashboardEnum";
 import { DashboardSectionCardData, DashboardResponse, TimeframeData, TrendDirection } from "../../interfaces/view/Dashboard";
-import EventsRepository from "../../repositories/EventsRepository";
+import EventRepository from "../../repositories/EventRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
 import UserRepository from "../../repositories/UserRepository";
 import { calculateDuration, humanizeDuration } from "../../utils/helpers/Duration";
@@ -90,7 +90,7 @@ class DashboardService {
         const timeFrame = calculateDuration(7, DurationEnum.DAY);
         const users = await UserRepository.getTotalUsersAsync();
         const usersTimeFrame = await TimelineRepository.getUsersTimeFrameAsync(timeFrame);
-        const messagesSentTimeFrame = await EventsRepository.getMessagesSentTimeFrameAsync(timeFrame);
+        const messagesSentTimeFrame = await EventRepository.getMessagesSentTimeFrameAsync(timeFrame);
         const gamesPlayedTimeFrame = await TimelineRepository.getGamesPlayedTimeFrameAsync(timeFrame);
 
         // Get the charts
@@ -214,7 +214,7 @@ class DashboardService {
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
         const members = await ServerService.getTotalMembersAsync();
-        const events = await EventsRepository.getEventsTimeFrameAsync(timeFrame);
+        const events = await EventRepository.getEventsTimeFrameAsync(timeFrame);
 
         const barChartEventsByType = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsByType, identity);
         const barChartActivityOverTime = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_ActivityOverTime, identity);

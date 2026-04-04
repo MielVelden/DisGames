@@ -74,9 +74,8 @@ export class WebSocketService {
 			return;
 
 		const alreadySubscribed = client.jobSubs.some((sub) => sub.executionId === executionId);
-		if (!alreadySubscribed) {
+		if (!alreadySubscribed)
 			client.jobSubs.push({ executionId });
-		}
 	}
 
 	async unsubscribeFromJob(clientId: string, executionId: string): Promise<void> {
