@@ -17,8 +17,8 @@ export default {
         const guilds = discordClient.guilds.cache.size;
         const members = discordClient.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
 
-        const users = await UserRepository.getTotalUsersAsync();
-        const servers = await ServerRepository.getTotalMembersAsync();
+        const users = await UserRepository.getTotalAsync();
+        const servers = await ServerRepository.getTotalServerMembersAsync();
         const totalPoints = await PointRepository.getTotalPointsAsync();
 
         const message = `

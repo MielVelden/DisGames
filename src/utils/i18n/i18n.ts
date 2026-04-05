@@ -939,6 +939,14 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Events",
             [LanguageEnum.NL]: "Evenementen",
         },
+        [MetricEnum.Members]: {
+            [LanguageEnum.EN]: "Members",
+            [LanguageEnum.NL]: "Leden",
+        },
+        [MetricEnum.ServerMembers]: {
+            [LanguageEnum.EN]: "Server Members",
+            [LanguageEnum.NL]: "Serverleden",
+        },
     },
 };
 

@@ -6,7 +6,7 @@ import { Repository, RepositoryWithBase } from "../../interfaces/database/Reposi
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
 import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyEnum";
 import { BaseEntity } from "../../interfaces/database/BaseEntity";
-import { registerPull } from "../../utils/application/MetricRegistry";
+import { registerPull } from "../../utils/registries/MetricRegistry";
 import { METRIC_PULL_KEY } from '../../interfaces/domain';
 
 export abstract class BaseDomainService<T extends BaseEntity & { getId(): number | undefined; getExternalId(): string | number | undefined; }, S extends BaseEntity, R extends Repository<T> = Repository<T>> {

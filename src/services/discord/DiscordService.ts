@@ -25,6 +25,7 @@ import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
 import Logger from '../../utils/application/Logger';
+import { discordClient } from "../../";
 
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';
@@ -33,7 +34,7 @@ import DiscordGuildMapper from './mappers/DiscordGuildMapper';
 import DiscordInteractionMapper from './mappers/DiscordInteractionMapper';
 import DiscordMessageHandler from './handlers/DiscordMessageHandler';
 import { createWelcomeContainer } from '../../builders/containers/WelcomeContainer';
-import { TrackMetric } from '../../utils/helpers/Decorator';
+import { TrackMetric, TrackMetricPull, RegisterMetricPulls } from '../../utils/helpers/Decorator';
 import { MetricEnum } from '../../interfaces/enums/application/MetricEnum';
 
 export type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
@@ -48,6 +49,7 @@ export interface DiscordMessageContent {
     ephemeral?: boolean;
 }
 
+@RegisterMetricPulls()
 class DiscordService {
     // #region Mappers - Delegation to dedicated mappers
     
@@ -147,6 +149,16 @@ class DiscordService {
     public async handleRateLimitAsync(info: { timeout: number; limit: number; method: string; path: string; route: string }): Promise<void> {
         const { timeout, limit, method, path, route } = info;
         Logger.logWarning(`Discord rate limit hit: ${method} ${path} (route: ${route}), limit ${limit}, retry in ${timeout}ms`);
+    }
+
+    @TrackMetricPull(MetricEnum.Guilds)
+    public async getTotalGuildsAsync() {
+        return discordClient.guilds.cache.size;
+    }
+    
+    @TrackMetricPull(MetricEnum.Members)
+    public async getTotalMembersAsync() {
+        return discordClient.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
     }
 
     // #endregion

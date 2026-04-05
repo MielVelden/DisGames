@@ -1,6 +1,8 @@
 import { InteractionEvent } from "../../interfaces/application";
 import { EventsModel, EventsSaveModel } from "../../interfaces/database/TableInterfaces";
+import { MetricEnum } from "../../interfaces/enums";
 import EventRepository from "../../repositories/EventRepository";
+import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { BaseDomainService } from "./BaseDomainService";
 
 class EventService extends BaseDomainService<EventsModel, EventsSaveModel, typeof EventRepository> {
@@ -16,6 +18,11 @@ class EventService extends BaseDomainService<EventsModel, EventsSaveModel, typeo
 
     public purgeAsync(id: number): Promise<void> {
         return this.repository.purgeAsync(id);
+    }
+
+    @TrackMetricPull(MetricEnum.Events)
+    public async getTotalAsync() {
+        return this.repository.getTotalAsync();
     }
 }
 

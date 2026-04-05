@@ -11,7 +11,9 @@ export enum MetricEnum {
     Guilds = 3,
     Users = 4,
     Points = 5,
-    Events = 6,
+    Events = 6, //TODO
+    Members = 7,
+    ServerMembers = 8,
 }
 
 SetMetricType(MetricEnum, MetricEnum.ActiveGames, MetricTypeEnum.Push);

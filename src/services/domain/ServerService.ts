@@ -1,7 +1,9 @@
 import { TimelineEvent } from "../../interfaces/application/Event";
 import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../../interfaces/database/TableInterfaces";
+import { MetricEnum } from "../../interfaces/enums";
 import ServerRepository from "../../repositories/ServerRepository";
 import Logger from "../../utils/application/Logger";
+import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { normalizeString } from "../../utils/helpers/String";
 import { DEFAULT_LANGUAGE } from "../../utils/i18n/MultiLingualString";
 import { BaseDomainService } from "./BaseDomainService";
@@ -53,8 +55,14 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
         await this.repository.purgeAsync(id);
     }
 
-    public async getTotalMembersAsync(): Promise<number> {
-        return await this.repository.getTotalMembersAsync();
+    @TrackMetricPull(MetricEnum.Servers)
+    public async getTotalAsync(): Promise<number> {
+        return await this.repository.getTotalAsync();
+    }
+
+    @TrackMetricPull(MetricEnum.ServerMembers)
+    public async getTotalServerMembersAsync(): Promise<number> {
+        return await this.repository.getTotalServerMembersAsync();
     }
 }
 

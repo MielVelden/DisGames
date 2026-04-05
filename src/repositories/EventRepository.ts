@@ -53,6 +53,10 @@ class EventRepository implements RepositoryWithBase<EventsModel, EventsSaveModel
             previousValue: previousEvents - currentEvents
         }
     }
+
+    public async getTotalAsync() {
+        return this.baseRepository.Select().Count();
+    }
 }
 
 export default new EventRepository();

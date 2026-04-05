@@ -9,7 +9,7 @@ import { startHttpServer } from './server';
 import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
 import { JobScheduler } from './services/application/JobScheduler';
-import { initAsync } from './utils/handlers/InitHandler';
+import { initAsync } from './utils/registries/InitRegistry';
 
 getConfig();
 

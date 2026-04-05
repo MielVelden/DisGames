@@ -15,7 +15,7 @@ import { Component, ComponentType, Container, TextDisplay, Title, Separator, But
 import GameRepository from "../../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
-import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
+import { GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/helpers/Enum";
 import GameDataRepository from "../../repositories/GameDataRepository";
@@ -36,7 +36,9 @@ import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
+import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
 
+@RegisterMetricPulls()
 class GameService {
     private games: GameModule[] = [];
 
@@ -709,6 +711,11 @@ class GameService {
         } as Container;
     }
     // #endregion
+
+    @TrackMetricPull(MetricEnum.ActiveGames)
+    public async getTotalAsync(): Promise<number> {
+        return await GameRepository.getTotalAsync();
+    }
 }
 
 export default new GameService();

@@ -5,13 +5,17 @@ import { MetricEnum, MetricTypeEnum } from "../../interfaces/enums/application/M
 import MetricRepository from "../../repositories/MetricRepository";
 import { getEnumAsList } from "../../utils/helpers/Enum";
 import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
-import { getPullRegistrations } from "../../utils/application/MetricRegistry";
+import { getPullRegistrations } from "../../utils/registries/MetricRegistry";
 import { BaseDomainService } from "./BaseDomainService";
 import { getSystemEventAsync } from "../../utils/helpers/Timeline";
 import { wsService } from "../../server";
 
 class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, typeof MetricRepository> {
     protected readonly repository = MetricRepository;
+
+    public async initAsync() {
+        // TODO: Load all metrics in cache
+    }
 
     public getAllAsync(): Promise<MetricsModel[]> {
         return this.repository.getAllAsync();

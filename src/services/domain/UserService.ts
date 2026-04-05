@@ -1,5 +1,5 @@
 import { UsersModel, UsersSaveModel, UsersModelFieldEnum } from "../../interfaces/database/TableInterfaces";
-import { UserRoleEnum } from "../../interfaces/enums";
+import { MetricEnum, UserRoleEnum } from "../../interfaces/enums";
 import { ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
@@ -8,6 +8,7 @@ import { User } from "../../interfaces/domain";
 import TimelineBuilder from "./TimelineBuilder";
 import { InteractionEvent } from "../../interfaces/application";
 import { BaseDomainService } from "./BaseDomainService";
+import { TrackMetricPull } from "../../utils/helpers/Decorator";
 
 class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
     protected readonly repository = UserRepository;
@@ -95,6 +96,11 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
             hasPermission: () => true,
             sendMessageAsync: async () => {},
         };
+    }
+
+    @TrackMetricPull(MetricEnum.Users)
+    public async getTotalAsync(){
+        return this.repository.getTotalAsync();
     }
 }
 

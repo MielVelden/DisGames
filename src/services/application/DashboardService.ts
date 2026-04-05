@@ -110,7 +110,6 @@ class DashboardService {
 
     private async getUsersDashboardAsync(identity: User): Promise<DashboardResponse> {
         const timeFrame = calculateDuration(7, DurationEnum.DAY);
-        const users = await UserRepository.getTotalUsersAsync();
         const usersTimeFrame = await TimelineRepository.getUsersTimeFrameAsync(timeFrame);
         const messagesSentTimeFrame = await EventRepository.getMessagesSentTimeFrameAsync(timeFrame);
         const gamesPlayedTimeFrame = await TimelineRepository.getGamesPlayedTimeFrameAsync(timeFrame);
@@ -122,15 +121,7 @@ class DashboardService {
         return {
             title: "Users",
             cards: [
-                this.createDashboardCard(
-                    "Total Users",
-                    users,
-                    "up",
-                    {
-                        primaryText: "User base is growing",
-                        secondaryText: "Consistent increase in registrations"
-                    }
-                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.Users),
                 this.createDashboardCardWithTimeframe(
                     "New Users",
                     usersTimeFrame
@@ -152,7 +143,7 @@ class DashboardService {
         const timeFrame = calculateDuration(7, DurationEnum.DAY);
         const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
-        const members = await ServerService.getTotalMembersAsync();
+        const members = await ServerService.getTotalServerMembersAsync();
         const averageMemberCount =
             servers.length > 0 ? Math.round((members / servers.length) * 10) / 10 : 0;
 
@@ -163,28 +154,12 @@ class DashboardService {
         return {
             title: "Servers",
             cards: [
-                this.createDashboardCard(
-                    "Total Servers",
-                    servers.length,
-                    "up",
-                    {
-                        primaryText: "Server base is growing",
-                        secondaryText: "Consistent increase in servers"
-                    }
-                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.Servers),
                 this.createDashboardCardWithTimeframe(
                     "New Servers",
                     serversTimeFrame
                 ),
-                this.createDashboardCard(
-                    "Total Members",
-                    members,
-                    "up",
-                    {
-                        primaryText: "Member base is growing",
-                        secondaryText: "Consistent increase in members"
-                    }
-                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.Members),
                 this.createDashboardCard(
                     "Average Member Count",
                     averageMemberCount,
@@ -233,10 +208,7 @@ class DashboardService {
 
     private async getAnalyticsDashboardAsync(identity: User): Promise<DashboardResponse> {
         const timeFrame = calculateDuration(2, DurationEnum.DAY);
-        const servers = await ServerRepository.getAllAsync();
         const serversTimeFrame = await TimelineRepository.getServersTimeFrameAsync(timeFrame);
-        const members = await ServerService.getTotalMembersAsync();
-        //const events = await EventRepository.getEventsTimeFrameAsync(timeFrame);
 
         const barChartEventsByType = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_EventsByType, identity);
         const barChartActivityOverTime = await ChartService.getChartAsync(ChartTypeEnum.BarChart_Events_ActivityOverTime, identity);
@@ -245,28 +217,12 @@ class DashboardService {
         return {
             title: "Analytics",
             cards: [
-                this.createDashboardCard(
-                    "Total Servers",
-                    servers.length,
-                    "up",
-                    {
-                        primaryText: "Server base is growing",
-                        secondaryText: "Consistent increase in servers"
-                    }
-                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.Servers),
                 this.createDashboardCardWithTimeframe(
                     "New Servers",
                     serversTimeFrame
                 ),
-                this.createDashboardCard(
-                    "Total Members",
-                    members,
-                    "up",
-                    {
-                        primaryText: "Member base is growing",
-                        secondaryText: "Consistent increase in members"
-                    }
-                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.ServerMembers),
                 await this.createDashboardCardByMetricAsync(MetricEnum.Events)
             ],
             charts: [
@@ -289,7 +245,7 @@ class DashboardService {
         const gamesPlayedTimeFrame = await TimelineRepository.getGamesPlayedTimeFrameAsync(timeFrame);
         const barChartGamesByType = await ChartService.getChartAsync(ChartTypeEnum.PieChart_Games_GamesByType, identity);
 
-        const totalGames = await GameRepository.getTotalCountAsync();
+        const totalGames = await GameRepository.getTotalAsync();
         const distinctServersWithGames = await GameRepository.getDistinctServerCountAsync();
         const averageGamesPerServer =
             distinctServersWithGames > 0
@@ -312,15 +268,7 @@ class DashboardService {
                         secondaryText: "Per server with at least one configured game"
                     }
                 ),
-                this.createDashboardCard(
-                    "Total Games",
-                    totalGames,
-                    undefined,
-                    {
-                        primaryText: "Rows in the games table",
-                        secondaryText: "All active game instances"
-                    }
-                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.ActiveGames),
                 this.createDashboardCard(
                     "Most Popular Game",
                     mostPopularGameLabel,
