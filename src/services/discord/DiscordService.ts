@@ -72,6 +72,7 @@ class DiscordService {
         return await DiscordInteractionMapper.mapInteractionToInteractionEventAsync(interaction);
     }
 
+    @TrackMetric(MetricEnum.Guilds)
     public async handleGuildCreateAsync(guild: DiscordGuild): Promise<void> {
         const event = await DiscordGuildMapper.mapGuildToGuildCreateEventAsync(guild);
         Logger.logInfo(`Joined Discord guild ${guild.name} (${guild.id})`);

@@ -6,3 +6,8 @@ export interface MetricPullRegistration {
     metric: MetricEnum;
     fnAsync: () => Promise<number>;
 }
+
+export interface CacheMetric {
+    value: number;
+    updated: boolean;
+};

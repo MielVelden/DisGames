@@ -7,7 +7,7 @@ export default {
     name: 'Collect Metrics',
     description: 'Collect metrics',
     isEnabled: true,
-    cronExpression: '0 0 2 * * *',
+    cronExpression: '0 0 */2 * * *',
 
     handler: async (progress): Promise<void> => {
         const identity = await UserService.getSystemUserAsync();

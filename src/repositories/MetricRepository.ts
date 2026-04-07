@@ -1,6 +1,9 @@
 import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel, getMetricsFieldType, RepositoryWithBase } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
-import { MetricEnum, TableEnum } from "../interfaces/enums/index";
+import { ExceptionEnum, MetricEnum, TableEnum } from "../interfaces/enums/index";
+import { runQueryAsync } from "./util/ConnectionHandler";
+import { ErrorHelper } from "../utils/application/Error";
+import { CacheMetric } from "../interfaces/domain";
 
 class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum> {
     public readonly baseRepository: BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>;
@@ -23,6 +26,22 @@ class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveMo
 
     async purgeAsync(id: number): Promise<void> {
         await this.baseRepository.Delete(id);
+    }
+
+    async getAllByMetricAsync(): Promise<Map<MetricEnum, CacheMetric>> {
+        const map = new Map<MetricEnum, CacheMetric>;
+        const model = await runQueryAsync("SELECT Id, MetricEnum, Datetime, Value FROM (SELECT *,ROW_NUMBER() OVER (PARTITION BY MetricEnum ORDER BY Datetime DESC) AS rn FROM metrics) t WHERE rn = 1;") as MetricsModel[];
+        if(!model)
+            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
+        
+        model.forEach(x=> {
+            map.set(x.MetricEnum, { 
+                value: x.Value,
+                updated: true
+            });
+        });
+
+        return map;
     }
 
     async getLatestByMetricAsync(metric: MetricEnum): Promise<MetricsModel> {

@@ -1,20 +1,19 @@
 import { InteractionEvent, WebSocketEvent } from "../../interfaces/application";
 import { MetricsModel, MetricsSaveModel } from "../../interfaces/database/TableInterfaces";
-import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyEnum";
-import { MetricEnum, MetricTypeEnum } from "../../interfaces/enums/application/MetricEnum";
+import { MetricEnum } from "../../interfaces/enums/application/MetricEnum";
 import MetricRepository from "../../repositories/MetricRepository";
-import { getEnumAsList } from "../../utils/helpers/Enum";
-import { getEnumProperty } from "../../utils/helpers/EnumMetadata";
 import { getPullRegistrations } from "../../utils/registries/MetricRegistry";
 import { BaseDomainService } from "./BaseDomainService";
 import { getSystemEventAsync } from "../../utils/helpers/Timeline";
 import { wsService } from "../../server";
+import { CacheMetric } from "../../interfaces/domain";
 
 class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, typeof MetricRepository> {
     protected readonly repository = MetricRepository;
+    private cache = new Map<MetricEnum, CacheMetric>();
 
     public async initAsync() {
-        // TODO: Load all metrics in cache
+        this.cache = await this.repository.getAllByMetricAsync();
     }
 
     public getAllAsync(): Promise<MetricsModel[]> {
@@ -33,12 +32,6 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
     }
 
     public async collectMetricsAsync(): Promise<void> {
-        const metricsPull = getEnumAsList(MetricEnum).filter(metric => getEnumProperty(MetricEnum, metric, MetadataKeyEnum.MetricType) === MetricTypeEnum.Pull);
-        console.log('metricsPull ', metricsPull);
-
-        const metricsPush = getEnumAsList(MetricEnum).filter(metric => getEnumProperty(MetricEnum, metric, MetadataKeyEnum.MetricType) === MetricTypeEnum.Push);
-        console.log('metricsPush ', metricsPush);
-
         const date = new Date();
         const event = await getSystemEventAsync();
         await Promise.all(
@@ -54,15 +47,25 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
     }
 
     public async incrementAsync(metric: MetricEnum, amount: number = 1) {
-        const entity = await this.repository.getLatestByMetricAsync(metric);
-        const newValue = entity?.Value ? entity.Value + amount : amount;
+        const currentValue = this.cache.get(metric);
+        const newValue = currentValue?.value ? currentValue.value + amount : amount;
+        this.cache.set(metric, {
+            value: newValue,
+            updated: false,
+        });
+    }
 
-        const event = await getSystemEventAsync();
-        this.saveAsync(new MetricsSaveModel({
-            MetricEnum: metric,
-            Datetime: new Date(),
-            Value: newValue
-        }), event);
+    public async flushAsync() {
+        this.cache.forEach(async (x, key) => {
+            if (!x.updated) {
+                const event = await getSystemEventAsync();
+                this.saveAsync(new MetricsSaveModel({
+                    MetricEnum: key,
+                    Datetime: new Date(),
+                    Value: x.value
+                }), event);
+            }
+        });
     }
 
     public async getLatestByMetricAsync(metric: MetricEnum) {
