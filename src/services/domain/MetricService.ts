@@ -37,7 +37,7 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
         await Promise.all(
             getPullRegistrations().map(async (pullRegistration) => {
                 const value = await pullRegistration.fnAsync();
-                this.saveAsync(new MetricsSaveModel({
+                await this.saveAsync(new MetricsSaveModel({
                     MetricEnum: pullRegistration.metric,
                     Datetime: date,
                     Value: value
@@ -64,7 +64,7 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
         this.cache.forEach(async (x, key) => {
             if (!x.updated) {
                 const event = await getSystemEventAsync();
-                this.saveAsync(new MetricsSaveModel({
+                await this.saveAsync(new MetricsSaveModel({
                     MetricEnum: key,
                     Datetime: new Date(),
                     Value: x.value

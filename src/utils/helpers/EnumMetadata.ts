@@ -1,6 +1,5 @@
 import { EnumType } from '../../interfaces/application/EnumType';
 import { EnumValue, MetadataKeyEnum, MetadataValue } from '../../interfaces/enums/application/MetadataKeyEnum';
-import { MetricTypeEnum } from '../../interfaces/enums/application/MetricEnum';
 
 const enumMetadataRegistry = new Map<string, Map<MetadataKeyEnum, MetadataValue>>();
 const pendingRegistrations: Array<() => void> = [];
@@ -134,16 +133,5 @@ export function SetEmoji(
     queueRegistration(() => {
         const metadataMap = ensureMetadataMap(enumObject, enumValue);
         metadataMap.set(MetadataKeyEnum.Emoji, emoji);
-    });
-}
-
-export function SetMetricType(
-    enumObject: EnumType,
-    enumValue: EnumValue,
-    metricType: MetricTypeEnum
-): void {
-    queueRegistration(() => {
-        const metadataMap = ensureMetadataMap(enumObject, enumValue);
-        metadataMap.set(MetadataKeyEnum.MetricType, metricType);
     });
 }

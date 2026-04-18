@@ -17,9 +17,8 @@ export class JobScheduler {
     }
 
     public static getInstance(): JobScheduler {
-        if (!JobScheduler.instance) {
+        if (!JobScheduler.instance)
             JobScheduler.instance = new JobScheduler();
-        }
         return JobScheduler.instance;
     }
 

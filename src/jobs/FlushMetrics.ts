@@ -9,7 +9,7 @@ export default {
     cronExpression: '0 */2 * * * *',
 
     handler: async (progress): Promise<void> => {
-        MetricService.flushAsync();
+        await MetricService.flushAsync();
         progress(1, 1, 'Flush completed');
     }
 } as JobModule;
