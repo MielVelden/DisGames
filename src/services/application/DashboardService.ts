@@ -90,7 +90,7 @@ class DashboardService {
             value: model.Value,
             trend: undefined,
             footer: {
-                primaryText: 'titel',
+                primaryText: i18n.metrics[metric][LanguageEnum.EN],
                 secondaryText: `Recorded ${humanizeDateFromNow(model.Datetime)} ago`
             }
         }

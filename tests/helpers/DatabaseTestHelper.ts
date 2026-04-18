@@ -2,7 +2,7 @@ import TestDatabase from '../config/TestDatabase';
 import { createConnectionAsync, getTableName } from '../../src/repositories/util/ConnectionHandler';
 import { CLEANUP_ORDER } from './TableNameMapping';
 import Logger from '../../src/utils/application/Logger';
-import { initAsync } from '../../src/utils/handlers/InitHandler';
+import { initAsync } from '../../src/utils/registries/InitRegistry';
 
 export class DatabaseTestHelper {
     private static isTestModeEnabled: boolean = false;

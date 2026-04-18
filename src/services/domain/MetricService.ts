@@ -53,6 +53,11 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
             value: newValue,
             updated: false,
         });
+        wsService.broadcastMessageAsync(WebSocketEvent.UPDATE_METRIC, new MetricsSaveModel({ 
+            MetricEnum: metric,
+            Datetime: new Date(),
+            Value: newValue
+        }));
     }
 
     public async flushAsync() {
