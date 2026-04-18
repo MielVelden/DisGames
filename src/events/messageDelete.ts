@@ -4,7 +4,7 @@ import {
 } from 'discord.js';
 import { EventTypeEnum } from '../interfaces/enums';
 import { handleDiscordMessageAsync } from './messageCreate';
-import { EventService } from '../services/application/EventService';
+import { InteractionService } from '../services/application/InteractionService';
 import Logger from '../utils/application/Logger';
 
 export default {
@@ -12,9 +12,9 @@ export default {
 
     async execute(message: Message): Promise<void> {
         // Check if this message was deleted internally
-        if (EventService.isMessageInternallyDeleted(message.id)) {
+        if (InteractionService.isMessageInternallyDeleted(message.id)) {
             Logger.logDebug(`Skipping internally deleted message: ${message.id}`);
-            EventService.removeInternallyDeletedMessage(message.id);
+            InteractionService.removeInternallyDeletedMessage(message.id);
             return;
         }
 

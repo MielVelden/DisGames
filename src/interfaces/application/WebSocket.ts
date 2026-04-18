@@ -4,6 +4,7 @@ export enum WebSocketEvent {
 	PING = "PING",
 	JOB_PROGRESS = "JOB_PROGRESS",
 	CLIENT_ID = "CLIENT_ID",
+	UPDATE_METRIC = "UPDATE_METRIC",
 }
 
 export interface WebSocketMessage {

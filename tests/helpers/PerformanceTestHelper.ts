@@ -8,7 +8,7 @@ import { createTestChannelAsync } from '../fixtures/channels';
 import { createTestGameAsync } from '../fixtures/games';
 import Logger, { loggerColors, loggerEmojis, LogLevel } from '../../src/utils/application/Logger';
 import GameService from '../../src/services/domain/GameService';
-import { EventService } from '../../src/services/application/EventService';
+import { InteractionService } from '../../src/services/application/InteractionService';
 import { handleCommandAsync } from '../../src/utils/handlers/CommandHandler';
 import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { GameTypeEnum } from '../../src/interfaces/enums/database/GameTypeEnum';
@@ -343,7 +343,7 @@ export class PerformanceTestHelper {
                 Logger.logDebug(`Skipping button event: ${(event as any).customId}`);
                 return;
             } else {
-                await EventService.handleEventAsync(event);
+                await InteractionService.handleEventAsync(event);
             }
         } catch (error) {
             // For performance tests, we'll log but not throw for certain expected errors

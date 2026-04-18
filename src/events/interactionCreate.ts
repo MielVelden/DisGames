@@ -5,9 +5,9 @@ import {
 import DiscordService from '../services/discord/DiscordService';
 import { InteractionEvent, isSlashCommandInteractionEvent } from '../interfaces/application/Event';
 import { handleCommandAsync } from '../utils/handlers/CommandHandler';
-import { EventService } from '../services/application/EventService';
+import { InteractionService } from '../services/application/InteractionService';
 import { handleErrorAsync } from '../utils/application/Error';
-import EventsService from '../services/domain/EventsService';
+import EventService from '../services/domain/EventService';
 import { EventsSaveModel } from '../interfaces/database';
 import { withEventContextAsync } from '../middleware/EventContext';
 
@@ -24,7 +24,7 @@ export default {
 
 export async function handleDiscordInteractionAsync(event: InteractionEvent): Promise<void> {
     return withEventContextAsync(event, async () => {
-        await EventsService.saveAsync(new EventsSaveModel({
+        await EventService.saveAsync(new EventsSaveModel({
             UserId: event.user.id,
             ServerId: event.server.Id,
             EventTypeEnum: event.type,
@@ -40,7 +40,7 @@ export async function handleDiscordInteractionAsync(event: InteractionEvent): Pr
             if (isSlashCommandInteractionEvent(event) && (event.command.canExecute?.(event) ?? true))
                 await handleCommandAsync(event.command, event);
             else
-                await EventService.handleEventAsync(event);
+                await InteractionService.handleEventAsync(event);
         }
         catch (error) {
             await handleErrorAsync(error, event);

@@ -13,7 +13,7 @@ import { MessageInteractionEvent } from '../../../src/interfaces/application/Eve
 import { GamesSaveModel, ServersModel } from '../../../src/interfaces/database/TableInterfaces';
 import { User } from '../../../src/interfaces/domain/User';
 import { LanguageEnum } from '../../../src/interfaces/enums/database/LanguageEnum';
-import { EventService } from '../../../src/services/application/EventService';
+import { InteractionService } from '../../../src/services/application/InteractionService';
 import GameService from '../../../src/services/domain/GameService';
 import { createTestServerAsync } from '../../fixtures/servers';
 import { createTestChannelAsync } from '../../fixtures/channels';
@@ -271,7 +271,7 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                     await createTestGameAsync(gameSaveModel);
 
                     // Mark the message as internally deleted before the event arrives
-                    EventService.markMessageAsInternallyDeleted(messageId);
+                    InteractionService.markMessageAsInternallyDeleted(messageId);
 
                     const internalDeleteEvent = buildEventWithType(
                         EventTypeEnum.MESSAGE_DELETE,
@@ -298,7 +298,7 @@ export default function registerWordSnakeGameTests(runner: TestRunner): void {
                     );
 
                     // Cleanup: remove the internal delete marker
-                    EventService.removeInternallyDeletedMessage(messageId);
+                    InteractionService.removeInternallyDeletedMessage(messageId);
                 }
             }
         ]

@@ -27,8 +27,9 @@ export class WebSocketService {
 
 					switch (msg.event) {
 						case WebSocketEvent.PING:
-							this.handlePing(id);
+							this.handlePingAsync(id);
 							break;
+						case WebSocketEvent.UPDATE_METRIC:
 						case WebSocketEvent.UPDATE_RECORD:
 						case WebSocketEvent.DELETE_RECORD:
 						case WebSocketEvent.JOB_PROGRESS:
@@ -52,7 +53,7 @@ export class WebSocketService {
 		});
 	}
 
-	async subscribeClient(clientId: string, table: TableEnum, objectId?: number): Promise<void> {
+	async subscribeClientAsync(clientId: string, table: TableEnum, objectId?: number): Promise<void> {
 		const client = this.clients.get(clientId);
 		if (!client) 
 			return;
@@ -60,7 +61,7 @@ export class WebSocketService {
 		client.subs.push({ table, objectId });
 	}
 
-	async unsubscribeClient(clientId: string, table: TableEnum, objectId?: number): Promise<void> {
+	async unsubscribeClientAsync(clientId: string, table: TableEnum, objectId?: number): Promise<void> {
 		const client = this.clients.get(clientId);
 		if (!client) 
 			return;
@@ -68,18 +69,17 @@ export class WebSocketService {
 		client.subs = client.subs.filter((s) => !(s.table === table && s.objectId === objectId));
 	}
 
-	async subscribeToJob(clientId: string, executionId: string): Promise<void> {
+	async subscribeToJobAsync(clientId: string, executionId: string): Promise<void> {
 		const client = this.clients.get(clientId);
 		if (!client) 
 			return;
 
 		const alreadySubscribed = client.jobSubs.some((sub) => sub.executionId === executionId);
-		if (!alreadySubscribed) {
+		if (!alreadySubscribed)
 			client.jobSubs.push({ executionId });
-		}
 	}
 
-	async unsubscribeFromJob(clientId: string, executionId: string): Promise<void> {
+	async unsubscribeFromJobAsync(clientId: string, executionId: string): Promise<void> {
 		const client = this.clients.get(clientId);
 		if (!client) 
 			return;
@@ -87,7 +87,7 @@ export class WebSocketService {
 		client.jobSubs = client.jobSubs.filter((sub) => sub.executionId !== executionId);
 	}
 
-	async broadcastJobProgress(progressData: JobProgressData): Promise<void> {
+	async broadcastJobProgressAsync(progressData: JobProgressData): Promise<void> {
 		const message: WebSocketMessage = {
 			event: WebSocketEvent.JOB_PROGRESS,
 			data: progressData
@@ -105,11 +105,17 @@ export class WebSocketService {
 		}
 	}
 
-	private async handlePing(clientId: string): Promise<void> {
-		this.sendMessage(clientId, WebSocketEvent.PING, new Date().toISOString());
+	private async handlePingAsync(clientId: string): Promise<void> {
+		this.sendMessageAsync(clientId, WebSocketEvent.PING, new Date().toISOString());
 	}
 
-	private async sendMessage(clientId: string, type: WebSocketEvent, data?: any): Promise<void> {
+	public async broadcastMessageAsync(type: WebSocketEvent, data?: any) {
+		for (const [clientId, client] of this.clients.entries()) {
+			await this.sendMessageAsync(clientId, type, data);
+		}
+	}
+
+	private async sendMessageAsync(clientId: string, type: WebSocketEvent, data?: any): Promise<void> {
 		const client = this.clients.get(clientId);
 		if (!client) 
 			ErrorHelper.throwWithParameters(ExceptionEnum.CLIENT_NOT_FOUND, { clientId: clientId });

@@ -8,6 +8,7 @@ export * from './database/TableEnum';
 export * from './database/TimelineTypeEnum';
 export * from './application/UserRoleEnum';
 export * from './application/ExpectionEnum';
+export * from './application/MetricEnum';
 export * from './games/DifficultyEnum';
 export * from './games/GameSettingsEnum';
 export * from './commands/Games';

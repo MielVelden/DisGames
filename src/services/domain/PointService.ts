@@ -5,6 +5,8 @@ import PointRepository from "../../repositories/PointRepository";
 import { ErrorHelper } from "../../utils/application/Error";
 import { BaseDomainService } from "./BaseDomainService";
 import Logger from "../../utils/application/Logger";
+import { TrackMetricPull } from "../../utils/helpers/Decorator";
+import { MetricEnum } from "../../interfaces/enums/application/MetricEnum";
 
 class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeof PointRepository> {
     protected readonly repository = PointRepository;
@@ -56,6 +58,11 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
     public async purgeAsync(id: number): Promise<void> {
         await this.repository.purgeAsync(id);
         Logger.logDebug(`Purged points record with id ${id}`);
+    }
+
+    @TrackMetricPull(MetricEnum.Points)
+    public async getPointsAsync() {
+        return this.repository.getTotalPointsAsync();
     }
 }
 

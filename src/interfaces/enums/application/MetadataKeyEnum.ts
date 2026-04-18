@@ -4,7 +4,8 @@ export enum MetadataKeyEnum {
     IsRequired = "IsRequired",
     ValidateRegex = "ValidateRegex",
     Emoji = "Emoji",
-    IsRequiredInTestMode = "IsRequiredInTestMode"
+    IsRequiredInTestMode = "IsRequiredInTestMode",
+    MetricType = "MetricType",
 }
 
 export type EnumValue = string | number;

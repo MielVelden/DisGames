@@ -5,7 +5,7 @@ import { Duration } from "../interfaces/application";
 import { subtractDurationFromDate } from "../utils/helpers/Duration";
 import { TimeframeData } from "../interfaces/view/Dashboard";
 
-class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveModel, typeof EventsModelFieldEnum> {
+class EventRepository implements RepositoryWithBase<EventsModel, EventsSaveModel, typeof EventsModelFieldEnum> {
     public readonly baseRepository: BaseRepository<EventsModel, EventsSaveModel, typeof EventsModelFieldEnum>;
 
     constructor() {
@@ -53,6 +53,10 @@ class EventsRepository implements RepositoryWithBase<EventsModel, EventsSaveMode
             previousValue: previousEvents - currentEvents
         }
     }
+
+    public async getTotalAsync() {
+        return this.baseRepository.Select().Count();
+    }
 }
 
-export default new EventsRepository();
+export default new EventRepository();

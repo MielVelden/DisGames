@@ -5,6 +5,7 @@ import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
 import { GameTypeEnum } from "../../interfaces/enums/database/GameTypeEnum";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
+import { MetricEnum } from "../../interfaces/enums";
 
 export const i18n: I18nTranslations = {
     labels: {
@@ -911,6 +912,40 @@ export const i18n: I18nTranslations = {
         [LanguageEnum.DE]: {
             [LanguageEnum.EN]: "German",
             [LanguageEnum.NL]: "Duits"
+        },
+    },
+    metrics: {
+        [MetricEnum.ActiveGames]: {
+            [LanguageEnum.EN]: "Active Games",
+            [LanguageEnum.NL]: "Actieve spellen",
+        },
+        [MetricEnum.Servers]: {
+            [LanguageEnum.EN]: "Servers",
+            [LanguageEnum.NL]: "Servers",
+        },
+        [MetricEnum.Guilds]: {
+            [LanguageEnum.EN]: "Guilds",
+            [LanguageEnum.NL]: "Gildes",
+        },
+        [MetricEnum.Users]: {
+            [LanguageEnum.EN]: "Users",
+            [LanguageEnum.NL]: "Gebruikers",
+        },
+        [MetricEnum.Points]: {
+            [LanguageEnum.EN]: "Points",
+            [LanguageEnum.NL]: "Punten",
+        },
+        [MetricEnum.Events]: {
+            [LanguageEnum.EN]: "Events",
+            [LanguageEnum.NL]: "Evenementen",
+        },
+        [MetricEnum.Members]: {
+            [LanguageEnum.EN]: "Members",
+            [LanguageEnum.NL]: "Leden",
+        },
+        [MetricEnum.ServerMembers]: {
+            [LanguageEnum.EN]: "Server Members",
+            [LanguageEnum.NL]: "Serverleden",
         },
     },
 };

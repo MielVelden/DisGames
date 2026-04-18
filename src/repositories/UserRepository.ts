@@ -30,7 +30,7 @@ class UserRepository implements RepositoryWithBase<UsersModel, UsersSaveModel, t
         return model[0];
     }
 
-    async getTotalUsersAsync(): Promise<number> {
+    async getTotalAsync(): Promise<number> {
         const total = await this.baseRepository.Select().Count();
         return total;
     }
