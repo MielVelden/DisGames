@@ -15,7 +15,7 @@ import { Component, ComponentType, Container, TextDisplay, Title, Separator, But
 import GameRepository from "../../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
-import { GameTypeEnum, LanguageEnum } from "../../interfaces/enums";
+import { GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/helpers/Enum";
 import GameDataRepository from "../../repositories/GameDataRepository";
@@ -35,8 +35,10 @@ import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
-import { EventService } from "../application/EventService";
+import { InteractionService } from "../application/InteractionService";
+import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
 
+@RegisterMetricPulls()
 class GameService {
     private games: GameModule[] = [];
 
@@ -418,7 +420,7 @@ class GameService {
                     ErrorHelper.throw(ExceptionEnum.GAME_NOT_ACTIVE);
                 case GameOptionEnum.DISABLE_MESSAGE_CHANGE:
                     if (gameEvent.getGameData().LastUser === gameEvent.user.userId && (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE || gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE)) {
-                        const isInternalDeleteEvent = gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE && EventService.isMessageInternallyDeleted(gameEvent.messageId);
+                        const isInternalDeleteEvent = gameEvent.eventType === EventTypeEnum.MESSAGE_DELETE && InteractionService.isMessageInternallyDeleted(gameEvent.messageId);
                         if (gameEvent.eventType === EventTypeEnum.MESSAGE_UPDATE)
                             gameEvent.deleteMessage();
 
@@ -709,6 +711,11 @@ class GameService {
         } as Container;
     }
     // #endregion
+
+    @TrackMetricPull(MetricEnum.ActiveGames)
+    public async getTotalAsync(): Promise<number> {
+        return await GameRepository.getTotalAsync();
+    }
 }
 
 export default new GameService();

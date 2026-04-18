@@ -41,7 +41,7 @@ class GameRepository implements RepositoryWithBase<GamesModel, GamesSaveModel, t
         return model;
     }
 
-    async getTotalCountAsync(): Promise<number> {
+    async getTotalAsync(): Promise<number> {
         return await this.baseRepository.Select().Count();
     }
 

@@ -13,13 +13,12 @@ export class JobScheduler {
     private jobs: Map<string, schedule.Job> = new Map();
 
     private constructor() {
-        this.scheduleJobs();
+        setImmediate(() => this.scheduleJobs());
     }
 
     public static getInstance(): JobScheduler {
-        if (!JobScheduler.instance) {
+        if (!JobScheduler.instance)
             JobScheduler.instance = new JobScheduler();
-        }
         return JobScheduler.instance;
     }
 
@@ -108,18 +107,51 @@ export class JobScheduler {
         }
     }
 
+    private static isHighFrequency(cronExpression?: string): boolean {
+        if (!cronExpression) return false;
+        const fields = cronExpression.trim().split(/\s+/);
+        const minuteField = fields.length === 6 ? fields[1] : fields[0];
+
+        if (minuteField === '*')
+            return true;
+
+        const stepMatch = minuteField.match(/^\*\/(\d+)$/);
+        if (stepMatch)
+            return parseInt(stepMatch[1]) < 15;
+
+        const values = minuteField.split(',').map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b);
+        if (values.length > 1) {
+            for (let i = 1; i < values.length; i++) {
+                if (values[i] - values[i - 1] < 15)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     private async executeJob(jobModule: JobModule): Promise<void> {
         const startTime = Date.now();
 
         try {
-            const noOpProgress = (current: number, total: number, message?: string) => {};
-            await jobModule.handler(noOpProgress);
+            let completed = false;
+            const progressCallback = (current: number, total: number, _message?: string) => {
+                if (current >= total) 
+                    completed = true;
+            };
+
+            await jobModule.handler(progressCallback);
 
             const duration = Date.now() - startTime;
-            await Logger.logInfo(`Job '${jobModule.name}' completed in ${duration}ms`, {
-                webhookType: WebhookType.DEBUG,
-                sendToDiscord: false
-            });
+
+            if (!completed)
+                progressCallback(1, 1, `Job '${jobModule.name}' completed in ${duration}ms`);
+
+            if (!JobScheduler.isHighFrequency(jobModule.cronExpression))
+                await Logger.logInfo(`Job '${jobModule.name}' completed in ${duration}ms`, {
+                    webhookType: WebhookType.DEBUG,
+                    sendToDiscord: false
+                });
         } catch (error) {
             const duration = Date.now() - startTime;
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -132,7 +164,6 @@ export class JobScheduler {
             ErrorHelper.wrap(error, ExceptionEnum.JOB_FAILED);
         }
     }
-
 }
 
 export default JobScheduler.getInstance();

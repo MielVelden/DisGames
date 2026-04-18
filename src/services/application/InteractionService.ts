@@ -10,7 +10,7 @@ import { i18n } from '../../utils/i18n/i18n';
 
 const DEFAULT_TIMEOUT = calculateDuration(1, DurationEnum.MINUTE);
 
-export class EventService {
+export class InteractionService {
   private static buttonHandlers: Map<string, ButtonHandler> = new Map();
   private static selectMenuHandlers: Map<string, SelectMenuHandler> = new Map();
   private static timeouts: Map<string, NodeJS.Timeout> = new Map();
@@ -18,40 +18,40 @@ export class EventService {
 
   // #region Message Delete Tracking
   public static markMessageAsInternallyDeleted(messageId: string): void {
-    EventService.internallyDeletedMessages.add(messageId);
+    InteractionService.internallyDeletedMessages.add(messageId);
 
     // Auto cleanup after 30 seconds to prevent memory leaks
     setTimeout(() => {
-      EventService.internallyDeletedMessages.delete(messageId);
+      InteractionService.internallyDeletedMessages.delete(messageId);
     }, 30000);
   }
 
   public static isMessageInternallyDeleted(messageId: string): boolean {
-    return EventService.internallyDeletedMessages.has(messageId);
+    return InteractionService.internallyDeletedMessages.has(messageId);
   }
 
   public static removeInternallyDeletedMessage(messageId: string): void {
-    EventService.internallyDeletedMessages.delete(messageId);
+    InteractionService.internallyDeletedMessages.delete(messageId);
   }
   // #endregion
 
   public static registerButtonHandler(handler: ButtonHandler): void {
-    EventService.buttonHandlers.set(handler.id, handler);
-    EventService.setupTimeout(handler);
+    InteractionService.buttonHandlers.set(handler.id, handler);
+    InteractionService.setupTimeout(handler);
   }
 
   public static registerSelectMenuHandler(handler: SelectMenuHandler): void {
-    EventService.selectMenuHandlers.set(handler.id, handler);
-    EventService.setupTimeout(handler);
+    InteractionService.selectMenuHandlers.set(handler.id, handler);
+    InteractionService.setupTimeout(handler);
   }
 
   public static registerHandler(type: EventTypeEnum, handler: ButtonHandler | SelectMenuHandler): void {
     switch (type) {
       case EventTypeEnum.BUTTON:
-        EventService.registerButtonHandler(handler);
+        InteractionService.registerButtonHandler(handler);
         break;
       case EventTypeEnum.SELECT_MENU:
-        EventService.registerSelectMenuHandler(handler);
+        InteractionService.registerSelectMenuHandler(handler);
         break;
       case EventTypeEnum.MESSAGE:
       case EventTypeEnum.MESSAGE_UPDATE:
@@ -67,34 +67,34 @@ export class EventService {
   private static setupTimeout(handler: ButtonHandler | SelectMenuHandler): void {
     if (handler.onTimeout) {
       const timeoutId = setTimeout(async () => {
-        EventService.removeHandler(handler.id);
+        InteractionService.removeHandler(handler.id);
         if (handler.onTimeout) {
           await handler.onTimeout();
         }
       }, durationToMilliseconds(handler.timeout ?? DEFAULT_TIMEOUT));
 
-      EventService.timeouts.set(handler.id, timeoutId);
+      InteractionService.timeouts.set(handler.id, timeoutId);
     }
   }
 
   private static removeHandler(handlerId: string): void {
-    EventService.buttonHandlers.delete(handlerId);
-    EventService.selectMenuHandlers.delete(handlerId);
+    InteractionService.buttonHandlers.delete(handlerId);
+    InteractionService.selectMenuHandlers.delete(handlerId);
 
-    const timeoutId = EventService.timeouts.get(handlerId);
+    const timeoutId = InteractionService.timeouts.get(handlerId);
     if (timeoutId) {
       clearTimeout(timeoutId);
-      EventService.timeouts.delete(handlerId);
+      InteractionService.timeouts.delete(handlerId);
     }
   }
 
   public static async handleButtonInteraction(interaction: InteractionEvent): Promise<void> {
-    const handler = EventService.buttonHandlers.get(interaction.customId);
+    const handler = InteractionService.buttonHandlers.get(interaction.customId);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.userId)
         return await interaction.replyAsync(new MultiLingualString(i18n.labels.common.notYourEvent), true);
 
-      EventService.removeHandler(handler.id);
+      InteractionService.removeHandler(handler.id);
       await handler.handle(interaction);
     } else {
       Logger.logDebug(`No handler found for button: ${interaction.customId}`);
@@ -102,7 +102,7 @@ export class EventService {
   }
 
   public static async handleSelectMenuInteraction(interaction: SelectMenuInteractionEvent): Promise<void> {
-    const handler = EventService.selectMenuHandlers.get(interaction.customId);
+    const handler = InteractionService.selectMenuHandlers.get(interaction.customId);
     Logger.logDebug(`Handling select menu interaction: ${interaction.customId}`);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.userId)
@@ -110,7 +110,7 @@ export class EventService {
 
       await interaction.deferReplyAsync();
 
-      EventService.removeHandler(handler.id);
+      InteractionService.removeHandler(handler.id);
       await handler.handle(interaction);
     } else
       Logger.logDebug(`No handler found for select menu: ${interaction.customId}`);

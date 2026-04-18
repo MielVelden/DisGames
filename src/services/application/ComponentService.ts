@@ -5,7 +5,7 @@ import { ActionButton, Component, ComponentType, Container, ContainerBuilder, Li
 import { EventTypeEnum, GameTypeEnum } from "../../interfaces/enums";
 import { i18n, LanguageEnumTranslations } from "../../utils/i18n/i18n";
 import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { EventService } from "./EventService";
+import { InteractionService } from "./InteractionService";
 import MediaService from "./MediaService";
 import Logger from "../../utils/application/Logger";
 import { toonEncode } from "../../utils/helpers/Toon";
@@ -74,7 +74,7 @@ class ComponentService {
             id: crypto.randomUUID()
         };
         Logger.logDebug(`Registering component (type: ${type}) with id: ${handler.id}`);
-        EventService.registerHandler(type, handler);
+        InteractionService.registerHandler(type, handler);
 
         return {
             ...config,

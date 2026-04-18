@@ -1,10 +1,12 @@
 import { InteractionEvent } from "../../interfaces/application";
 import { EventsModel, EventsSaveModel } from "../../interfaces/database/TableInterfaces";
-import EventsRepository from "../../repositories/EventsRepository";
+import { MetricEnum } from "../../interfaces/enums";
+import EventRepository from "../../repositories/EventRepository";
+import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { BaseDomainService } from "./BaseDomainService";
 
-class EventsService extends BaseDomainService<EventsModel, EventsSaveModel, typeof EventsRepository> {
-    protected readonly repository = EventsRepository;
+class EventService extends BaseDomainService<EventsModel, EventsSaveModel, typeof EventRepository> {
+    protected readonly repository = EventRepository;
 
     public getAllAsync(): Promise<EventsModel[]> {
         return this.repository.getAllAsync();
@@ -17,6 +19,11 @@ class EventsService extends BaseDomainService<EventsModel, EventsSaveModel, type
     public purgeAsync(id: number): Promise<void> {
         return this.repository.purgeAsync(id);
     }
+
+    @TrackMetricPull(MetricEnum.Events)
+    public async getTotalAsync() {
+        return this.repository.getTotalAsync();
+    }
 }
 
-export default new EventsService();
+export default new EventService();
