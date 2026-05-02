@@ -1,6 +1,6 @@
 {
   "name": "disgames",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "github": "https://github.com/MielVelden/DisGames",
   "description": "Minigame bot",
   "main": "index.js",

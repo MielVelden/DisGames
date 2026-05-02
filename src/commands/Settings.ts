@@ -11,6 +11,7 @@ import ServerService from "../services/domain/ServerService";
 import { ServersSaveModel } from "../interfaces/database";
 import { LanguageEnum } from "../interfaces/enums";
 import { createLanguageSelectMenu } from "../builders/selectmenus/LanguageSelectMenu";
+import GameService from "../services/domain/GameService";
 
 export class SettingsCommand implements Command {
     name = CommandEnum.SETTINGS;
@@ -21,7 +22,8 @@ export class SettingsCommand implements Command {
 
     async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {
         const server = await ServerService.getByExternalIdAsync(event.guildId);
-
+        const activeGames = await GameService.getActiveGamesAsync(server.ServerId);
+        
         const changeLanguageButton = createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeLanguage), ButtonStyle.SECONDARY, "🌐", event.user.userId, async (event: InteractionEvent) => {
             const languageSelectMenu = createLanguageSelectMenu();
             const languageEvent = await event.getUserInputBySelectMenuAsync(languageSelectMenu);
@@ -36,7 +38,11 @@ export class SettingsCommand implements Command {
             }
         });
 
-        const settingsContainer = createSettingsContainer([changeLanguageButton]);
+        const settingsContainer = createSettingsContainer({
+            LanguageEnum: server.LanguageEnum,
+            ServerName: server.Name,
+            GamesEnabled: activeGames.length
+        }, [changeLanguageButton]);
         await event.addComponentsAsync(settingsContainer);
         await event.replyAsync();
     }

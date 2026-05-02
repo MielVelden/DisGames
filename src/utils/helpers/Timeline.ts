@@ -29,6 +29,6 @@ export async function getSystemEventAsync() {
     const server = await ServerService.getByExternalIdAsync(getConfigValue(EnvConfigEnum.DISGAMES_SERVER_ID));
     const event = createBaseTimelineEvent(user, server);
     if (!event)
-      ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
+        ErrorHelper.throw(ExceptionEnum.UNAUTHORIZED);
     return event;
-  }
+}
