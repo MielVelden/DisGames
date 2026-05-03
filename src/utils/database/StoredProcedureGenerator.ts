@@ -1,22 +1,20 @@
 import * as fs from 'fs';
-import { DatabaseConnection } from './DatabaseConnection';
 import { SchemaUtils } from './SchemaUtils';
 import Logger from '../application/Logger';
+import { runQueryAsync, getDatabaseName } from '../../repositories/util/ConnectionHandler';
 
 export class StoredProcedureGenerator {
   static async generateRoutineEnums(storedProcedureEnumFilePath: string, functionEnumFilePath: string): Promise<void> {
-    const connection = DatabaseConnection.getConnection();
-     
     // Get all stored procedures AND functions from the database
     const routinesQuery = `
         SELECT ROUTINE_NAME, ROUTINE_TYPE, ROUTINE_SCHEMA
-        FROM information_schema.ROUTINES 
-        WHERE ROUTINE_SCHEMA = ? 
+        FROM information_schema.ROUTINES
+        WHERE ROUTINE_SCHEMA = ?
         AND ROUTINE_TYPE IN ('PROCEDURE', 'FUNCTION')
         ORDER BY ROUTINE_TYPE, ROUTINE_NAME
     `;
-    
-    const [routines] = await connection.query(routinesQuery, [DatabaseConnection.databaseName]);
+
+    const routines = await runQueryAsync(routinesQuery, [getDatabaseName()]);
 
     const procedures = (routines as any[]).filter(r => r.ROUTINE_TYPE === 'PROCEDURE');
     const functions = (routines as any[]).filter(r => r.ROUTINE_TYPE === 'FUNCTION');

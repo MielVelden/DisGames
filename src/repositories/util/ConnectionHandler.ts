@@ -265,6 +265,14 @@ export async function commitTransactionAsync(): Promise<void> {
 
 //#region Table Enums
 
+export function getDatabaseName(): string {
+    const dbUrl = getConfigValue(EnvConfigEnum.DATABASE_URL) as string;
+    if (!dbUrl)
+        ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { environmentVariable: 'DATABASE_URL' });
+    const url = new URL(dbUrl);
+    return url.pathname.replace(/^\//, '');
+}
+
 export function getTableName(tableEnumValue: TableEnum): string {
     const enumValue = table_enums.find(tableEnum => tableEnum.Id === tableEnumValue)?.TableName;
     if (!enumValue) {

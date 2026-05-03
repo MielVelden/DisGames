@@ -147,8 +147,14 @@ export class SchemaUtils {
 
   static async importEnum(enumFileLocation: string, enumPath: string): Promise<Record<string, any>> {
     const resolvedPath = path.resolve(enumFileLocation, enumPath);
-    const module = require(resolvedPath);
-    return module;
+    const content = fs.readFileSync(resolvedPath, 'utf-8');
+    const exportedNames: Record<string, string> = {};
+    const exportRegex = /export\s+(?:enum|const|class|interface|type)\s+(\w+)/g;
+    let match;
+    while ((match = exportRegex.exec(content)) !== null) {
+      exportedNames[match[1]] = match[1];
+    }
+    return exportedNames;
   }
 
   static async createEnumMapping(enumFileLocation: string, enumPaths: string[]): Promise<Record<string, string>> {

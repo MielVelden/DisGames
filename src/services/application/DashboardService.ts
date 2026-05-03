@@ -4,7 +4,6 @@ import { DashboardEnum } from "../../interfaces/enums/view/DashboardEnum";
 import { DashboardSectionCardData, DashboardResponse, TimeframeData, TrendDirection } from "../../interfaces/view/Dashboard";
 import EventRepository from "../../repositories/EventRepository";
 import TimelineRepository from "../../repositories/TimelineRepository";
-import UserRepository from "../../repositories/UserRepository";
 import { calculateDuration, humanizeDuration } from "../../utils/helpers/Duration";
 import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import { ChartTypeEnum } from "../../interfaces/enums/application/ChartTypeEnum";

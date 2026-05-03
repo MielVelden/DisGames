@@ -180,6 +180,9 @@ export interface I18nTranslations {
             labels: {
                 title: LanguageTranslations;
                 description: LanguageTranslations;
+                serverName: (serverName: string) => MultiLingualString;
+                currentLanguage: (language: string) => MultiLingualString;
+                gamesEnabled: (gamesEnabled: number) => MultiLingualString;
                 changeLanguage: LanguageTranslations;
                 languageChanged: LanguageTranslations;
                 clickHereToChangeLanguage: LanguageTranslations;

@@ -647,6 +647,18 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.EN]: "Manage the settings for the bot",
                     [LanguageEnum.NL]: "Beheer de instellingen voor de bot",
                 },
+                serverName: (serverName: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "> Server Name: `{serverName}`",
+                    [LanguageEnum.NL]: "> Server Naam: `{serverName}`",
+                }, { serverName }),
+                currentLanguage: (language: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "> Current Language: `{language}`",
+                    [LanguageEnum.NL]: "> Huidige Taal: `{language}`",
+                }, { language }),
+                gamesEnabled: (gamesEnabled: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: "> Games Enabled: `{gamesEnabled}`",
+                    [LanguageEnum.NL]: "> Spellen Ingeschakeld: `{gamesEnabled}`",
+                }, { gamesEnabled }),
                 changeLanguage: {
                     [LanguageEnum.EN]: "Change Language",
                     [LanguageEnum.NL]: "Taal wijzigen",

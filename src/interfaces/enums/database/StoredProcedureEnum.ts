@@ -3,6 +3,7 @@ export enum StoredProcedureEnum {
   BarChartEventsActivityOverTime = "BarChart_Events_ActivityOverTime",
   BarChartEventsEventsByType = "BarChart_Events_EventsByType",
   BarChartEventsEventsPerHour = "BarChart_Events_EventsPerHour",
+  CleanUpData = "CleanUpData",
   GetRandomGameData = "GetRandomGameData",
   GetUserProfile = "GetUserProfile",
   PieChartGamesGamesByType = "PieChart_Games_GamesByType",

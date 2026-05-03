@@ -418,10 +418,30 @@ class DiscordMessageHandler {
                 case EventTypeEnum.MESSAGE:
                 case EventTypeEnum.MESSAGE_UPDATE:
                 case EventTypeEnum.MESSAGE_DELETE:
-                    await event.currentInteraction.reply(replyOptions);
+                    try {
+                        await event.currentInteraction.reply(replyOptions);
+                    } catch (error) {
+                        if (this.isUnknownInteractionError(error)) {
+                            await Logger.logWarning(`Interaction ${event.currentInteraction.id} expired before reply in channel ${event.channelId}`);
+                            resolve(null);
+                            return;
+                        }
+
+                        throw error;
+                    }
                     break;
                 case EventTypeEnum.SELECT_MENU:
-                    await event.currentInteraction.editReply(replyOptions);
+                    try {
+                        await event.currentInteraction.editReply(replyOptions);
+                    } catch (error) {
+                        if (this.isUnknownInteractionError(error)) {
+                            await Logger.logWarning(`Interaction ${event.currentInteraction.id} expired before editReply in channel ${event.channelId}`);
+                            resolve(null);
+                            return;
+                        }
+
+                        throw error;
+                    }
                     break;
                 case EventTypeEnum.BUTTON:
                     try {

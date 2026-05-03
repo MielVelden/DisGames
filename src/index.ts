@@ -10,6 +10,8 @@ import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
 import { JobScheduler } from './services/application/JobScheduler';
 import { initAsync } from './utils/registries/InitRegistry';
+import { syncRoutines } from './utils/routines/Sync';
+import { validateSchemaAsync } from './utils/database/GenerateSchema';
 
 getConfig();
 
@@ -32,6 +34,15 @@ discordClient.once('ready', async () => {
   });
   await createConnectionAsync().then(async (success) => {
     if (success) {
+      if (!getConfigValue(EnvConfigEnum.DEBUG_MODE)) {
+        try {
+          await syncRoutines();
+          await validateSchemaAsync();
+        } catch (err) {
+          Logger.logError('Routine sync failed, shutting down', err as Error, { sendToDiscord: true });
+          process.exit(1);
+        }
+      }
       await initAsync();
       await loadCommands(discordClient);
       await loadEvents(discordClient);
