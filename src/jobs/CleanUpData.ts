@@ -1,5 +1,5 @@
 import { JobModule } from "../interfaces/application/Job";
-import { FunctionEnum, StoredProcedureEnum } from "../interfaces/enums";
+import { StoredProcedureEnum } from "../interfaces/enums";
 import Logger from "../utils/application/Logger";
 import { RepositoryUtils } from "../repositories/BaseRepository";
 
@@ -7,7 +7,7 @@ export default {
     id: 'cleanup-data',
     name: 'Cleanup Data',
     description: 'Cleanup data',
-    isEnabled: true,
+    isEnabled: false,
     cronExpression: '0 0 2 * * *',
 
     handler: async (progress): Promise<void> => {

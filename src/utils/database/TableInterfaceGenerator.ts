@@ -1,11 +1,11 @@
 import * as fs from 'fs';
-import { DatabaseConnection } from './DatabaseConnection';
 import { SchemaUtils } from './SchemaUtils';
 import { JsonInterfaceValidator } from './JsonInterfaceValidator';
 import { InterfaceImportManager } from './InterfaceImportManager';
 import Logger from '../application/Logger';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { getEnumValue } from '../helpers/Enum';
+import { validateConnectionAsync, runQueryAsync, getDatabaseName } from '../../repositories/util/ConnectionHandler';
 
 export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;
@@ -68,12 +68,13 @@ export class TableInterfaceGenerator {
     });
   }
 
-  static async generateTableInterfaces(
+  static async generateTableInterfacesAsync(
     outputFilePath: string,
     enumFileLocation: string,
-    enumFile: string
+    enumFile: string,
+    validate: boolean = false
   ): Promise<void> {
-    const connection = DatabaseConnection.getConnection();
+    const databaseName = getDatabaseName();
 
     // Get all enums from the index.ts file
     const enumPaths = SchemaUtils.getExportedEnums(enumFileLocation, enumFile);
@@ -81,17 +82,15 @@ export class TableInterfaceGenerator {
 
     // Get all tables in the database
     const tablesQuery = `
-        SELECT table_name 
-        FROM information_schema.tables 
+        SELECT table_name
+        FROM information_schema.tables
         WHERE table_schema = ?
     `;
-    const [tables] = await connection.query(tablesQuery, [DatabaseConnection.databaseName]);
+    const tables = await runQueryAsync(tablesQuery, [databaseName]);
 
     // Collect all JSON interface imports needed
     const jsonInterfaceImports = await InterfaceImportManager.collectJsonInterfaceImports(
       tables as any[],
-      connection,
-      DatabaseConnection.databaseName,
       SchemaUtils
     );
 
@@ -115,7 +114,7 @@ export class TableInterfaceGenerator {
             WHERE table_name = ? 
             AND table_schema = ?
         `;
-      const [columns] = await connection.query(columnsQuery, [tableName, DatabaseConnection.databaseName]);
+      const columns = await runQueryAsync(columnsQuery, [tableName, databaseName]);
 
       // Generate interface content
       interfaceContent += `export interface ${SchemaUtils.capitalize(tableName)}${this.suffix} {\n`;
@@ -220,7 +219,16 @@ export class TableInterfaceGenerator {
     }
 
     // Write interfaces to file
-    fs.writeFileSync(outputFilePath, interfaceContent);
+    if (validate) {
+      const existingContent = fs.readFileSync(outputFilePath, 'utf-8');
+      if (existingContent !== interfaceContent)
+        Logger.logError('Interfaces have changed, please update the database', undefined, {
+          sendToDiscord: true
+        });
+      return;
+    } else {
+      fs.writeFileSync(outputFilePath, interfaceContent);
+    }
 
     Logger.logInfo('Interfaces gegenereerd in ' + outputFilePath);
   }

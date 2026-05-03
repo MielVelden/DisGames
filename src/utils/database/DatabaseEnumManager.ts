@@ -1,33 +1,26 @@
 import { TableEnum } from '../../interfaces/enums';
-import { DatabaseConnection } from './DatabaseConnection';
 import Logger from '../application/Logger';
+import { runQueryAsync } from '../../repositories/util/ConnectionHandler';
 
 export class DatabaseEnumManager {
   static async updateDatabaseWithEnums(): Promise<void> {
-    const connection = DatabaseConnection.getConnection();
-    
-    // Get all existing enums from 'table_enums'
     const existingEnumsQuery = `
         SELECT id, LOWER(tablename) as tablename FROM table_enums;
     `;
-    const [existingEnumRows] = await connection.query(existingEnumsQuery);
+    const existingEnumRows = await runQueryAsync(existingEnumsQuery);
 
-    // Create a map of existing enums
     const existingEnumMap = new Map(
       (existingEnumRows as any[]).map((row: any) => [row.tablename, row.id])
     );
 
-    // Loop through all enums in TableEnum
     for (const [tableName, enumValue] of Object.entries(TableEnum)) {
       if (typeof enumValue === 'number') {
         const lowerCaseTableName = tableName.toLowerCase();
 
-        // Check if the enum exists in 'table_enums'
         if (!existingEnumMap.has(lowerCaseTableName)) {
           Logger.logInfo(`Table '${lowerCaseTableName}' does not exist in 'table_enums'. Adding...`);
 
-          // Add the enum to 'table_enums'
-          await connection.query(`
+          await runQueryAsync(`
                     INSERT INTO table_enums (Id, TableName)
                     VALUES (?, ?)
                 `, [enumValue, lowerCaseTableName]);

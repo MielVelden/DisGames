@@ -1,8 +1,8 @@
-import { DatabaseConnection } from './DatabaseConnection';
+import { createConnectionAsync, closeConnectionAsync } from '../../repositories/util/ConnectionHandler';
 import { TableInterfaceGenerator } from './TableInterfaceGenerator';
 import { StoredProcedureGenerator } from './StoredProcedureGenerator';
 import { DatabaseEnumManager } from './DatabaseEnumManager';
-import { RoutineSyncService } from '../routines/RoutineSyncService';
+import { exportRoutines } from '../routines/Sync';
 import Logger from '../application/Logger';
 import { getConfig } from '../application/Config';
 
@@ -22,11 +22,11 @@ const functionEnumFilePath = databaseEnumLocation + functionEnumFileName;
 
 getConfig();
 
-async function main() {
+export async function createSchemaAsync() {
     try {
-        await DatabaseConnection.createConnection();
-        
-        await TableInterfaceGenerator.generateTableInterfaces(
+        await createConnectionAsync();
+
+        await TableInterfaceGenerator.generateTableInterfacesAsync(
             outputFilePath,
             enumFileLocation,
             enumFile
@@ -39,12 +39,19 @@ async function main() {
         
         await DatabaseEnumManager.updateDatabaseWithEnums();
 
-        await RoutineSyncService.exportRoutines();
+        await exportRoutines();
     } catch (err) {
         Logger.logError(`Error generating schema: ${err}`);
     } finally {
-        await DatabaseConnection.closeConnection();
+        await closeConnectionAsync();
     }
 }
 
-main();
+export async function validateSchemaAsync(): Promise<void> {
+    await TableInterfaceGenerator.generateTableInterfacesAsync(
+        outputFilePath,
+        enumFileLocation,
+        enumFile,
+        true
+    );
+}
