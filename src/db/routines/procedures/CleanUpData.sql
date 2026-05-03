@@ -2,15 +2,12 @@
 CREATE PROCEDURE `CleanUpData`()
 BEGIN
     DECLARE Done INT DEFAULT 0;
+    DECLARE EventTypeEnumMessage INT DEFAULT 5;
 
     REPEAT
         DELETE FROM events
-        WHERE CreatedAt < NOW() - INTERVAL 14 DAY
-          AND JSON_UNQUOTE(JSON_EXTRACT(PayloadJSON, '$.channelId')) NOT IN (
-              SELECT CAST(ChannelId AS CHAR)
-              FROM games
-              WHERE ChannelId IS NOT NULL
-          )
+        WHERE CreatedAt < NOW() - INTERVAL 21 DAY
+          AND EventTypeEnum = EventTypeEnumMessage
         LIMIT 500;
 
         SET Done = ROW_COUNT() < 500;

@@ -7,7 +7,7 @@ export default {
     id: 'cleanup-data',
     name: 'Cleanup Data',
     description: 'Cleanup data',
-    isEnabled: false,
+    isEnabled: true,
     cronExpression: '0 0 2 * * *',
 
     handler: async (progress): Promise<void> => {
