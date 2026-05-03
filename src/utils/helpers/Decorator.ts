@@ -5,17 +5,24 @@ import { registerPull } from "../registries/MetricRegistry";
 
 export function TrackMetric(metric: MetricEnum, amount = 1) {
     return function (
-        _target: any,
-        _propertyKey: string,
-        descriptor: PropertyDescriptor
+        target: any,
+        propertyKey: string,
+        descriptor?: PropertyDescriptor
     ) {
-        const original = descriptor.value;
+        // New TC39 decorator spec: target is the method, second arg is context
+        if (descriptor === undefined) {
+            const original = target as Function;
+            return async function (this: any, ...args: any[]) {
+                await MetricService.incrementAsync(metric, amount);
+                return original.apply(this, args);
+            } as any;
+        }
 
+        const original = descriptor.value;
         descriptor.value = async function (...args: any[]) {
             await MetricService.incrementAsync(metric, amount);
             return original.apply(this, args);
         };
-
         return descriptor;
     };
 }

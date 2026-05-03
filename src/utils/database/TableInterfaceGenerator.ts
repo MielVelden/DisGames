@@ -68,6 +68,41 @@ export class TableInterfaceGenerator {
     });
   }
 
+  private static detectChangedTables(existingContent: string, newContent: string): string[] {
+    const extractSections = (content: string): Map<string, string> => {
+      const sections = new Map<string, string>();
+      const lines = content.split('\n');
+      let current: string | null = null;
+      let block: string[] = [];
+
+      for (const line of lines) {
+        const match = line.match(/^export interface (\w+)Model \{/);
+        if (match) {
+          if (current) sections.set(current, block.join('\n'));
+          current = match[1];
+          block = [line];
+        } else if (current) {
+          block.push(line);
+        }
+      }
+      if (current) sections.set(current, block.join('\n'));
+      return sections;
+    };
+
+    const existingSections = extractSections(existingContent);
+    const newSections = extractSections(newContent);
+    const changed: string[] = [];
+
+    for (const [table, newBlock] of newSections) {
+      if (existingSections.get(table) !== newBlock) changed.push(table);
+    }
+    for (const table of existingSections.keys()) {
+      if (!newSections.has(table)) changed.push(table);
+    }
+
+    return [...new Set(changed)];
+  }
+
   static async generateTableInterfacesAsync(
     outputFilePath: string,
     enumFileLocation: string,
@@ -221,10 +256,13 @@ export class TableInterfaceGenerator {
     // Write interfaces to file
     if (validate) {
       const existingContent = fs.readFileSync(outputFilePath, 'utf-8');
-      if (existingContent !== interfaceContent)
-        Logger.logError('Interfaces have changed, please update the database', undefined, {
-          sendToDiscord: true
-        });
+      if (existingContent !== interfaceContent) {
+        const changedTables = this.detectChangedTables(existingContent, interfaceContent);
+        const message = changedTables.length > 0
+          ? `Interfaces have changed, please update the database. Changed tables: ${changedTables.join(', ')}`
+          : 'Interfaces have changed, please update the database';
+        Logger.logError(message, undefined, { sendToDiscord: true });
+      }
       return;
     } else {
       fs.writeFileSync(outputFilePath, interfaceContent);
