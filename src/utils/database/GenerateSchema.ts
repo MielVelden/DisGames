@@ -2,6 +2,7 @@ import { DatabaseConnection } from './DatabaseConnection';
 import { TableInterfaceGenerator } from './TableInterfaceGenerator';
 import { StoredProcedureGenerator } from './StoredProcedureGenerator';
 import { DatabaseEnumManager } from './DatabaseEnumManager';
+import { RoutineSyncService } from '../routines/RoutineSyncService';
 import Logger from '../application/Logger';
 import { getConfig } from '../application/Config';
 
@@ -37,7 +38,8 @@ async function main() {
         );
         
         await DatabaseEnumManager.updateDatabaseWithEnums();
-        
+
+        await RoutineSyncService.exportRoutines();
     } catch (err) {
         Logger.logError(`Error generating schema: ${err}`);
     } finally {
