@@ -32,7 +32,7 @@ class ChartService {
     // #region Bar Charts
 
     private async getBarChartEventsEventsByTypeAsync(identity: User): Promise<ChartDefinition> {
-        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [1, null]);
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [1]);
 
         return {
             title: "Events by Type",
@@ -42,7 +42,7 @@ class ChartService {
     }
 
     private async getBarChartEventsActivityOverTimeAsync(identity: User): Promise<ChartDefinition> {
-        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsActivityOverTime, [null, 30]);
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsActivityOverTime, [30]);
 
         return {
             title: "Activity over time",
@@ -52,7 +52,7 @@ class ChartService {
     }
 
     private async getBarChartEventsEventsPerHourAsync(identity: User): Promise<ChartDefinition> {
-        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsPerHour, [null, 7]);
+        const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsPerHour, [7]);
 
         return {
             title: "Events per hour",

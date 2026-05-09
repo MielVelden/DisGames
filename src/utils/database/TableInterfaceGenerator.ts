@@ -5,7 +5,7 @@ import { InterfaceImportManager } from './InterfaceImportManager';
 import Logger from '../application/Logger';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { getEnumValue } from '../helpers/Enum';
-import { validateConnectionAsync, runQueryAsync, getDatabaseName } from '../../repositories/util/ConnectionHandler';
+import { runQueryAsync, getDatabaseName } from '../../repositories/util/ConnectionHandler';
 
 export class TableInterfaceGenerator {
   private static readonly suffix = 'Model' as string;
@@ -69,38 +69,51 @@ export class TableInterfaceGenerator {
   }
 
   private static detectChangedTables(existingContent: string, newContent: string): string[] {
-    const extractSections = (content: string): Map<string, string> => {
-      const sections = new Map<string, string>();
+    const extractFields = (content: string): Map<string, Map<string, string>> => {
+      const tables = new Map<string, Map<string, string>>();
       const lines = content.split('\n');
       let current: string | null = null;
-      let block: string[] = [];
+      let depth = 0;
 
       for (const line of lines) {
         const match = line.match(/^export interface (\w+)Model \{/);
         if (match) {
-          if (current) sections.set(current, block.join('\n'));
           current = match[1];
-          block = [line];
-        } else if (current) {
-          block.push(line);
+          depth = 1;
+          tables.set(current, new Map());
+          continue;
+        }
+        if (!current) continue;
+
+        const opens = (line.match(/\{/g) || []).length;
+        const closes = (line.match(/\}/g) || []).length;
+        depth += opens - closes;
+
+        if (depth <= 0) { current = null; depth = 0; continue; }
+
+        if (depth === 1) {
+          const field = line.match(/^\s+(\w+)\??:\s+(.+?);/);
+          if (field) tables.get(current)!.set(field[1], field[2].trim());
         }
       }
-      if (current) sections.set(current, block.join('\n'));
-      return sections;
+      return tables;
     };
 
-    const existingSections = extractSections(existingContent);
-    const newSections = extractSections(newContent);
-    const changed: string[] = [];
+    const existing = extractFields(existingContent);
+    const next = extractFields(newContent);
+    const changed = new Set<string>();
 
-    for (const [table, newBlock] of newSections) {
-      if (existingSections.get(table) !== newBlock) changed.push(table);
+    for (const [table, fields] of next) {
+      const old = existing.get(table);
+      if (!old) { changed.add(table); continue; }
+      for (const [f, t] of fields) { if (old.get(f) !== t) { changed.add(table); break; } }
+      for (const f of old.keys()) { if (!fields.has(f)) { changed.add(table); break; } }
     }
-    for (const table of existingSections.keys()) {
-      if (!newSections.has(table)) changed.push(table);
+    for (const table of existing.keys()) {
+      if (!next.has(table)) changed.add(table);
     }
 
-    return [...new Set(changed)];
+    return [...changed];
   }
 
   static async generateTableInterfacesAsync(
