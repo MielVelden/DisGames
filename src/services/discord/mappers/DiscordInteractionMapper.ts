@@ -22,7 +22,6 @@ import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
 import UserService from '../../domain/UserService';
 import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../../interfaces/enums';
 import { ErrorHelper } from '../../../utils/application/Error';
-import Logger from '../../../utils/application/Logger';
 
 class DiscordInteractionMapper {
     public async mapInteractionToInteractionEventAsync(interaction: DiscordInteraction): Promise<InteractionEvent> {
@@ -165,21 +164,21 @@ class DiscordInteractionMapper {
     }
 
     private async mapDiscordUserToUser(discordUser: DiscordUser, discordMember: DiscordGuildMember, event: InteractionEvent): Promise<User> {
-        let user = await UserService.getByExternalIdAsync(discordUser.id).catch((error: Error) => {
-            Logger.logError('Failed to fetch user by external ID', error, { sendToDiscord: true });
-            return undefined;
-        });
+        let user = await UserService.getByExternalIdAsync(discordUser.id).catch(() => undefined);
         if (!user) {
+            let saveError: unknown;
             user = await UserService.saveAsync(new UsersSaveModel({
                 UserId: discordUser.id,
                 Username: discordUser.username,
             }), event).catch((error: Error) => {
-                Logger.logError('Failed to save new user', error, { sendToDiscord: true });
+                saveError = error;
                 return undefined;
             });
             // Race condition: another request inserted first, fetch the existing record
             if (!user)
-                user = await UserService.getByExternalIdAsync(discordUser.id);
+                user = await UserService.getByExternalIdAsync(discordUser.id).catch(() => undefined);
+            if (!user)
+                throw saveError ?? new Error('Failed to create or find user');
         }
 
         // Update the username if it has changed
