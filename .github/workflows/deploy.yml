@@ -60,8 +60,12 @@ jobs:
 
       - name: Trigger Coolify redeploy (production)
         if: github.ref_name == 'typescript'
-        run: curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_PROD }}"
+        run: |
+          curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_PROD }}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
 
       - name: Trigger Coolify redeploy (development)
         if: github.ref_name == 'development'
-        run: curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_DEV }}"
+        run: |
+          curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_DEV }}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
