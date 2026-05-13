@@ -93,6 +93,13 @@ export function assertNever(x: never, origin: { [key: string]: string | number }
     throw new Error(i18n.labels.handleNever(x, originName).getMessage());
 }
 
+function isTransientNetworkError(error: unknown): boolean {
+    if (!error || typeof error !== 'object')
+        return false;
+    const e = error as { name?: string; code?: string };
+    return e.name === 'ConnectTimeoutError' || e.code === 'UND_ERR_CONNECT_TIMEOUT';
+}
+
 export async function handleErrorAsync(error: unknown, event: InteractionEvent): Promise<void> {
     if (error instanceof ComponentError) {
         if (error.hasComponents()) {
@@ -112,6 +119,8 @@ export async function handleErrorAsync(error: unknown, event: InteractionEvent):
 
         if (!error.silently)
             Logger.logError(`Error handling message`, error as Error, { includeStackTrace: false });
+    } else if (isTransientNetworkError(error)) {
+        await Logger.logWarning(`Error handling message: transient network error reaching Discord API`);
     } else {
         Logger.logError(`Error handling message`, error as Error);
     }

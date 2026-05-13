@@ -105,7 +105,7 @@ async function reconnectAfterConnectionLossAsync(): Promise<void> {
         connection = await pool.getConnection();
         await loadTableEnumsAsync();
     } catch (err) {
-        Logger.logError('Failed to get database connection from pool after loss, rebuilding pool', err as Error);
+        Logger.logError('Failed to get database connection from pool after loss, rebuilding pool', err as Error, { sendToDiscord: true });
         await rebuildPoolAsync();
     }
 }
@@ -118,7 +118,7 @@ async function ensureConnectionAsync(): Promise<void> {
     try {
         connection = await pool.getConnection();
     } catch (err) {
-        Logger.logError('Failed to acquire database connection', err as Error);
+        Logger.logError('Failed to acquire database connection', err as Error, { sendToDiscord: true });
         await rebuildPoolAsync();
     }
 }
@@ -200,11 +200,11 @@ export async function runQueryAsync(query: string, params?: any[]): Promise<any[
             try {
                 return await execute();
             } catch (retryErr) {
-                Logger.logError(`Error while running database query`, retryErr as Error);
+                Logger.logError(`Error while running database query`, retryErr as Error, { sendToDiscord: true });
                 ErrorHelper.wrap(retryErr, ExceptionEnum.DATABASE_CONNECTION_FAILED);
             }
         }
-        Logger.logError(`Error while running database query`, err as Error);
+        Logger.logError(`Error while running database query`, err as Error, { sendToDiscord: true });
         ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
     }
 }
