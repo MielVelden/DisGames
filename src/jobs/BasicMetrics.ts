@@ -1,10 +1,8 @@
 import { JobModule } from "../interfaces/application/Job";
-import { discordClient } from "..";
 import Logger from "../utils/application/Logger";
 import { WebhookType } from "../interfaces/enums/application/Webhook";
-import UserRepository from "../repositories/UserRepository";
-import ServerRepository from "../repositories/ServerRepository";
-import PointRepository from "../repositories/PointRepository";
+import MetricService from "../services/domain/MetricService";
+import { MetricEnum } from "../interfaces/enums";
 
 export default {
     id: 'basic-metrics',
@@ -14,20 +12,40 @@ export default {
     cronExpression: '0 0 2 * * *',
 
     handler: async (progress): Promise<void> => {
-        const guilds = discordClient.guilds.cache.size;
-        const members = discordClient.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+        const metricTypes = [
+            MetricEnum.Guilds,
+            MetricEnum.Members,
+            MetricEnum.Users,
+            MetricEnum.Servers,
+            MetricEnum.Points,
+        ];
 
-        const users = await UserRepository.getTotalAsync();
-        const servers = await ServerRepository.getTotalServerMembersAsync();
-        const totalPoints = await PointRepository.getTotalPointsAsync();
+        const metrics: Record<string, { current: any; previous: any; increase: number }> = {};
 
-        const message = `
-            **Daily Metrics:**
-            Guilds: ${guilds}
-            Members: ${members}
-            Users: ${users}
-            Servers: ${servers}
-            Total Points: ${totalPoints}`;
+        for (const metricType of metricTypes) {
+            const currentMetric = await MetricService.getLatestByMetricAsync(metricType);
+            const previousMetric = await MetricService.getPreviousByMetricAsync(metricType);
+            const increase = currentMetric.Value - previousMetric.Value;
+
+            metrics[metricType] = {
+                current: currentMetric,
+                previous: previousMetric,
+                increase,
+            };
+        }
+
+        const metricLabels: Partial<Record<MetricEnum, string>> = {
+            [MetricEnum.Guilds]: 'Guilds',
+            [MetricEnum.Members]: 'Members',
+            [MetricEnum.Users]: 'Users',
+            [MetricEnum.Servers]: 'Servers',
+            [MetricEnum.Points]: 'Total Points',
+        };
+
+        let message = '**Daily Metrics:**\n';
+        for (const metricType of metricTypes) {
+            message += `${metricLabels[metricType] || metricType}: ${metrics[metricType].current.Value}\n`;
+        }
 
         Logger.logInfo(message, {
             webhookType: WebhookType.INFO,

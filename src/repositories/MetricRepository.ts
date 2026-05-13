@@ -48,6 +48,11 @@ class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveMo
         const model = await this.baseRepository.Select().Where({ MetricEnum: metric }).OrderBy("Datetime", "DESC").Limit(1).Execute();
         return model[0];
     }
+
+    async getPreviousByMetricAsync(metric: MetricEnum): Promise<MetricsModel> {
+        const model = await this.baseRepository.Select().Where({ MetricEnum: metric }).OrderBy("Datetime", "DESC").Limit(2).Execute();
+        return model[1];
+    }
 }
 
 export default new MetricRepository();
