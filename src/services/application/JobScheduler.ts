@@ -7,6 +7,7 @@ import { ExceptionEnum } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
 import { createJobReportEmbed } from '../../builders/embeds/JobEmbed';
 import { WebhookType } from '../../interfaces/application';
+import TestMode from '../../utils/application/TestMode';
 
 export class JobScheduler {
     private static instance: JobScheduler;
@@ -23,6 +24,9 @@ export class JobScheduler {
     }
 
     private scheduleJobs(): void {
+        if (TestMode.isEnabled()) 
+            return;
+
         const jobModules = JobService.getJobModules();
 
         for (const jobModule of jobModules) {
