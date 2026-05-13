@@ -5,6 +5,7 @@ import { EnvConfigEnum } from "./EnvConfigEnum";
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISGAMES_API_PORT);
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.PREFIX);
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.TOKEN);
+SetIsRequiredInTestMode(EnvConfigEnum, EnvConfigEnum.TOKEN);
 
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISCORD_CLIENT_ID);
 SetValidateRegex(EnvConfigEnum, EnvConfigEnum.DISCORD_CLIENT_ID, /^[0-9]+$/);
