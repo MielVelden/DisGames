@@ -134,8 +134,6 @@ temp/
 .DS_Store
 
 config.json
-package-lock.json
-enterLargeJsons.js
 
 settings.json
 

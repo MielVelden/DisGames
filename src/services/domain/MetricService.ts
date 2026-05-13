@@ -76,6 +76,10 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
     public async getLatestByMetricAsync(metric: MetricEnum) {
         return this.repository.getLatestByMetricAsync(metric);
     }
+    
+    public async getPreviousByMetricAsync(metric: MetricEnum) {
+        return this.repository.getPreviousByMetricAsync(metric);
+    }
 }
 
 export default new MetricService();

@@ -202,6 +202,14 @@ class DiscordMessageHandler {
         return discordError.code === 'InteractionAlreadyReplied' || discordError.name === 'InteractionAlreadyReplied';
     }
 
+    private isInteractionNotRepliedError(error: unknown): boolean {
+        if (!error || typeof error !== 'object')
+            return false;
+
+        const discordError = error as { code?: string; name?: string };
+        return discordError.code === 'InteractionNotReplied' || discordError.name === 'InteractionNotReplied';
+    }
+
     public async reactAsync(interaction: DiscordMessageInteraction | DiscordMessage, emoji: string): Promise<void> {
         try {
             if (interaction instanceof DiscordMessage)
@@ -301,7 +309,16 @@ class DiscordMessageHandler {
     public async handleInteractionEditAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
         switch (event.type) {
             case EventTypeEnum.SLASH_COMMAND:
-                await event.currentInteraction.editReply(content);
+                try {
+                    await event.currentInteraction.editReply(content);
+                } catch (error) {
+                    if (this.isUnknownInteractionError(error) || this.isInteractionNotRepliedError(error)) {
+                        await Logger.logWarning(`Interaction ${event.currentInteraction.id} expired before edit in channel ${event.channelId}`);
+                        return;
+                    }
+
+                    throw error;
+                }
                 break;
             case EventTypeEnum.MESSAGE:
             case EventTypeEnum.MESSAGE_UPDATE:
@@ -563,7 +580,16 @@ class DiscordMessageHandler {
         if (!content)
             return;
 
-        await channel.send(content);
+        try {
+            await channel.send(content);
+        } catch (error) {
+            if (this.isMissingPermissionsError(error)) {
+                await Logger.logWarning(`Missing permissions to send welcome message to channel ${channelId} in guild ${guild.id}`);
+                return;
+            }
+
+            throw error;
+        }
     }
 }
 
