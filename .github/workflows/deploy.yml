@@ -22,6 +22,9 @@ jobs:
         run: npm ci && npm test
         env:
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          DEBUG_DISCORD_WEBHOOK_URL: ${{ secrets.DEBUG_DISCORD_WEBHOOK_URL }}
+          TEST_DISCORD_WEBHOOK_URL: ${{ secrets.TEST_DISCORD_WEBHOOK_URL }}
+          DISCORD_OWNER_ID: ${{ secrets.DISCORD_OWNER_ID }}
 
       - name: Resolve image tag
         id: tag
