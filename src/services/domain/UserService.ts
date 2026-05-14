@@ -3,12 +3,15 @@ import { MetricEnum, UserRoleEnum } from "../../interfaces/enums";
 import { ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
+import EventRepository from "../../repositories/EventRepository";
 import Logger from "../../utils/application/Logger";
 import { User } from "../../interfaces/domain";
 import TimelineBuilder from "./TimelineBuilder";
-import { InteractionEvent } from "../../interfaces/application";
+import { DurationEnum, InteractionEvent } from "../../interfaces/application";
 import { BaseDomainService } from "./BaseDomainService";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
+import { calculateDuration } from "../../utils/helpers/Duration";
+import ServerService from "./ServerService";
 
 class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
     protected readonly repository = UserRepository;
@@ -34,7 +37,7 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
             objectId: user.Id,
             event: event
         });
-        
+
         return user;
     }
 
@@ -94,13 +97,40 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
             role: user.UserRoleEnum,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {},
+            sendMessageAsync: async () => { },
         };
     }
 
     @TrackMetricPull(MetricEnum.Users)
-    public async getTotalAsync(){
+    public async getTotalAsync() {
         return this.repository.getTotalAsync();
+    }
+
+    @TrackMetricPull(MetricEnum.AdoptionRate)
+    public async getAdoptionRateAsync(): Promise<number> {
+        const [allUsers, totalMembers] = await Promise.all([
+            UserRepository.getAllAsync(),
+            ServerService.getTotalServerMembersAsync(),
+        ]);
+        const userCount = allUsers.filter(u => u.UserRoleEnum !== UserRoleEnum.SYSTEM).length;
+        if (totalMembers === 0)
+            return 0;
+        return Math.round((userCount / totalMembers) * 100) / 100;
+    }
+
+    @TrackMetricPull(MetricEnum.InactivityRate)
+    public async getInactivityRateAsync(): Promise<number> {
+        const thirtyDays = calculateDuration(30, DurationEnum.DAY);
+        const [allUsers, activeIds] = await Promise.all([
+            UserRepository.getAllAsync(),
+            EventRepository.getActiveUserIdsInPeriodAsync(thirtyDays),
+        ]);
+        const users = allUsers.filter(u => u.UserRoleEnum !== UserRoleEnum.SYSTEM);
+        if (users.length === 0)
+            return 0;
+
+        const inactive = users.filter(u => !activeIds.has(u.Id)).length;
+        return Math.round((inactive / users.length) * 100) / 100;
     }
 }
 

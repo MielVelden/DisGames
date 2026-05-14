@@ -7,4 +7,6 @@ export enum MetricEnum {
     Events = 6,
     Members = 7,
     ServerMembers = 8,
+    AdoptionRate = 9,
+    InactivityRate = 10,
 }

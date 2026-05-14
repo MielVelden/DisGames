@@ -959,6 +959,14 @@ export const i18n: I18nTranslations = {
             [LanguageEnum.EN]: "Server Members",
             [LanguageEnum.NL]: "Serverleden",
         },
+        [MetricEnum.AdoptionRate]: {
+            [LanguageEnum.EN]: "Adoption Rate",
+            [LanguageEnum.NL]: "Adoptiegraad",
+        },
+        [MetricEnum.InactivityRate]: {
+            [LanguageEnum.EN]: "Inactivity Rate",
+            [LanguageEnum.NL]: "Inactiviteitsgraad",
+        },
     },
 };
 

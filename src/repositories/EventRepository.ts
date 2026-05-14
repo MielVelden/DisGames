@@ -57,6 +57,16 @@ class EventRepository implements RepositoryWithBase<EventsModel, EventsSaveModel
     public async getTotalAsync() {
         return this.baseRepository.Select().Count();
     }
+
+    public async getActiveUserIdsInPeriodAsync(duration: Duration): Promise<Set<number>> {
+        const startDate = subtractDurationFromDate(duration, new Date());
+        const events = await this.baseRepository
+            .Select([EventsModelFieldEnum.UserId])
+            .Where({ CreatedAt: { operator: '>=', value: startDate } })
+            .GroupBy([EventsModelFieldEnum.UserId])
+            .Execute();
+        return new Set(events.map(e => e.UserId));
+    }
 }
 
 export default new EventRepository();

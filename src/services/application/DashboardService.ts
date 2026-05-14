@@ -132,7 +132,8 @@ class DashboardService {
                 this.createDashboardCardWithTimeframe(
                     "Games Played",
                     gamesPlayedTimeFrame,
-                )
+                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.AdoptionRate),
             ],
             charts: [lineChart, pieChart]
         }
@@ -222,7 +223,8 @@ class DashboardService {
                     serversTimeFrame
                 ),
                 await this.createDashboardCardByMetricAsync(MetricEnum.ServerMembers),
-                await this.createDashboardCardByMetricAsync(MetricEnum.Events)
+                await this.createDashboardCardByMetricAsync(MetricEnum.Events),
+                await this.createDashboardCardByMetricAsync(MetricEnum.InactivityRate),
             ],
             charts: [
                 barChartEventsByType,
