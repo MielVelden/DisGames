@@ -18,6 +18,7 @@ export default function registerMediaServiceTests(runner: TestRunner): void {
         tests: [
             {
                 name: 'getGameDataImage should return a valid image for the highest GameData id of a game with images',
+                skip: true, // Skipping this test for now since it relies on existing data and media files which may not be present in all environments
                 testFunction: async () => {
                     // Arrange — find all games that have images
                     const gamesWithImages = GameService.getGames().filter(g => g.config.hasImages === true);
