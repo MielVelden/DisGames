@@ -24,23 +24,38 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
     if (!isMessageInteractionEvent(event))
         return;
     return withEventContextAsync(event, async () => {
-        await EventService.saveAsync(new EventsSaveModel({
-            UserId: event.user.id,
-            ServerId: event.server.Id,
-            EventTypeEnum: event.type,
-            PayloadJSON: {
-                messageId: event.messageId,
-                channelId: event.channelId,
-                guildId: event.guildId,
-                content: event.content
-            }
-        }), event);
-
         try {
-            if (event.command && (event.command.canExecute?.(event) ?? true))
+            if (event.command && (event.command.canExecute?.(event) ?? true)) {
+                await EventService.saveAsync(new EventsSaveModel({
+                    UserId: event.user.id,
+                    ServerId: event.server.Id,
+                    EventTypeEnum: event.type,
+                    PayloadJSON: {
+                        messageId: event.messageId,
+                        channelId: event.channelId,
+                        guildId: event.guildId,
+                        content: event.content
+                    }
+                }), event);
+
                 await handleCommandAsync(event.command, event);
-            else
-                await GameService.handleGameAsync(event);
+            } else {
+                if (await GameService.checkActiveGameInChannel(event.channelId)) {
+                    await EventService.saveAsync(new EventsSaveModel({
+                        UserId: event.user.id,
+                        ServerId: event.server.Id,
+                        EventTypeEnum: event.type,
+                        PayloadJSON: {
+                            messageId: event.messageId,
+                            channelId: event.channelId,
+                            guildId: event.guildId,
+                            content: event.content
+                        }
+                    }), event);
+
+                    await GameService.handleGameAsync(event);
+                }
+            }
         }
         catch (error) {
             await handleErrorAsync(error, event);
@@ -51,10 +66,10 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
 export async function handleDiscordMessageAsync(message: Message, eventType: EventTypeEnum): Promise<void> {
     if (!message.author || message.author.bot)
         return;
-    
+
     if (!isMessageEventType(eventType))
         return;
-    
+
     const event = await DiscordService.mapMessageToInteractionEventAsync(message, eventType);
     await processMessageEventAsync(event);
 }

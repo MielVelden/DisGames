@@ -1,4 +1,6 @@
 import { TableEnum, StoredProcedureEnum, ExceptionEnum } from "../interfaces/enums/index";
+import { MetadataKeyEnum } from "../interfaces/enums/application/MetadataKeyEnum";
+import { getEnumProperty } from "../utils/helpers/EnumMetadata";
 import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
 import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
@@ -272,8 +274,9 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
       this.cacheManager.setCacheEntry(serializedEntity.Id, savedRecord);
       return savedRecord;
     } else {
-      // INSERT - invalidate all query cache
+      // INSERT - invalidate all query cache and external ID list cache
       this.cacheManager.invalidateAllQueryCache();
+      this.cacheManager.invalidateExternalIdCache();
 
       if (isValidEnumValue(this.fieldEnum, 'CreatedAt'))
         serializedEntity.CreatedAt = new Date();
@@ -310,18 +313,43 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
     // Invalidate cache before deletion
     this.cacheManager.invalidateCache(id);
     this.cacheManager.invalidateAllQueryCache();
+    this.cacheManager.invalidateExternalIdCache();
 
     const query = `DELETE FROM ${this.table} WHERE Id = ?`;
     const params = [id];
     await runQueryAsync(query, params);
   }
 
-  // Utility method to get cache statistics
-  public getCacheStats(): { idCacheSize: number; queryCacheSize: number } {
+  public async getExternalIdsAsync(): Promise<string[]> {
+    const cached = this.cacheManager.getExternalIdCache();
+    if (cached !== null) 
+      return cached;
+
+    const externalIdField = getEnumProperty(TableEnum, this.tableEnum, MetadataKeyEnum.ExternalIdField);
+    if (!externalIdField) 
+      return [];
+
+    const fieldName = String(externalIdField);
+    const results = await runQueryAsync(`SELECT ${fieldName} FROM ${this.table}`, []);
+
+    if (!results || results.length === 0) {
+      this.cacheManager.setExternalIdCache([]);
+      return [];
+    }
+
+    const lowerField = fieldName.toLowerCase();
+    const ids = (results as Array<Record<string, unknown>>)
+      .map(row => String(row[fieldName] ?? row[lowerField] ?? ''))
+      .filter(Boolean);
+
+    this.cacheManager.setExternalIdCache(ids);
+    return ids;
+  }
+
+  public getCacheStats(): { idCacheSize: number; queryCacheSize: number; externalIdCacheSize: number } {
     return this.cacheManager.getCacheStats();
   }
 
-  // Utility method to clear all cache
   public clearCache(): void {
     this.cacheManager.clearAllCache();
   }

@@ -104,6 +104,11 @@ class GameService {
         return this.games;
     }
 
+    public async checkActiveGameInChannel(channelId: string): Promise<boolean> {
+         const externalIds = await GameRepository.getExternalIdsAsync();
+         return externalIds.includes(channelId);
+    }
+
     public async getActiveGamesAsync(serverId: string): Promise<GameModule[]> {
         const activeGames = await GameRepository.getByServerIdAsync(serverId);
         return this.games.filter(game => activeGames.some(activeGame => activeGame.GameTypeEnum === game.config.id));

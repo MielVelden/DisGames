@@ -154,7 +154,7 @@ class DiscordMessageHandler {
             return false;
 
         const discordError = error as { code?: number; status?: number };
-        return discordError.code === 50013 && discordError.status === 403;
+        return (discordError.code === 50013 || discordError.code === 50001) && discordError.status === 403;
     }
 
     private isUnknownMessageError(error: unknown): boolean {
@@ -565,7 +565,16 @@ class DiscordMessageHandler {
         if (!content)
             return;
 
-        await channel.send(content);
+        try {
+            await channel.send(content);
+        } catch (error) {
+            if (this.isMissingPermissionsError(error)) {
+                await Logger.logWarning(`Missing permissions to send message to channel ${channelId} in guild ${guild.id}`);
+                return;
+            }
+
+            throw error;
+        }
     }
 
     public async sendToGuildChannelAsync(guild: DiscordGuild, channelId: string, components: Component[], language: LanguageEnum): Promise<void> {

@@ -57,6 +57,10 @@ class GameRepository implements RepositoryWithBase<GamesModel, GamesSaveModel, t
         return row.Total ?? row.total ?? 0;
     }
 
+    async getExternalIdsAsync(): Promise<string[]> {
+        return this.baseRepository.getExternalIdsAsync();
+    }
+
     async getMostPopularGameTypeAsync(): Promise<GameTypeEnum | null> {
         const tableName = getTableName(TableEnum.GAMES);
         const results = await runQueryAsync(
