@@ -10,6 +10,7 @@ export type LanguageTranslations = {
     [LanguageEnum.NL]: string;
     [LanguageEnum.ES]?: string;
     [LanguageEnum.DE]?: string;
+    [LanguageEnum.PT]?: string;
 };
 
 export type ParameterizedTranslation = (...params: string[]) => MultiLingualString;
@@ -27,6 +28,7 @@ export type LanguageEnumTranslations<T extends string | number> = {
         [LanguageEnum.NL]: string;
         [LanguageEnum.ES]?: string;
         [LanguageEnum.DE]?: string;
+        [LanguageEnum.PT]?: string;
     }
 };
 

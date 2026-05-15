@@ -5,6 +5,7 @@ export enum LanguageEnum {
     NL = 2,
     ES = 3,
     DE = 4,
+    PT = 5,
 }
 
 SetIsRequired(LanguageEnum, LanguageEnum.EN);
