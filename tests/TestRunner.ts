@@ -136,16 +136,21 @@ export class TestRunner {
                 await suite.beforeEach();
             }
 
-            // Start database transaction
-            await DatabaseTestHelper.startTestCaseAsync();
+            const invokeTest = async () => {
+                if (this.debugMode) {
+                    await test.testFunction();
+                } else {
+                    const timeout = test.timeout || this.config.testTimeout;
+                    await this.runWithTimeoutAsync(test.testFunction, timeout);
+                }
+            };
 
-            if (this.debugMode) {
-                // Run the actual test without timeout
-                await test.testFunction();
+            if (test.bypassTransaction) {
+                // Tests that exercise the pool/transaction layer itself must run outside
+                // the ambient test transaction, otherwise every query is pinned to one connection.
+                await invokeTest();
             } else {
-                // Run the actual test with timeout
-                const timeout = test.timeout || this.config.testTimeout;
-                await this.runWithTimeoutAsync(test.testFunction, timeout);
+                await DatabaseTestHelper.runTestCaseAsync(invokeTest);
             }
 
             const duration = Date.now() - startTime;
@@ -173,9 +178,6 @@ export class TestRunner {
 
         } finally {
             try {
-                // Rollback database transaction
-                await DatabaseTestHelper.endTestCaseAsync();
-
                 // Run afterEach
                 if (suite.afterEach) {
                     await suite.afterEach();

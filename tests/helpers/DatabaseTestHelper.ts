@@ -13,12 +13,17 @@ export class DatabaseTestHelper {
         this.enableTestMode();
     }
 
-    public static async startTestCaseAsync(): Promise<void> {
+    /**
+     * Wraps a test body in a per-test transaction with an ambient TransactionHandle.
+     * Any repository call inside picks up the handle automatically — no plumbing needed.
+     */
+    public static async runTestCaseAsync(body: () => Promise<void>): Promise<void> {
         await TestDatabase.startTransactionAsync();
-    }
-
-    public static async endTestCaseAsync(): Promise<void> {
-        await TestDatabase.rollbackTransactionAsync();
+        try {
+            await TestDatabase.withAmbientTransactionAsync(body);
+        } finally {
+            await TestDatabase.rollbackTransactionAsync();
+        }
     }
 
     public static async teardownAsync(): Promise<void> {
@@ -47,9 +52,9 @@ export class DatabaseTestHelper {
             const tableName = getTableName(tableEnum);
             try {
                 await TestDatabase.runQueryAsync(`DELETE FROM ${tableName} WHERE 1=1`);
-                Logger.logDebug(`Cleaned test data from table: ${tableName}`);
+                Logger.logDebug(() => `Cleaned test data from table: ${tableName}`);
             } catch (error) {
-                Logger.logDebug(`Could not clean table ${tableName}: ${(error as Error)?.message}`);
+                Logger.logDebug(() => `Could not clean table ${tableName}: ${(error as Error)?.message}`);
             }
         }
     }
