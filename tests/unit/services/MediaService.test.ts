@@ -75,7 +75,14 @@ export default function registerMediaServiceTests(runner: TestRunner): void {
                         const second = await MediaService.getMediaBufferAsync(image);
                         AssertionHelpers.assertEqual(second.length, first.length, 'same buffer length on cache hit');
                         AssertionHelpers.assertEqual(readFileCalls, 0, 'cache hit must not call fs.promises.readFile');
-                        AssertionHelpers.assertTrue(expectedPath.length > 0, 'expected path resolved');
+                        // Validates that the cached entry is keyed by the expected resolved path
+                        const fromPath = await MediaService.getBufferByPathAsync(expectedPath);
+                        AssertionHelpers.assertEqual(
+                            fromPath.length,
+                            first.length,
+                            'getBufferByPathAsync returns the same cached buffer for the resolved path',
+                        );
+                        AssertionHelpers.assertEqual(readFileCalls, 0, 'path-based cache lookup also skipped fs.readFile');
                     } finally {
                         (fs.promises as any).readFile = original;
                     }

@@ -453,8 +453,7 @@ class DiscordComponentMapper {
                     return null;
                 }
                 const fileBuffer = await MediaService.getBufferByPathAsync(item.media.url);
-                if (Logger.isDebugEnabled())
-                    Logger.logDebug(() => `Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                Logger.logDebug(() => `Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
                 return new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` });
             } catch (error) {
                 Logger.logError(`Error loading file: ${item.media.url}`, error as Error);

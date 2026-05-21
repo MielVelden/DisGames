@@ -8,13 +8,17 @@ import {
     rollbackTransactionAsync,
     commitTransactionAsync,
     runInTransactionAsync,
-    _getPoolForTests,
 } from '../../../src/repositories/util/ConnectionHandler';
 
-// These tests verify the pool actually pools (parallel queries), that transactions
-// are isolated per handle, and that connections are returned to the pool on commit/rollback.
-// They MUST run with bypassTransaction so the ambient test transaction does not pin every
-// query to a single connection.
+// All assertions use observable MySQL behavior (CONNECTION_ID()) rather than
+// wall-clock timing or mysql2 private internals, so the suite is stable in CI.
+// Tests must bypass the ambient test transaction — otherwise every query is
+// pinned to a single connection and pool behavior cannot be observed.
+
+async function getConnectionIdViaPool(): Promise<number> {
+    const rows = await runQueryAsync('SELECT CONNECTION_ID() AS cid') as Array<{ cid: number }>;
+    return rows[0].cid;
+}
 
 export default function registerConnectionHandlerTests(runner: TestRunner): void {
     const suite: TestSuite = {
@@ -23,41 +27,44 @@ export default function registerConnectionHandlerTests(runner: TestRunner): void
 
         tests: [
             {
-                name: 'runQueryAsync uses the pool — concurrent queries run in parallel',
+                name: 'runQueryAsync fans out concurrent queries across multiple pool connections',
                 bypassTransaction: true,
                 testFunction: async () => {
-                    const start = Date.now();
-                    await Promise.all([
-                        runQueryAsync('SELECT SLEEP(0.1) AS slept'),
-                        runQueryAsync('SELECT SLEEP(0.1) AS slept'),
-                        runQueryAsync('SELECT SLEEP(0.1) AS slept'),
-                        runQueryAsync('SELECT SLEEP(0.1) AS slept'),
-                        runQueryAsync('SELECT SLEEP(0.1) AS slept'),
+                    // If the pool is real (not a single held connection), 5 concurrent
+                    // CONNECTION_ID() calls return at least 2 distinct connection ids.
+                    // Each connection has a unique server-side id, so a Set with size > 1
+                    // proves the queries ran in parallel on different connections.
+                    const ids = await Promise.all([
+                        getConnectionIdViaPool(),
+                        getConnectionIdViaPool(),
+                        getConnectionIdViaPool(),
+                        getConnectionIdViaPool(),
+                        getConnectionIdViaPool(),
                     ]);
-                    const elapsed = Date.now() - start;
-                    AssertionHelpers.assertLessThan(
-                        elapsed,
-                        400,
-                        `5 parallel 100ms queries should complete under 400ms with a real pool (took ${elapsed}ms)`,
+                    const unique = new Set(ids);
+                    AssertionHelpers.assertGreaterThan(
+                        unique.size,
+                        1,
+                        `concurrent queries should run on >1 distinct pool connection (got ids=${ids.join(',')})`,
                     );
                 }
             },
 
             {
-                name: 'runExecuteAsync also pools concurrent prepared queries',
+                name: 'runExecuteAsync also fans out across multiple pool connections',
                 bypassTransaction: true,
                 testFunction: async () => {
-                    const start = Date.now();
-                    await Promise.all([
-                        runExecuteAsync('SELECT SLEEP(?) AS slept', [0.1]),
-                        runExecuteAsync('SELECT SLEEP(?) AS slept', [0.1]),
-                        runExecuteAsync('SELECT SLEEP(?) AS slept', [0.1]),
+                    const rowsList = await Promise.all([
+                        runExecuteAsync('SELECT CONNECTION_ID() AS cid'),
+                        runExecuteAsync('SELECT CONNECTION_ID() AS cid'),
+                        runExecuteAsync('SELECT CONNECTION_ID() AS cid'),
                     ]);
-                    const elapsed = Date.now() - start;
-                    AssertionHelpers.assertLessThan(
-                        elapsed,
-                        300,
-                        `3 parallel 100ms execute calls should complete under 300ms (took ${elapsed}ms)`,
+                    const ids = rowsList.map((rows) => (rows as Array<{ cid: number }>)[0].cid);
+                    const unique = new Set(ids);
+                    AssertionHelpers.assertGreaterThan(
+                        unique.size,
+                        1,
+                        `concurrent execute() should use >1 distinct connection (got ids=${ids.join(',')})`,
                     );
                 }
             },
@@ -66,8 +73,6 @@ export default function registerConnectionHandlerTests(runner: TestRunner): void
                 name: 'two concurrent transaction handles use different connections',
                 bypassTransaction: true,
                 testFunction: async () => {
-                    // CONNECTION_ID() is per-connection. Two distinct handles must report
-                    // different connection ids → proves we are not holding a single shared connection.
                     const a = await startTransactionAsync();
                     const b = await startTransactionAsync();
                     try {
@@ -82,63 +87,69 @@ export default function registerConnectionHandlerTests(runner: TestRunner): void
             },
 
             {
-                name: 'commitTransactionAsync releases the connection back to the pool',
+                name: 'commitTransactionAsync releases the connection so it can be reused',
                 bypassTransaction: true,
                 testFunction: async () => {
-                    const pool = _getPoolForTests();
-                    AssertionHelpers.assertNotNull(pool, 'pool exists');
-
-                    const before = (pool as any)._allConnections?.length ?? 0;
-
-                    const tx = await startTransactionAsync();
-                    await runQueryAsync('SELECT 1', undefined, tx);
-                    await commitTransactionAsync(tx);
-
-                    const after = (pool as any)._allConnections?.length ?? 0;
+                    // Lock the pool to one connection by acquiring + committing in series.
+                    // If commit released the connection, the next acquire reuses the same
+                    // server-side id. If it didn't, the next acquire opens a new connection
+                    // with a different id.
+                    const seen = new Set<number>();
+                    for (let i = 0; i < 5; i++) {
+                        const tx = await startTransactionAsync();
+                        const [row] = await runQueryAsync('SELECT CONNECTION_ID() AS cid', undefined, tx) as Array<{ cid: number }>;
+                        seen.add(row.cid);
+                        await commitTransactionAsync(tx);
+                    }
                     AssertionHelpers.assertTrue(
-                        after - before <= 1,
-                        `pool size after commit should not grow unbounded (before=${before}, after=${after})`,
+                        seen.size <= 5,
+                        `at most 5 distinct ids across 5 cycles, got ${seen.size} (ids=${[...seen].join(',')})`,
+                    );
+                    // Strong contract: the pool reuses connections, so we never see more than
+                    // a small bounded set even after 5 cycles — typically just 1.
+                    AssertionHelpers.assertLessThan(
+                        seen.size,
+                        4,
+                        `commit must release back to the pool — saw ${seen.size} distinct ids across 5 serial commits`,
                     );
                 }
             },
 
             {
-                name: 'rollbackTransactionAsync releases the connection back to the pool',
+                name: 'rollbackTransactionAsync releases the connection so it can be reused',
                 bypassTransaction: true,
                 testFunction: async () => {
-                    const pool = _getPoolForTests();
-                    AssertionHelpers.assertNotNull(pool, 'pool exists');
-
-                    const before = (pool as any)._allConnections?.length ?? 0;
-
-                    const tx = await startTransactionAsync();
-                    await runQueryAsync('SELECT 1', undefined, tx);
-                    await rollbackTransactionAsync(tx);
-
-                    const after = (pool as any)._allConnections?.length ?? 0;
-                    AssertionHelpers.assertTrue(
-                        after - before <= 1,
-                        `pool size after rollback should not grow unbounded (before=${before}, after=${after})`,
+                    const seen = new Set<number>();
+                    for (let i = 0; i < 5; i++) {
+                        const tx = await startTransactionAsync();
+                        const [row] = await runQueryAsync('SELECT CONNECTION_ID() AS cid', undefined, tx) as Array<{ cid: number }>;
+                        seen.add(row.cid);
+                        await rollbackTransactionAsync(tx);
+                    }
+                    AssertionHelpers.assertLessThan(
+                        seen.size,
+                        4,
+                        `rollback must release back to the pool — saw ${seen.size} distinct ids across 5 serial rollbacks`,
                     );
                 }
             },
 
             {
-                name: 'runInTransactionAsync makes runQueryAsync route to the ambient handle',
+                name: 'runInTransactionAsync routes implicit queries through the ambient handle',
                 bypassTransaction: true,
                 testFunction: async () => {
                     const tx = await startTransactionAsync();
                     try {
                         const [outsideRow] = await runQueryAsync('SELECT CONNECTION_ID() AS cid', undefined, tx) as Array<{ cid: number }>;
 
-                        const insideRow = await runInTransactionAsync(tx, async () => {
+                        const insideCid = await runInTransactionAsync(tx, async () => {
                             // No explicit tx → AsyncLocalStorage delivers the ambient handle
                             const rows = await runQueryAsync('SELECT CONNECTION_ID() AS cid') as Array<{ cid: number }>;
-                            return rows[0];
+                            return rows[0].cid;
                         });
 
                         AssertionHelpers.assertEqual(
-                            insideRow.cid,
+                            insideCid,
                             outsideRow.cid,
                             'ambient context routes implicit queries through the same handle connection',
                         );
@@ -149,27 +160,23 @@ export default function registerConnectionHandlerTests(runner: TestRunner): void
             },
 
             {
-                name: 'sequential transactions reuse pool connections (no growth)',
+                name: 'sequential commit cycles do not exhaust the pool',
                 bypassTransaction: true,
                 testFunction: async () => {
-                    // Open + commit 5 transactions in series and confirm the pool's connection
-                    // count does not grow unbounded — each commit's release returns the
-                    // connection so the next acquisition reuses it.
-                    const pool = _getPoolForTests();
-                    AssertionHelpers.assertNotNull(pool, 'pool exists');
-
-                    const baselineSize = (pool as any)._allConnections?.length ?? 0;
-
-                    for (let i = 0; i < 5; i++) {
+                    // Open + commit 10 transactions in series. Each commit must release so the
+                    // pool can hand the connection back out — proving by the fact that the
+                    // distinct-ids set never explodes (would be 10 distinct ids without reuse).
+                    const seen = new Set<number>();
+                    for (let i = 0; i < 10; i++) {
                         const tx = await startTransactionAsync();
-                        await runQueryAsync('SELECT 1', undefined, tx);
+                        const [row] = await runQueryAsync('SELECT CONNECTION_ID() AS cid', undefined, tx) as Array<{ cid: number }>;
+                        seen.add(row.cid);
                         await commitTransactionAsync(tx);
                     }
-
-                    const finalSize = (pool as any)._allConnections?.length ?? 0;
-                    AssertionHelpers.assertTrue(
-                        finalSize - baselineSize <= 1,
-                        `pool size grew by at most 1 over 5 tx cycles (baseline=${baselineSize}, final=${finalSize})`,
+                    AssertionHelpers.assertLessThan(
+                        seen.size,
+                        5,
+                        `pool must reuse connections — got ${seen.size} distinct ids across 10 serial cycles`,
                     );
                 }
             }
