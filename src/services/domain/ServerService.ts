@@ -29,7 +29,6 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
 
     protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
         savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
-        savable.validateIsNotNull(ServersModelFieldEnum.Points, 0);
         
         if (savable.isProvided(ServersModelFieldEnum.Name))
             savable.Name = normalizeString(savable.Name);

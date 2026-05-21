@@ -6,11 +6,11 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
-import GameImageService from "../image/GameImageService";
 import { STRING_DELIMITER } from "../../constants";
 import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
 import { createBlock } from "../../utils/helpers/Markdown";
+import ConnectionImageService from "../../builders/images/ConnectionGameCard";
 
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];
@@ -96,7 +96,7 @@ function parseWordsFromAnswer(userInput: string): string[] {
 
 async function createGameImage(gameState: ConnectionsGameState, serverId: string, languageEnum: LanguageEnum): Promise<Component> {
     if (gameState.gameDataArray && gameState.gameDataArray.length === 4) {
-        const media = await GameImageService.generateGameImage(
+        const media = await ConnectionImageService.generateGameImage(
             gameState.gameDataArray,
             serverId,
             languageEnum,

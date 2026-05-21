@@ -30,10 +30,10 @@ export function createInformationBlock(items: { key: string | MultiLingualString
     return new MultiLingualString(translations);
 }
 
-export function createTitle(title: string | MultiLingualString): MultiLingualString {
+export function createTitle(title: string | MultiLingualString, emoji?: string): MultiLingualString {
     if (isMultiLingualString(title))
-        return title.changeText((text) => `## ${text}`);
-    return createMultiLingualString(`## ${title}`);
+        return title.changeText((text) => `## ${emoji ? `${emoji} ` : ''}${text}`);
+    return createMultiLingualString(`## ${emoji ? `${emoji} ` : ''}${title}`);
 }
 
 export function createSubtitle(subtitle: MultiLingualString): MultiLingualString {

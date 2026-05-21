@@ -6,4 +6,5 @@ export enum CommandEnum {
     RESTARTGAME = 'restartgame',
     SETTINGS = "settings",
     ABOUTME = "aboutme",
+    JOB = "job",
 }

@@ -1166,6 +1166,15 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.PT]: "Reiniciar o jogo",
             },
         },
+        job: {
+            description: {
+                [LanguageEnum.EN]: "Execute a job",
+                [LanguageEnum.NL]: "Een taak uitvoeren",
+                [LanguageEnum.ES]: "Ejecutar un trabajo",
+                [LanguageEnum.DE]: "Einen Job ausführen",
+                [LanguageEnum.PT]: "Executar um trabalho",
+            },
+        }
     },
     exceptions: {
         [ExceptionEnum.GAME_ALREADY_EXISTS]: {

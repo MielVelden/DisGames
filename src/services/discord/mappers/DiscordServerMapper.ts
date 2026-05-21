@@ -10,7 +10,6 @@ export function getTempServer(discordGuild: DiscordGuild): ServersModel {
         Id: 0,
         ServerId: discordGuild.id,
         Name: discordGuild.name,
-        Points: 0,
         LanguageEnum: LanguageEnum.EN,
         MemberCount: discordGuild.memberCount ?? 0
     });

@@ -205,6 +205,9 @@ export interface I18nTranslations {
         },
         restartGame: {
             description: LanguageTranslations;
+        },
+        job: {
+            description: LanguageTranslations;
         }
     }
     exceptions: LanguageEnumTranslations<ExceptionEnum>;
