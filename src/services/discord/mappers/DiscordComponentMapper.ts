@@ -25,8 +25,8 @@ import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
-import * as fs from 'fs';
 import Logger from '../../../utils/application/Logger';
+import MediaService from '../../application/MediaService';
 import { withEventContextAsync } from '../../../middleware/EventContext';
 
 class DiscordComponentMapper {
@@ -406,7 +406,7 @@ class DiscordComponentMapper {
                 return null;
             }
 
-            const files: AttachmentBuilder[] = this.collectLocalAttachments(components);
+            const files: AttachmentBuilder[] = await this.collectLocalAttachmentsAsync(components);
 
             return this.createReplyOptions(rootComponents, files, ephemeral);
         });
@@ -421,47 +421,48 @@ class DiscordComponentMapper {
         };
     }
 
-    private collectLocalAttachments(components: Component[]): AttachmentBuilder[] {
-        const files: AttachmentBuilder[] = [];
+    private async collectLocalAttachmentsAsync(components: Component[]): Promise<AttachmentBuilder[]> {
+        const items: MediaGallery['items'][number][] = [];
 
-        const findMediaGalleries = (components: Component[]): void => {
+        const collect = (components: Component[]): void => {
             for (const component of components) {
                 if (!component || !component.type)
                     continue;
 
                 if (component.type === ComponentType.MEDIA_GALLERY) {
                     const mediaGallery = component as MediaGallery;
-
                     for (const item of mediaGallery.items) {
-                        if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:')) {
-                            try {
-                                // Validate that file exists before trying to read it
-                                if (!fs.existsSync(item.media.url)) {
-                                    Logger.logWarning(`File not found: ${item.media.url}`);
-                                    continue;
-                                }
-
-                                // Read file as Buffer to prevent stream issues
-                                const fileBuffer = fs.readFileSync(item.media.url);
-                                Logger.logDebug(`Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
-                                files.push(new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` }));
-                            } catch (error) {
-                                Logger.logError(`Error loading file: ${item.media.url}`, error as Error);
-                                // Skip this file if it cannot be loaded
-                            }
-                        }
+                        if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:'))
+                            items.push(item);
                     }
                 } else if (component.type === ComponentType.CONTAINER) {
                     const container = component as Container;
-                    if (container.components) {
-                        findMediaGalleries(container.components);
-                    }
+                    if (container.components)
+                        collect(container.components);
                 }
             }
         };
 
-        findMediaGalleries(components);
-        return files;
+        collect(components);
+
+        // Read all local files concurrently — each goes through MediaService's buffer cache
+        const loaded = await Promise.all(items.map(async (item) => {
+            try {
+                if (!(await MediaService.fileExistsAsync(item.media.url))) {
+                    Logger.logWarning(`File not found: ${item.media.url}`);
+                    return null;
+                }
+                const fileBuffer = await MediaService.getBufferByPathAsync(item.media.url);
+                if (Logger.isDebugEnabled())
+                    Logger.logDebug(() => `Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                return new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` });
+            } catch (error) {
+                Logger.logError(`Error loading file: ${item.media.url}`, error as Error);
+                return null;
+            }
+        }));
+
+        return loaded.filter((file): file is AttachmentBuilder => file !== null);
     }
 
     public mapContentComponents(interaction: InteractionEvent): string {

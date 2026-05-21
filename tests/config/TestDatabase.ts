@@ -2,12 +2,22 @@ import Logger from '../../src/utils/application/Logger';
 import { DatabaseHelper } from '../../src/utils/database/DatabaseHelper';
 import { BaseEntityFieldType } from '../../src/interfaces/database/BaseEntity';
 import { ExceptionEnum, TableEnum } from '../../src/interfaces/enums';
-import { closeConnectionAsync, commitTransactionAsync, getTableName, rollbackTransactionAsync, runQueryAsync, startTransactionAsync, validateConnectionAsync } from '../../src/repositories/util/ConnectionHandler';
+import {
+    closeConnectionAsync,
+    commitTransactionAsync,
+    getTableName,
+    rollbackTransactionAsync,
+    runInTransactionAsync,
+    runQueryAsync,
+    startTransactionAsync,
+    validateConnectionAsync,
+    TransactionHandle,
+} from '../../src/repositories/util/ConnectionHandler';
 import { ErrorHelper } from '../../src/utils/application/Error';
 
 export class TestDatabase {
     private static _instance: TestDatabase;
-    private _isInTransaction: boolean = false;
+    private _tx: TransactionHandle | null = null;
 
     private constructor() {}
 
@@ -18,46 +28,58 @@ export class TestDatabase {
         return TestDatabase._instance;
     }
 
-    public async startTransactionAsync(): Promise<void> {
-        if (this._isInTransaction)
+    public async startTransactionAsync(): Promise<TransactionHandle> {
+        if (this._tx)
             throw new Error('Transaction already started');
 
-        await startTransactionAsync();
-        this._isInTransaction = true;
+        this._tx = await startTransactionAsync();
         Logger.logDebug('Test transaction started');
+        return this._tx;
     }
 
     public async rollbackTransactionAsync(): Promise<void> {
-        if (!this.isInTransaction())
+        if (!this._tx)
             throw new Error('No active transaction to rollback');
 
-        await rollbackTransactionAsync();
-        this._isInTransaction = false;
+        const tx = this._tx;
+        this._tx = null;
+        await rollbackTransactionAsync(tx);
         Logger.logDebug('Test transaction rolled back');
     }
 
     public async commitTransactionAsync(): Promise<void> {
-        if (!this.isInTransaction())
+        if (!this._tx)
             throw new Error('No active transaction to commit');
 
-        await commitTransactionAsync();
-        this._isInTransaction = false;
+        const tx = this._tx;
+        this._tx = null;
+        await commitTransactionAsync(tx);
         Logger.logDebug('Test transaction committed');
+    }
+
+    /**
+     * Runs `body` with the active test transaction installed as the ambient handle, so any
+     * repository query inside picks it up automatically via AsyncLocalStorage.
+     */
+    public async withAmbientTransactionAsync<T>(body: () => Promise<T>): Promise<T> {
+        if (!this._tx)
+            throw new Error('No active transaction to bind ambient context to');
+        return runInTransactionAsync(this._tx, body);
     }
 
     public async runQueryAsync(query: string, params?: any[]): Promise<any[]> {
         await validateConnectionAsync();
 
         try {
-            Logger.logDebug(`Query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
-            const rows = await runQueryAsync(query, params);
-            
+            Logger.logDebug(() => `Query: ${query}${params ? ` with params ${JSON.stringify(params)}` : ''}`);
+            const rows = await runQueryAsync(query, params, this._tx ?? undefined);
+
             // For non-SELECT queries (INSERT, UPDATE, DELETE), return empty array
             const trimmedQuery = query.trim().toUpperCase();
             if (!trimmedQuery.startsWith('SELECT') && !trimmedQuery.startsWith('CALL')) {
                 return [];
             }
-            
+
             // Process results to handle MultiLingualString and JSON fields like BaseRepository
             return DatabaseHelper.processResultsFromDatabase(rows as any[]);
         } catch (error) {
@@ -74,9 +96,9 @@ export class TestDatabase {
         const values = Object.values(processedData).map(() => '?').join(', ');
         const query = `INSERT INTO ${tableNameString} (${keys}) VALUES (${values})`;
         const params = Object.values(processedData);
-        
+
         await this.runQueryAsync(query, params);
-        
+
         // Return the inserted record
         const selectQuery = `SELECT * FROM ${tableNameString} ORDER BY Id DESC LIMIT 1`;
         const result = await this.runQueryAsync(selectQuery);
@@ -96,7 +118,7 @@ export class TestDatabase {
         const params = [...Object.values(processedData).filter((_, index) => Object.keys(processedData)[index] !== 'Id'), id];
 
         await this.runQueryAsync(query, params);
-        
+
         // Return the updated record
         const selectQuery = `SELECT * FROM ${tableNameString} WHERE Id = ?`;
         const result = await this.runQueryAsync(selectQuery, [id]);
@@ -106,13 +128,13 @@ export class TestDatabase {
     public async callStoredProcedureAsync(procedureName: string, params: any[] = []): Promise<any[]> {
         const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
         const results = await this.runQueryAsync(query, params);
-        
+
         // Process stored procedure results
         return DatabaseHelper.processStoredProcedureResults(results);
     }
 
     public isInTransaction(): boolean {
-        return this._isInTransaction;
+        return this._tx !== null;
     }
 
     public async closeAsync(): Promise<void> {

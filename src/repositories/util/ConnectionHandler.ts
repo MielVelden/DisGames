@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import { AsyncLocalStorage } from 'async_hooks';
 import { TableEnum } from '../../interfaces/enums/database/TableEnum';
 import { URL } from 'url';
 import Logger from '../../utils/application/Logger';
@@ -12,9 +13,21 @@ import { WebhookType } from '../../interfaces/application';
 dotenv.config();
 
 let pool: mysql.Pool | null = null;
-let connection: mysql.PoolConnection | null = null;
 let table_enums: Array<{ Id: number, TableName: string }> = [];
-let inTransaction = false;
+
+export type TransactionHandle = {
+    connection: mysql.PoolConnection;
+};
+
+const transactionStorage = new AsyncLocalStorage<TransactionHandle>();
+
+function ambientTx(): TransactionHandle | undefined {
+    return transactionStorage.getStore();
+}
+
+export async function runInTransactionAsync<T>(tx: TransactionHandle, fn: () => Promise<T>): Promise<T> {
+    return transactionStorage.run(tx, fn);
+}
 
 function createPoolFromConfig(url: URL, dbName: string): mysql.Pool {
     return mysql.createPool({
@@ -53,26 +66,10 @@ function isRecoverableConnectionError(err: unknown): boolean {
     return false;
 }
 
-async function releaseHeldConnectionAsync(): Promise<void> {
-    if (!connection)
-        return;
-    const c = connection;
-    connection = null;
-    try {
-        c.destroy();
-    } catch {
-        try {
-            c.release();
-        } catch {
-        }
-    }
-}
-
 async function loadTableEnumsAsync(): Promise<void> {
-    if (!connection)
+    if (!pool)
         ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
-    const query = 'SELECT * FROM table_enums';
-    const [rows] = await connection.query(query);
+    const [rows] = await pool.query('SELECT * FROM table_enums');
     table_enums = rows as Array<{ Id: number, TableName: string }>;
 }
 
@@ -80,7 +77,6 @@ async function rebuildPoolAsync(): Promise<void> {
     const dbUrl = getConfigValue(EnvConfigEnum.DATABASE_URL) as string;
     if (!dbUrl)
         ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { environmentVariable: 'DATABASE_URL' });
-    await releaseHeldConnectionAsync();
     if (pool) {
         try {
             await pool.end();
@@ -91,36 +87,13 @@ async function rebuildPoolAsync(): Promise<void> {
     const url = new URL(dbUrl);
     const dbName = url.pathname.replace(/^\//, '');
     pool = createPoolFromConfig(url, dbName);
-    connection = await pool.getConnection();
     await loadTableEnumsAsync();
 }
 
-async function reconnectAfterConnectionLossAsync(): Promise<void> {
-    await releaseHeldConnectionAsync();
-    if (!pool) {
-        await rebuildPoolAsync();
-        return;
-    }
-    try {
-        connection = await pool.getConnection();
-        await loadTableEnumsAsync();
-    } catch (err) {
-        Logger.logError('Failed to get database connection from pool after loss, rebuilding pool', err as Error, { sendToDiscord: true });
-        await rebuildPoolAsync();
-    }
-}
-
-async function ensureConnectionAsync(): Promise<void> {
-    if (connection)
-        return;
+function ensurePool(): mysql.Pool {
     if (!pool)
         ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
-    try {
-        connection = await pool.getConnection();
-    } catch (err) {
-        Logger.logError('Failed to acquire database connection', err as Error, { sendToDiscord: true });
-        await rebuildPoolAsync();
-    }
+    return pool;
 }
 
 //#region Connection Functions
@@ -137,7 +110,6 @@ export async function createConnectionAsync(): Promise<boolean> {
 
         pool = createPoolFromConfig(url, dbName);
 
-        connection = await pool.getConnection();
         await loadTableEnumsAsync();
         return true;
     } catch (err) {
@@ -147,9 +119,6 @@ export async function createConnectionAsync(): Promise<boolean> {
 }
 
 export async function closeConnectionAsync(): Promise<void> {
-    inTransaction = false;
-    await releaseHeldConnectionAsync();
-
     if (pool) {
         await pool.end();
         pool = null;
@@ -157,18 +126,21 @@ export async function closeConnectionAsync(): Promise<void> {
 }
 
 export async function validateConnectionAsync(): Promise<boolean> {
-    await ensureConnectionAsync();
-    if (!connection)
-        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
+    const activePool = ensurePool();
+    let conn: mysql.PoolConnection | null = null;
     try {
-        await connection.ping();
+        conn = await activePool.getConnection();
+        await conn.ping();
         return true;
     } catch (err) {
         if (!isRecoverableConnectionError(err))
             ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
-        Logger.logError('Database ping failed, reconnecting', err as Error);
-        await reconnectAfterConnectionLossAsync();
+        Logger.logError('Database ping failed, rebuilding pool', err as Error);
+        await rebuildPoolAsync();
         return true;
+    } finally {
+        if (conn)
+            conn.release();
     }
 }
 
@@ -176,29 +148,32 @@ export async function validateConnectionAsync(): Promise<boolean> {
 
 //#region Query Functions
 
-export async function runQueryAsync(query: string, params?: any[]): Promise<any[] | undefined> {
-    await ensureConnectionAsync();
-    if (!connection)
-        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
+type Runner = (sql: string, params?: any[]) => Promise<[any, any]>;
 
-    const execute = async () => {
-        Logger.logDebug(params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
-        const [rows] = await connection!.query(query, params);
-        return rows as any[];
-    };
+async function runWithRetry(
+    runner: (executor: Runner) => Promise<any[]>,
+    tx?: TransactionHandle,
+): Promise<any[] | undefined> {
+    const activePool = ensurePool();
+    const activeTx = tx ?? ambientTx();
+    const executor: Runner = activeTx
+        ? (sql, params) => activeTx.connection.query(sql, params) as Promise<[any, any]>
+        : (sql, params) => activePool.query(sql, params) as Promise<[any, any]>;
 
     try {
-        return await execute();
+        return await runner(executor);
     } catch (err) {
-        if (!inTransaction && isRecoverableConnectionError(err)) {
-            Logger.logError('Database connection lost, reconnecting', err as Error, {
+        if (!activeTx && isRecoverableConnectionError(err)) {
+            Logger.logError('Database connection lost, rebuilding pool', err as Error, {
                 webhookType: WebhookType.DEBUG,
                 sendToDiscord: true
             });
-
-            await reconnectAfterConnectionLossAsync();
             try {
-                return await execute();
+                await rebuildPoolAsync();
+                const retryPool = ensurePool();
+                const retryExecutor: Runner = (sql, params) =>
+                    retryPool.query(sql, params) as Promise<[any, any]>;
+                return await runner(retryExecutor);
             } catch (retryErr) {
                 Logger.logError(`Error while running database query`, retryErr as Error, { sendToDiscord: true });
                 ErrorHelper.wrap(retryErr, ExceptionEnum.DATABASE_CONNECTION_FAILED);
@@ -209,55 +184,100 @@ export async function runQueryAsync(query: string, params?: any[]): Promise<any[
     }
 }
 
+export async function runQueryAsync(query: string, params?: any[], tx?: TransactionHandle): Promise<any[] | undefined> {
+    return runWithRetry(async (executor) => {
+        if (Logger.isDebugEnabled())
+            Logger.logDebug(() => params ? `Running query: ${query} with params ${params}` : `Running query: ${query}`);
+        const [rows] = await executor(query, params);
+        return rows as any[];
+    }, tx);
+}
+
+// MySQL's prepared-statement protocol (used by .execute()) rejects parameterized
+// LIMIT/OFFSET on versions older than 8.0.23. mysql2's text protocol (.query()) handles
+// them universally, so we route those queries there automatically.
+function requiresTextProtocol(sql: string): boolean {
+    return /\s(LIMIT|OFFSET)\s*\?/i.test(sql);
+}
+
+export async function runExecuteAsync(query: string, params?: any[], tx?: TransactionHandle): Promise<any[] | undefined> {
+    if (requiresTextProtocol(query))
+        return runQueryAsync(query, params, tx);
+
+    const activePool = ensurePool();
+    const activeTx = tx ?? ambientTx();
+    const executor: Runner = activeTx
+        ? (sql, p) => activeTx.connection.execute(sql, p) as Promise<[any, any]>
+        : (sql, p) => activePool.execute(sql, p) as Promise<[any, any]>;
+
+    try {
+        if (Logger.isDebugEnabled())
+            Logger.logDebug(() => params ? `Running execute: ${query} with params ${params}` : `Running execute: ${query}`);
+        const [rows] = await executor(query, params);
+        return rows as any[];
+    } catch (err) {
+        if (!activeTx && isRecoverableConnectionError(err)) {
+            Logger.logError('Database connection lost during execute, rebuilding pool', err as Error, {
+                webhookType: WebhookType.DEBUG,
+                sendToDiscord: true
+            });
+            try {
+                await rebuildPoolAsync();
+                const retryPool = ensurePool();
+                const [rows] = await retryPool.execute(query, params);
+                return rows as any[];
+            } catch (retryErr) {
+                Logger.logError(`Error while running database execute`, retryErr as Error, { sendToDiscord: true });
+                ErrorHelper.wrap(retryErr, ExceptionEnum.DATABASE_CONNECTION_FAILED);
+            }
+        }
+        Logger.logError(`Error while running database execute`, err as Error, { sendToDiscord: true });
+        ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
+    }
+}
+
 //#region Transaction Functions
 
-export async function startTransactionAsync(): Promise<void> {
-    await ensureConnectionAsync();
-    if (!connection)
-        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
+export async function startTransactionAsync(): Promise<TransactionHandle> {
+    const activePool = ensurePool();
+    let conn: mysql.PoolConnection;
     try {
-        await connection.beginTransaction();
+        conn = await activePool.getConnection();
     } catch (err) {
         if (!isRecoverableConnectionError(err))
             ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
-        Logger.logError('Database connection lost at transaction start, reconnecting', err as Error);
-        await reconnectAfterConnectionLossAsync();
-        if (!connection)
-            ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
-        try {
-            await connection.beginTransaction();
-        } catch (retryErr) {
-            ErrorHelper.wrap(retryErr, ExceptionEnum.DATABASE_CONNECTION_FAILED);
-        }
+        Logger.logError('Database connection lost at transaction start, rebuilding pool', err as Error);
+        await rebuildPoolAsync();
+        conn = await ensurePool().getConnection();
     }
-    inTransaction = true;
+
+    try {
+        await conn.beginTransaction();
+    } catch (err) {
+        conn.release();
+        ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
+    }
+
+    return { connection: conn };
 }
 
-export async function rollbackTransactionAsync(): Promise<void> {
-    if (!connection) {
-        inTransaction = false;
-        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
-    }
+export async function rollbackTransactionAsync(tx: TransactionHandle): Promise<void> {
     try {
-        await connection.rollback();
+        await tx.connection.rollback();
     } catch (err) {
         ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
     } finally {
-        inTransaction = false;
+        tx.connection.release();
     }
 }
 
-export async function commitTransactionAsync(): Promise<void> {
-    if (!connection) {
-        inTransaction = false;
-        ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
-    }
+export async function commitTransactionAsync(tx: TransactionHandle): Promise<void> {
     try {
-        await connection.commit();
+        await tx.connection.commit();
     } catch (err) {
         ErrorHelper.wrap(err, ExceptionEnum.DATABASE_CONNECTION_FAILED);
     } finally {
-        inTransaction = false;
+        tx.connection.release();
     }
 }
 
@@ -284,6 +304,14 @@ export function getTableName(tableEnumValue: TableEnum): string {
             ErrorHelper.throwWithParameters(ExceptionEnum.TABLE_ENUM_NOT_FOUND, { tableEnumValue: tableEnumValue.toString() });
     }
     return enumValue;
+}
+
+//#endregion
+
+//#region Test Helpers (internal)
+
+export function _getPoolForTests(): mysql.Pool | null {
+    return pool;
 }
 
 //#endregion

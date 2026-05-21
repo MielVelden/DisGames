@@ -62,9 +62,15 @@ class Logger {
         await this.log(LogLevel.ERROR, message, error, options);
     }
 
-    public async logDebug(message: string, options?: LoggerOptions): Promise<void> {
-        if (TestMode.isDebugModeEnabled() || (!TestMode.isEnabled() && getConfigValue(EnvConfigEnum.DEBUG_MODE)))
-            await this.log(LogLevel.DEBUG, message, undefined, options);
+    public isDebugEnabled(): boolean {
+        return TestMode.isDebugModeEnabled() || (!TestMode.isEnabled() && !!getConfigValue(EnvConfigEnum.DEBUG_MODE));
+    }
+
+    public async logDebug(message: string | (() => string), options?: LoggerOptions): Promise<void> {
+        if (!this.isDebugEnabled())
+            return;
+        const resolved = typeof message === 'function' ? message() : message;
+        await this.log(LogLevel.DEBUG, resolved, undefined, options);
     }
 
     public async logTest(message: string): Promise<void> {
