@@ -225,6 +225,7 @@ class ConnectionImageService extends BaseCard {
         }
 
         const buffer = canvas.toBuffer('image/png');
+        // TODO(feat-customization merge): switch to fs.promises.writeFile; ProfileCard.ts has the canonical async write pattern.
         fs.writeFileSync(filepath, buffer);
     }
 

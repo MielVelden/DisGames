@@ -3,18 +3,16 @@ name: Build & Deploy
 on:
   push:
     branches: [typescript, development]
+  pull_request:
+    branches: [development]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +24,17 @@ jobs:
           DISCORD_OWNER_ID: ${{ secrets.DISCORD_OWNER_ID }}
           TEST_DISCORD_WEBHOOK_URL: ${{ secrets.TEST_DISCORD_WEBHOOK_URL }}
           DEBUG_DISCORD_WEBHOOK_URL: ${{ secrets.DEBUG_DISCORD_WEBHOOK_URL }}
+
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Resolve image metadata
         id: tag
