@@ -15,7 +15,7 @@ export class ComponentError extends Error {
     public readonly parameters?: { [key: string]: string | number };
 
     constructor(options: ComponentErrorOptions) {
-        const translated = new MultiLingualString(i18n.exceptions[options.message]);
+        const translated = new MultiLingualString(i18n.enums.exceptions[options.message]);
         if (options.parameters)
             translated.replaceParameters(options.parameters);
 
@@ -37,7 +37,7 @@ export class ComponentError extends Error {
     }
 
     public getMessage(): string {
-        const errorMessage = new MultiLingualString(i18n.exceptions[this.errorKey]);
+        const errorMessage = new MultiLingualString(i18n.enums.exceptions[this.errorKey]);
         if (this.parameters)
             errorMessage.replaceParameters(this.parameters);
         return errorMessage.getMessage();

@@ -545,14 +545,14 @@ class GameService {
             const value = values[setting.key];
 
             if (setting.required && (value === undefined || value === null)) {
-                errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_REQUIRED]));
+                errors.push(new MultiLingualString(i18n.enums.exceptions[ExceptionEnum.SETTING_REQUIRED]));
                 return;
             }
 
             if (value !== undefined && value !== null) {
                 if (setting.type === GameSettingType.BOOLEAN) {
                     if (typeof value !== 'boolean') {
-                        errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_INVALID_TYPE]));
+                        errors.push(new MultiLingualString(i18n.enums.exceptions[ExceptionEnum.SETTING_INVALID_TYPE]));
                         return;
                     }
                     validatedValues[setting.key] = value;
@@ -560,7 +560,7 @@ class GameService {
                     const enumSetting = setting as EnumGameSetting;
                     const validValues = enumSetting.options.map(opt => opt.value);
                     if (!validValues.includes(value as string | number)) {
-                        errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_INVALID_VALUE]));
+                        errors.push(new MultiLingualString(i18n.enums.exceptions[ExceptionEnum.SETTING_INVALID_VALUE]));
                         return;
                     }
                     validatedValues[setting.key] = value;

@@ -20,7 +20,7 @@ export function createLanguageSelectMenu(handlerConfig?: HandlerConfig): SelectM
                 const language = LanguageEnum[key as keyof typeof LanguageEnum];
                 return {
                     emoji: getEnumProperty(LanguageEnum, language, MetadataKeyEnum.Emoji) as string,
-                    label: new MultiLingualString(i18n.languages[language]),
+                    label: new MultiLingualString(i18n.enums.languages[language]),
                     value: key,
                 };
             })

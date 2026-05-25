@@ -6,6 +6,7 @@ export enum MetadataKeyEnum {
     Emoji = "Emoji",
     IsRequiredInTestMode = "IsRequiredInTestMode",
     MetricType = "MetricType",
+    Color = "Color",
 }
 
 export type EnumValue = string | number;

@@ -8,6 +8,7 @@ import Logger from '../../utils/application/Logger';
 import { STRING_DELIMITER } from '../../constants';
 import { ErrorHelper } from '../../utils/application/Error';
 import { BaseCard } from './BaseCard';
+import { Color } from '../../utils/helpers/Color';
 
 interface CategoryData {
     categoryName: string;
@@ -32,10 +33,10 @@ interface ConnectionImageConfig {
     cellPadding: number;
     fontSize: number;
     borderRadius: number;
-    backgroundColor: string;
-    cellBackgroundColor: string;
-    textColor: string;
-    groupedBackgroundColors: string[];
+    backgroundColor: Color;
+    cellBackgroundColor: Color;
+    textColor: Color;
+    groupedBackgroundColors: Color[];
 }
 
 class ConnectionImageService extends BaseCard {

@@ -4,13 +4,18 @@ import * as path from 'path';
 import { GeneratedMedia } from '../../interfaces/application/Media';
 import { BaseCard, TextStyle } from './BaseCard';
 import { SCALE, FONT_SANS, FONT_MONO } from './CardTokens';
+import { PROJECT_NAME } from '../../utils/constants/Project';
+import { formatDate } from '../../utils/helpers/Date';
+import { Color } from '../../utils/helpers/Color';
+import { LanguageEnum, UserRoleEnum } from '../../interfaces/enums';
+import { DEFAULT_LANGUAGE, getMultiLingualString } from '../../utils/i18n/MultiLingualString';
+import { i18n } from '../../utils/i18n/i18n';
+import { AchievementEnum } from '../../interfaces/enums/database/AchievementEnum';
+import { getEnumProperty } from '../../utils/helpers/EnumMetadata';
+import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
 
-export type ProfileColorPack = 'cosmic' | 'ember' | 'toxic' | 'frost' | 'solar';
-export type ProfileRole = 'owner' | 'admin' | 'mod' | 'member';
-
-export interface ProfileBadge {
-    icon: string;
-    color: string;
+export interface ProfileAchievement {
+    achievementEnum: AchievementEnum;
     title: string;
     description: string;
     date: string;
@@ -20,7 +25,7 @@ export interface ProfileCardData {
     username: string;
     userId: string;
     joinedAt: Date;
-    role: ProfileRole;
+    role: UserRoleEnum;
     rank: number;
     totalUsers: number;
     totalPoints: number;
@@ -29,17 +34,16 @@ export interface ProfileCardData {
     xpMax: number;
     favoriteGame: string;
     favoriteHours: number;
-    pack?: ProfileColorPack;
-    badges?: ProfileBadge[];
+    badges?: ProfileAchievement[];
     online?: boolean;
 }
 
 interface ColorPack {
-    deep: string;
-    base: string;
-    mid: string;
-    accent: string;
-    accent2: string;
+    deep: Color;
+    base: Color;
+    mid: Color;
+    accent: Color;
+    accent2: Color;
 }
 
 const CARD_WIDTH = 840 * SCALE;
@@ -66,19 +70,12 @@ const COLOR_PROGRESS_TRACK = 'rgba(0,0,0,0.4)';
 const COLOR_STATUS_ONLINE = '#3ec875';
 const COLOR_STATUS_OFFLINE = '#6b67a0';
 
-const COLOR_PACKS: Record<ProfileColorPack, ColorPack> = {
-    cosmic: { deep: '#1a1742', base: '#27245C', mid: '#312898', accent: '#D938C8', accent2: '#7C3BFF' },
-    ember: { deep: '#2a0f1f', base: '#4a1530', mid: '#8e1a4a', accent: '#FF7A3D', accent2: '#FFC857' },
-    toxic: { deep: '#0d2418', base: '#143a26', mid: '#1f6b3e', accent: '#6EE787', accent2: '#20E3B2' },
-    frost: { deep: '#0c1a33', base: '#143055', mid: '#1f5a9e', accent: '#5BE2FF', accent2: '#B794F6' },
-    solar: { deep: '#2a1738', base: '#432064', mid: '#7a2d8a', accent: '#FFD23F', accent2: '#FF5DA2' },
-};
-
-const ROLE_LABELS: Record<ProfileRole, string> = {
-    owner: 'OWNER',
-    admin: 'ADMIN',
-    mod: 'MOD',
-    member: 'MEMBER',
+const COLOR_PACK: ColorPack = {
+    deep: '#1a1742',
+    base: '#27245C',
+    mid: '#312898',
+    accent: '#D938C8',
+    accent2: '#7C3BFF'
 };
 
 const AVATAR_SIZE = 64 * SCALE;
@@ -115,35 +112,32 @@ const BADGE_ACCENT_WIDTH = 4 * SCALE;
 const BRAND_TOP = 14 * SCALE;
 const BRAND_RIGHT = 16 * SCALE;
 
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 class ProfileCardService extends BaseCard {
     constructor() {
         super(path.join('images', 'generated'));
     }
 
-    public async generate(data: ProfileCardData): Promise<GeneratedMedia> {
-        const pack = COLOR_PACKS[data.pack ?? 'cosmic'];
+    public async generate(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
         const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
 
-        this.drawCardBackground(ctx, pack);
-        this.drawBrand(ctx, pack);
+        this.drawCardBackground(ctx);
+        this.drawBrand(ctx);
 
         let leftY = HEADER_TOP;
-        this.drawHeader(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        this.drawHeader(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH, language);
         leftY += AVATAR_SIZE + SECTION_GAP;
 
-        this.drawStats(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        this.drawStats(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
         leftY += CHIP_HEIGHT + SECTION_GAP;
 
-        this.drawLevelBlock(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        this.drawLevelBlock(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
         leftY += LEVEL_BLOCK_HEIGHT + SECTION_GAP;
 
-        this.drawFavorite(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        this.drawFavorite(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
 
         const rightHeight = CARD_HEIGHT - HEADER_TOP - CARD_PADDING;
         this.drawBadges(ctx, data.badges ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight);
@@ -155,26 +149,26 @@ class ProfileCardService extends BaseCard {
         });
     }
 
-    private drawCardBackground(ctx: CanvasRenderingContext2D, pack: ColorPack): void {
+    private drawCardBackground(ctx: CanvasRenderingContext2D): void {
         ctx.save();
         this.roundedRectPath(ctx, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS);
         ctx.clip();
 
         const base = ctx.createLinearGradient(0, 0, 0, CARD_HEIGHT);
-        base.addColorStop(0, pack.base);
-        base.addColorStop(1, pack.deep);
+        base.addColorStop(0, COLOR_PACK.base);
+        base.addColorStop(1, COLOR_PACK.deep);
         ctx.fillStyle = base;
         ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
         const topRight = ctx.createRadialGradient(CARD_WIDTH, 0, 0, CARD_WIDTH, 0, 420 * SCALE);
-        topRight.addColorStop(0, this.withAlpha(pack.accent, 0.24));
-        topRight.addColorStop(1, this.withAlpha(pack.accent, 0));
+        topRight.addColorStop(0, this.withAlpha(COLOR_PACK.accent, 0.24));
+        topRight.addColorStop(1, this.withAlpha(COLOR_PACK.accent, 0));
         ctx.fillStyle = topRight;
         ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
         const bottomLeft = ctx.createRadialGradient(0, CARD_HEIGHT, 0, 0, CARD_HEIGHT, 360 * SCALE);
-        bottomLeft.addColorStop(0, this.withAlpha(pack.accent2, 0.18));
-        bottomLeft.addColorStop(1, this.withAlpha(pack.accent2, 0));
+        bottomLeft.addColorStop(0, this.withAlpha(COLOR_PACK.accent2, 0.18));
+        bottomLeft.addColorStop(1, this.withAlpha(COLOR_PACK.accent2, 0));
         ctx.fillStyle = bottomLeft;
         ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
@@ -186,8 +180,8 @@ class ProfileCardService extends BaseCard {
         });
     }
 
-    private drawBrand(ctx: CanvasRenderingContext2D, pack: ColorPack): void {
-        const text = 'DISGAMES';
+    private drawBrand(ctx: CanvasRenderingContext2D): void {
+        const text = PROJECT_NAME.toUpperCase();
         const fontSize = 10 * SCALE;
         const brandStyle: TextStyle = {
             font: `600 ${fontSize}px ${FONT_MONO}`,
@@ -203,14 +197,14 @@ class ProfileCardService extends BaseCard {
         const top = BRAND_TOP + fontSize / 2;
         const dotCx = right - totalWidth + dotR;
 
-        this.fillCircle(ctx, dotCx, top, dotR + 1.5 * SCALE, this.withAlpha(pack.accent, 0.2));
-        this.fillCircle(ctx, dotCx, top, dotR, pack.accent);
+        this.fillCircle(ctx, dotCx, top, dotR + 1.5 * SCALE, this.withAlpha(COLOR_PACK.accent, 0.2));
+        this.fillCircle(ctx, dotCx, top, dotR, COLOR_PACK.accent);
 
         this.drawText(ctx, text, dotCx + dotR + gap, top, brandStyle);
     }
 
-    private drawHeader(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
-        this.drawAvatar(ctx, data, pack, x, y);
+    private drawHeader(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, width: number, language: LanguageEnum): void {
+        this.drawAvatar(ctx, data, x, y);
 
         const textLeft = x + AVATAR_SIZE + AVATAR_TEXT_GAP;
         const textMaxWidth = width - AVATAR_SIZE - AVATAR_TEXT_GAP;
@@ -227,17 +221,17 @@ class ProfileCardService extends BaseCard {
         const usernameWidth = ctx.measureText(truncated).width;
         const badgeX = textLeft + usernameWidth + 8 * SCALE;
         const badgeY = nameY + 2 * SCALE;
-        this.drawRoleBadge(ctx, data.role, pack, badgeX, badgeY);
+        this.drawRoleBadge(ctx, data.role, badgeX, badgeY, language);
 
         const subY = nameY + 22 * SCALE + 8 * SCALE;
         this.drawHeaderSub(ctx, data, textLeft, subY, textMaxWidth);
     }
 
-    private drawAvatar(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number): void {
+    private drawAvatar(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number): void {
         const ringGrad = ctx.createLinearGradient(x, y, x + AVATAR_SIZE, y + AVATAR_SIZE);
-        ringGrad.addColorStop(0, pack.accent);
-        ringGrad.addColorStop(0.5, pack.accent2);
-        ringGrad.addColorStop(1, pack.mid);
+        ringGrad.addColorStop(0, COLOR_PACK.accent);
+        ringGrad.addColorStop(0.5, COLOR_PACK.accent2);
+        ringGrad.addColorStop(1, COLOR_PACK.mid);
         this.fillRoundedRect(ctx, x, y, AVATAR_SIZE, AVATAR_SIZE, AVATAR_RADIUS, ringGrad);
 
         const innerX = x + AVATAR_RING_WIDTH;
@@ -245,8 +239,8 @@ class ProfileCardService extends BaseCard {
         const innerSize = AVATAR_SIZE - AVATAR_RING_WIDTH * 2;
 
         const innerGrad = ctx.createLinearGradient(innerX, innerY, innerX + innerSize, innerY + innerSize);
-        innerGrad.addColorStop(0, pack.mid);
-        innerGrad.addColorStop(1, pack.deep);
+        innerGrad.addColorStop(0, COLOR_PACK.mid);
+        innerGrad.addColorStop(1, COLOR_PACK.deep);
         this.fillRoundedRect(ctx, innerX, innerY, innerSize, innerSize, AVATAR_INNER_RADIUS, innerGrad);
 
         this.drawText(ctx, this.getInitials(data.username),
@@ -263,13 +257,13 @@ class ProfileCardService extends BaseCard {
         const statusR = 8 * SCALE;
         const statusCx = x + AVATAR_SIZE - statusR / 2;
         const statusCy = y + AVATAR_SIZE - statusR / 2;
-        this.fillCircle(ctx, statusCx, statusCy, statusR + 3 * SCALE, pack.deep);
+        this.fillCircle(ctx, statusCx, statusCy, statusR + 3 * SCALE, COLOR_PACK.deep);
         this.fillCircle(ctx, statusCx, statusCy, statusR,
             data.online === false ? COLOR_STATUS_OFFLINE : COLOR_STATUS_ONLINE);
     }
 
-    private drawRoleBadge(ctx: CanvasRenderingContext2D, role: ProfileRole, pack: ColorPack, x: number, y: number): void {
-        const label = ROLE_LABELS[role];
+    private drawRoleBadge(ctx: CanvasRenderingContext2D, role: UserRoleEnum, x: number, y: number, language: LanguageEnum): void {
+        const label = getMultiLingualString(i18n.enums.userRoles[role], language);
         const fontSize = 10.5 * SCALE;
         const padX = 8 * SCALE;
         const height = 22 * SCALE;
@@ -279,25 +273,17 @@ class ProfileCardService extends BaseCard {
         const textWidth = ctx.measureText(label).width;
         const width = textWidth + padX * 2;
 
-        let bgFill: string | CanvasGradient;
-        let textColor: string;
-        let borderColor: string;
+        let bgFill: Color | CanvasGradient;
+        let textColor: Color;
+        let borderColor: Color;
 
-        if (role === 'owner') {
+        if (role === UserRoleEnum.ADMIN) {
             const grad = ctx.createLinearGradient(x, y, x + width, y + height);
-            grad.addColorStop(0, pack.accent);
-            grad.addColorStop(1, pack.accent2);
+            grad.addColorStop(0, COLOR_PACK.accent);
+            grad.addColorStop(1, COLOR_PACK.accent2);
             bgFill = grad;
             textColor = '#ffffff';
             borderColor = 'transparent';
-        } else if (role === 'admin') {
-            bgFill = this.withAlpha(pack.accent, 0.22);
-            textColor = '#ffffff';
-            borderColor = this.withAlpha(pack.accent, 0.4);
-        } else if (role === 'mod') {
-            bgFill = this.withAlpha(pack.accent2, 0.22);
-            textColor = '#ffffff';
-            borderColor = this.withAlpha(pack.accent2, 0.4);
         } else {
             bgFill = 'rgba(255,255,255,0.06)';
             textColor = COLOR_TEXT_MUTED;
@@ -359,23 +345,23 @@ class ProfileCardService extends BaseCard {
         });
     }
 
-    private drawStats(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+    private drawStats(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, width: number): void {
         const chipW = (width - CHIP_GAP) / 2;
 
         this.drawChip(ctx, x, y, chipW,
             'SERVER RANK',
             `#${this.formatNumber(data.rank)}`,
             ` / ${this.formatNumber(data.totalUsers)}`,
-            pack.accent,
-            (cx, cy) => this.drawTrophyIcon(ctx, cx, cy, pack.accent),
+            COLOR_PACK.accent,
+            (cx, cy) => this.drawTrophyIcon(ctx, cx, cy, COLOR_PACK.accent),
         );
 
         this.drawChip(ctx, x + chipW + CHIP_GAP, y, chipW,
             'TOTAL POINTS',
             this.formatNumber(data.totalPoints),
             ' pts',
-            pack.accent2,
-            (cx, cy) => this.drawStarIcon(ctx, cx, cy, pack.accent2, 7 * SCALE),
+            COLOR_PACK.accent2,
+            (cx, cy) => this.drawStarIcon(ctx, cx, cy, COLOR_PACK.accent2, 7 * SCALE),
         );
     }
 
@@ -387,7 +373,7 @@ class ProfileCardService extends BaseCard {
         label: string,
         value: string,
         valueSuffix: string,
-        iconColor: string,
+        iconColor: Color,
         drawIcon: (cx: number, cy: number) => void,
     ): void {
         this.fillRoundedRect(ctx, x, y, width, CHIP_HEIGHT, CHIP_RADIUS, COLOR_CHIP_BG);
@@ -425,7 +411,7 @@ class ProfileCardService extends BaseCard {
         });
     }
 
-    private drawLevelBlock(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+    private drawLevelBlock(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, width: number): void {
         this.fillRoundedRect(ctx, x, y, width, LEVEL_BLOCK_HEIGHT, LEVEL_BLOCK_RADIUS, COLOR_PANEL);
         this.strokeRoundedRect(ctx, x, y, width, LEVEL_BLOCK_HEIGHT, LEVEL_BLOCK_RADIUS, {
             color: COLOR_PANEL_BORDER,
@@ -438,7 +424,7 @@ class ProfileCardService extends BaseCard {
 
         const lvlPrefixStyle: TextStyle = {
             font: `600 ${10 * SCALE}px ${FONT_MONO}`,
-            color: pack.accent,
+            color: COLOR_PACK.accent,
         };
         ctx.font = lvlPrefixStyle.font;
         const lvlPrefixW = ctx.measureText('LVL').width;
@@ -460,18 +446,18 @@ class ProfileCardService extends BaseCard {
 
         const barY = innerY + 40 * SCALE;
         const pct = data.xpMax > 0 ? Math.max(0, Math.min(1, data.xpCurrent / data.xpMax)) : 0;
-        this.drawProgressBar(ctx, innerX, barY, innerW, pct, pack);
+        this.drawProgressBar(ctx, innerX, barY, innerW, pct);
     }
 
-    private drawProgressBar(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, pct: number, pack: ColorPack): void {
+    private drawProgressBar(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, pct: number): void {
         this.fillRoundedRect(ctx, x, y, width, PROGRESS_HEIGHT, PROGRESS_RADIUS, COLOR_PROGRESS_TRACK);
 
         const fillW = Math.round(width * pct);
         if (fillW <= 0) return;
 
         const grad = ctx.createLinearGradient(x, 0, x + fillW, 0);
-        grad.addColorStop(0, pack.accent2);
-        grad.addColorStop(1, pack.accent);
+        grad.addColorStop(0, COLOR_PACK.accent2);
+        grad.addColorStop(1, COLOR_PACK.accent);
 
         ctx.save();
         this.roundedRectPath(ctx, x, y, Math.max(fillW, PROGRESS_RADIUS * 2), PROGRESS_HEIGHT, PROGRESS_RADIUS);
@@ -482,7 +468,7 @@ class ProfileCardService extends BaseCard {
 
         const tipCx = x + fillW;
         const tipCy = y + PROGRESS_HEIGHT / 2;
-        this.drawRadialGlow(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS * 3, pack.accent, [
+        this.drawRadialGlow(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS * 3, COLOR_PACK.accent, [
             [0, 0.7],
             [1, 0],
         ]);
@@ -490,12 +476,12 @@ class ProfileCardService extends BaseCard {
         this.fillCircle(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS, '#ffffff');
     }
 
-    private drawFavorite(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+    private drawFavorite(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, width: number): void {
         const iconX = x + 2 * SCALE;
         const iconY = y;
         this.fillRoundedRect(ctx, iconX, iconY, FAV_ICON_SIZE, FAV_ICON_SIZE, FAV_ICON_RADIUS,
-            this.withAlpha(pack.accent2, 0.16));
-        this.drawControllerIcon(ctx, iconX + FAV_ICON_SIZE / 2, iconY + FAV_ICON_SIZE / 2, pack.accent2);
+            this.withAlpha(COLOR_PACK.accent2, 0.16));
+        this.drawControllerIcon(ctx, iconX + FAV_ICON_SIZE / 2, iconY + FAV_ICON_SIZE / 2, COLOR_PACK.accent2);
 
         const midY = y + FAV_HEIGHT / 2 + 0.5 * SCALE;
         let cursorX = iconX + FAV_ICON_SIZE + 10 * SCALE;
@@ -536,7 +522,7 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, hoursText, hoursX, midY, hoursStyle);
     }
 
-    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileBadge[], x: number, y: number, width: number, height: number): void {
+    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileAchievement[], x: number, y: number, width: number, height: number): void {
         const visible = badges.slice(0, 4);
         const rowHeight = visible.length > 0 ? height / visible.length : BADGE_ROW_HEIGHT;
 
@@ -562,25 +548,27 @@ class ProfileCardService extends BaseCard {
         ctx.restore();
     }
 
-    private drawBadgeRow(ctx: CanvasRenderingContext2D, badge: ProfileBadge, x: number, y: number, width: number, height: number): void {
-        ctx.fillStyle = badge.color;
+    private drawBadgeRow(ctx: CanvasRenderingContext2D, badge: ProfileAchievement, x: number, y: number, width: number, height: number): void {
+        const color = getEnumProperty(AchievementEnum, badge.achievementEnum, MetadataKeyEnum.Color) as Color;
+        const icon = getEnumProperty(AchievementEnum, badge.achievementEnum, MetadataKeyEnum.Emoji) as string;
+        ctx.fillStyle = color;
         ctx.fillRect(x, y, BADGE_ACCENT_WIDTH, height);
 
         const iconX = x + BADGE_ACCENT_WIDTH + 12 * SCALE;
         const iconY = y + (height - BADGE_ICON_SIZE) / 2;
         this.fillRoundedRect(ctx, iconX, iconY, BADGE_ICON_SIZE, BADGE_ICON_SIZE, BADGE_ICON_RADIUS,
-            this.withAlpha(badge.color, 0.18));
+            this.withAlpha(color, 0.18));
         this.strokeRoundedRect(ctx, iconX, iconY, BADGE_ICON_SIZE, BADGE_ICON_SIZE, BADGE_ICON_RADIUS, {
-            color: this.withAlpha(badge.color, 0.3),
+            color: this.withAlpha(color, 0.3),
             width: 1 * SCALE,
         });
 
-        this.drawText(ctx, badge.icon,
+        this.drawText(ctx, icon,
             iconX + BADGE_ICON_SIZE / 2,
             iconY + BADGE_ICON_SIZE / 2 + 1 * SCALE,
             {
                 font: `${18 * SCALE}px ${FONT_SANS}`,
-                color: badge.color,
+                color: color,
                 align: 'center',
                 baseline: 'middle',
             },
@@ -632,7 +620,7 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, this.truncateText(ctx, badge.description, titleMaxW), titleX, textTop + 17 * SCALE, descStyle);
     }
 
-    private drawTrophyIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string): void {
+    private drawTrophyIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: Color): void {
         const size = 14 * SCALE;
         const w = size;
         const h = size;
@@ -663,7 +651,7 @@ class ProfileCardService extends BaseCard {
         ctx.stroke();
     }
 
-    private drawStarIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string, radius: number): void {
+    private drawStarIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: Color, radius: number): void {
         ctx.fillStyle = color;
         ctx.beginPath();
         for (let i = 0; i < 10; i++) {
@@ -678,7 +666,7 @@ class ProfileCardService extends BaseCard {
         ctx.fill();
     }
 
-    private drawControllerIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string): void {
+    private drawControllerIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: Color): void {
         const w = 14 * SCALE;
         const h = 9 * SCALE;
         const x = cx - w / 2;
@@ -702,7 +690,8 @@ class ProfileCardService extends BaseCard {
     private formatJoined(date: Date): string {
         if (!date)
             date = new Date();
-        return `Member since ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
+        // TODO: i18n
+        return `Member since ${formatDate(date, true)}`;
     }
 
     private formatNumber(n: number): string {

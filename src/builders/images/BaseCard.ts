@@ -4,16 +4,17 @@ import * as path from 'path';
 import { GeneratedMedia, MediaType } from '../../interfaces/application/Media';
 import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
 import Logger from '../../utils/application/Logger';
+import { Color } from '../../utils/helpers/Color';
 
 export interface TextStyle {
     font: string;
-    color: string | CanvasGradient;
+    color: Color | CanvasGradient;
     align?: CanvasTextAlign;
     baseline?: CanvasTextBaseline;
 }
 
 export interface StrokeStyle {
-    color: string;
+    color: Color;
     width: number;
 }
 
@@ -53,7 +54,7 @@ export abstract class BaseCard {
         };
     }
 
-    protected withAlpha(hex: string, alpha: number): string {
+    protected withAlpha(hex: string, alpha: number): Color {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
         const b = parseInt(hex.slice(5, 7), 16);
@@ -89,7 +90,7 @@ export abstract class BaseCard {
         width: number,
         height: number,
         radius: number,
-        fill: string | CanvasGradient,
+        fill: Color | CanvasGradient,
     ): void {
         this.roundedRectPath(ctx, x, y, width, height, radius);
         ctx.fillStyle = fill;
@@ -131,7 +132,7 @@ export abstract class BaseCard {
         cx: number,
         cy: number,
         radius: number,
-        fill: string | CanvasGradient,
+        fill: Color | CanvasGradient,
     ): void {
         ctx.fillStyle = fill;
         ctx.beginPath();
@@ -144,7 +145,7 @@ export abstract class BaseCard {
         cx: number,
         cy: number,
         radius: number,
-        color: string,
+        color: Color,
         stops: GlowStop[],
     ): void {
         const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);

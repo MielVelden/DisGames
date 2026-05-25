@@ -1,5 +1,17 @@
 import humanizeDurationMs from "humanize-duration";
 
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export function formatDate(date: Date, includeDate: boolean = true): string {
+    if (!date || isNaN(date.getTime()))
+        return "Unknown";
+
+    if (includeDate)
+        return `${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    
+    return `${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 export function isDate(value: any): value is Date {
     return value instanceof Date;
 }

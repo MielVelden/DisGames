@@ -8,7 +8,7 @@ import { SettingsResponse } from "../../interfaces/view/Settings";
 
 export function createSettingsContainer(settings: SettingsResponse, actions: ActionButton[]): Component[] {
     const settingsContainerImage = MediaService.getBaseImage('settings');
-    const language = new MultiLingualString(i18n.languages[settings.LanguageEnum]).getMessage(settings.LanguageEnum);
+    const language = new MultiLingualString(i18n.enums.languages[settings.LanguageEnum]).getMessage(settings.LanguageEnum);
 
     return [
         ComponentService.createImage(settingsContainerImage, false),

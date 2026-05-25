@@ -1,4 +1,4 @@
-import { ExceptionEnum, MetricEnum } from "../enums";
+import { ExceptionEnum, MetricEnum, UserRoleEnum } from "../enums";
 import { GamesCommandActionEnum } from "../enums/commands/Games";
 import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
@@ -210,7 +210,10 @@ export interface I18nTranslations {
             description: LanguageTranslations;
         }
     }
-    exceptions: LanguageEnumTranslations<ExceptionEnum>;
-    languages: LanguageEnumTranslations<LanguageEnum>;
-    metrics: LanguageEnumTranslations<MetricEnum>;
+    enums: {
+        exceptions: LanguageEnumTranslations<ExceptionEnum>;
+        languages: LanguageEnumTranslations<LanguageEnum>;
+        metrics: LanguageEnumTranslations<MetricEnum>;
+        userRoles: LanguageEnumTranslations<UserRoleEnum>;
+    }
 }

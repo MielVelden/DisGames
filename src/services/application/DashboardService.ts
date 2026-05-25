@@ -84,12 +84,12 @@ class DashboardService {
         return {
             id: metric.toString().toLowerCase(),
             metricEnum: metric,
-            title: i18n.metrics[metric][LanguageEnum.EN],
-            description: i18n.metrics[metric][LanguageEnum.EN],
+            title: i18n.enums.metrics[metric][LanguageEnum.EN],
+            description: i18n.enums.metrics[metric][LanguageEnum.EN],
             value: model.Value,
             trend: undefined,
             footer: {
-                primaryText: i18n.metrics[metric][LanguageEnum.EN],
+                primaryText: i18n.enums.metrics[metric][LanguageEnum.EN],
                 secondaryText: `Recorded ${humanizeDateFromNow(model.Datetime)}`
             }
         }
