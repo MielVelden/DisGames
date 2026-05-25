@@ -1,8 +1,23 @@
+import { CanvasRenderingContext2D } from 'canvas';
 import * as fs from 'fs';
 import * as path from 'path';
 import { GeneratedMedia, MediaType } from '../../interfaces/application/Media';
 import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
 import Logger from '../../utils/application/Logger';
+
+export interface TextStyle {
+    font: string;
+    color: string | CanvasGradient;
+    align?: CanvasTextAlign;
+    baseline?: CanvasTextBaseline;
+}
+
+export interface StrokeStyle {
+    color: string;
+    width: number;
+}
+
+export type GlowStop = [offset: number, alpha: number];
 
 export abstract class BaseCard {
     protected readonly imagesPath: string;
@@ -43,5 +58,106 @@ export abstract class BaseCard {
         const g = parseInt(hex.slice(3, 5), 16);
         const b = parseInt(hex.slice(5, 7), 16);
         return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    protected roundedRectPath(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        radius: number,
+    ): void {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        ctx.lineTo(x + r, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    protected fillRoundedRect(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        radius: number,
+        fill: string | CanvasGradient,
+    ): void {
+        this.roundedRectPath(ctx, x, y, width, height, radius);
+        ctx.fillStyle = fill;
+        ctx.fill();
+    }
+
+    protected strokeRoundedRect(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        radius: number,
+        stroke: StrokeStyle,
+    ): void {
+        const half = stroke.width / 2;
+        this.roundedRectPath(ctx, x + half, y + half, width - stroke.width, height - stroke.width, radius);
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = stroke.width;
+        ctx.stroke();
+    }
+
+    protected drawText(
+        ctx: CanvasRenderingContext2D,
+        text: string,
+        x: number,
+        y: number,
+        style: TextStyle,
+    ): void {
+        ctx.font = style.font;
+        ctx.fillStyle = style.color;
+        ctx.textAlign = style.align ?? 'left';
+        ctx.textBaseline = style.baseline ?? 'alphabetic';
+        ctx.fillText(text, x, y);
+    }
+
+    protected fillCircle(
+        ctx: CanvasRenderingContext2D,
+        cx: number,
+        cy: number,
+        radius: number,
+        fill: string | CanvasGradient,
+    ): void {
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    protected drawRadialGlow(
+        ctx: CanvasRenderingContext2D,
+        cx: number,
+        cy: number,
+        radius: number,
+        color: string,
+        stops: GlowStop[],
+    ): void {
+        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        for (const [offset, alpha] of stops) {
+            glow.addColorStop(offset, this.withAlpha(color, alpha));
+        }
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
 }

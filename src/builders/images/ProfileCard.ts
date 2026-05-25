@@ -1,307 +1,726 @@
 import { createCanvas, CanvasRenderingContext2D } from 'canvas';
 import * as fs from 'fs';
 import * as path from 'path';
-import { BaseCard } from './BaseCard';
+import { GeneratedMedia } from '../../interfaces/application/Media';
+import { BaseCard, TextStyle } from './BaseCard';
+import { SCALE, FONT_SANS, FONT_MONO } from './CardTokens';
 
-export interface StatRow {
-    icon: string;
-    label: string;
-    value: string;
-}
+export type ProfileColorPack = 'cosmic' | 'ember' | 'toxic' | 'frost' | 'solar';
+export type ProfileRole = 'owner' | 'admin' | 'mod' | 'member';
 
-export interface Achievement {
+export interface ProfileBadge {
     icon: string;
-    iconColor: string;
+    color: string;
     title: string;
     description: string;
     date: string;
 }
 
-export interface ProfileCardOptions {
-    title?: string;
-    stats?: StatRow[];
-    achievementsTitle?: string;
-    achievements?: Achievement[];
-    accentColor?: string;
-    sphereColor?: string;
+export interface ProfileCardData {
+    username: string;
+    userId: string;
+    joinedAt: Date;
+    role: ProfileRole;
+    rank: number;
+    totalUsers: number;
+    totalPoints: number;
+    level: number;
+    xpCurrent: number;
+    xpMax: number;
+    favoriteGame: string;
+    favoriteHours: number;
+    pack?: ProfileColorPack;
+    badges?: ProfileBadge[];
+    online?: boolean;
 }
 
-// ── Layout constants ──────────────────────────────────────────────────────────
-const SPHERE_R = 50;
-const CARD_H = 280;   // both cards share the same height
-const CARD_R = 22;
+interface ColorPack {
+    deep: string;
+    base: string;
+    mid: string;
+    accent: string;
+    accent2: string;
+}
 
-// Left card — starts lower because sphere sits on its top edge
-const L_X = 10;
-const L_Y = SPHERE_R + 8;          // 58
-const L_W = 275;
-const L_H = CARD_H;
-const SPH_CX = L_X + L_W / 2;     // 147.5
-const SPH_CY = L_Y;
+const CARD_WIDTH = 840 * SCALE;
+const CARD_HEIGHT = 360 * SCALE;
+const CARD_PADDING = 22 * SCALE;
+const CARD_RADIUS = 18 * SCALE;
+const CARD_BORDER_COLOR = 'rgba(255,255,255,0.08)';
 
-// Right card — same height, bottom-aligned with left card
-const GAP = 18;
-const R_X = L_X + L_W + GAP;      // 303
-const R_Y = L_Y;                   // same top → same bottom
-const R_W = 326;
-const R_H = CARD_H;
+const COLUMN_GAP = 22 * SCALE;
+const COLUMN_WIDTH = (CARD_WIDTH - CARD_PADDING * 2 - COLUMN_GAP) / 2;
+const LEFT_COLUMN_X = CARD_PADDING;
+const RIGHT_COLUMN_X = CARD_PADDING + COLUMN_WIDTH + COLUMN_GAP;
 
-const CANVAS_W = R_X + R_W + 12;  // 641
-const CANVAS_H = L_Y + CARD_H + 20;
+const COLOR_TEXT = '#f3eefe';
+const COLOR_TEXT_MUTED = '#a5a0c9';
+const COLOR_TEXT_FAINT = '#6b67a0';
+const COLOR_PANEL = 'rgba(0,0,0,0.18)';
+const COLOR_PANEL_BORDER = 'rgba(255,255,255,0.06)';
+const COLOR_CHIP_BG = 'rgba(255,255,255,0.04)';
+const COLOR_CHIP_BORDER = 'rgba(255,255,255,0.06)';
+const COLOR_DIVIDER = 'rgba(255,255,255,0.06)';
+const COLOR_DIVIDER_STRONG = 'rgba(255,255,255,0.10)';
+const COLOR_PROGRESS_TRACK = 'rgba(0,0,0,0.4)';
+const COLOR_STATUS_ONLINE = '#3ec875';
+const COLOR_STATUS_OFFLINE = '#6b67a0';
 
-const FILE_ROW_H = 70;
-// ─────────────────────────────────────────────────────────────────────────────
+const COLOR_PACKS: Record<ProfileColorPack, ColorPack> = {
+    cosmic: { deep: '#1a1742', base: '#27245C', mid: '#312898', accent: '#D938C8', accent2: '#7C3BFF' },
+    ember: { deep: '#2a0f1f', base: '#4a1530', mid: '#8e1a4a', accent: '#FF7A3D', accent2: '#FFC857' },
+    toxic: { deep: '#0d2418', base: '#143a26', mid: '#1f6b3e', accent: '#6EE787', accent2: '#20E3B2' },
+    frost: { deep: '#0c1a33', base: '#143055', mid: '#1f5a9e', accent: '#5BE2FF', accent2: '#B794F6' },
+    solar: { deep: '#2a1738', base: '#432064', mid: '#7a2d8a', accent: '#FFD23F', accent2: '#FF5DA2' },
+};
 
-class ProfileCard extends BaseCard {
-    private readonly defaultConfig: Required<ProfileCardOptions> = {
-        title: 'Your Progress',
-        stats: [],
-        achievementsTitle: 'Shared Files',
-        achievements: [],
-        accentColor: '#8B5CF6',
-        sphereColor: '#8B5CF6',
-    };
+const ROLE_LABELS: Record<ProfileRole, string> = {
+    owner: 'OWNER',
+    admin: 'ADMIN',
+    mod: 'MOD',
+    member: 'MEMBER',
+};
 
+const AVATAR_SIZE = 64 * SCALE;
+const AVATAR_RADIUS = 16 * SCALE;
+const AVATAR_INNER_RADIUS = 14 * SCALE;
+const AVATAR_RING_WIDTH = 2 * SCALE;
+
+const SECTION_GAP = 16 * SCALE;
+const HEADER_TOP = CARD_PADDING + 8 * SCALE;
+const AVATAR_TEXT_GAP = 14 * SCALE;
+
+const CHIP_HEIGHT = 54 * SCALE;
+const CHIP_RADIUS = 10 * SCALE;
+const CHIP_GAP = 10 * SCALE;
+const CHIP_ICON_SIZE = 30 * SCALE;
+const CHIP_ICON_RADIUS = 8 * SCALE;
+
+const LEVEL_BLOCK_HEIGHT = 84 * SCALE;
+const LEVEL_BLOCK_RADIUS = 12 * SCALE;
+const PROGRESS_HEIGHT = 10 * SCALE;
+const PROGRESS_RADIUS = 5 * SCALE;
+const PROGRESS_TIP_RADIUS = 7 * SCALE;
+
+const FAV_HEIGHT = 22 * SCALE;
+const FAV_ICON_SIZE = 22 * SCALE;
+const FAV_ICON_RADIUS = 6 * SCALE;
+
+const BADGES_RADIUS = 12 * SCALE;
+const BADGE_ROW_HEIGHT = 70 * SCALE;
+const BADGE_ICON_SIZE = 36 * SCALE;
+const BADGE_ICON_RADIUS = 9 * SCALE;
+const BADGE_ACCENT_WIDTH = 4 * SCALE;
+
+const BRAND_TOP = 14 * SCALE;
+const BRAND_RIGHT = 16 * SCALE;
+
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+class ProfileCardService extends BaseCard {
     constructor() {
         super(path.join('images', 'generated'));
     }
 
-    public async generate(options: ProfileCardOptions = {}) {
-        const config: Required<ProfileCardOptions> = { ...this.defaultConfig, ...options };
+    public async generate(data: ProfileCardData): Promise<GeneratedMedia> {
+        const pack = COLOR_PACKS[data.pack ?? 'cosmic'];
         const uniqueCode = this.generateUniqueCode();
-        const filepath = path.join(this.imagesPath, `${uniqueCode}.png`);
+        const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
-        this.generateImageFile(config, filepath);
-
-        return this.buildMedia(uniqueCode, filepath);
-    }
-
-    private generateImageFile(config: Required<ProfileCardOptions>, filepath: string): void {
-        const canvas = createCanvas(CANVAS_W, CANVAS_H);
+        const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
 
-        this.drawCard(ctx, L_X, L_Y, L_W, L_H, CARD_R);
-        this.drawCard(ctx, R_X, R_Y, R_W, R_H, CARD_R);
+        this.drawCardBackground(ctx, pack);
+        this.drawBrand(ctx, pack);
 
-        this.drawSphere(ctx, config.sphereColor);
-        this.drawLeftContent(ctx, config);
-        this.drawRightContent(ctx, config);
+        let leftY = HEADER_TOP;
+        this.drawHeader(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        leftY += AVATAR_SIZE + SECTION_GAP;
+
+        this.drawStats(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        leftY += CHIP_HEIGHT + SECTION_GAP;
+
+        this.drawLevelBlock(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        leftY += LEVEL_BLOCK_HEIGHT + SECTION_GAP;
+
+        this.drawFavorite(ctx, data, pack, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+
+        const rightHeight = CARD_HEIGHT - HEADER_TOP - CARD_PADDING;
+        this.drawBadges(ctx, data.badges ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight);
 
         fs.writeFileSync(filepath, canvas.toBuffer('image/png'));
-    }
 
-    // ── Left panel ────────────────────────────────────────────────────────────
-
-    private drawLeftContent(ctx: CanvasRenderingContext2D, config: Required<ProfileCardOptions>): void {
-        const cx = SPH_CX;
-        const belowSphere = SPH_CY + SPHERE_R + 18;  // ~126
-
-        ctx.fillStyle = '#1f2937';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(config.title, cx, belowSphere);
-
-        const dividerY = belowSphere + 20;
-        this.drawDivider(ctx, L_X + 20, dividerY, L_X + L_W - 20);
-
-        const statsStartY = dividerY + 28;
-        config.stats.forEach((stat, i) => {
-            this.drawStatRow(ctx, stat, L_X + 30, statsStartY + i * 42);
+        return this.buildMedia(uniqueCode, filepath, {
+            name: `${data.userId}-${uniqueCode}`,
         });
     }
 
-    private drawStatRow(ctx: CanvasRenderingContext2D, stat: StatRow, x: number, y: number): void {
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'left';
-
-        ctx.font = '16px "Segoe UI Emoji", Arial';
-        ctx.fillStyle = '#374151';
-        ctx.fillText(stat.icon, x, y);
-
-        ctx.font = '14px Arial';
-        ctx.fillStyle = '#9ca3af';
-        const labelText = `${stat.label}: `;
-        const labelW = ctx.measureText(labelText).width;
-        ctx.fillText(labelText, x + 28, y);
-
-        ctx.font = 'bold 14px Arial';
-        ctx.fillStyle = '#374151';
-        ctx.fillText(stat.value, x + 28 + labelW, y);
-    }
-
-    // ── Right panel ───────────────────────────────────────────────────────────
-
-    private drawRightContent(ctx: CanvasRenderingContext2D, config: Required<ProfileCardOptions>): void {
-        const padX = 20;
-        const innerX = R_X + padX;
-        const innerRight = R_X + R_W - padX;
-        const headerY = R_Y + 22;
-
-        ctx.textBaseline = 'middle';
-
-        ctx.fillStyle = '#1f2937';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(config.achievementsTitle, innerX, headerY);
-
-        const dividerY = headerY + 18;
-        this.drawDivider(ctx, innerX, dividerY, innerRight);
-
-        let rowY = dividerY + 1;
-        config.achievements.forEach((file, i) => {
-            this.drawFileRow(ctx, file, innerX, innerRight, rowY);
-            rowY += FILE_ROW_H;
-            if (i < config.achievements.length - 1) {
-                this.drawDivider(ctx, innerX, rowY, innerRight);
-            }
-        });
-    }
-
-    private drawFileRow(
-        ctx: CanvasRenderingContext2D,
-        file: Achievement,
-        x: number,
-        rightEdge: number,
-        rowY: number
-    ): void {
-        const iconSize = 44;
-        const iconX = x;
-        const iconY = rowY + (FILE_ROW_H - iconSize) / 2;
-
-        this.drawRoundedRect(ctx, iconX, iconY, iconSize, iconSize, 8, file.iconColor);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `bold ${file.icon.length > 2 ? 11 : 13}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(file.icon, iconX + iconSize / 2, iconY + iconSize / 2);
-
-        const textX = iconX + iconSize + 12;
-        const rowCenterY = rowY + FILE_ROW_H / 2;
-
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#111827';
-        ctx.font = 'bold 14px Arial';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText(file.title, textX, rowCenterY - 2);
-
-        ctx.fillStyle = '#9ca3af';
-        ctx.font = '12px Arial';
-        ctx.fillText(file.description, textX, rowCenterY + 15);
-
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#9ca3af';
-        ctx.font = '12px Arial';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(file.date, rightEdge, rowCenterY + 6);
-    }
-
-    // ── Shared drawing helpers ────────────────────────────────────────────────
-
-    private drawCard(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+    private drawCardBackground(ctx: CanvasRenderingContext2D, pack: ColorPack): void {
         ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.12)';
-        ctx.shadowBlur = 24;
-        ctx.shadowOffsetY = 5;
-        this.drawRoundedRect(ctx, x, y, w, h, r, '#ffffff');
-        ctx.restore();
-    }
-
-    private drawDivider(ctx: CanvasRenderingContext2D, x1: number, y: number, x2: number): void {
-        ctx.save();
-        ctx.strokeStyle = '#f3f4f6';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x1, y);
-        ctx.lineTo(x2, y);
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    private drawSphere(ctx: CanvasRenderingContext2D, color: string): void {
-        const cx = SPH_CX;
-        const cy = SPH_CY;
-        const r = SPHERE_R;
-
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.22)';
-        ctx.shadowBlur = 16;
-        ctx.shadowOffsetY = 7;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        this.roundedRectPath(ctx, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS);
         ctx.clip();
 
-        const base = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.04, cx + r * 0.1, cy + r * 0.1, r * 1.2);
-        base.addColorStop(0, this.adjustBrightness(color, 60));
-        base.addColorStop(0.45, color);
-        base.addColorStop(1, this.adjustBrightness(color, -50));
+        const base = ctx.createLinearGradient(0, 0, 0, CARD_HEIGHT);
+        base.addColorStop(0, pack.base);
+        base.addColorStop(1, pack.deep);
         ctx.fillStyle = base;
-        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-        const bumpR = r * 0.115;
-        const spacingX = bumpR * 2.55;
-        const spacingY = bumpR * 2.25;
-        for (let row = -r; row <= r; row += spacingY) {
-            const offsetX = Math.round(row / spacingY) % 2 === 0 ? 0 : bumpR * 1.27;
-            for (let col = -r - bumpR; col <= r + bumpR; col += spacingX) {
-                const bx = cx + col + offsetX;
-                const by = cy + row;
-                const dx = bx - cx, dy = by - cy;
-                if (dx * dx + dy * dy >= (r - bumpR * 0.6) ** 2) continue;
-                const z = Math.sqrt(Math.max(0, r * r - dx * dx - dy * dy)) / r;
-                const bGrad = ctx.createRadialGradient(bx - bumpR * 0.35, by - bumpR * 0.35, 0, bx, by, bumpR);
-                bGrad.addColorStop(0, this.withAlpha(this.adjustBrightness(color, 50 + z * 20), 0.9));
-                bGrad.addColorStop(0.55, this.withAlpha(this.adjustBrightness(color, z * 15 - 10), 0.75));
-                bGrad.addColorStop(1, this.withAlpha(this.adjustBrightness(color, -30), 0.5));
-                ctx.beginPath();
-                ctx.arc(bx, by, bumpR, 0, Math.PI * 2);
-                ctx.fillStyle = bGrad;
-                ctx.fill();
-            }
+        const topRight = ctx.createRadialGradient(CARD_WIDTH, 0, 0, CARD_WIDTH, 0, 420 * SCALE);
+        topRight.addColorStop(0, this.withAlpha(pack.accent, 0.24));
+        topRight.addColorStop(1, this.withAlpha(pack.accent, 0));
+        ctx.fillStyle = topRight;
+        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+        const bottomLeft = ctx.createRadialGradient(0, CARD_HEIGHT, 0, 0, CARD_HEIGHT, 360 * SCALE);
+        bottomLeft.addColorStop(0, this.withAlpha(pack.accent2, 0.18));
+        bottomLeft.addColorStop(1, this.withAlpha(pack.accent2, 0));
+        ctx.fillStyle = bottomLeft;
+        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+        ctx.restore();
+
+        this.strokeRoundedRect(ctx, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS, {
+            color: CARD_BORDER_COLOR,
+            width: 1 * SCALE,
+        });
+    }
+
+    private drawBrand(ctx: CanvasRenderingContext2D, pack: ColorPack): void {
+        const text = 'DISGAMES';
+        const fontSize = 10 * SCALE;
+        const brandStyle: TextStyle = {
+            font: `600 ${fontSize}px ${FONT_MONO}`,
+            color: COLOR_TEXT_FAINT,
+            baseline: 'middle',
+        };
+        ctx.font = brandStyle.font;
+        const textWidth = ctx.measureText(text).width;
+        const dotR = 2.5 * SCALE;
+        const gap = 5 * SCALE;
+        const totalWidth = dotR * 2 + gap + textWidth;
+        const right = CARD_WIDTH - BRAND_RIGHT;
+        const top = BRAND_TOP + fontSize / 2;
+        const dotCx = right - totalWidth + dotR;
+
+        this.fillCircle(ctx, dotCx, top, dotR + 1.5 * SCALE, this.withAlpha(pack.accent, 0.2));
+        this.fillCircle(ctx, dotCx, top, dotR, pack.accent);
+
+        this.drawText(ctx, text, dotCx + dotR + gap, top, brandStyle);
+    }
+
+    private drawHeader(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+        this.drawAvatar(ctx, data, pack, x, y);
+
+        const textLeft = x + AVATAR_SIZE + AVATAR_TEXT_GAP;
+        const textMaxWidth = width - AVATAR_SIZE - AVATAR_TEXT_GAP;
+        const nameY = y + 4 * SCALE;
+        const nameStyle: TextStyle = {
+            font: `700 ${22 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT,
+            baseline: 'top',
+        };
+        ctx.font = nameStyle.font;
+        const truncated = this.truncateText(ctx, data.username, textMaxWidth - 80 * SCALE);
+        this.drawText(ctx, truncated, textLeft, nameY, nameStyle);
+
+        const usernameWidth = ctx.measureText(truncated).width;
+        const badgeX = textLeft + usernameWidth + 8 * SCALE;
+        const badgeY = nameY + 2 * SCALE;
+        this.drawRoleBadge(ctx, data.role, pack, badgeX, badgeY);
+
+        const subY = nameY + 22 * SCALE + 8 * SCALE;
+        this.drawHeaderSub(ctx, data, textLeft, subY, textMaxWidth);
+    }
+
+    private drawAvatar(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number): void {
+        const ringGrad = ctx.createLinearGradient(x, y, x + AVATAR_SIZE, y + AVATAR_SIZE);
+        ringGrad.addColorStop(0, pack.accent);
+        ringGrad.addColorStop(0.5, pack.accent2);
+        ringGrad.addColorStop(1, pack.mid);
+        this.fillRoundedRect(ctx, x, y, AVATAR_SIZE, AVATAR_SIZE, AVATAR_RADIUS, ringGrad);
+
+        const innerX = x + AVATAR_RING_WIDTH;
+        const innerY = y + AVATAR_RING_WIDTH;
+        const innerSize = AVATAR_SIZE - AVATAR_RING_WIDTH * 2;
+
+        const innerGrad = ctx.createLinearGradient(innerX, innerY, innerX + innerSize, innerY + innerSize);
+        innerGrad.addColorStop(0, pack.mid);
+        innerGrad.addColorStop(1, pack.deep);
+        this.fillRoundedRect(ctx, innerX, innerY, innerSize, innerSize, AVATAR_INNER_RADIUS, innerGrad);
+
+        this.drawText(ctx, this.getInitials(data.username),
+            innerX + innerSize / 2,
+            innerY + innerSize / 2 + 1 * SCALE,
+            {
+                font: `700 ${26 * SCALE}px ${FONT_SANS}`,
+                color: COLOR_TEXT,
+                align: 'center',
+                baseline: 'middle',
+            },
+        );
+
+        const statusR = 8 * SCALE;
+        const statusCx = x + AVATAR_SIZE - statusR / 2;
+        const statusCy = y + AVATAR_SIZE - statusR / 2;
+        this.fillCircle(ctx, statusCx, statusCy, statusR + 3 * SCALE, pack.deep);
+        this.fillCircle(ctx, statusCx, statusCy, statusR,
+            data.online === false ? COLOR_STATUS_OFFLINE : COLOR_STATUS_ONLINE);
+    }
+
+    private drawRoleBadge(ctx: CanvasRenderingContext2D, role: ProfileRole, pack: ColorPack, x: number, y: number): void {
+        const label = ROLE_LABELS[role];
+        const fontSize = 10.5 * SCALE;
+        const padX = 8 * SCALE;
+        const height = 22 * SCALE;
+        const radius = 6 * SCALE;
+
+        ctx.font = `700 ${fontSize}px ${FONT_SANS}`;
+        const textWidth = ctx.measureText(label).width;
+        const width = textWidth + padX * 2;
+
+        let bgFill: string | CanvasGradient;
+        let textColor: string;
+        let borderColor: string;
+
+        if (role === 'owner') {
+            const grad = ctx.createLinearGradient(x, y, x + width, y + height);
+            grad.addColorStop(0, pack.accent);
+            grad.addColorStop(1, pack.accent2);
+            bgFill = grad;
+            textColor = '#ffffff';
+            borderColor = 'transparent';
+        } else if (role === 'admin') {
+            bgFill = this.withAlpha(pack.accent, 0.22);
+            textColor = '#ffffff';
+            borderColor = this.withAlpha(pack.accent, 0.4);
+        } else if (role === 'mod') {
+            bgFill = this.withAlpha(pack.accent2, 0.22);
+            textColor = '#ffffff';
+            borderColor = this.withAlpha(pack.accent2, 0.4);
+        } else {
+            bgFill = 'rgba(255,255,255,0.06)';
+            textColor = COLOR_TEXT_MUTED;
+            borderColor = 'rgba(255,255,255,0.10)';
         }
 
-        const hl = ctx.createRadialGradient(cx - r * 0.32, cy - r * 0.38, 0, cx - r * 0.32, cy - r * 0.38, r * 0.62);
-        hl.addColorStop(0, 'rgba(255,255,255,0.48)');
-        hl.addColorStop(0.45, 'rgba(255,255,255,0.1)');
-        hl.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = hl;
-        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+        this.fillRoundedRect(ctx, x, y, width, height, radius, bgFill);
+        if (borderColor !== 'transparent') {
+            this.strokeRoundedRect(ctx, x, y, width, height, radius, {
+                color: borderColor,
+                width: 1 * SCALE,
+            });
+        }
+
+        this.drawText(ctx, label, x + width / 2, y + height / 2 + 1 * SCALE, {
+            font: `700 ${fontSize}px ${FONT_SANS}`,
+            color: textColor,
+            align: 'center',
+            baseline: 'middle',
+        });
+    }
+
+    private drawHeaderSub(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, maxWidth: number): void {
+        const pillH = 14 * SCALE;
+        const pillPad = 4 * SCALE;
+        const pillFont = 9 * SCALE;
+        const pillStyle: TextStyle = {
+            font: `700 ${pillFont}px ${FONT_SANS}`,
+            color: COLOR_TEXT_FAINT,
+            align: 'center',
+            baseline: 'middle',
+        };
+        ctx.font = pillStyle.font;
+        const pillTextW = ctx.measureText('ID').width;
+        const pillW = pillTextW + pillPad * 2;
+
+        this.fillRoundedRect(ctx, x, y, pillW, pillH, 3 * SCALE, 'rgba(255,255,255,0.05)');
+        this.drawText(ctx, 'ID', x + pillW / 2, y + pillH / 2 + 0.5 * SCALE, pillStyle);
+
+        const idStyle: TextStyle = {
+            font: `500 ${10.5 * SCALE}px ${FONT_MONO}`,
+            color: COLOR_TEXT_FAINT,
+            baseline: 'middle',
+        };
+        ctx.font = idStyle.font;
+        const idX = x + pillW + 5 * SCALE;
+        const idText = this.truncateText(ctx, data.userId, maxWidth * 0.45);
+        this.drawText(ctx, idText, idX, y + pillH / 2 + 0.5 * SCALE, idStyle);
+        const idW = ctx.measureText(idText).width;
+
+        const dotX = idX + idW + 8 * SCALE;
+        const dotCy = y + pillH / 2;
+        this.fillCircle(ctx, dotX, dotCy, 1.5 * SCALE, COLOR_TEXT_FAINT);
+
+        this.drawText(ctx, this.formatJoined(data.joinedAt), dotX + 8 * SCALE, y + pillH / 2 + 0.5 * SCALE, {
+            font: `500 ${11 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT_MUTED,
+            baseline: 'middle',
+        });
+    }
+
+    private drawStats(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+        const chipW = (width - CHIP_GAP) / 2;
+
+        this.drawChip(ctx, x, y, chipW,
+            'SERVER RANK',
+            `#${this.formatNumber(data.rank)}`,
+            ` / ${this.formatNumber(data.totalUsers)}`,
+            pack.accent,
+            (cx, cy) => this.drawTrophyIcon(ctx, cx, cy, pack.accent),
+        );
+
+        this.drawChip(ctx, x + chipW + CHIP_GAP, y, chipW,
+            'TOTAL POINTS',
+            this.formatNumber(data.totalPoints),
+            ' pts',
+            pack.accent2,
+            (cx, cy) => this.drawStarIcon(ctx, cx, cy, pack.accent2, 7 * SCALE),
+        );
+    }
+
+    private drawChip(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        width: number,
+        label: string,
+        value: string,
+        valueSuffix: string,
+        iconColor: string,
+        drawIcon: (cx: number, cy: number) => void,
+    ): void {
+        this.fillRoundedRect(ctx, x, y, width, CHIP_HEIGHT, CHIP_RADIUS, COLOR_CHIP_BG);
+        this.strokeRoundedRect(ctx, x, y, width, CHIP_HEIGHT, CHIP_RADIUS, {
+            color: COLOR_CHIP_BORDER,
+            width: 1 * SCALE,
+        });
+
+        const iconX = x + 12 * SCALE;
+        const iconY = y + (CHIP_HEIGHT - CHIP_ICON_SIZE) / 2;
+        this.fillRoundedRect(ctx, iconX, iconY, CHIP_ICON_SIZE, CHIP_ICON_SIZE, CHIP_ICON_RADIUS,
+            this.withAlpha(iconColor, 0.18));
+        drawIcon(iconX + CHIP_ICON_SIZE / 2, iconY + CHIP_ICON_SIZE / 2);
+
+        const textX = iconX + CHIP_ICON_SIZE + 10 * SCALE;
+        this.drawText(ctx, label, textX, y + 12 * SCALE, {
+            font: `600 ${9.5 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT_FAINT,
+            baseline: 'top',
+        });
+
+        const valueStyle: TextStyle = {
+            font: `700 ${15 * SCALE}px ${FONT_MONO}`,
+            color: COLOR_TEXT,
+            baseline: 'top',
+        };
+        ctx.font = valueStyle.font;
+        const valueW = ctx.measureText(value).width;
+        this.drawText(ctx, value, textX, y + 27 * SCALE, valueStyle);
+
+        this.drawText(ctx, valueSuffix, textX + valueW + 2 * SCALE, y + 31 * SCALE, {
+            font: `500 ${11 * SCALE}px ${FONT_MONO}`,
+            color: COLOR_TEXT_FAINT,
+            baseline: 'top',
+        });
+    }
+
+    private drawLevelBlock(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+        this.fillRoundedRect(ctx, x, y, width, LEVEL_BLOCK_HEIGHT, LEVEL_BLOCK_RADIUS, COLOR_PANEL);
+        this.strokeRoundedRect(ctx, x, y, width, LEVEL_BLOCK_HEIGHT, LEVEL_BLOCK_RADIUS, {
+            color: COLOR_PANEL_BORDER,
+            width: 1 * SCALE,
+        });
+
+        const innerX = x + 14 * SCALE;
+        const innerY = y + 14 * SCALE;
+        const innerW = width - 28 * SCALE;
+
+        const lvlPrefixStyle: TextStyle = {
+            font: `600 ${10 * SCALE}px ${FONT_MONO}`,
+            color: pack.accent,
+        };
+        ctx.font = lvlPrefixStyle.font;
+        const lvlPrefixW = ctx.measureText('LVL').width;
+        this.drawText(ctx, 'LVL', innerX, innerY + 24 * SCALE, lvlPrefixStyle);
+
+        this.drawText(ctx, String(data.level), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
+            font: `800 ${30 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT,
+        });
+
+        const xpText = `${this.formatNumber(data.xpCurrent)} / ${this.formatNumber(data.xpMax)} XP`;
+        const xpStyle: TextStyle = {
+            font: `600 ${11.5 * SCALE}px ${FONT_MONO}`,
+            color: COLOR_TEXT_MUTED,
+        };
+        ctx.font = xpStyle.font;
+        const xpW = ctx.measureText(xpText).width;
+        this.drawText(ctx, xpText, innerX + innerW - xpW, innerY + 22 * SCALE, xpStyle);
+
+        const barY = innerY + 40 * SCALE;
+        const pct = data.xpMax > 0 ? Math.max(0, Math.min(1, data.xpCurrent / data.xpMax)) : 0;
+        this.drawProgressBar(ctx, innerX, barY, innerW, pct, pack);
+    }
+
+    private drawProgressBar(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, pct: number, pack: ColorPack): void {
+        this.fillRoundedRect(ctx, x, y, width, PROGRESS_HEIGHT, PROGRESS_RADIUS, COLOR_PROGRESS_TRACK);
+
+        const fillW = Math.round(width * pct);
+        if (fillW <= 0) return;
+
+        const grad = ctx.createLinearGradient(x, 0, x + fillW, 0);
+        grad.addColorStop(0, pack.accent2);
+        grad.addColorStop(1, pack.accent);
+
+        ctx.save();
+        this.roundedRectPath(ctx, x, y, Math.max(fillW, PROGRESS_RADIUS * 2), PROGRESS_HEIGHT, PROGRESS_RADIUS);
+        ctx.clip();
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, fillW, PROGRESS_HEIGHT);
+        ctx.restore();
+
+        const tipCx = x + fillW;
+        const tipCy = y + PROGRESS_HEIGHT / 2;
+        this.drawRadialGlow(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS * 3, pack.accent, [
+            [0, 0.7],
+            [1, 0],
+        ]);
+
+        this.fillCircle(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS, '#ffffff');
+    }
+
+    private drawFavorite(ctx: CanvasRenderingContext2D, data: ProfileCardData, pack: ColorPack, x: number, y: number, width: number): void {
+        const iconX = x + 2 * SCALE;
+        const iconY = y;
+        this.fillRoundedRect(ctx, iconX, iconY, FAV_ICON_SIZE, FAV_ICON_SIZE, FAV_ICON_RADIUS,
+            this.withAlpha(pack.accent2, 0.16));
+        this.drawControllerIcon(ctx, iconX + FAV_ICON_SIZE / 2, iconY + FAV_ICON_SIZE / 2, pack.accent2);
+
+        const midY = y + FAV_HEIGHT / 2 + 0.5 * SCALE;
+        let cursorX = iconX + FAV_ICON_SIZE + 10 * SCALE;
+
+        const labelStyle: TextStyle = {
+            font: `600 ${10 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT_FAINT,
+            baseline: 'middle',
+        };
+        ctx.font = labelStyle.font;
+        this.drawText(ctx, 'FAVORITE', cursorX, midY, labelStyle);
+        cursorX += ctx.measureText('FAVORITE').width + 10 * SCALE;
+
+        ctx.fillStyle = COLOR_DIVIDER_STRONG;
+        ctx.fillRect(cursorX, y + (FAV_HEIGHT - 14 * SCALE) / 2, 1 * SCALE, 14 * SCALE);
+        cursorX += 10 * SCALE;
+
+        const hoursText = `${this.formatNumber(data.favoriteHours)} hrs`;
+        const hoursStyle: TextStyle = {
+            font: `500 ${11 * SCALE}px ${FONT_MONO}`,
+            color: COLOR_TEXT_MUTED,
+            baseline: 'middle',
+        };
+        ctx.font = hoursStyle.font;
+        const hoursW = ctx.measureText(hoursText).width;
+        const hoursX = x + width - hoursW - 2 * SCALE;
+
+        const gameStyle: TextStyle = {
+            font: `600 ${13 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT,
+            baseline: 'middle',
+        };
+        ctx.font = gameStyle.font;
+        const gameMaxW = hoursX - cursorX - 8 * SCALE;
+        const game = this.truncateText(ctx, data.favoriteGame, gameMaxW);
+        this.drawText(ctx, game, cursorX, midY, gameStyle);
+
+        this.drawText(ctx, hoursText, hoursX, midY, hoursStyle);
+    }
+
+    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileBadge[], x: number, y: number, width: number, height: number): void {
+        const visible = badges.slice(0, 4);
+        const rowHeight = visible.length > 0 ? height / visible.length : BADGE_ROW_HEIGHT;
+
+        this.fillRoundedRect(ctx, x, y, width, height, BADGES_RADIUS, COLOR_PANEL);
+        this.strokeRoundedRect(ctx, x, y, width, height, BADGES_RADIUS, {
+            color: COLOR_PANEL_BORDER,
+            width: 1 * SCALE,
+        });
+
+        ctx.save();
+        this.roundedRectPath(ctx, x, y, width, height, BADGES_RADIUS);
+        ctx.clip();
+
+        visible.forEach((badge, i) => {
+            const rowY = y + i * rowHeight;
+            if (i > 0) {
+                ctx.fillStyle = COLOR_DIVIDER;
+                ctx.fillRect(x, rowY, width, 1 * SCALE);
+            }
+            this.drawBadgeRow(ctx, badge, x, rowY, width, rowHeight);
+        });
 
         ctx.restore();
     }
 
-    private drawRoundedRect(
-        ctx: CanvasRenderingContext2D,
-        x: number, y: number, w: number, h: number, r: number, color: string
-    ): void {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
+    private drawBadgeRow(ctx: CanvasRenderingContext2D, badge: ProfileBadge, x: number, y: number, width: number, height: number): void {
+        ctx.fillStyle = badge.color;
+        ctx.fillRect(x, y, BADGE_ACCENT_WIDTH, height);
+
+        const iconX = x + BADGE_ACCENT_WIDTH + 12 * SCALE;
+        const iconY = y + (height - BADGE_ICON_SIZE) / 2;
+        this.fillRoundedRect(ctx, iconX, iconY, BADGE_ICON_SIZE, BADGE_ICON_SIZE, BADGE_ICON_RADIUS,
+            this.withAlpha(badge.color, 0.18));
+        this.strokeRoundedRect(ctx, iconX, iconY, BADGE_ICON_SIZE, BADGE_ICON_SIZE, BADGE_ICON_RADIUS, {
+            color: this.withAlpha(badge.color, 0.3),
+            width: 1 * SCALE,
+        });
+
+        this.drawText(ctx, badge.icon,
+            iconX + BADGE_ICON_SIZE / 2,
+            iconY + BADGE_ICON_SIZE / 2 + 1 * SCALE,
+            {
+                font: `${18 * SCALE}px ${FONT_SANS}`,
+                color: badge.color,
+                align: 'center',
+                baseline: 'middle',
+            },
+        );
+
+        const dateRightPad = 12 * SCALE;
+        const dateRight = x + width - dateRightPad;
+        const textBlockHeight = 32 * SCALE;
+        const textTop = y + (height - textBlockHeight) / 2;
+
+        this.drawText(ctx, 'EARNED', dateRight, textTop + 1 * SCALE, {
+            font: `600 ${9 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT_FAINT,
+            align: 'right',
+            baseline: 'top',
+        });
+
+        const dateStyle: TextStyle = {
+            font: `500 ${10 * SCALE}px ${FONT_MONO}`,
+            color: COLOR_TEXT_FAINT,
+            align: 'right',
+            baseline: 'top',
+        };
+        ctx.font = dateStyle.font;
+        const dateW = ctx.measureText(badge.date).width;
+        this.drawText(ctx, badge.date, dateRight, textTop + 17 * SCALE, dateStyle);
+
+        ctx.font = `600 ${9 * SCALE}px ${FONT_SANS}`;
+        const earnedW = ctx.measureText('EARNED').width;
+        const dateLeft = dateRight - Math.max(dateW, earnedW);
+
+        const titleX = iconX + BADGE_ICON_SIZE + 12 * SCALE;
+        const titleMaxW = dateLeft - titleX - 8 * SCALE;
+
+        const titleStyle: TextStyle = {
+            font: `600 ${13 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT,
+            baseline: 'top',
+        };
+        ctx.font = titleStyle.font;
+        this.drawText(ctx, this.truncateText(ctx, badge.title, titleMaxW), titleX, textTop, titleStyle);
+
+        const descStyle: TextStyle = {
+            font: `500 ${10.5 * SCALE}px ${FONT_SANS}`,
+            color: COLOR_TEXT_MUTED,
+            baseline: 'top',
+        };
+        ctx.font = descStyle.font;
+        this.drawText(ctx, this.truncateText(ctx, badge.description, titleMaxW), titleX, textTop + 17 * SCALE, descStyle);
+    }
+
+    private drawTrophyIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string): void {
+        const size = 14 * SCALE;
+        const w = size;
+        const h = size;
+        const x = cx - w / 2;
+        const y = cy - h / 2;
+
         ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x + w * 0.25, y);
+        ctx.lineTo(x + w * 0.75, y);
+        ctx.lineTo(x + w * 0.75, y + h * 0.5);
+        ctx.quadraticCurveTo(x + w * 0.5, y + h * 0.75, x + w * 0.25, y + h * 0.5);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillRect(x + w * 0.35, y + h * 0.7, w * 0.3, h * 0.15);
+        ctx.fillRect(x + w * 0.2, y + h * 0.85, w * 0.6, h * 0.12);
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5 * SCALE;
+        ctx.beginPath();
+        ctx.moveTo(x + w * 0.25, y + h * 0.15);
+        ctx.lineTo(x, y + h * 0.15);
+        ctx.lineTo(x, y + h * 0.35);
+        ctx.moveTo(x + w * 0.75, y + h * 0.15);
+        ctx.lineTo(x + w, y + h * 0.15);
+        ctx.lineTo(x + w, y + h * 0.35);
+        ctx.stroke();
+    }
+
+    private drawStarIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string, radius: number): void {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+            const r = i % 2 === 0 ? radius : radius / 2.3;
+            const angle = (Math.PI / 5) * i - Math.PI / 2;
+            const px = cx + Math.cos(angle) * r;
+            const py = cy + Math.sin(angle) * r;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
         ctx.fill();
     }
 
-    private adjustBrightness(hex: string, amount: number): string {
-        const r = Math.max(0, Math.min(255, parseInt(hex.slice(1, 3), 16) + amount));
-        const g = Math.max(0, Math.min(255, parseInt(hex.slice(3, 5), 16) + amount));
-        const b = Math.max(0, Math.min(255, parseInt(hex.slice(5, 7), 16) + amount));
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    private drawControllerIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string): void {
+        const w = 14 * SCALE;
+        const h = 9 * SCALE;
+        const x = cx - w / 2;
+        const y = cy - h / 2;
+
+        this.fillRoundedRect(ctx, x, y, w, h, h / 2, color);
+
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(x + w * 0.18, y + h * 0.45, w * 0.18, h * 0.1);
+        ctx.fillRect(x + w * 0.25, y + h * 0.32, h * 0.1, w * 0.18 * 0.6);
+
+        this.fillCircle(ctx, x + w * 0.72, y + h * 0.4, h * 0.1, 'rgba(0,0,0,0.35)');
+        this.fillCircle(ctx, x + w * 0.84, y + h * 0.55, h * 0.1, 'rgba(0,0,0,0.35)');
+    }
+
+    private getInitials(name: string): string {
+        const cleaned = name.replace(/[^A-Za-z0-9]/g, '');
+        return (cleaned.slice(0, 2) || '?').toUpperCase();
+    }
+
+    private formatJoined(date: Date): string {
+        if (!date)
+            date = new Date();
+        return `Member since ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    private formatNumber(n: number): string {
+        return n.toLocaleString('en-US');
+    }
+
+    private truncateText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
+        if (ctx.measureText(text).width <= maxWidth) return text;
+        const ellipsis = '…';
+        let lo = 0;
+        let hi = text.length;
+        while (lo < hi) {
+            const mid = Math.floor((lo + hi + 1) / 2);
+            if (ctx.measureText(text.slice(0, mid) + ellipsis).width <= maxWidth) lo = mid;
+            else hi = mid - 1;
+        }
+        return text.slice(0, lo) + ellipsis;
     }
 }
 
-export default new ProfileCard();
+export default new ProfileCardService();

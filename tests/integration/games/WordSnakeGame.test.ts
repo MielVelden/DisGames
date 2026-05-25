@@ -44,7 +44,6 @@ function buildEventWithType(
         Name: 'TestServer',
         ServerId: serverId,
         LanguageEnum: LanguageEnum.EN,
-        Points: 0
     });
     const mockInteraction = {
         content,

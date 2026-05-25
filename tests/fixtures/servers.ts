@@ -27,7 +27,6 @@ export const MOCK_SERVERS: ServersModel[] = TEST_SERVERS.map((server, index) => 
     ServerId: server.ServerId || 'default',
     Name: server.Name || 'TestServer',
     LanguageEnum: server.LanguageEnum || LanguageEnum.NL,
-    Points: server.Points || 0
 }));
 
 export function getTestServer(serverId: string): ServersModel | undefined {

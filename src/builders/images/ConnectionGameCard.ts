@@ -237,7 +237,7 @@ class ConnectionImageService extends BaseCard {
         gridItem: ConnectionItem,
         config: ConnectionImageConfig
     ): void {
-        this.drawRoundedRect(ctx, x, y, size, size, config.borderRadius, config.cellBackgroundColor);
+        this.fillRoundedRect(ctx, x, y, size, size, config.borderRadius, config.cellBackgroundColor);
 
         ctx.fillStyle = config.textColor;
         ctx.textAlign = 'center';
@@ -267,7 +267,7 @@ class ConnectionImageService extends BaseCard {
         const colorIndex = gridItem.categoryIndex || 0;
         const backgroundColor = config.groupedBackgroundColors[colorIndex % config.groupedBackgroundColors.length];
 
-        this.drawRoundedRect(ctx, x, y, width, height, config.borderRadius, backgroundColor);
+        this.fillRoundedRect(ctx, x, y, width, height, config.borderRadius, backgroundColor);
 
         ctx.fillStyle = '#ffffff';
 
@@ -437,30 +437,6 @@ class ConnectionImageService extends BaseCard {
         });
     }
 
-    private drawRoundedRect(
-        ctx: CanvasRenderingContext2D,
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        radius: number,
-        fillColor: string
-    ): void {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + width - radius, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-        ctx.lineTo(x + width, y + height - radius);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-        ctx.lineTo(x + radius, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
-
-        ctx.fillStyle = fillColor;
-        ctx.fill();
-    }
 }
 
 export default new ConnectionImageService();

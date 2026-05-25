@@ -286,7 +286,6 @@ export class TestDiscordEventBuilder {
             Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
-            Points: this.inputSimulator.getServer().points || 0
         });
 
         const channelId = this.resolveChannelId();
@@ -341,7 +340,6 @@ export class TestDiscordEventBuilder {
             Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
-            Points: this.inputSimulator.getServer().points || 0
         });
 
         const channelId = this.resolveChannelId();
@@ -395,7 +393,6 @@ export class TestDiscordEventBuilder {
             Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
-            Points: this.inputSimulator.getServer().points || 0
         });
 
         const channelId = this.resolveChannelId();

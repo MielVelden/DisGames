@@ -92,17 +92,21 @@ class ProgressBarService extends BaseCard {
             this.drawOutlinedText(ctx, config.textAbove, canvasWidth / 2, config.fontSize / 2 + 4, config.fontSize, config.textColor);
         }
 
-        this.drawRoundedRect(ctx, paddingX, barY, barWidth, barHeight, borderRadius, config.trackColor);
+        this.fillRoundedRect(ctx, paddingX, barY, barWidth, barHeight, borderRadius, config.trackColor);
 
         if (fillWidth > 0) {
             const grad = ctx.createLinearGradient(paddingX, 0, paddingX + fillWidth, 0);
             grad.addColorStop(0, config.barStartColor);
             grad.addColorStop(1, config.barEndColor);
-            this.drawRoundedRect(ctx, paddingX, barY, fillWidth, barHeight, borderRadius, grad);
+            this.fillRoundedRect(ctx, paddingX, barY, fillWidth, barHeight, borderRadius, grad);
         }
 
         if (fillWidth > borderRadius)
-            this.drawGlow(ctx, paddingX + fillWidth, barY + barHeight / 2, config.glowColor);
+            this.drawRadialGlow(ctx, paddingX + fillWidth, barY + barHeight / 2, 40, config.glowColor, [
+                [0, 0.6],
+                [0.4, 0.2],
+                [1, 0],
+            ]);
 
         const textBelowY = barY + barHeight + config.fontSize / 2 + 10;
         this.drawOutlinedText(ctx, config.textFormat(percent), canvasWidth / 2, textBelowY, config.fontSize, config.textColor);
@@ -129,46 +133,6 @@ class ProgressBarService extends BaseCard {
         ctx.fillText(text, x, y);
     }
 
-    private drawGlow(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string): void {
-        const radius = 40;
-        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        glow.addColorStop(0, this.withAlpha(color, 0.6));
-        glow.addColorStop(0.4, this.withAlpha(color, 0.2));
-        glow.addColorStop(1, this.withAlpha(color, 0));
-
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    }
-
-    private drawRoundedRect(
-        ctx: CanvasRenderingContext2D,
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        radius: number,
-        fill: string | CanvasGradient
-    ): void {
-        const r = Math.min(radius, width / 2, height / 2);
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + width - r, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
-        ctx.lineTo(x + width, y + height - r);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-        ctx.lineTo(x + r, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
-        ctx.fillStyle = fill;
-        ctx.fill();
-    }
 }
 
 export default new ProgressBarService();
