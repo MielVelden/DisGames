@@ -110,9 +110,9 @@ class ComponentService {
         return [
             this.createImage(gameImage, false),
             this.createSeparator(),
-            this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[gameTypeEnum].name), gameEmoji))),
-            this.createContent(new MultiLingualString(i18n.commands.games.types[gameTypeEnum].howToPlay)),
-            this.createContent(i18n.commands.games.types[gameTypeEnum].startMessage!()),
+            this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].name), gameEmoji))),
+            this.createContent(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].howToPlay)),
+            this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()),
             this.createContent(createBlock(createMultiLingualString(firstAnswer))),
         ];
     }

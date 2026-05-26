@@ -14,8 +14,8 @@ export default {
     config: {
         id: GameTypeEnum.COUNTING,
         emoji: "📊",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.COUNTING].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.COUNTING].description),
         points: 1,
         isCalculated: true,
         expectedType: "number",

@@ -19,8 +19,8 @@ export default {
     config: {
         id: GameTypeEnum.NUMBER_GUESS,
         emoji: "🔢",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].description),
         points: 1,
         isCalculated: true,
         expectedType: "number",
@@ -58,13 +58,13 @@ export default {
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
+                component: ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
             });
         },
 
         async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
+                ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
             ];
         },
 

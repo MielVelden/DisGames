@@ -13,30 +13,9 @@ import { i18n } from '../../utils/i18n/i18n';
 import { AchievementEnum } from '../../interfaces/enums/database/AchievementEnum';
 import { getEnumProperty } from '../../utils/helpers/EnumMetadata';
 import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
-
-export interface ProfileAchievement {
-    achievementEnum: AchievementEnum;
-    title: string;
-    description: string;
-    date: string;
-}
-
-export interface ProfileCardData {
-    username: string;
-    userId: string;
-    joinedAt: Date;
-    role: UserRoleEnum;
-    rank: number;
-    totalUsers: number;
-    totalPoints: number;
-    level: number;
-    xpCurrent: number;
-    xpMax: number;
-    favoriteGame: string;
-    favoriteHours: number;
-    badges?: ProfileAchievement[];
-    online?: boolean;
-}
+import { formatNumber } from '../../utils/helpers/Number';
+import { getInitials } from '../../utils/helpers/String';
+import { ProfileAchievement, ProfileCardData, ProfileFavoriteGame } from '../../interfaces/view';
 
 interface ColorPack {
     deep: Color;
@@ -117,9 +96,11 @@ class ProfileCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generate(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
+    public async generateAsync(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
+        this.validateData(data);
+
         const uniqueCode = this.generateUniqueCode();
-        const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
+        const filepath = path.join(this.imagesPath, `${data.UserId}-${uniqueCode}.png`);
 
         const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
@@ -137,16 +118,25 @@ class ProfileCardService extends BaseCard {
         this.drawLevelBlock(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
         leftY += LEVEL_BLOCK_HEIGHT + SECTION_GAP;
 
-        this.drawFavorite(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
+        this.drawFavorite(ctx, 'FAVORITE GAME', data.favoriteGame, LEFT_COLUMN_X, leftY, COLUMN_WIDTH, language);
+        if (data.leastFavoriteGame) {
+            const leastFavY = leftY + FAV_ICON_SIZE + 8 * SCALE;
+            this.drawFavorite(ctx, 'LEAST PLAYED', data.leastFavoriteGame, LEFT_COLUMN_X, leastFavY, COLUMN_WIDTH, language);
+        }
 
         const rightHeight = CARD_HEIGHT - HEADER_TOP - CARD_PADDING;
-        this.drawBadges(ctx, data.badges ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight);
+        this.drawBadges(ctx, data.achievements ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight, language);
 
-        fs.writeFileSync(filepath, canvas.toBuffer('image/png'));
+        await fs.promises.writeFile(filepath, canvas.toBuffer('image/png'));
 
         return this.buildMedia(uniqueCode, filepath, {
-            name: `${data.userId}-${uniqueCode}`,
+            name: `${data.UserId}-${uniqueCode}`,
         });
+    }
+
+    private validateData(data: ProfileCardData): void {
+        if (!data.CreatedAt)
+            data.CreatedAt = new Date();
     }
 
     private drawCardBackground(ctx: CanvasRenderingContext2D): void {
@@ -215,13 +205,13 @@ class ProfileCardService extends BaseCard {
             baseline: 'top',
         };
         ctx.font = nameStyle.font;
-        const truncated = this.truncateText(ctx, data.username, textMaxWidth - 80 * SCALE);
+        const truncated = this.truncateText(ctx, data.Username, textMaxWidth - 80 * SCALE);
         this.drawText(ctx, truncated, textLeft, nameY, nameStyle);
 
         const usernameWidth = ctx.measureText(truncated).width;
         const badgeX = textLeft + usernameWidth + 8 * SCALE;
         const badgeY = nameY + 2 * SCALE;
-        this.drawRoleBadge(ctx, data.role, badgeX, badgeY, language);
+        this.drawRoleBadge(ctx, data.UserRoleEnum, badgeX, badgeY, language);
 
         const subY = nameY + 22 * SCALE + 8 * SCALE;
         this.drawHeaderSub(ctx, data, textLeft, subY, textMaxWidth);
@@ -243,7 +233,7 @@ class ProfileCardService extends BaseCard {
         innerGrad.addColorStop(1, COLOR_PACK.deep);
         this.fillRoundedRect(ctx, innerX, innerY, innerSize, innerSize, AVATAR_INNER_RADIUS, innerGrad);
 
-        this.drawText(ctx, this.getInitials(data.username),
+        this.drawText(ctx, getInitials(data.Username),
             innerX + innerSize / 2,
             innerY + innerSize / 2 + 1 * SCALE,
             {
@@ -253,13 +243,6 @@ class ProfileCardService extends BaseCard {
                 baseline: 'middle',
             },
         );
-
-        const statusR = 8 * SCALE;
-        const statusCx = x + AVATAR_SIZE - statusR / 2;
-        const statusCy = y + AVATAR_SIZE - statusR / 2;
-        this.fillCircle(ctx, statusCx, statusCy, statusR + 3 * SCALE, COLOR_PACK.deep);
-        this.fillCircle(ctx, statusCx, statusCy, statusR,
-            data.online === false ? COLOR_STATUS_OFFLINE : COLOR_STATUS_ONLINE);
     }
 
     private drawRoleBadge(ctx: CanvasRenderingContext2D, role: UserRoleEnum, x: number, y: number, language: LanguageEnum): void {
@@ -330,7 +313,7 @@ class ProfileCardService extends BaseCard {
         };
         ctx.font = idStyle.font;
         const idX = x + pillW + 5 * SCALE;
-        const idText = this.truncateText(ctx, data.userId, maxWidth * 0.45);
+        const idText = this.truncateText(ctx, data.UserId, maxWidth * 0.45);
         this.drawText(ctx, idText, idX, y + pillH / 2 + 0.5 * SCALE, idStyle);
         const idW = ctx.measureText(idText).width;
 
@@ -338,7 +321,7 @@ class ProfileCardService extends BaseCard {
         const dotCy = y + pillH / 2;
         this.fillCircle(ctx, dotX, dotCy, 1.5 * SCALE, COLOR_TEXT_FAINT);
 
-        this.drawText(ctx, this.formatJoined(data.joinedAt), dotX + 8 * SCALE, y + pillH / 2 + 0.5 * SCALE, {
+        this.drawText(ctx, this.formatJoined(data.CreatedAt), dotX + 8 * SCALE, y + pillH / 2 + 0.5 * SCALE, {
             font: `500 ${11 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT_MUTED,
             baseline: 'middle',
@@ -349,16 +332,16 @@ class ProfileCardService extends BaseCard {
         const chipW = (width - CHIP_GAP) / 2;
 
         this.drawChip(ctx, x, y, chipW,
-            'SERVER RANK',
-            `#${this.formatNumber(data.rank)}`,
-            ` / ${this.formatNumber(data.totalUsers)}`,
+            'PLAYER RANK',
+            `#${formatNumber(data.UserRank)}`,
+            ` / ${formatNumber(data.TotalUsers)}`,
             COLOR_PACK.accent,
             (cx, cy) => this.drawTrophyIcon(ctx, cx, cy, COLOR_PACK.accent),
         );
 
         this.drawChip(ctx, x + chipW + CHIP_GAP, y, chipW,
             'TOTAL POINTS',
-            this.formatNumber(data.totalPoints),
+            formatNumber(data.TotalPoints),
             ' pts',
             COLOR_PACK.accent2,
             (cx, cy) => this.drawStarIcon(ctx, cx, cy, COLOR_PACK.accent2, 7 * SCALE),
@@ -430,12 +413,12 @@ class ProfileCardService extends BaseCard {
         const lvlPrefixW = ctx.measureText('LVL').width;
         this.drawText(ctx, 'LVL', innerX, innerY + 24 * SCALE, lvlPrefixStyle);
 
-        this.drawText(ctx, String(data.level), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
+        this.drawText(ctx, String(data.level.level), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
             font: `800 ${30 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT,
         });
 
-        const xpText = `${this.formatNumber(data.xpCurrent)} / ${this.formatNumber(data.xpMax)} XP`;
+        const xpText = `${formatNumber(data.level.xpCurrent)} / ${formatNumber(data.level.xpMax)} XP`;
         const xpStyle: TextStyle = {
             font: `600 ${11.5 * SCALE}px ${FONT_MONO}`,
             color: COLOR_TEXT_MUTED,
@@ -445,7 +428,7 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, xpText, innerX + innerW - xpW, innerY + 22 * SCALE, xpStyle);
 
         const barY = innerY + 40 * SCALE;
-        const pct = data.xpMax > 0 ? Math.max(0, Math.min(1, data.xpCurrent / data.xpMax)) : 0;
+        const pct = data.level.xpMax > 0 ? Math.max(0, Math.min(1, data.level.xpCurrent / data.level.xpMax)) : 0;
         this.drawProgressBar(ctx, innerX, barY, innerW, pct);
     }
 
@@ -476,7 +459,7 @@ class ProfileCardService extends BaseCard {
         this.fillCircle(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS, '#ffffff');
     }
 
-    private drawFavorite(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, width: number): void {
+    private drawFavorite(ctx: CanvasRenderingContext2D, label: string, gameData: ProfileFavoriteGame, x: number, y: number, width: number, language: LanguageEnum): void {
         const iconX = x + 2 * SCALE;
         const iconY = y;
         this.fillRoundedRect(ctx, iconX, iconY, FAV_ICON_SIZE, FAV_ICON_SIZE, FAV_ICON_RADIUS,
@@ -492,14 +475,14 @@ class ProfileCardService extends BaseCard {
             baseline: 'middle',
         };
         ctx.font = labelStyle.font;
-        this.drawText(ctx, 'FAVORITE', cursorX, midY, labelStyle);
-        cursorX += ctx.measureText('FAVORITE').width + 10 * SCALE;
+        this.drawText(ctx, label, cursorX, midY, labelStyle);
+        cursorX += ctx.measureText(label).width + 10 * SCALE;
 
         ctx.fillStyle = COLOR_DIVIDER_STRONG;
         ctx.fillRect(cursorX, y + (FAV_HEIGHT - 14 * SCALE) / 2, 1 * SCALE, 14 * SCALE);
         cursorX += 10 * SCALE;
 
-        const hoursText = `${this.formatNumber(data.favoriteHours)} hrs`;
+        const hoursText = `${formatNumber(gameData.points)} pts`;
         const hoursStyle: TextStyle = {
             font: `500 ${11 * SCALE}px ${FONT_MONO}`,
             color: COLOR_TEXT_MUTED,
@@ -516,13 +499,14 @@ class ProfileCardService extends BaseCard {
         };
         ctx.font = gameStyle.font;
         const gameMaxW = hoursX - cursorX - 8 * SCALE;
-        const game = this.truncateText(ctx, data.favoriteGame, gameMaxW);
+        const gameName = getMultiLingualString(i18n.enums.gameTypes[gameData.gameId].name, language);
+        const game = this.truncateText(ctx, gameName, gameMaxW);
         this.drawText(ctx, game, cursorX, midY, gameStyle);
 
         this.drawText(ctx, hoursText, hoursX, midY, hoursStyle);
     }
 
-    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileAchievement[], x: number, y: number, width: number, height: number): void {
+    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileAchievement[], x: number, y: number, width: number, height: number, language: LanguageEnum): void {
         const visible = badges.slice(0, 4);
         const rowHeight = visible.length > 0 ? height / visible.length : BADGE_ROW_HEIGHT;
 
@@ -542,15 +526,15 @@ class ProfileCardService extends BaseCard {
                 ctx.fillStyle = COLOR_DIVIDER;
                 ctx.fillRect(x, rowY, width, 1 * SCALE);
             }
-            this.drawBadgeRow(ctx, badge, x, rowY, width, rowHeight);
+            this.drawBadgeRow(ctx, badge, x, rowY, width, rowHeight, language);
         });
 
         ctx.restore();
     }
 
-    private drawBadgeRow(ctx: CanvasRenderingContext2D, badge: ProfileAchievement, x: number, y: number, width: number, height: number): void {
-        const color = getEnumProperty(AchievementEnum, badge.achievementEnum, MetadataKeyEnum.Color) as Color;
-        const icon = getEnumProperty(AchievementEnum, badge.achievementEnum, MetadataKeyEnum.Emoji) as string;
+    private drawBadgeRow(ctx: CanvasRenderingContext2D, achievement: ProfileAchievement, x: number, y: number, width: number, height: number, language: LanguageEnum): void {
+        const color = getEnumProperty(AchievementEnum, achievement.achievementEnum, MetadataKeyEnum.Color) as Color;
+        const icon = getEnumProperty(AchievementEnum, achievement.achievementEnum, MetadataKeyEnum.Emoji) as string;
         ctx.fillStyle = color;
         ctx.fillRect(x, y, BADGE_ACCENT_WIDTH, height);
 
@@ -576,7 +560,7 @@ class ProfileCardService extends BaseCard {
 
         const dateRightPad = 12 * SCALE;
         const dateRight = x + width - dateRightPad;
-        const textBlockHeight = 32 * SCALE;
+        const textBlockHeight = 42 * SCALE;
         const textTop = y + (height - textBlockHeight) / 2;
 
         this.drawText(ctx, 'EARNED', dateRight, textTop + 1 * SCALE, {
@@ -593,8 +577,10 @@ class ProfileCardService extends BaseCard {
             baseline: 'top',
         };
         ctx.font = dateStyle.font;
-        const dateW = ctx.measureText(badge.date).width;
-        this.drawText(ctx, badge.date, dateRight, textTop + 17 * SCALE, dateStyle);
+
+        const formattedDate = formatDate(achievement.date, true);
+        const dateW = ctx.measureText(formattedDate).width;
+        this.drawText(ctx, formattedDate, dateRight, textTop + 17 * SCALE, dateStyle);
 
         ctx.font = `600 ${9 * SCALE}px ${FONT_SANS}`;
         const earnedW = ctx.measureText('EARNED').width;
@@ -609,7 +595,8 @@ class ProfileCardService extends BaseCard {
             baseline: 'top',
         };
         ctx.font = titleStyle.font;
-        this.drawText(ctx, this.truncateText(ctx, badge.title, titleMaxW), titleX, textTop, titleStyle);
+        const title = getMultiLingualString(i18n.enums.achievements[achievement.achievementEnum].title, language);
+        this.drawText(ctx, this.truncateText(ctx, title, titleMaxW), titleX, textTop, titleStyle);
 
         const descStyle: TextStyle = {
             font: `500 ${10.5 * SCALE}px ${FONT_SANS}`,
@@ -617,7 +604,11 @@ class ProfileCardService extends BaseCard {
             baseline: 'top',
         };
         ctx.font = descStyle.font;
-        this.drawText(ctx, this.truncateText(ctx, badge.description, titleMaxW), titleX, textTop + 17 * SCALE, descStyle);
+        const description = getMultiLingualString(i18n.enums.achievements[achievement.achievementEnum].description, language);
+        const descLines = this.wrapText(ctx, description, titleMaxW, 2);
+        descLines.forEach((line, li) => {
+            this.drawText(ctx, line, titleX, textTop + 17 * SCALE + li * 13 * SCALE, descStyle);
+        });
     }
 
     private drawTrophyIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: Color): void {
@@ -682,20 +673,30 @@ class ProfileCardService extends BaseCard {
         this.fillCircle(ctx, x + w * 0.84, y + h * 0.55, h * 0.1, 'rgba(0,0,0,0.35)');
     }
 
-    private getInitials(name: string): string {
-        const cleaned = name.replace(/[^A-Za-z0-9]/g, '');
-        return (cleaned.slice(0, 2) || '?').toUpperCase();
-    }
-
     private formatJoined(date: Date): string {
-        if (!date)
-            date = new Date();
         // TODO: i18n
         return `Member since ${formatDate(date, true)}`;
     }
 
-    private formatNumber(n: number): string {
-        return n.toLocaleString('en-US');
+    private wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number): string[] {
+        const words = text.split(' ');
+        const lines: string[] = [];
+        let current = '';
+        for (let i = 0; i < words.length; i++) {
+            const test = current ? `${current} ${words[i]}` : words[i];
+            if (ctx.measureText(test).width <= maxWidth) {
+                current = test;
+            } else {
+                if (current) lines.push(current);
+                if (lines.length === maxLines - 1) {
+                    lines.push(this.truncateText(ctx, words.slice(i).join(' '), maxWidth));
+                    return lines;
+                }
+                current = words[i];
+            }
+        }
+        if (current) lines.push(current);
+        return lines;
     }
 
     private truncateText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {

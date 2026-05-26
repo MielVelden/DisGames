@@ -4,6 +4,7 @@ import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { AchievementEnum } from "../enums/database/AchievementEnum";
 
 export type LanguageTranslations = {
     [LanguageEnum.EN]: string;
@@ -23,12 +24,13 @@ export type LanguageCommandOptionTranslations<T extends string | number> = {
 };
 
 export type LanguageEnumTranslations<T extends string | number> = {
+    [K in T]: LanguageTranslations
+};
+
+export type LanguageAchievementEnumTranslations<T extends string | number> = {
     [K in T]: {
-        [LanguageEnum.EN]: string;
-        [LanguageEnum.NL]: string;
-        [LanguageEnum.ES]?: string;
-        [LanguageEnum.DE]?: string;
-        [LanguageEnum.PT]?: string;
+        title: LanguageTranslations,
+        description: LanguageTranslations
     }
 };
 
@@ -158,7 +160,6 @@ export interface I18nTranslations {
                 move: LanguageTranslations;
                 moveHere: LanguageTranslations;
             },
-            types: LanguageGameTypeTranslations<GameTypeEnum>;
             event: {
                 messageChanged: (user: string, message: string) => MultiLingualString;
             }
@@ -211,6 +212,8 @@ export interface I18nTranslations {
         }
     }
     enums: {
+        achievements: LanguageAchievementEnumTranslations<AchievementEnum>;
+        gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
         exceptions: LanguageEnumTranslations<ExceptionEnum>;
         languages: LanguageEnumTranslations<LanguageEnum>;
         metrics: LanguageEnumTranslations<MetricEnum>;

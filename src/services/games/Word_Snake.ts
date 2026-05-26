@@ -9,8 +9,8 @@ export default {
     config: {
         id: GameTypeEnum.WORD_SNAKE,
         emoji: "🐍",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.WORD_SNAKE].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.WORD_SNAKE].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.WORD_SNAKE].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.WORD_SNAKE].description),
         points: 1,
         isCalculated: true,
         expectedType: "string",

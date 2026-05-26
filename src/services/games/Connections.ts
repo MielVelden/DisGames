@@ -112,8 +112,8 @@ export default {
     config: {
         id: GameTypeEnum.CONNECTIONS,
         emoji: "🔗",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.CONNECTIONS].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.CONNECTIONS].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.CONNECTIONS].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.CONNECTIONS].description),
         points: 2,
         isCalculated: false,
         expectedType: "string",
@@ -181,7 +181,7 @@ export default {
                         enum: GameActionEnum.COMPONENT,
                         priority: GameActionPriorityEnum.HIGH,
                         component: [
-                            ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.CONNECTIONS].gameComplete!())),
+                            ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.CONNECTIONS].gameComplete!())),
                             ComponentService.createSeparator()
                         ]
                     });

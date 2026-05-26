@@ -235,7 +235,7 @@ class DashboardService {
     }
 
     private getGameTypeDisplayName(gameType: GameTypeEnum): string {
-        const def = i18n.commands.games.types[gameType];
+        const def = i18n.enums.gameTypes[gameType];
         if (!def?.name)
             return String(gameType);
         return def.name[LanguageEnum.EN];

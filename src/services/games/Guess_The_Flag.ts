@@ -14,8 +14,8 @@ export default {
     config: {
         id: GameTypeEnum.GUESS_THE_FLAG,
         emoji: "🏳️",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
@@ -39,7 +39,7 @@ export default {
 
         async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
+                ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
             ];
         },
 

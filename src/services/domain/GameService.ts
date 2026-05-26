@@ -380,9 +380,9 @@ class GameService {
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.CRITICAL,
                 component: [
-                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[gameEvent.gameConfig.id].name), gameEvent.gameConfig.emoji))),
-                    ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[gameEvent.gameConfig.id].howToPlay)),
-                    ComponentService.createContent(i18n.commands.games.types[gameEvent.gameConfig.id].nextAnswer!()),
+                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.enums.gameTypes[gameEvent.gameConfig.id].name), gameEvent.gameConfig.emoji))),
+                    ComponentService.createContent(new MultiLingualString(i18n.enums.gameTypes[gameEvent.gameConfig.id].howToPlay)),
+                    ComponentService.createContent(i18n.enums.gameTypes[gameEvent.gameConfig.id].nextAnswer!()),
                 ]
             })
         }

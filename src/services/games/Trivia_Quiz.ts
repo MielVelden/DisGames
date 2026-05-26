@@ -14,8 +14,8 @@ export default {
     config: {
         id: GameTypeEnum.TRIVIA_QUIZ,
         emoji: "❓",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.TRIVIA_QUIZ].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.TRIVIA_QUIZ].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",

@@ -26,8 +26,8 @@ export default {
     config: {
         id: GameTypeEnum.ANAGRAM,
         emoji: "🔍",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.ANAGRAM].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.ANAGRAM].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
