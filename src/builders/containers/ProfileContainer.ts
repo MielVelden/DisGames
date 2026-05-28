@@ -4,6 +4,7 @@ import ComponentService from "../../services/application/ComponentService";
 import ProfileCard from "../images/ProfileCard";
 import { AchievementEnum } from "../../interfaces/enums/database/AchievementEnum";
 import { GameTypeEnum } from "../../interfaces/enums";
+import { createTitle } from "../../utils/helpers/Markdown";
 
 export async function createProfileContainerAsync(profile: ProfileResponse): Promise<Component[]> {
     const media = await ProfileCard.generateAsync({

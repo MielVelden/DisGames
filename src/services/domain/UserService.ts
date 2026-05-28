@@ -49,6 +49,13 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
         await UserRepository.purgeAsync(id);
     }
 
+    public async addExperiencePointsAsync(userId: string, points: number): Promise<void> {
+        const user = await this.getByExternalIdAsync(userId);
+        user.ExperiencePoints += points;
+        Logger.logDebug(`Added ${points} experience points to user ${userId}. Total experience is now ${user.ExperiencePoints}.`);
+        await UserRepository.saveAsync(user);
+    }
+
     public async updateUsernameAsync(userId: string, username: string): Promise<UsersModel> {
         const user = await this.getByExternalIdAsync(userId);
         user.Username = username;

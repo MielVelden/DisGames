@@ -23,6 +23,7 @@ export class ButtonDiscordEvent extends BaseReplyDiscordEvent<DiscordButtonInter
 
     public async sendAsync(): Promise<void> {
         await DiscordMessageHandler.sendAsync(this, undefined);
+        this.flushPostSend();
     }
 
     public async reactAsync(emoji: string): Promise<void> {

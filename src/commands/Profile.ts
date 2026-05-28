@@ -1,7 +1,7 @@
 import { Command, CommandOptionConfig, CommandOptionType } from "../interfaces/application/Command";
 import { InteractionEvent, isSelectMenuInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
 import { createProfileContainerAsync } from "../builders/containers/ProfileContainer";
@@ -18,6 +18,9 @@ const optionsConfig = [
             {
                 enumValue: ProfileCommandActionEnum.VIEW,
                 handler: async (event: SlashCommandInteractionEvent) => {
+                    await event.replyAsync(createMultiLingualString('i18n.commands.profile.loadingProfile'));
+                    await event.clearComponentsAsync();
+                    
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
                     const profileComponents = await createProfileContainerAsync(userProfile);
                     await event.addComponentsAsync(profileComponents);
@@ -28,7 +31,7 @@ const optionsConfig = [
                         handle: async (interaction: InteractionEvent) => {
                             if (!isSelectMenuInteractionEvent(interaction))
                                 return;
-                            
+
                             const gameId = Number(interaction.selected);
                             const userGameProfile = await UserService.getUserGameProfileAsync(event.user.userId, event.server.ServerId, gameId);
                             const profileGameComponents = createProfileGameContainer(userGameProfile);
@@ -37,7 +40,7 @@ const optionsConfig = [
                         }
                     });
                     await event.addComponentAsync(gameSelectMenu);
-                    await event.replyAsync();
+                    await event.editAsync();
                 }
             },
             {

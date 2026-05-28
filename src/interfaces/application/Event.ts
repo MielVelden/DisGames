@@ -57,6 +57,8 @@ export interface BaseInteractionEvent {
     timelineEntries: TimelineEntriesSaveModel[];
     addTimelineEntry(entry: TimelineEntriesSaveModel): void;
     commitTimelineAsync(): Promise<void>;
+
+    scheduleAction(task: () => Promise<void>): void;
 }
 
 export interface ReplyInteractionEvent {

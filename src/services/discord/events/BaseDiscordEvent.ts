@@ -16,6 +16,7 @@ import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 import { ErrorHelper } from "../../../utils/application/Error";
+import Logger from "../../../utils/application/Logger";
 
 export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> implements BaseInteractionEvent {
     public readonly type: EventTypeEnum;
@@ -29,6 +30,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
 
     public components: Component[] = [];
     public timelineEntries: TimelineEntriesSaveModel[] = [];
+    private postSendTasks: Array<() => Promise<void>> = [];
 
     constructor(
         type: EventTypeEnum,
@@ -64,10 +66,12 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
 
     public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
         await DiscordMessageHandler.sendToChannelAsync(this as unknown as InteractionEvent, channelId, components);
+        this.flushPostSend();
     }
 
     public async editAsync(content?: string): Promise<void> {
         await DiscordMessageHandler.editAsync(this as unknown as InteractionEvent, content);
+        this.flushPostSend();
     }
 
     public async editWithComponentsAsync(components: Component[]): Promise<void> {
@@ -196,6 +200,16 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
             ErrorHelper.throw(ExceptionEnum.DISCORD_CHANNEL_NOT_FOUND);
 
         return channel.name;
+    }
+
+    public scheduleAction(task: () => Promise<void>): void {
+        this.postSendTasks.push(task);
+    }
+
+    protected flushPostSend(): void {
+        const tasks = this.postSendTasks.splice(0);
+        for (const task of tasks)
+            task().catch(err => Logger.logError('Post-send task failed', err as Error));
     }
 
     public addTimelineEntry(entry: TimelineEntriesSaveModel): void {

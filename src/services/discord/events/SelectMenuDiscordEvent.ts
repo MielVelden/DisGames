@@ -30,5 +30,6 @@ export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringS
 
     public async sendAsync(): Promise<void> {
         await DiscordMessageHandler.sendAsync(this, undefined);
+        this.flushPostSend();
     }
 } 

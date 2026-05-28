@@ -37,6 +37,7 @@ import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
+import UserService from "./UserService";
 
 @RegisterMetricPulls()
 class GameService {
@@ -316,20 +317,24 @@ class GameService {
 
             // Answer is correct
             await this.handleValidAnswerAsync(gameEvent);
-            // Add points to the user
-            await PointService.saveAsync(new PointsSaveModel({
+
+            const gameData = gameEvent.getGameData();
+            event.scheduleAction(() => UserService.addExperiencePointsAsync(gameEvent.user.userId, gameEvent.gameConfig.points));
+            event.scheduleAction(async () => { await PointService.saveAsync(new PointsSaveModel({
                 UserId: gameEvent.user.userId,
                 ServerId: gameEvent.server.ServerId,
                 GameId: gameEvent.gameId,
                 Points: gameEvent.gameConfig.points
-            }), event);
+            }), event); });
 
-            // Timeline for correct answer
-            await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
-                event: event,
-                old: null,
-                new: gameEvent.getGameData(),
-                objectId: gameEvent.getGameData().Id
+            event.scheduleAction(async () => {
+                await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
+                    event: event,
+                    old: null,
+                    new: gameData,
+                    objectId: gameData.Id
+                });
+                await event.commitTimelineAsync();
             });
         } else if (gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Answer is incorrect - handle via game module if available
@@ -348,9 +353,6 @@ class GameService {
 
         // Loop through all actions and handle them
         await this.handleGameActionsAsync(gameEvent, event);
-
-        // Commit timeline
-        await event.commitTimelineAsync();
 
         // Reply to the game channel
         await event.replyAsync();
