@@ -4,7 +4,7 @@ import ComponentService from "../../services/application/ComponentService";
 import ProfileCard from "../images/ProfileCard";
 import { AchievementEnum } from "../../interfaces/enums/database/AchievementEnum";
 import { GameTypeEnum } from "../../interfaces/enums";
-import { createTitle } from "../../utils/helpers/Markdown";
+import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
 
 export async function createProfileContainerAsync(profile: ProfileResponse): Promise<Component[]> {
     const media = await ProfileCard.generateAsync({
@@ -15,11 +15,7 @@ export async function createProfileContainerAsync(profile: ProfileResponse): Pro
         UserRank: profile.UserRank,
         TotalUsers: profile.TotalUsers,
         TotalPoints: profile.TotalPoints,
-        level: {
-            level: Math.floor(profile.TotalPoints / 1000),
-            xpCurrent: profile.TotalPoints % 1000,
-            xpMax: 1000,
-        },
+        level: calculateUserLevel(profile.ExperiencePoints),
         favoriteGame: {
             gameId: GameTypeEnum.CONNECTIONS, // Placeholder, replace with actual favorite game ID
             points: 500, // Placeholder, replace with actual points in favorite game

@@ -21,6 +21,7 @@ BEGIN
         u.UserId,
         u.Username,
         u.UserRoleEnum,
+        u.ExperiencePoints,
         COALESCE(r.TotalPoints, 0) AS TotalPoints,
         COALESCE(r.UserRank, (SELECT COUNT(*) FROM TotalPoints)) AS UserRank,
         (SELECT COUNT(*) FROM users) AS TotalUsers,

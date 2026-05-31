@@ -413,12 +413,12 @@ class ProfileCardService extends BaseCard {
         const lvlPrefixW = ctx.measureText('LVL').width;
         this.drawText(ctx, 'LVL', innerX, innerY + 24 * SCALE, lvlPrefixStyle);
 
-        this.drawText(ctx, String(data.level.level), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
+        this.drawText(ctx, String(data.level.currentLevel), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
             font: `800 ${30 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT,
         });
 
-        const xpText = `${formatNumber(data.level.xpCurrent)} / ${formatNumber(data.level.xpMax)} XP`;
+        const xpText = `${formatNumber(data.level.xpNow)} / ${formatNumber(data.level.xpMax)} XP`;
         const xpStyle: TextStyle = {
             font: `600 ${11.5 * SCALE}px ${FONT_MONO}`,
             color: COLOR_TEXT_MUTED,
@@ -428,7 +428,8 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, xpText, innerX + innerW - xpW, innerY + 22 * SCALE, xpStyle);
 
         const barY = innerY + 40 * SCALE;
-        const pct = data.level.xpMax > 0 ? Math.max(0, Math.min(1, data.level.xpCurrent / data.level.xpMax)) : 0;
+        // const pct = data.level.xpMax > 0 ? Math.max(0, Math.min(1, data.level.xpNow / data.level.xpMax)) : 0;
+        const pct = data.level.progress / 100;
         this.drawProgressBar(ctx, innerX, barY, innerW, pct);
     }
 
