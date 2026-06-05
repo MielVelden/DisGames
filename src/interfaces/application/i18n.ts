@@ -166,6 +166,8 @@ export interface I18nTranslations {
         },
         profile: {
             description: LanguageTranslations;
+            loadingTitle: LanguageTranslations;
+            loadingProfile: LanguageTranslations;
             option: LanguageCommandOptionTranslations<ProfileCommandActionEnum>;
             labels: {
                 title: LanguageTranslations;

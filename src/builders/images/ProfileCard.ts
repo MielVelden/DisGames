@@ -46,8 +46,6 @@ const COLOR_CHIP_BORDER = 'rgba(255,255,255,0.06)';
 const COLOR_DIVIDER = 'rgba(255,255,255,0.06)';
 const COLOR_DIVIDER_STRONG = 'rgba(255,255,255,0.10)';
 const COLOR_PROGRESS_TRACK = 'rgba(0,0,0,0.4)';
-const COLOR_STATUS_ONLINE = '#3ec875';
-const COLOR_STATUS_OFFLINE = '#6b67a0';
 
 const COLOR_PACK: ColorPack = {
     deep: '#1a1742',

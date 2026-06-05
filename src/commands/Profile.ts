@@ -1,13 +1,15 @@
 import { Command, CommandOptionConfig, CommandOptionType } from "../interfaces/application/Command";
 import { InteractionEvent, isSelectMenuInteractionEvent, SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { i18n } from "../utils/i18n/i18n";
-import { createMultiLingualString, MultiLingualString } from "../utils/i18n/MultiLingualString";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
 import { createProfileContainerAsync } from "../builders/containers/ProfileContainer";
 import UserService from "../services/domain/UserService";
 import { createAllGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
 import { createProfileGameContainer } from "../builders/containers/ProfileGameContainer";
+import ComponentService from "../services/application/ComponentService";
+import { createTitle } from "../utils/helpers/Markdown";
 
 const optionsConfig = [
     {
@@ -18,9 +20,11 @@ const optionsConfig = [
             {
                 enumValue: ProfileCommandActionEnum.VIEW,
                 handler: async (event: SlashCommandInteractionEvent) => {
-                    await event.replyAsync(createMultiLingualString('i18n.commands.profile.loadingProfile'));
+                    await event.addComponentAsync(ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.profile.loadingTitle))));
+                    await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.profile.loadingProfile)));
+                    await event.replyAsync();
                     await event.clearComponentsAsync();
-                    
+
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
                     const profileComponents = await createProfileContainerAsync(userProfile);
                     await event.addComponentsAsync(profileComponents);

@@ -561,6 +561,20 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.DE]: "Verwalte dein Profil",
                 [LanguageEnum.PT]: "Gerencie seu perfil",
             },
+            loadingTitle: {
+                [LanguageEnum.EN]: "Your Profile",
+                [LanguageEnum.NL]: "Jouw Profiel",
+                [LanguageEnum.ES]: "Tu Perfil",
+                [LanguageEnum.DE]: "Dein Profil",
+                [LanguageEnum.PT]: "Seu Perfil",
+            },
+            loadingProfile: {
+                [LanguageEnum.EN]: "Fetching your profile, one moment…",
+                [LanguageEnum.NL]: "Profiel wordt opgehaald, even geduld…",
+                [LanguageEnum.ES]: "Obteniendo tu perfil, un momento…",
+                [LanguageEnum.DE]: "Profil wird geladen, einen Moment…",
+                [LanguageEnum.PT]: "Obtendo seu perfil, um momento…",
+            },
             option: {
                 choices: {
                     [ProfileCommandActionEnum.VIEW]: {
