@@ -6,7 +6,11 @@ class UserRepository implements RepositoryWithBase<UsersModel, UsersSaveModel, t
     public readonly baseRepository: BaseRepository<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum>(TableEnum.USERS, UsersModelFieldEnum, getUsersFieldType);
+        this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum>(
+            TableEnum.USERS,
+            UsersModelFieldEnum,
+            getUsersFieldType,
+        );
     }
 
     async getByIdAsync(id: number): Promise<UsersModel | null> {

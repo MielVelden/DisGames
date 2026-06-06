@@ -7,7 +7,11 @@ class DebugRepository implements RepositoryWithBase<DebugModel, DebugSaveModel, 
     public readonly baseRepository: BaseRepository<DebugModel, DebugSaveModel, typeof DebugModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<DebugModel, DebugSaveModel, typeof DebugModelFieldEnum>(TableEnum.DEBUG, DebugModelFieldEnum, getDebugFieldType);
+        this.baseRepository = new BaseRepository<DebugModel, DebugSaveModel, typeof DebugModelFieldEnum>(
+            TableEnum.DEBUG, 
+            DebugModelFieldEnum, 
+            getDebugFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<DebugModel | null> {

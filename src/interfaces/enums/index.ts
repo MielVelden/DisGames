@@ -1,6 +1,6 @@
 // Sort the enums alphabetically
 
-export * from './database/AchievementEnum';
+export * from './application/BadgeEnum';
 export * from './database/GameTypeEnum';
 export * from './database/LanguageEnum';
 export * from './database/StoredProcedureEnum';
@@ -13,7 +13,6 @@ export * from './application/MetricEnum';
 export * from './games/DifficultyEnum';
 export * from './games/GameSettingsEnum';
 export * from './commands/Games';
-export * from './commands/Profile';
 export * from './application/EventTypeEnum';
 
 // Import metadata options to trigger registrations

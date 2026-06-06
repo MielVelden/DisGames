@@ -1,10 +1,11 @@
 import { UserLevelData } from "../domain";
 import { GameTypeEnum, UserRoleEnum } from "../enums";
-import { AchievementEnum } from "../enums/database/AchievementEnum";
+import { BadgeEnum } from "../enums/application/BadgeEnum";
 
-export interface ProfileAchievement {
-    achievementEnum: AchievementEnum;
+export interface ProfileBadge {
+    achievementEnum: BadgeEnum;
     date: Date;
+    level: number;
 }
 
 export interface ProfileFavoriteGame {
@@ -23,7 +24,7 @@ export interface ProfileCardData {
     level: UserLevelData;
     favoriteGame: ProfileFavoriteGame;
     leastFavoriteGame?: ProfileFavoriteGame;
-    achievements?: ProfileAchievement[];
+    badges?: ProfileBadge[];
 }
 
 export interface ProfileResponse {

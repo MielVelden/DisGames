@@ -9,7 +9,11 @@ class EventRepository implements RepositoryWithBase<EventsModel, EventsSaveModel
     public readonly baseRepository: BaseRepository<EventsModel, EventsSaveModel, typeof EventsModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<EventsModel, EventsSaveModel, typeof EventsModelFieldEnum>(TableEnum.EVENTS, EventsModelFieldEnum, getEventsFieldType);
+        this.baseRepository = new BaseRepository<EventsModel, EventsSaveModel, typeof EventsModelFieldEnum>(
+            TableEnum.EVENTS, 
+            EventsModelFieldEnum, 
+            getEventsFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<EventsModel | null> {

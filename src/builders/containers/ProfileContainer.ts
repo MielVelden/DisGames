@@ -2,7 +2,7 @@ import { Component } from "../../interfaces/application/Message";
 import { ProfileResponse } from "../../interfaces/view";
 import ComponentService from "../../services/application/ComponentService";
 import ProfileCard from "../images/ProfileCard";
-import { AchievementEnum } from "../../interfaces/enums/database/AchievementEnum";
+import { BadgeEnum } from "../../interfaces/enums/application/BadgeEnum";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
 
@@ -24,12 +24,12 @@ export async function createProfileContainerAsync(profile: ProfileResponse): Pro
             gameId: GameTypeEnum.ANAGRAM, // Placeholder, replace with actual least favorite game ID
             points: 100, // Placeholder, replace with actual points in least favorite game
         },
-        achievements: [
-            { achievementEnum: AchievementEnum.SEVEN_DAYS_STREAK, date: new Date('Mar 21, 2024') },
-            { achievementEnum: AchievementEnum.FIRST_GAME, date: new Date('Feb 18, 2024') },
-            { achievementEnum: AchievementEnum.FIRST_GAME, date: new Date('Feb 08, 2024') },
-            { achievementEnum: AchievementEnum.SEVEN_DAYS_STREAK, date: new Date('Mar 21, 2024') },
-            { achievementEnum: AchievementEnum.SEVEN_DAYS_STREAK, date: new Date('Mar 21, 2024') },
+        badges: [
+            { achievementEnum: BadgeEnum.DAY_STREAK, date: new Date('Mar 21, 2024'), level: 3 }, // TODO: mock level, replace with real badge level
+            { achievementEnum: BadgeEnum.FIRST_GAME, date: new Date('Feb 18, 2024'), level: 1 },
+            { achievementEnum: BadgeEnum.FIRST_GAME, date: new Date('Feb 08, 2024'), level: 1 },
+            { achievementEnum: BadgeEnum.DAY_STREAK, date: new Date('Mar 21, 2024'), level: 7 },
+            { achievementEnum: BadgeEnum.DAY_STREAK, date: new Date('Mar 21, 2024'), level: 12 },
         ],
     });
 

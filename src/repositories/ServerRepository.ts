@@ -7,7 +7,11 @@ class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveMo
     public readonly baseRepository: BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>(TableEnum.SERVERS, ServersModelFieldEnum, getServersFieldType);
+        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>(
+            TableEnum.SERVERS, 
+            ServersModelFieldEnum, 
+            getServersFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<ServersModel | null> {

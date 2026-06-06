@@ -33,7 +33,7 @@ export interface BaseInteractionEvent {
 
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;
-    addComponentsAsync(components: Component[]): Promise<void>;
+    addComponentsAsync(components: Component[], addInFront?: boolean): Promise<void>;
     clearComponentsAsync(): Promise<void>;
 
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;

@@ -8,7 +8,11 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
     public readonly baseRepository: BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>(TableEnum.POINTS, PointsModelFieldEnum, getPointsFieldType);
+        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>(
+            TableEnum.POINTS, 
+            PointsModelFieldEnum, 
+            getPointsFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<PointsModel | null> {

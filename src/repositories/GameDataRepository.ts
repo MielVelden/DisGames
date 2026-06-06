@@ -9,7 +9,11 @@ class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSa
     public readonly baseRepository: BaseRepository<GameDataModel, GameDataSaveModel, typeof GameDataModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel, typeof GameDataModelFieldEnum>(TableEnum.GAME_DATA, GameDataModelFieldEnum, getGameDataFieldType);
+        this.baseRepository = new BaseRepository<GameDataModel, GameDataSaveModel, typeof GameDataModelFieldEnum>(
+            TableEnum.GAME_DATA, 
+            GameDataModelFieldEnum, 
+            getGameDataFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<GameDataModel | null> {

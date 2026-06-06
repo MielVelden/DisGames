@@ -6,7 +6,7 @@ import { I18nTranslations } from "../../interfaces/application/i18n";
 import { GameTypeEnum } from "../../interfaces/enums/database/GameTypeEnum";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import { MetricEnum, UserRoleEnum } from "../../interfaces/enums";
-import { AchievementEnum } from "../../interfaces/enums/database/AchievementEnum";
+import { BadgeEnum } from "../../interfaces/enums/application/BadgeEnum";
 
 export const i18n: I18nTranslations = {
     labels: {
@@ -815,8 +815,8 @@ export const i18n: I18nTranslations = {
         }
     },
     enums: {
-        achievements: {
-            [AchievementEnum.FIRST_GAME]: {
+        badges: {
+            [BadgeEnum.FIRST_GAME]: {
                 title: {
                     [LanguageEnum.EN]: "First Game",
                     [LanguageEnum.NL]: "Eerste Spel",
@@ -832,7 +832,7 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.PT]: "Jogue seu primeiro jogo",
                 },
             },
-            [AchievementEnum.SEVEN_DAYS_STREAK]: {
+            [BadgeEnum.DAY_STREAK]: {
                 title: {
                     [LanguageEnum.EN]: "7 Days Streak",
                     [LanguageEnum.NL]: "7 Dagen Op Rij",

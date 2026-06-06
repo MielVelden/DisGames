@@ -56,8 +56,8 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         await DiscordComponentMapper.addComponentAsync(this as unknown as InteractionEvent, component);
     }
 
-    public async addComponentsAsync(components: Component[]): Promise<void> {
-        await DiscordComponentMapper.addComponentsAsync(this as unknown as InteractionEvent, components);
+    public async addComponentsAsync(components: Component[], addInFront: boolean = false): Promise<void> {
+        await DiscordComponentMapper.addComponentsAsync(this as unknown as InteractionEvent, components, addInFront);
     }
 
     public async clearComponentsAsync(): Promise<void> {

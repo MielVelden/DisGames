@@ -15,7 +15,7 @@ import { Component, ComponentType, Container, TextDisplay, Title, Separator, But
 import GameRepository from "../../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
-import { GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
+import { BadgeTriggerEnum, GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/helpers/Enum";
 import GameDataRepository from "../../repositories/GameDataRepository";
@@ -38,6 +38,7 @@ import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdo
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
 import UserService from "./UserService";
+import BadgeService from "./BadgeService";
 
 @RegisterMetricPulls()
 class GameService {
@@ -306,6 +307,8 @@ class GameService {
 
         await this.handleGameOptionsAsync(gameEvent, event);
 
+        await BadgeService.evaluateAll(event, BadgeTriggerEnum.BEFORE_GAME);
+        
         if (gameEvent.validateAnswer(gameEvent) && gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Add correct reaction
             if (gameEvent.gameConfig.addCorrectReaction)
@@ -353,6 +356,8 @@ class GameService {
 
         // Loop through all actions and handle them
         await this.handleGameActionsAsync(gameEvent, event);
+
+        await BadgeService.evaluateAll(event, BadgeTriggerEnum.AFTER_GAME);
 
         // Reply to the game channel
         await event.replyAsync();

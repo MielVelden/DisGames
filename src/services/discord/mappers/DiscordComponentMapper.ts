@@ -382,8 +382,11 @@ class DiscordComponentMapper {
         event.components.push(component);
     }
 
-    public async addComponentsAsync(event: InteractionEvent, components: Component[]): Promise<void> {
-        components.forEach(component => this.addComponentAsync(event, component));
+    public async addComponentsAsync(event: InteractionEvent, components: Component[], addInFront?: boolean): Promise<void> {
+        if (addInFront)
+            event.components.unshift(...components);
+        else
+            event.components.push(...components);
     }
 
     public async clearComponentsAsync(event: InteractionEvent): Promise<void> {

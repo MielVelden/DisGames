@@ -4,7 +4,7 @@ import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { AchievementEnum } from "../enums/database/AchievementEnum";
+import { BadgeEnum } from "../enums/application/BadgeEnum";
 
 export type LanguageTranslations = {
     [LanguageEnum.EN]: string;
@@ -214,7 +214,7 @@ export interface I18nTranslations {
         }
     }
     enums: {
-        achievements: LanguageAchievementEnumTranslations<AchievementEnum>;
+        badges: LanguageAchievementEnumTranslations<BadgeEnum>;
         gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
         exceptions: LanguageEnumTranslations<ExceptionEnum>;
         languages: LanguageEnumTranslations<LanguageEnum>;

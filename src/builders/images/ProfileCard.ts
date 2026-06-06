@@ -3,57 +3,41 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { GeneratedMedia } from '../../interfaces/application/Media';
 import { BaseCard, TextStyle } from './BaseCard';
-import { SCALE, FONT_SANS, FONT_MONO } from './CardTokens';
-import { PROJECT_NAME } from '../../utils/constants/Project';
+import {
+    SCALE,
+    FONT_SANS,
+    FONT_MONO,
+    COLOR_PACK,
+    COLOR_TEXT,
+    COLOR_TEXT_MUTED,
+    COLOR_TEXT_FAINT,
+    COLOR_PANEL,
+    COLOR_PANEL_BORDER,
+    COLOR_CHIP_BG,
+    COLOR_CHIP_BORDER,
+    COLOR_DIVIDER,
+    COLOR_DIVIDER_STRONG,
+    COLOR_PROGRESS_TRACK,
+} from './CardTokens';
+import { drawCardBackground, drawBrand } from './CardChrome';
+import BadgeRowRenderer from './renderers/BadgeRowRenderer';
 import { formatDate } from '../../utils/helpers/Date';
 import { Color } from '../../utils/helpers/Color';
 import { LanguageEnum, UserRoleEnum } from '../../interfaces/enums';
 import { DEFAULT_LANGUAGE, getMultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { i18n } from '../../utils/i18n/i18n';
-import { AchievementEnum } from '../../interfaces/enums/database/AchievementEnum';
-import { getEnumProperty } from '../../utils/helpers/EnumMetadata';
-import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyEnum';
 import { formatNumber } from '../../utils/helpers/Number';
 import { getInitials } from '../../utils/helpers/String';
-import { ProfileAchievement, ProfileCardData, ProfileFavoriteGame } from '../../interfaces/view';
-
-interface ColorPack {
-    deep: Color;
-    base: Color;
-    mid: Color;
-    accent: Color;
-    accent2: Color;
-}
+import { ProfileBadge, ProfileCardData, ProfileFavoriteGame } from '../../interfaces/view';
 
 const CARD_WIDTH = 840 * SCALE;
 const CARD_HEIGHT = 360 * SCALE;
 const CARD_PADDING = 22 * SCALE;
-const CARD_RADIUS = 18 * SCALE;
-const CARD_BORDER_COLOR = 'rgba(255,255,255,0.08)';
 
 const COLUMN_GAP = 22 * SCALE;
 const COLUMN_WIDTH = (CARD_WIDTH - CARD_PADDING * 2 - COLUMN_GAP) / 2;
 const LEFT_COLUMN_X = CARD_PADDING;
 const RIGHT_COLUMN_X = CARD_PADDING + COLUMN_WIDTH + COLUMN_GAP;
-
-const COLOR_TEXT = '#f3eefe';
-const COLOR_TEXT_MUTED = '#a5a0c9';
-const COLOR_TEXT_FAINT = '#6b67a0';
-const COLOR_PANEL = 'rgba(0,0,0,0.18)';
-const COLOR_PANEL_BORDER = 'rgba(255,255,255,0.06)';
-const COLOR_CHIP_BG = 'rgba(255,255,255,0.04)';
-const COLOR_CHIP_BORDER = 'rgba(255,255,255,0.06)';
-const COLOR_DIVIDER = 'rgba(255,255,255,0.06)';
-const COLOR_DIVIDER_STRONG = 'rgba(255,255,255,0.10)';
-const COLOR_PROGRESS_TRACK = 'rgba(0,0,0,0.4)';
-
-const COLOR_PACK: ColorPack = {
-    deep: '#1a1742',
-    base: '#27245C',
-    mid: '#312898',
-    accent: '#D938C8',
-    accent2: '#7C3BFF'
-};
 
 const AVATAR_SIZE = 64 * SCALE;
 const AVATAR_RADIUS = 16 * SCALE;
@@ -82,12 +66,6 @@ const FAV_ICON_RADIUS = 6 * SCALE;
 
 const BADGES_RADIUS = 12 * SCALE;
 const BADGE_ROW_HEIGHT = 70 * SCALE;
-const BADGE_ICON_SIZE = 36 * SCALE;
-const BADGE_ICON_RADIUS = 9 * SCALE;
-const BADGE_ACCENT_WIDTH = 4 * SCALE;
-
-const BRAND_TOP = 14 * SCALE;
-const BRAND_RIGHT = 16 * SCALE;
 
 class ProfileCardService extends BaseCard {
     constructor() {
@@ -103,8 +81,8 @@ class ProfileCardService extends BaseCard {
         const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
 
-        this.drawCardBackground(ctx);
-        this.drawBrand(ctx);
+        drawCardBackground(ctx, CARD_WIDTH, CARD_HEIGHT);
+        drawBrand(ctx, CARD_WIDTH);
 
         let leftY = HEADER_TOP;
         this.drawHeader(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH, language);
@@ -123,7 +101,7 @@ class ProfileCardService extends BaseCard {
         }
 
         const rightHeight = CARD_HEIGHT - HEADER_TOP - CARD_PADDING;
-        this.drawBadges(ctx, data.achievements ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight, language);
+        this.drawBadges(ctx, data.badges ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight, language);
 
         await fs.promises.writeFile(filepath, canvas.toBuffer('image/png'));
 
@@ -135,60 +113,6 @@ class ProfileCardService extends BaseCard {
     private validateData(data: ProfileCardData): void {
         if (!data.CreatedAt)
             data.CreatedAt = new Date();
-    }
-
-    private drawCardBackground(ctx: CanvasRenderingContext2D): void {
-        ctx.save();
-        this.roundedRectPath(ctx, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS);
-        ctx.clip();
-
-        const base = ctx.createLinearGradient(0, 0, 0, CARD_HEIGHT);
-        base.addColorStop(0, COLOR_PACK.base);
-        base.addColorStop(1, COLOR_PACK.deep);
-        ctx.fillStyle = base;
-        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-
-        const topRight = ctx.createRadialGradient(CARD_WIDTH, 0, 0, CARD_WIDTH, 0, 420 * SCALE);
-        topRight.addColorStop(0, this.withAlpha(COLOR_PACK.accent, 0.24));
-        topRight.addColorStop(1, this.withAlpha(COLOR_PACK.accent, 0));
-        ctx.fillStyle = topRight;
-        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-
-        const bottomLeft = ctx.createRadialGradient(0, CARD_HEIGHT, 0, 0, CARD_HEIGHT, 360 * SCALE);
-        bottomLeft.addColorStop(0, this.withAlpha(COLOR_PACK.accent2, 0.18));
-        bottomLeft.addColorStop(1, this.withAlpha(COLOR_PACK.accent2, 0));
-        ctx.fillStyle = bottomLeft;
-        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-
-        ctx.restore();
-
-        this.strokeRoundedRect(ctx, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS, {
-            color: CARD_BORDER_COLOR,
-            width: 1 * SCALE,
-        });
-    }
-
-    private drawBrand(ctx: CanvasRenderingContext2D): void {
-        const text = PROJECT_NAME.toUpperCase();
-        const fontSize = 10 * SCALE;
-        const brandStyle: TextStyle = {
-            font: `600 ${fontSize}px ${FONT_MONO}`,
-            color: COLOR_TEXT_FAINT,
-            baseline: 'middle',
-        };
-        ctx.font = brandStyle.font;
-        const textWidth = ctx.measureText(text).width;
-        const dotR = 2.5 * SCALE;
-        const gap = 5 * SCALE;
-        const totalWidth = dotR * 2 + gap + textWidth;
-        const right = CARD_WIDTH - BRAND_RIGHT;
-        const top = BRAND_TOP + fontSize / 2;
-        const dotCx = right - totalWidth + dotR;
-
-        this.fillCircle(ctx, dotCx, top, dotR + 1.5 * SCALE, this.withAlpha(COLOR_PACK.accent, 0.2));
-        this.fillCircle(ctx, dotCx, top, dotR, COLOR_PACK.accent);
-
-        this.drawText(ctx, text, dotCx + dotR + gap, top, brandStyle);
     }
 
     private drawHeader(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, width: number, language: LanguageEnum): void {
@@ -426,7 +350,6 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, xpText, innerX + innerW - xpW, innerY + 22 * SCALE, xpStyle);
 
         const barY = innerY + 40 * SCALE;
-        // const pct = data.level.xpMax > 0 ? Math.max(0, Math.min(1, data.level.xpNow / data.level.xpMax)) : 0;
         const pct = data.level.progress / 100;
         this.drawProgressBar(ctx, innerX, barY, innerW, pct);
     }
@@ -505,7 +428,7 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, hoursText, hoursX, midY, hoursStyle);
     }
 
-    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileAchievement[], x: number, y: number, width: number, height: number, language: LanguageEnum): void {
+    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileBadge[], x: number, y: number, width: number, height: number, language: LanguageEnum): void {
         const visible = badges.slice(0, 4);
         const rowHeight = visible.length > 0 ? height / visible.length : BADGE_ROW_HEIGHT;
 
@@ -525,89 +448,10 @@ class ProfileCardService extends BaseCard {
                 ctx.fillStyle = COLOR_DIVIDER;
                 ctx.fillRect(x, rowY, width, 1 * SCALE);
             }
-            this.drawBadgeRow(ctx, badge, x, rowY, width, rowHeight, language);
+            BadgeRowRenderer.draw(ctx, badge, x, rowY, width, rowHeight, language);
         });
 
         ctx.restore();
-    }
-
-    private drawBadgeRow(ctx: CanvasRenderingContext2D, achievement: ProfileAchievement, x: number, y: number, width: number, height: number, language: LanguageEnum): void {
-        const color = getEnumProperty(AchievementEnum, achievement.achievementEnum, MetadataKeyEnum.Color) as Color;
-        const icon = getEnumProperty(AchievementEnum, achievement.achievementEnum, MetadataKeyEnum.Emoji) as string;
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, BADGE_ACCENT_WIDTH, height);
-
-        const iconX = x + BADGE_ACCENT_WIDTH + 12 * SCALE;
-        const iconY = y + (height - BADGE_ICON_SIZE) / 2;
-        this.fillRoundedRect(ctx, iconX, iconY, BADGE_ICON_SIZE, BADGE_ICON_SIZE, BADGE_ICON_RADIUS,
-            this.withAlpha(color, 0.18));
-        this.strokeRoundedRect(ctx, iconX, iconY, BADGE_ICON_SIZE, BADGE_ICON_SIZE, BADGE_ICON_RADIUS, {
-            color: this.withAlpha(color, 0.3),
-            width: 1 * SCALE,
-        });
-
-        this.drawText(ctx, icon,
-            iconX + BADGE_ICON_SIZE / 2,
-            iconY + BADGE_ICON_SIZE / 2 + 1 * SCALE,
-            {
-                font: `${18 * SCALE}px ${FONT_SANS}`,
-                color: color,
-                align: 'center',
-                baseline: 'middle',
-            },
-        );
-
-        const dateRightPad = 12 * SCALE;
-        const dateRight = x + width - dateRightPad;
-        const textBlockHeight = 42 * SCALE;
-        const textTop = y + (height - textBlockHeight) / 2;
-
-        this.drawText(ctx, 'EARNED', dateRight, textTop + 1 * SCALE, {
-            font: `600 ${9 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
-            align: 'right',
-            baseline: 'top',
-        });
-
-        const dateStyle: TextStyle = {
-            font: `500 ${10 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_FAINT,
-            align: 'right',
-            baseline: 'top',
-        };
-        ctx.font = dateStyle.font;
-
-        const formattedDate = formatDate(achievement.date, true);
-        const dateW = ctx.measureText(formattedDate).width;
-        this.drawText(ctx, formattedDate, dateRight, textTop + 17 * SCALE, dateStyle);
-
-        ctx.font = `600 ${9 * SCALE}px ${FONT_SANS}`;
-        const earnedW = ctx.measureText('EARNED').width;
-        const dateLeft = dateRight - Math.max(dateW, earnedW);
-
-        const titleX = iconX + BADGE_ICON_SIZE + 12 * SCALE;
-        const titleMaxW = dateLeft - titleX - 8 * SCALE;
-
-        const titleStyle: TextStyle = {
-            font: `600 ${13 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT,
-            baseline: 'top',
-        };
-        ctx.font = titleStyle.font;
-        const title = getMultiLingualString(i18n.enums.achievements[achievement.achievementEnum].title, language);
-        this.drawText(ctx, this.truncateText(ctx, title, titleMaxW), titleX, textTop, titleStyle);
-
-        const descStyle: TextStyle = {
-            font: `500 ${10.5 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_MUTED,
-            baseline: 'top',
-        };
-        ctx.font = descStyle.font;
-        const description = getMultiLingualString(i18n.enums.achievements[achievement.achievementEnum].description, language);
-        const descLines = this.wrapText(ctx, description, titleMaxW, 2);
-        descLines.forEach((line, li) => {
-            this.drawText(ctx, line, titleX, textTop + 17 * SCALE + li * 13 * SCALE, descStyle);
-        });
     }
 
     private drawTrophyIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: Color): void {
@@ -675,40 +519,6 @@ class ProfileCardService extends BaseCard {
     private formatJoined(date: Date): string {
         // TODO: i18n
         return `Member since ${formatDate(date, true)}`;
-    }
-
-    private wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number): string[] {
-        const words = text.split(' ');
-        const lines: string[] = [];
-        let current = '';
-        for (let i = 0; i < words.length; i++) {
-            const test = current ? `${current} ${words[i]}` : words[i];
-            if (ctx.measureText(test).width <= maxWidth) {
-                current = test;
-            } else {
-                if (current) lines.push(current);
-                if (lines.length === maxLines - 1) {
-                    lines.push(this.truncateText(ctx, words.slice(i).join(' '), maxWidth));
-                    return lines;
-                }
-                current = words[i];
-            }
-        }
-        if (current) lines.push(current);
-        return lines;
-    }
-
-    private truncateText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
-        if (ctx.measureText(text).width <= maxWidth) return text;
-        const ellipsis = '…';
-        let lo = 0;
-        let hi = text.length;
-        while (lo < hi) {
-            const mid = Math.floor((lo + hi + 1) / 2);
-            if (ctx.measureText(text.slice(0, mid) + ellipsis).width <= maxWidth) lo = mid;
-            else hi = mid - 1;
-        }
-        return text.slice(0, lo) + ellipsis;
     }
 }
 

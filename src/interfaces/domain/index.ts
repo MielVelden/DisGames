@@ -8,4 +8,4 @@ export * from './User';
 export * from './Events_Payload';
 export * from './Metrics';
 export * from './Servers_Settings';
-export * from './Users_UserAchievementData';
+export * from './Badge';
