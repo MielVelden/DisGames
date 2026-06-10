@@ -211,6 +211,13 @@ export interface I18nTranslations {
         },
         job: {
             description: LanguageTranslations;
+        },
+        handoff: {
+            description: LanguageTranslations;
+            labels: {
+                activated: LanguageTranslations;
+                shuttingDown: LanguageTranslations;
+            };
         }
     }
     enums: {

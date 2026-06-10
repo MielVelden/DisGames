@@ -13,6 +13,7 @@ import { initAsync } from './utils/registries/InitRegistry';
 import { syncRoutines } from './utils/routines/Sync';
 import { validateSchemaAsync } from './utils/database/GenerateSchema';
 import TestMode from './utils/application/TestMode';
+import { gracefulShutdown, isStandby } from './utils/application/HandoffManager';
 
 getConfig();
 
@@ -29,7 +30,7 @@ discordClient.on('error', (error: Error) => {
   void Logger.logError('Discord client error', error);
 });
 
-discordClient.once('ready', async () => {
+discordClient.once('clientReady', async () => {
   Logger.logInfo(`Logged in as ${discordClient.user?.tag}`, {
     sendToDiscord: true
   });
@@ -61,9 +62,15 @@ discordClient.once('ready', async () => {
   });
 });
 
+if (isStandby())
+  Logger.logInfo('Starting in standby mode. Not responding to events until handoff');
+
+process.on('SIGTERM', () => void gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => void gracefulShutdown('SIGINT'));
+
 // During test runs the DiscordClient is constructed only because something in the
 // import graph touches `discordClient` (e.g. DiscordService). We must NOT log in or
 // the bot's `ready` handler will race with tests, fire initAsync a second time, and
 // try to bind the HTTP port that's already serving the test process.
 if (!TestMode.isEnabled())
-    discordClient.login(getConfigValue(EnvConfigEnum.TOKEN));
+  discordClient.login(getConfigValue(EnvConfigEnum.TOKEN));

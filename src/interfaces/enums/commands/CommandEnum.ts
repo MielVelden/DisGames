@@ -7,4 +7,5 @@ export enum CommandEnum {
     SETTINGS = "settings",
     ABOUTME = "aboutme",
     JOB = "job",
+    HANDOFF = "handoff",
 }

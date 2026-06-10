@@ -10,11 +10,15 @@ import { handleErrorAsync } from '../utils/application/Error';
 import EventService from '../services/domain/EventService';
 import { EventsSaveModel } from '../interfaces/database';
 import { withEventContextAsync } from '../middleware/EventContext';
+import { isStandby } from '../utils/application/HandoffManager';
 
 export default {
     name: Events.InteractionCreate,
 
     async execute(interaction: Interaction): Promise<void> {
+        if (isStandby())
+            return;
+
         // Map the interaction to the InteractionEvent interface
         const event = await DiscordService.mapInteractionToInteractionEventAsync(interaction);
 

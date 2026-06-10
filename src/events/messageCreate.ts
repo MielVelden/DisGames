@@ -11,6 +11,7 @@ import EventService from '../services/domain/EventService';
 import { EventTypeEnum, isMessageEventType } from '../interfaces/enums';
 import { EventsSaveModel } from '../interfaces/database';
 import { withEventContextAsync } from '../middleware/EventContext';
+import { isStandby } from '../utils/application/HandoffManager';
 
 export default {
     name: Events.MessageCreate,
@@ -26,6 +27,9 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
     return withEventContextAsync(event, async () => {
         try {
             if (event.command && (event.command.canExecute?.(event) ?? true)) {
+                if (isStandby() && !event.command.forceCheck)
+                    return;
+
                 await EventService.saveAsync(new EventsSaveModel({
                     UserId: event.user.id,
                     ServerId: event.server.Id,
@@ -40,6 +44,9 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
 
                 await handleCommandAsync(event.command, event);
             } else {
+                if (isStandby())
+                    return;
+
                 if (await GameService.checkActiveGameInChannel(event.channelId)) {
                     await EventService.saveAsync(new EventsSaveModel({
                         UserId: event.user.id,

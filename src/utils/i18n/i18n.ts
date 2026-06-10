@@ -812,7 +812,32 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.DE]: "Einen Job ausführen",
                 [LanguageEnum.PT]: "Executar um trabalho",
             },
-        }
+        },
+        handoff: {
+            description: {
+                [LanguageEnum.EN]: "Transfer control to a standby instance",
+                [LanguageEnum.NL]: "Geef controle over aan een standby instantie",
+                [LanguageEnum.ES]: "Transferir control a una instancia en espera",
+                [LanguageEnum.DE]: "Kontrolle an eine Standby-Instanz übergeben",
+                [LanguageEnum.PT]: "Transferir controlo para uma instância em espera",
+            },
+            labels: {
+                activated: {
+                    [LanguageEnum.EN]: "Handoff complete at {time}. This instance is now active.",
+                    [LanguageEnum.NL]: "Handoff voltooid om {time}. Deze instantie is nu actief.",
+                    [LanguageEnum.ES]: "Transferencia completa a las {time}. Esta instancia está ahora activa.",
+                    [LanguageEnum.DE]: "Übergabe abgeschlossen um {time}. Diese Instanz ist jetzt aktiv.",
+                    [LanguageEnum.PT]: "Transferência concluída às {time}. Esta instância está agora ativa.",
+                },
+                shuttingDown: {
+                    [LanguageEnum.EN]: "Handing off at {time}. Shutting down this instance...",
+                    [LanguageEnum.NL]: "Overdragen om {time}. Deze instantie wordt afgesloten...",
+                    [LanguageEnum.ES]: "Transfiriendo a las {time}. Apagando esta instancia...",
+                    [LanguageEnum.DE]: "Übergabe um {time}. Diese Instanz wird heruntergefahren...",
+                    [LanguageEnum.PT]: "A transferir às {time}. A desligar esta instância...",
+                },
+            }
+        },
     },
     enums: {
         badges: {

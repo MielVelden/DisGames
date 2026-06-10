@@ -80,6 +80,11 @@ export class JobScheduler {
         await this.executeJob(job);
     }
 
+    public async shutdown(): Promise<void> {
+        await schedule.gracefulShutdown();
+        this.jobs.clear();
+    }
+
 
     private scheduleJob(jobModule: JobModule): void {
         try {
