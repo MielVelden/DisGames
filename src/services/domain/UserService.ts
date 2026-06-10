@@ -10,12 +10,14 @@ import TimelineBuilder from "./TimelineBuilder";
 import { DurationEnum, InteractionEvent } from "../../interfaces/application";
 import { BaseDomainService } from "./BaseDomainService";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
+import { RegisterInit } from "../../utils/registries/InitRegistry";
 import { calculateDuration } from "../../utils/helpers/Duration";
 import ServerService from "./ServerService";
 import BadgeRepository from "../../repositories/BadgeRepository";
 import BadgeService from "./BadgeService";
 import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
 
+@RegisterInit()
 class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
     protected readonly repository = UserRepository;
 

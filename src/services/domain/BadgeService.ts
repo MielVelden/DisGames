@@ -10,7 +10,9 @@ import PointRepository from "../../repositories/PointRepository";
 import Logger from "../../utils/application/Logger";
 import ComponentService from "../application/ComponentService";
 import BadgeCard from "../../builders/images/BadgeCard";
+import { RegisterInit } from "../../utils/registries/InitRegistry";
 
+@RegisterInit()
 class BadgeService {
     private badges: BadgeModule[] = [];
 

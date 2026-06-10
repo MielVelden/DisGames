@@ -37,15 +37,18 @@ import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
+import { RegisterInit } from "../../utils/registries/InitRegistry";
 import UserService from "./UserService";
 import BadgeService from "./BadgeService";
 
+@RegisterInit()
 @RegisterMetricPulls()
 class GameService {
     private games: GameModule[] = [];
 
     public async initAsync(): Promise<void> {
         await this.loadGamesAsync();
+        await this.validateGameImagesAsync();
     }
 
     private async loadGamesAsync(): Promise<void> {
@@ -98,6 +101,21 @@ class GameService {
                 }
             } catch (error) {
                 Logger.logError(`Failed to load datasheets for game ${gameConfig.id}, continuing without datasheet settings`, error as Error);
+            }
+        }
+    }
+
+    private async validateGameImagesAsync(): Promise<void> {
+        for (const game of this.games) {
+            if (game.config.hasImages) {
+                const gameDataArray = await GameDataRepository.getAllByGameIdAsync(game.config.id);
+                for (const gameData of gameDataArray) {
+                    try {
+                        MediaService.getGameDataImage(game.config.id, gameData.Id);
+                    } catch (error) {
+                        Logger.logError(`Missing image for game ${game.config.id} with data ID ${gameData.Id}`, error as Error, { sendToDiscord: true });
+                    }
+                }
             }
         }
     }

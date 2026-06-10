@@ -59,6 +59,10 @@ class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSa
             .WhereRaw('ResponseMLS->>\'$."1"\' = ?', [primaryValue])
             .Execute();
     }
+
+    async getAllByGameIdAsync(gameId: number): Promise<GameDataModel[]> {
+        return this.baseRepository.Select().Where({ GameId: gameId }).Execute();
+    }
 }
 
 export default new GameDataRepository();

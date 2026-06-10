@@ -1,14 +1,24 @@
-import GameService from "../../services/domain/GameService";
-import MediaService from "../../services/application/MediaService";
-import MetricService from "../../services/domain/MetricService";
-import UserService from "../../services/domain/UserService";
-import BadgeService from "../../services/domain/BadgeService";
+const registrations: Array<() => Promise<void>> = [];
 
-// TODO: Add a way to load the services automatically
+export function registerInit(fn: () => Promise<void>): void {
+    registrations.push(fn);
+}
+
 export async function initAsync(): Promise<void> {
-    await MediaService.initAsync();
-    await GameService.initAsync();
-    await UserService.initAsync();
-    await MetricService.initAsync();
-    await BadgeService.initAsync();
+    for (const fn of registrations) {
+        await fn();
+    }
+}
+
+export function RegisterInit() {
+    return function <T extends new (...args: any[]) => {}>(constructor: T) {
+        return class extends constructor {
+            constructor(...args: any[]) {
+                super(...args);
+                if (typeof (this as any).initAsync === 'function') {
+                    registerInit(() => (this as any).initAsync());
+                }
+            }
+        };
+    };
 }

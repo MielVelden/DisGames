@@ -4,7 +4,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { GameTypeEnum } from "../../interfaces/enums";
 import Logger from "../../utils/application/Logger";
+import { RegisterInit } from "../../utils/registries/InitRegistry";
 
+@RegisterInit()
 class MediaService {
     private readonly imagesPath: string;
     private readonly notFoundImage: Media;
@@ -158,7 +160,7 @@ class MediaService {
             };
         }
 
-        Logger.logDebug(() => `Game image not found: ${gameImagePath}, using NotFound.png`);
+        Logger.logDebug(() => `Game image not found: ${gameImagePath}, using NotFound.png`, { sendToDiscord: true });
         return this.notFoundImage;
     }
 
@@ -173,7 +175,7 @@ class MediaService {
             };
         }
 
-        Logger.logDebug(() => `Game image not found: ${gameImagePath}, using NotFound.png`);
+        Logger.logDebug(() => `Game image not found: ${gameImagePath}, using NotFound.png`, { sendToDiscord: true });
         return this.notFoundImage;
     }
 
