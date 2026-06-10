@@ -1,5 +1,6 @@
 import { InteractionEvent, isReplyInteractionEvent } from "../../interfaces/application";
 import { ComponentErrorOptions } from "../../interfaces/application/Error";
+import { ExceptionTranslationParams } from "../../interfaces/application/i18n";
 import { Component } from "../../interfaces/application/Message";
 import { ExceptionEnum } from "../../interfaces/enums";
 import ComponentService from "../../services/application/ComponentService";
@@ -15,9 +16,10 @@ export class ComponentError extends Error {
     public readonly parameters?: { [key: string]: string | number };
 
     constructor(options: ComponentErrorOptions) {
-        const translated = new MultiLingualString(i18n.enums.exceptions[options.message]);
-        if (options.parameters)
-            translated.replaceParameters(options.parameters);
+        const exceptionDef = i18n.enums.exceptions[options.message];
+        const translated = typeof exceptionDef === 'function'
+            ? (exceptionDef as (p: Record<string, string | number>) => MultiLingualString)(options.parameters ?? {})
+            : new MultiLingualString(exceptionDef, options.parameters);
 
         super(translated.getMessage());
         this.name = 'ComponentError';
@@ -37,10 +39,10 @@ export class ComponentError extends Error {
     }
 
     public getMessage(): string {
-        const errorMessage = new MultiLingualString(i18n.enums.exceptions[this.errorKey]);
-        if (this.parameters)
-            errorMessage.replaceParameters(this.parameters);
-        return errorMessage.getMessage();
+        const exceptionDef = i18n.enums.exceptions[this.errorKey];
+        if (typeof exceptionDef === 'function')
+            return (exceptionDef as (p: Record<string, string | number>) => MultiLingualString)(this.parameters ?? {}).getMessage();
+        return new MultiLingualString(exceptionDef, this.parameters).getMessage();
     }
 
     public shouldAnnounceError(): boolean {
@@ -78,8 +80,8 @@ export class ErrorHelper {
         throw new ComponentError({ message, cause: error });
     }
 
-    static throwWithParameters(message: ExceptionEnum, parameters: { [key: string]: string | number }): never {
-        throw new ComponentError({ message, parameters });
+    static throwWithParameters<K extends keyof ExceptionTranslationParams>(message: K, parameters: ExceptionTranslationParams[K]): never {
+        throw new ComponentError({ message: message as ExceptionEnum, parameters: parameters as Record<string, string | number> });
     }
 
     static throwIfNull(value: any | null | undefined, message: ExceptionEnum): void {

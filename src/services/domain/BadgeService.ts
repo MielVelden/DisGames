@@ -88,6 +88,7 @@ class BadgeService {
 
         let userModel: UsersModel | undefined;
         let totalPointsCache: number | undefined;
+        let distinctServersCache: number | undefined;
 
         const loadUserAsync = async (): Promise<UsersModel> =>
             userModel ??= await UserRepository.getByUserIdAsync(userId);
@@ -106,6 +107,14 @@ class BadgeService {
             },
             async totalPoints(): Promise<number> {
                 return totalPointsCache ??= (await PointRepository.getUserProfileAsync(userId)).TotalPoints;
+            },
+            async accountAgeDays(): Promise<number> {
+                const user = await loadUserAsync();
+                const ms = Date.now() - new Date(user.CreatedAt).getTime();
+                return Math.floor(ms / 86_400_000);
+            },
+            async distinctServers(): Promise<number> {
+                return distinctServersCache ??= await PointRepository.getDistinctServerCountAsync(userId);
             },
         };
     }

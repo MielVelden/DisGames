@@ -11,6 +11,8 @@ export interface BadgeContext {
     streakDays(): Promise<number>;
     totalPoints(): Promise<number>;
     gamesPlayed(): Promise<number>;
+    accountAgeDays(): Promise<number>;
+    distinctServers(): Promise<number>;
 }
 
 export interface BadgeTier {

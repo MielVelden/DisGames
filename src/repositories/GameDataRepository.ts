@@ -44,7 +44,7 @@ class GameDataRepository implements RepositoryWithBase<GameDataModel, GameDataSa
     async getRandomDataByGameIdAsync(gameId: number): Promise<GameDataModel[]> {
         const result = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetRandomGameData, [gameId]);
         if (!result || result.length === 0)
-            ErrorHelper.throwWithParameters(ExceptionEnum.RECORD_NOT_FOUND, { recordType: TableEnum.GAME_DATA.toString() });
+            ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
         const errorMsg = (result.find((item: any) => item?.Errormsg) as any)?.Errormsg;
         if (errorMsg)

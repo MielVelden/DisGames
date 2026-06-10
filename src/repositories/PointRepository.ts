@@ -96,6 +96,15 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
     async getTotalPointsAsync(): Promise<number> {
         return await this.baseRepository.Select().Sum("Points");
     }
+
+    async getDistinctServerCountAsync(userId: string): Promise<number> {
+        const tableName = getTableName(TableEnum.POINTS);
+        const results = await runQueryAsync(
+            `SELECT COUNT(DISTINCT ServerId) AS Count FROM ${tableName} WHERE UserId = ?`,
+            [userId]
+        );
+        return results?.[0]?.Count ?? 0;
+    }
 }
 
 export default new PointRepository();

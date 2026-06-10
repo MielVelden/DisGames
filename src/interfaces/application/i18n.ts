@@ -27,6 +27,25 @@ export type LanguageEnumTranslations<T extends string | number> = {
     [K in T]: LanguageTranslations
 };
 
+export type ExceptionTranslationParams = {
+    [ExceptionEnum.TABLE_ENUM_NOT_FOUND]: { tableEnumValue: string };
+    [ExceptionEnum.ENV_VARIABLE_NOT_SET]: { environmentVariable: string };
+    [ExceptionEnum.FUNCTION_RETURNED_INVALID_RESULT]: { functionName: string };
+    [ExceptionEnum.JOB_NOT_FOUND]: { jobId: string };
+    [ExceptionEnum.CLIENT_NOT_FOUND]: { clientId: string };
+    [ExceptionEnum.FIELD_IS_NULL]: { field: string };
+    [ExceptionEnum.FIELD_IS_MISSING_AND_REQUIRED]: { key: string };
+    [ExceptionEnum.FIELD_HAS_INVALID_TYPE]: { key: string; received: string; expected: string };
+    [ExceptionEnum.FIELD_HAS_INVALID_VALUE]: { key: string };
+    [ExceptionEnum.TABLE_NOT_FOUND]: { tableName: string };
+};
+
+export type LanguageExceptionTranslations = {
+    [K in ExceptionEnum]: K extends keyof ExceptionTranslationParams
+        ? (params: ExceptionTranslationParams[K]) => MultiLingualString
+        : LanguageTranslations;
+};
+
 export type LanguageAchievementEnumTranslations<T extends string | number> = {
     [K in T]: {
         title: LanguageTranslations,
@@ -223,7 +242,7 @@ export interface I18nTranslations {
     enums: {
         badges: LanguageAchievementEnumTranslations<BadgeEnum>;
         gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
-        exceptions: LanguageEnumTranslations<ExceptionEnum>;
+        exceptions: LanguageExceptionTranslations;
         languages: LanguageEnumTranslations<LanguageEnum>;
         metrics: LanguageEnumTranslations<MetricEnum>;
         userRoles: LanguageEnumTranslations<UserRoleEnum>;

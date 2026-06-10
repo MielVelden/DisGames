@@ -47,7 +47,7 @@ export async function createTestUserAsync(overrides: Partial<UsersSaveModel> = {
     const user = new UsersSaveModel({
         ...defaultUser,
         ...overrides,
-        UserId: overrides.UserId || `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        UserId: overrides.UserId || `${Date.now()}${Math.floor(Math.random() * 10_000).toString().padStart(4, '0')}`
     });
 
     // Save user to database
