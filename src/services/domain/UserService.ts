@@ -29,7 +29,10 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
     protected async performSaveAsync(savable: UsersSaveModel, event: InteractionEvent): Promise<UsersModel> {
         savable.validateIsProvidedAndNotNull(UsersModelFieldEnum.UserId);
         savable.UserRoleEnum = UserRoleEnum.USER;
-
+        savable.ExperiencePoints = savable.ExperiencePoints ?? 0;
+        savable.StreakDays = savable.StreakDays ?? 0;
+        savable.GamesPlayed = savable.GamesPlayed ?? 0;
+        
         const user = await UserRepository.saveAsync(savable);
         await TimelineBuilder.forUserUpdateAsync({
             old: null,

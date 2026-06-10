@@ -1,4 +1,5 @@
 import { 
+    BaseInteractionEvent,
     InteractionEvent,
     MessageInteractionEvent,
     SelectMenuInteractionEvent
@@ -23,7 +24,7 @@ import { CommandEnum } from '../../src/interfaces/enums/commands/CommandEnum';
 import { MultiLingualString } from '../../src/utils/i18n/MultiLingualString';
 import { EventTypeEnum, UserRoleEnum } from '../../src/interfaces/enums';
 
-export class MockDiscordEvent {
+export class MockDiscordEvent implements BaseInteractionEvent {
     public readonly type: EventTypeEnum;
     public readonly customId: string;
     public readonly currentInteraction: any;
@@ -60,7 +61,7 @@ export class MockDiscordEvent {
         this.messageId = messageId;
         this.inputSimulator = inputSimulator || new TestInputSimulator();
     }
-
+    
     public async addComponentAsync(component: Component): Promise<void> {
         this.components.push(component);
     }
@@ -75,28 +76,28 @@ export class MockDiscordEvent {
 
     public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
         this.sentMessages.push([...components]);
-        
+
         const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         this.inputSimulator.trackMessage(messageId, channelId, components, false);
-        
+
         Logger.logTest(`Sent message to channel ${channelId} with ${components.length} components`);
     }
 
     public async editAsync(content?: string): Promise<void> {
         if (content)
             this.editedContent.push(content);
-        
+
         this.inputSimulator.trackMessage(this.messageId, this.channelId, this.components, true);
-        
+
         Logger.logTest(`Edited message: ${content || 'with components'}`);
     }
 
-    public async editWithComponentAsync(component: Component): Promise<void> {
-        this.components = [component];
-        
-        this.inputSimulator.trackMessage(this.messageId, this.channelId, [component], true);
-        
-        Logger.logTest(`Edited message with component`);
+    public async editWithComponentsAsync(components: Component[]): Promise<void> {
+        this.components = [...components];
+
+        this.inputSimulator.trackMessage(this.messageId, this.channelId, components, true);
+
+        Logger.logTest(`Edited message with components`);
     }
 
     public async getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null> {
@@ -112,7 +113,7 @@ export class MockDiscordEvent {
         return simulatedResponse?.value as string || null;
     }
 
-    public async getConfirmationFromUser(container: Component): Promise<InteractionEvent | null> {
+    public async getConfirmationFromUserAsync(_container: Component[]): Promise<InteractionEvent | null> {
         const confirmation = this.inputSimulator.getNextConfirmationResponse();
         return confirmation?.value as boolean ? this as unknown as InteractionEvent : null;
     }
@@ -212,6 +213,10 @@ export class MockDiscordEvent {
 
     public clearTracker(): void {
         this.inputSimulator.clearTracker();
+    }
+
+    public scheduleAction(task: () => Promise<void>): void {
+        task().catch(err => Logger.logTest(`Scheduled action failed: ${(err as Error).message}`));
     }
 }
 
