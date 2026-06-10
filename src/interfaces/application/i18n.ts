@@ -46,6 +46,26 @@ export type LanguageExceptionTranslations = {
         : LanguageTranslations;
 };
 
+export type BadgeTranslationParams = {
+    [BadgeEnum.DAY_STREAK]: { days: number };
+    [BadgeEnum.GAMES_PLAYED]: { count: number };
+    [BadgeEnum.POINT_COLLECTOR]: { points: number };
+    [BadgeEnum.VETERAN]: { days: number };
+    [BadgeEnum.WORLD_TRAVELER]: { servers: number };
+};
+
+export type LanguageBadgeTranslations = {
+    [K in BadgeEnum]: K extends keyof BadgeTranslationParams
+        ? {
+            title: (params: BadgeTranslationParams[K]) => MultiLingualString;
+            description: (params: BadgeTranslationParams[K]) => MultiLingualString;
+          }
+        : {
+            title: LanguageTranslations;
+            description: LanguageTranslations;
+          };
+};
+
 export type LanguageAchievementEnumTranslations<T extends string | number> = {
     [K in T]: {
         title: LanguageTranslations,
@@ -240,7 +260,7 @@ export interface I18nTranslations {
         }
     }
     enums: {
-        badges: LanguageAchievementEnumTranslations<BadgeEnum>;
+        badges: LanguageBadgeTranslations;
         gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
         exceptions: LanguageExceptionTranslations;
         languages: LanguageEnumTranslations<LanguageEnum>;

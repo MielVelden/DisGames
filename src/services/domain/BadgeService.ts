@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { InteractionEvent } from "../../interfaces/application";
 import { BadgeContext, BadgeModule, BadgeResult } from "../../interfaces/domain/Badge";
-import { BadgeTriggerEnum, LanguageEnum } from "../../interfaces/enums";
+import { BadgeEnum, BadgeTriggerEnum } from "../../interfaces/enums";
 import { UsersModel } from "../../interfaces/database/TableInterfaces";
 import BadgeRepository from "../../repositories/BadgeRepository";
 import UserRepository from "../../repositories/UserRepository";
@@ -46,6 +46,11 @@ class BadgeService {
         return this.badges;
     }
 
+    public getThresholdForLevel(achievementEnum: BadgeEnum, level: number): number {
+        const badge = this.badges.find(b => b.config.id === achievementEnum);
+        return badge?.config.tiers.find(t => t.level === level)?.threshold ?? level;
+    }
+
     public async evaluateAll(event: InteractionEvent, trigger: BadgeTriggerEnum): Promise<BadgeResult[]> {
         const context = this.createBadgeContext(event, trigger);
         const stored = await BadgeRepository.getLevelsForUserAsync(context.userId);
@@ -65,13 +70,15 @@ class BadgeService {
                 const changed = await BadgeRepository.upsertLevelAsync(context.userId, badge.config.id, achieved);
                 if (changed) {
                     earned.push({ achievement: badge.config.id, level: achieved, isNew: true });
+                    const threshold = badge.config.tiers.find(t => t.level === achieved)?.threshold ?? achieved;
                     const media = await BadgeCard.generateAsync({
                         userId: context.userId,
-                        badge: { achievementEnum: badge.config.id, date: new Date(), level: achieved },
+                        badge: { achievementEnum: badge.config.id, date: new Date(), level: achieved, threshold },
                     });
+
                     await event.addComponentsAsync([
                         ComponentService.createImage(media, false),
-                        ComponentService.createSeparator()
+                        ...(event.components.length ? [ComponentService.createSeparator()] : [])
                     ], true);
                 }
             } catch (error) {

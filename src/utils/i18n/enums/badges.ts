@@ -1,8 +1,9 @@
 import { BadgeEnum } from "../../../interfaces/enums/application/BadgeEnum";
-import { LanguageAchievementEnumTranslations } from "../../../interfaces/application/i18n";
+import { LanguageBadgeTranslations } from "../../../interfaces/application/i18n";
 import { LanguageEnum } from "../../../interfaces/enums/database/LanguageEnum";
+import { MultiLingualString } from "../MultiLingualString";
 
-export const badgeTranslations: LanguageAchievementEnumTranslations<BadgeEnum> = {
+export const badgeTranslations: LanguageBadgeTranslations = {
     [BadgeEnum.FIRST_GAME]: {
         title: {
             [LanguageEnum.EN]: "First Game",
@@ -20,83 +21,83 @@ export const badgeTranslations: LanguageAchievementEnumTranslations<BadgeEnum> =
         },
     },
     [BadgeEnum.DAY_STREAK]: {
-        title: {
-            [LanguageEnum.EN]: "7 Days Streak",
-            [LanguageEnum.NL]: "7 Dagen Op Rij",
-            [LanguageEnum.ES]: "Racha de 7 Días",
-            [LanguageEnum.DE]: "7 Tage in Folge",
-            [LanguageEnum.PT]: "Sequência de 7 Dias",
-        },
-        description: {
-            [LanguageEnum.EN]: "Play at least one game every day for 7 days in a row",
-            [LanguageEnum.NL]: "Speel minstens één spel elke dag gedurende 7 dagen achter elkaar",
-            [LanguageEnum.ES]: "Juega al menos un juego cada día durante 7 días seguidos",
-            [LanguageEnum.DE]: "Spiele mindestens ein Spiel jeden Tag für 7 Tage in Folge",
-            [LanguageEnum.PT]: "Jogue pelo menos um jogo todos os dias durante 7 dias seguidos",
-        },
+        title: ({ days }) => new MultiLingualString({
+            [LanguageEnum.EN]: "{days} Days Streak",
+            [LanguageEnum.NL]: "{days} Dagen Op Rij",
+            [LanguageEnum.ES]: "Racha de {days} Días",
+            [LanguageEnum.DE]: "{days} Tage in Folge",
+            [LanguageEnum.PT]: "Sequência de {days} Dias",
+        }, { days }),
+        description: ({ days }) => new MultiLingualString({
+            [LanguageEnum.EN]: "Play at least one game every day for {days} days in a row",
+            [LanguageEnum.NL]: "Speel minstens één spel elke dag gedurende {days} dagen achter elkaar",
+            [LanguageEnum.ES]: "Juega al menos un juego cada día durante {days} días seguidos",
+            [LanguageEnum.DE]: "Spiele mindestens ein Spiel jeden Tag für {days} Tage in Folge",
+            [LanguageEnum.PT]: "Jogue pelo menos um jogo todos os dias durante {days} dias seguidos",
+        }, { days }),
     },
     [BadgeEnum.GAMES_PLAYED]: {
-        title: {
-            [LanguageEnum.EN]: "Games Played",
-            [LanguageEnum.NL]: "Gespeelde Spellen",
-            [LanguageEnum.ES]: "Juegos Jugados",
-            [LanguageEnum.DE]: "Gespielte Spiele",
-            [LanguageEnum.PT]: "Jogos Jogados",
-        },
-        description: {
-            [LanguageEnum.EN]: "Play 10, 50 or 250 games",
-            [LanguageEnum.NL]: "Speel 10, 50 of 250 spellen",
-            [LanguageEnum.ES]: "Juega 10, 50 o 250 juegos",
-            [LanguageEnum.DE]: "Spiele 10, 50 oder 250 Spiele",
-            [LanguageEnum.PT]: "Jogue 10, 50 ou 250 jogos",
-        },
+        title: ({ count }) => new MultiLingualString({
+            [LanguageEnum.EN]: "{count} Games Played",
+            [LanguageEnum.NL]: "{count} Gespeelde Spellen",
+            [LanguageEnum.ES]: "{count} Juegos Jugados",
+            [LanguageEnum.DE]: "{count} Gespielte Spiele",
+            [LanguageEnum.PT]: "{count} Jogos Jogados",
+        }, { count }),
+        description: ({ count }) => new MultiLingualString({
+            [LanguageEnum.EN]: "Play {count} games",
+            [LanguageEnum.NL]: "Speel {count} spellen",
+            [LanguageEnum.ES]: "Juega {count} juegos",
+            [LanguageEnum.DE]: "Spiele {count} Spiele",
+            [LanguageEnum.PT]: "Jogue {count} jogos",
+        }, { count }),
     },
     [BadgeEnum.POINT_COLLECTOR]: {
-        title: {
-            [LanguageEnum.EN]: "Point Collector",
-            [LanguageEnum.NL]: "Puntenverzamelaar",
-            [LanguageEnum.ES]: "Coleccionista de Puntos",
-            [LanguageEnum.DE]: "Punktesammler",
-            [LanguageEnum.PT]: "Colecionador de Pontos",
-        },
-        description: {
-            [LanguageEnum.EN]: "Earn 500, 5.000 or 50.000 total points",
-            [LanguageEnum.NL]: "Verdien 500, 5.000 of 50.000 totale punten",
-            [LanguageEnum.ES]: "Gana 500, 5.000 o 50.000 puntos en total",
-            [LanguageEnum.DE]: "Verdiene 500, 5.000 oder 50.000 Gesamtpunkte",
-            [LanguageEnum.PT]: "Ganhe 500, 5.000 ou 50.000 pontos no total",
-        },
+        title: ({ points }) => new MultiLingualString({
+            [LanguageEnum.EN]: "{points} Points",
+            [LanguageEnum.NL]: "{points} Punten",
+            [LanguageEnum.ES]: "{points} Puntos",
+            [LanguageEnum.DE]: "{points} Punkte",
+            [LanguageEnum.PT]: "{points} Pontos",
+        }, { points }),
+        description: ({ points }) => new MultiLingualString({
+            [LanguageEnum.EN]: "Earn {points} total points",
+            [LanguageEnum.NL]: "Verdien {points} totale punten",
+            [LanguageEnum.ES]: "Gana {points} puntos en total",
+            [LanguageEnum.DE]: "Verdiene {points} Gesamtpunkte",
+            [LanguageEnum.PT]: "Ganhe {points} pontos no total",
+        }, { points }),
     },
     [BadgeEnum.VETERAN]: {
-        title: {
-            [LanguageEnum.EN]: "Veteran",
-            [LanguageEnum.NL]: "Veteraan",
-            [LanguageEnum.ES]: "Veterano",
-            [LanguageEnum.DE]: "Veteran",
-            [LanguageEnum.PT]: "Veterano",
-        },
-        description: {
-            [LanguageEnum.EN]: "Have an account for 100, 200 or 500 days",
-            [LanguageEnum.NL]: "Heb een account van 100, 200 of 500 dagen",
-            [LanguageEnum.ES]: "Tener una cuenta por 100, 200 o 500 días",
-            [LanguageEnum.DE]: "Habe ein Konto seit 100, 200 oder 500 Tagen",
-            [LanguageEnum.PT]: "Tenha uma conta por 100, 200 ou 500 dias",
-        },
+        title: ({ days }) => new MultiLingualString({
+            [LanguageEnum.EN]: "{days} Days",
+            [LanguageEnum.NL]: "{days} Dagen",
+            [LanguageEnum.ES]: "{days} Días",
+            [LanguageEnum.DE]: "{days} Tage",
+            [LanguageEnum.PT]: "{days} Dias",
+        }, { days }),
+        description: ({ days }) => new MultiLingualString({
+            [LanguageEnum.EN]: "Have an account for {days} days",
+            [LanguageEnum.NL]: "Heb een account van {days} dagen",
+            [LanguageEnum.ES]: "Tener una cuenta por {days} días",
+            [LanguageEnum.DE]: "Habe ein Konto seit {days} Tagen",
+            [LanguageEnum.PT]: "Tenha uma conta por {days} dias",
+        }, { days }),
     },
     [BadgeEnum.WORLD_TRAVELER]: {
-        title: {
-            [LanguageEnum.EN]: "World Traveler",
-            [LanguageEnum.NL]: "Wereldreiziger",
-            [LanguageEnum.ES]: "Viajero del Mundo",
-            [LanguageEnum.DE]: "Weltreisender",
-            [LanguageEnum.PT]: "Viajante Mundial",
-        },
-        description: {
-            [LanguageEnum.EN]: "Play in 5, 10 or 20 different servers",
-            [LanguageEnum.NL]: "Speel op 5, 10 of 20 verschillende servers",
-            [LanguageEnum.ES]: "Juega en 5, 10 o 20 servidores diferentes",
-            [LanguageEnum.DE]: "Spiele auf 5, 10 oder 20 verschiedenen Servern",
-            [LanguageEnum.PT]: "Jogue em 5, 10 ou 20 servidores diferentes",
-        },
+        title: ({ servers }) => new MultiLingualString({
+            [LanguageEnum.EN]: "{servers} Servers",
+            [LanguageEnum.NL]: "{servers} Servers",
+            [LanguageEnum.ES]: "{servers} Servidores",
+            [LanguageEnum.DE]: "{servers} Server",
+            [LanguageEnum.PT]: "{servers} Servidores",
+        }, { servers }),
+        description: ({ servers }) => new MultiLingualString({
+            [LanguageEnum.EN]: "Play in {servers} different servers",
+            [LanguageEnum.NL]: "Speel op {servers} verschillende servers",
+            [LanguageEnum.ES]: "Juega en {servers} servidores diferentes",
+            [LanguageEnum.DE]: "Spiele auf {servers} verschiedenen Servern",
+            [LanguageEnum.PT]: "Jogue em {servers} servidores diferentes",
+        }, { servers }),
     },
 };

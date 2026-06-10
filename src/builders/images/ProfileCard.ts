@@ -94,10 +94,12 @@ class ProfileCardService extends BaseCard {
         this.drawLevelBlock(ctx, data, LEFT_COLUMN_X, leftY, COLUMN_WIDTH);
         leftY += LEVEL_BLOCK_HEIGHT + SECTION_GAP;
 
-        this.drawFavorite(ctx, 'FAVORITE GAME', data.favoriteGame, LEFT_COLUMN_X, leftY, COLUMN_WIDTH, language);
-        if (data.leastFavoriteGame) {
-            const leastFavY = leftY + FAV_ICON_SIZE + 8 * SCALE;
-            this.drawFavorite(ctx, 'LEAST PLAYED', data.leastFavoriteGame, LEFT_COLUMN_X, leastFavY, COLUMN_WIDTH, language);
+        if (data.favoriteGame) {
+            this.drawFavorite(ctx, 'FAVORITE GAME', data.favoriteGame, LEFT_COLUMN_X, leftY, COLUMN_WIDTH, language);
+            if (data.leastFavoriteGame) {
+                const leastFavY = leftY + FAV_ICON_SIZE + 8 * SCALE;
+                this.drawFavorite(ctx, 'LEAST PLAYED', data.leastFavoriteGame, LEFT_COLUMN_X, leastFavY, COLUMN_WIDTH, language);
+            }
         }
 
         const rightHeight = CARD_HEIGHT - HEADER_TOP - CARD_PADDING;
@@ -335,12 +337,12 @@ class ProfileCardService extends BaseCard {
         const lvlPrefixW = ctx.measureText('LVL').width;
         this.drawText(ctx, 'LVL', innerX, innerY + 24 * SCALE, lvlPrefixStyle);
 
-        this.drawText(ctx, String(data.level.currentLevel), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
+        this.drawText(ctx, String(data.Level.currentLevel), innerX + lvlPrefixW + 6 * SCALE, innerY + 28 * SCALE, {
             font: `800 ${30 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT,
         });
 
-        const xpText = `${formatNumber(data.level.xpNow)} / ${formatNumber(data.level.xpMax)} XP`;
+        const xpText = `${formatNumber(data.Level.xpNow)} / ${formatNumber(data.Level.xpMax)} XP`;
         const xpStyle: TextStyle = {
             font: `600 ${11.5 * SCALE}px ${FONT_MONO}`,
             color: COLOR_TEXT_MUTED,
@@ -350,7 +352,7 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, xpText, innerX + innerW - xpW, innerY + 22 * SCALE, xpStyle);
 
         const barY = innerY + 40 * SCALE;
-        const pct = data.level.progress / 100;
+        const pct = data.Level.progress / 100;
         this.drawProgressBar(ctx, innerX, barY, innerW, pct);
     }
 

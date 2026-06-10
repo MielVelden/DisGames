@@ -57,7 +57,7 @@ class BadgeCardService extends BaseCard {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
-        const visuals = resolveBadgeVisuals(data.badge.achievementEnum, language);
+        const visuals = resolveBadgeVisuals(data.badge.achievementEnum, language, data.badge.level, data.badge.threshold);
         const iconImage = await loadEmojiImage(visuals.icon);
 
         measureCtx.font = `500 ${DESC_FONT}px ${FONT_SANS}`;

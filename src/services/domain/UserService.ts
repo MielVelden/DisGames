@@ -1,6 +1,6 @@
 import { UsersModel, UsersSaveModel, UsersModelFieldEnum } from "../../interfaces/database/TableInterfaces";
-import { MetricEnum, UserRoleEnum } from "../../interfaces/enums";
-import { ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
+import { GameTypeEnum, MetricEnum, UserRoleEnum } from "../../interfaces/enums";
+import { ProfileCardData, ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import EventRepository from "../../repositories/EventRepository";
@@ -12,6 +12,9 @@ import { BaseDomainService } from "./BaseDomainService";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { calculateDuration } from "../../utils/helpers/Duration";
 import ServerService from "./ServerService";
+import BadgeRepository from "../../repositories/BadgeRepository";
+import BadgeService from "./BadgeService";
+import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
 
 class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
     protected readonly repository = UserRepository;
@@ -32,7 +35,7 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
         savable.ExperiencePoints = savable.ExperiencePoints ?? 0;
         savable.StreakDays = savable.StreakDays ?? 0;
         savable.GamesPlayed = savable.GamesPlayed ?? 0;
-        
+
         const user = await UserRepository.saveAsync(savable);
         await TimelineBuilder.forUserUpdateAsync({
             old: null,
@@ -55,6 +58,7 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
     public async addExperiencePointsAsync(userId: string, points: number): Promise<void> {
         const user = await this.getByExternalIdAsync(userId);
         user.ExperiencePoints += points;
+        user.GamesPlayed += 1;
         Logger.logDebug(`Added ${points} experience points to user ${userId}. Total experience is now ${user.ExperiencePoints}.`);
         await UserRepository.saveAsync(user);
     }
@@ -66,8 +70,36 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
         return await UserRepository.saveAsync(user);
     }
 
-    public async getUserProfileAsync(userId: string): Promise<ProfileResponse> {
-        return await PointRepository.getUserProfileAsync(userId);
+    public async getUserProfileAsync(userId: string): Promise<ProfileCardData> {
+        const [profile, badges] = await Promise.all([
+            PointRepository.getUserProfileAsync(userId),
+            BadgeRepository.getProfileBadgesAsync(userId),
+        ]);
+
+        const badgesWithThreshold = badges.map(badge => ({
+            ...badge,
+            threshold: BadgeService.getThresholdForLevel(badge.achievementEnum, badge.level),
+        }));
+
+        return {
+            Username: profile.Username,
+            UserId: profile.UserId,
+            CreatedAt: profile.CreatedAt,
+            UserRoleEnum: profile.UserRoleEnum,
+            UserRank: profile.UserRank,
+            TotalUsers: profile.TotalUsers,
+            TotalPoints: profile.TotalPoints,
+            Level: calculateUserLevel(profile.ExperiencePoints),
+            favoriteGame: profile.FavoriteGameId !== null ? {
+                gameId: profile.FavoriteGameId as GameTypeEnum,
+                points: profile.FavoriteGamePoints!,
+            } : undefined,
+            leastFavoriteGame: profile.LeastFavoriteGameId !== null && profile.LeastFavoriteGameId !== profile.FavoriteGameId ? {
+                gameId: profile.LeastFavoriteGameId as GameTypeEnum,
+                points: profile.LeastFavoriteGamePoints!,
+            } : undefined,
+            badges: badgesWithThreshold,
+        };
     }
 
     public async getUserGameProfileAsync(userId: string, serverId: string, gameId: number): Promise<ProfileGameResponse> {

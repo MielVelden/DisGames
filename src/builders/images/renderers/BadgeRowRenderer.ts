@@ -19,6 +19,7 @@ export interface BadgeRowData {
     achievementEnum: BadgeEnum;
     date: Date;
     level: number;
+    threshold: number;
 }
 
 const ACCENT_WIDTH = 4 * SCALE;
@@ -40,7 +41,7 @@ class BadgeRowRenderer {
         language: LanguageEnum,
         iconSize: number = DEFAULT_ICON_SIZE,
     ): void {
-        const { color, icon, title, description } = resolveBadgeVisuals(badge.achievementEnum, language);
+        const { color, icon, title, description } = resolveBadgeVisuals(badge.achievementEnum, language, badge.level, badge.threshold);
 
         ctx.fillStyle = color;
         ctx.fillRect(x, y, ACCENT_WIDTH, height);
@@ -120,7 +121,8 @@ class BadgeRowRenderer {
 
     private drawLevelChip(ctx: CanvasRenderingContext2D, level: number, iconX: number, iconY: number, iconSize: number, color: Color): void {
         const label = toRoman(level);
-        if (!label) return;
+        if (!label) 
+            return;
 
         const chipHeight = iconSize * CHIP_HEIGHT_RATIO;
         const chipRadius = chipHeight / 2;

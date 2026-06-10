@@ -6,6 +6,7 @@ export interface ProfileBadge {
     achievementEnum: BadgeEnum;
     date: Date;
     level: number;
+    threshold: number;
 }
 
 export interface ProfileFavoriteGame {
@@ -21,8 +22,8 @@ export interface ProfileCardData {
     UserRank: number;
     TotalUsers: number;
     TotalPoints: number;
-    level: UserLevelData;
-    favoriteGame: ProfileFavoriteGame;
+    Level: UserLevelData;
+    favoriteGame?: ProfileFavoriteGame;
     leastFavoriteGame?: ProfileFavoriteGame;
     badges?: ProfileBadge[];
 }
@@ -36,6 +37,10 @@ export interface ProfileResponse {
     UserRank: number;
     TotalUsers: number;
     CreatedAt: Date;
+    FavoriteGameId: number | null;
+    FavoriteGamePoints: number | null;
+    LeastFavoriteGameId: number | null;
+    LeastFavoriteGamePoints: number | null;
 }
 
 export interface ProfileGameResponse {

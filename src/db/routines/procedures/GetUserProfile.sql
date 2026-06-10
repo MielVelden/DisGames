@@ -4,20 +4,28 @@ CREATE PROCEDURE `GetUserProfile`(
 )
 BEGIN
     WITH TotalPoints AS (
-        SELECT 
+        SELECT
             p.UserId,
             SUM(p.Points) AS TotalPoints
         FROM points p
         GROUP BY p.UserId
     ),
     Ranked AS (
-        SELECT 
+        SELECT
             tp.UserId,
             tp.TotalPoints,
             RANK() OVER (ORDER BY tp.TotalPoints DESC) AS UserRank
         FROM TotalPoints tp
+    ),
+    UserGamePoints AS (
+        SELECT
+            GameId,
+            SUM(Points) AS GamePoints
+        FROM points
+        WHERE UserId = p_UserId
+        GROUP BY GameId
     )
-    SELECT 
+    SELECT
         u.UserId,
         u.Username,
         u.UserRoleEnum,
@@ -25,7 +33,11 @@ BEGIN
         COALESCE(r.TotalPoints, 0) AS TotalPoints,
         COALESCE(r.UserRank, (SELECT COUNT(*) FROM TotalPoints)) AS UserRank,
         (SELECT COUNT(*) FROM users) AS TotalUsers,
-        u.CreatedAt
+        u.CreatedAt,
+        (SELECT GameId FROM UserGamePoints ORDER BY GamePoints DESC LIMIT 1) AS FavoriteGameId,
+        (SELECT GamePoints FROM UserGamePoints ORDER BY GamePoints DESC LIMIT 1) AS FavoriteGamePoints,
+        (SELECT GameId FROM UserGamePoints ORDER BY GamePoints ASC LIMIT 1) AS LeastFavoriteGameId,
+        (SELECT GamePoints FROM UserGamePoints ORDER BY GamePoints ASC LIMIT 1) AS LeastFavoriteGamePoints
     FROM users u
     LEFT JOIN Ranked r ON u.UserId = r.UserId
     WHERE u.UserId = p_UserId;

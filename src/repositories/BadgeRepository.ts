@@ -8,6 +8,7 @@ import {
 import BaseRepository from "./BaseRepository";
 import { BadgeEnum, TableEnum } from "../interfaces/enums";
 import { getTableName, runExecuteAsync } from "./util/ConnectionHandler";
+import { ProfileBadge } from "../interfaces/view";
 
 class BadgeRepository implements RepositoryWithBase<UsersAchievementsModel, UsersAchievementsSaveModel, typeof UsersAchievementsModelFieldEnum> {
     public readonly baseRepository: BaseRepository<UsersAchievementsModel, UsersAchievementsSaveModel, typeof UsersAchievementsModelFieldEnum>;
@@ -43,6 +44,16 @@ class BadgeRepository implements RepositoryWithBase<UsersAchievementsModel, User
         for (const row of rows)
             levels.set(row.AchievementEnum, row.Level);
         return levels;
+    }
+
+    async getProfileBadgesAsync(userId: string): Promise<ProfileBadge[]> {
+        const rows = await this.baseRepository.Select().Where({ UserId: userId }).Execute();
+        return rows.map(row => ({
+            achievementEnum: row.AchievementEnum as BadgeEnum,
+            date: row.CreatedAt,
+            level: row.Level,
+            threshold: 0,
+        }));
     }
 
     async upsertLevelAsync(userId: string, achievement: BadgeEnum, level: number): Promise<boolean> {
