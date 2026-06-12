@@ -103,7 +103,7 @@ class ProfileCardService extends BaseCard {
         }
 
         const rightHeight = CARD_HEIGHT - HEADER_TOP - CARD_PADDING;
-        this.drawBadges(ctx, data.badges ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight, language);
+        await this.drawBadges(ctx, data.badges ?? [], RIGHT_COLUMN_X, HEADER_TOP, COLUMN_WIDTH, rightHeight, language);
 
         await fs.promises.writeFile(filepath, canvas.toBuffer('image/png'));
 
@@ -430,7 +430,7 @@ class ProfileCardService extends BaseCard {
         this.drawText(ctx, hoursText, hoursX, midY, hoursStyle);
     }
 
-    private drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileBadge[], x: number, y: number, width: number, height: number, language: LanguageEnum): void {
+    private async drawBadges(ctx: CanvasRenderingContext2D, badges: ProfileBadge[], x: number, y: number, width: number, height: number, language: LanguageEnum): Promise<void> {
         const visible = badges.slice(0, 4);
         const rowHeight = visible.length > 0 ? height / visible.length : BADGE_ROW_HEIGHT;
 
@@ -444,14 +444,14 @@ class ProfileCardService extends BaseCard {
         this.roundedRectPath(ctx, x, y, width, height, BADGES_RADIUS);
         ctx.clip();
 
-        visible.forEach((badge, i) => {
+        await Promise.all(visible.map((badge, i) => {
             const rowY = y + i * rowHeight;
             if (i > 0) {
                 ctx.fillStyle = COLOR_DIVIDER;
                 ctx.fillRect(x, rowY, width, 1 * SCALE);
             }
-            BadgeRowRenderer.draw(ctx, badge, x, rowY, width, rowHeight, language);
-        });
+            return BadgeRowRenderer.draw(ctx, badge, x, rowY, width, rowHeight, language);
+        }));
 
         ctx.restore();
     }

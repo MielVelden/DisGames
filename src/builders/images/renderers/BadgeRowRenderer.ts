@@ -31,7 +31,7 @@ const CHIP_FONT_RATIO = 8.5 / 36;
 const CHIP_PAD_RATIO = 5 / 36;
 
 class BadgeRowRenderer {
-    public draw(
+    public async draw(
         ctx: CanvasRenderingContext2D,
         badge: BadgeRowData,
         x: number,
@@ -40,8 +40,8 @@ class BadgeRowRenderer {
         height: number,
         language: LanguageEnum,
         iconSize: number = DEFAULT_ICON_SIZE,
-    ): void {
-        const { color, icon, title, description } = resolveBadgeVisuals(badge.achievementEnum, language, badge.level, badge.threshold);
+    ): Promise<void> {
+        const { color, icon, image, title, description } = await resolveBadgeVisuals(badge.achievementEnum, language, badge.level, badge.threshold);
 
         ctx.fillStyle = color;
         ctx.fillRect(x, y, ACCENT_WIDTH, height);
@@ -55,16 +55,21 @@ class BadgeRowRenderer {
             width: 1 * SCALE,
         });
 
-        drawText(ctx, icon,
-            iconX + iconSize / 2,
-            iconY + iconSize / 2 + 1 * SCALE,
-            {
-                font: `${iconSize * EMOJI_FONT_RATIO}px ${FONT_SANS}`,
-                color: color,
-                align: 'center',
-                baseline: 'middle',
-            },
-        );
+        const iconPad = iconSize * 0.2;
+        if (image) {
+            ctx.drawImage(image, iconX + iconPad, iconY + iconPad, iconSize - iconPad * 2, iconSize - iconPad * 2);
+        } else {
+            drawText(ctx, icon,
+                iconX + iconSize / 2,
+                iconY + iconSize / 2 + 1 * SCALE,
+                {
+                    font: `${iconSize * EMOJI_FONT_RATIO}px ${FONT_SANS}`,
+                    color: COLOR_TEXT,
+                    align: 'center',
+                    baseline: 'middle',
+                },
+            );
+        }
 
         this.drawLevelChip(ctx, badge.level, iconX, iconY, iconSize, color);
 

@@ -10,6 +10,7 @@ import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
 import { JobScheduler } from './services/application/JobScheduler';
 import { initAsync } from './utils/registries/InitRegistry';
+import './utils/registries/ServiceRegistry';
 import { syncRoutines } from './utils/routines/Sync';
 import { validateSchemaAsync } from './utils/database/GenerateSchema';
 import TestMode from './utils/application/TestMode';

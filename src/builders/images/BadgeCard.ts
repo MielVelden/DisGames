@@ -16,7 +16,6 @@ import {
 import { drawCardBackground } from './CardChrome';
 import { BadgeRowData } from './renderers/BadgeRowRenderer';
 import { resolveBadgeVisuals } from './renderers/BadgeVisuals';
-import { loadEmojiImage } from './EmojiAsset';
 import { Color } from '../../utils/helpers/Color';
 import { formatDate } from '../../utils/helpers/Date';
 import { toRoman } from '../../utils/helpers/Number';
@@ -57,8 +56,7 @@ class BadgeCardService extends BaseCard {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
-        const visuals = resolveBadgeVisuals(data.badge.achievementEnum, language, data.badge.level, data.badge.threshold);
-        const iconImage = await loadEmojiImage(visuals.icon);
+        const visuals = await resolveBadgeVisuals(data.badge.achievementEnum, language, data.badge.level, data.badge.threshold);
 
         measureCtx.font = `500 ${DESC_FONT}px ${FONT_SANS}`;
         const descLines = this.wrapText(measureCtx, visuals.description, CARD_WIDTH - PADDING * 2.4, DESC_MAX_LINES);
@@ -84,7 +82,7 @@ class BadgeCardService extends BaseCard {
         ctx.clip();
 
         this.drawThemedGlow(ctx, visuals.color, cx, iconCenterY, cardHeight);
-        this.drawIcon(ctx, iconImage, visuals.icon, visuals.color, cx, iconCenterY);
+        this.drawIcon(ctx, visuals.image, visuals.icon, visuals.color, cx, iconCenterY);
         this.drawTier(ctx, data.badge.level, visuals.color, cx, tierTop);
         this.drawTitle(ctx, visuals.title, cx, titleTop);
         this.drawDescriptionLines(ctx, descLines, cx, descTop);

@@ -1,3 +1,4 @@
+import { Image } from 'canvas';
 import { Color } from '../../../utils/helpers/Color';
 import { getEnumProperty } from '../../../utils/helpers/EnumMetadata';
 import { LanguageEnum } from '../../../interfaces/enums';
@@ -6,10 +7,13 @@ import { MetadataKeyEnum } from '../../../interfaces/enums/application/MetadataK
 import { BadgeTranslationParams, LanguageTranslations } from '../../../interfaces/application/i18n';
 import { getMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { i18n } from '../../../utils/i18n/i18n';
+import { loadBadgeImage } from '../BadgeAsset';
+import { COLOR_TEXT } from '../CardTokens';
 
 export interface BadgeVisuals {
     color: Color;
     icon: string;
+    image: Image | null;
     title: string;
     description: string;
 }
@@ -30,13 +34,14 @@ function resolveBadgeField(field: BadgeField, language: LanguageEnum, params: Re
         : getMultiLingualString(field, language);
 }
 
-export function resolveBadgeVisuals(achievementEnum: BadgeEnum, language: LanguageEnum, level: number = 0, threshold: number = 0): BadgeVisuals {
+export async function resolveBadgeVisuals(achievementEnum: BadgeEnum, language: LanguageEnum, level: number = 0, threshold: number = 0): Promise<BadgeVisuals> {
     const badge = i18n.enums.badges[achievementEnum];
     const paramMapper = badgeThresholdParams[achievementEnum as keyof BadgeTranslationParams];
     const params = paramMapper ? paramMapper(threshold) as Record<string, number> : {};
     return {
         color: getEnumProperty(BadgeEnum, achievementEnum, MetadataKeyEnum.Color) as Color,
         icon: getEnumProperty(BadgeEnum, achievementEnum, MetadataKeyEnum.Emoji) as string,
+        image: await loadBadgeImage(achievementEnum, COLOR_TEXT),
         title: resolveBadgeField(badge.title as BadgeField, language, params),
         description: resolveBadgeField(badge.description as BadgeField, language, params),
     };
