@@ -11,7 +11,7 @@ import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import { compareStrings } from "../../utils/helpers/String";
 import { createBlock } from "../../utils/helpers/Markdown";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");
@@ -102,7 +102,7 @@ export default {
             event.addAction({
                 enum: GameActionEnum.REACTION,
                 priority: GameActionPriorityEnum.HIGH,
-                component: DEFAULT_WRONG_ANSWER_EMOJI
+                component: getRejectEmoji(event.server.Settings)
             })
         }
     } as GameFunctions

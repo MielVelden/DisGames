@@ -3,7 +3,7 @@ import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
+import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { createBlock } from "../../utils/helpers/Markdown";
@@ -42,7 +42,7 @@ export default {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: DEFAULT_ACCEPT_EMOJI
+                    component: getAcceptEmoji(event.server.Settings)
                 });
                 return true;
             }

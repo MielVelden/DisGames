@@ -8,6 +8,7 @@ import { User } from '../../src/interfaces/domain/User';
 import { ServersModel } from '../../src/interfaces/database/TableInterfaces';
 import { Command } from '../../src/interfaces/application/Command';
 import { Component } from '../../src/interfaces/application/Message';
+import { ModalDefinition, ModalResult, ModalTextField } from '../../src/interfaces/application/Modal';
 import { TestInputSimulator } from './TestInputSimulator';
 import { TimelineEntriesSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import { GameSettingsSchema, GameSettingsValues } from '../../src/interfaces/domain/GameSettings';
@@ -116,6 +117,21 @@ export class MockDiscordEvent implements BaseInteractionEvent {
     public async getConfirmationFromUserAsync(_container: Component[]): Promise<InteractionEvent | null> {
         const confirmation = this.inputSimulator.getNextConfirmationResponse();
         return confirmation?.value as boolean ? this as unknown as InteractionEvent : null;
+    }
+
+    public async askUserAsync<const TFields extends Record<string, ModalTextField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
+        const response = this.inputSimulator.getNextInputResponse();
+        if (!response)
+            return null;
+
+        const rawValues = (response.value ?? {}) as Record<string, string>;
+        const result = {} as ModalResult<TFields>;
+        for (const key of Object.keys(modal.fields) as Array<keyof TFields>) {
+            const field = modal.fields[key];
+            const raw = rawValues[key as string] ?? '';
+            result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+        }
+        return result;
     }
 
     public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {

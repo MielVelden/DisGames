@@ -7,7 +7,7 @@ import { GameDataModel, ServersModel } from "../../interfaces/database/TableInte
 import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import { STRING_DELIMITER } from "../../constants";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
 import { createBlock } from "../../utils/helpers/Markdown";
 import ConnectionImageService from "../../builders/images/ConnectionGameCard";
@@ -207,7 +207,7 @@ export default {
             event.addAction({
                 enum: GameActionEnum.REACTION,
                 priority: GameActionPriorityEnum.HIGH,
-                component: DEFAULT_WRONG_ANSWER_EMOJI
+                component: getRejectEmoji(event.server.Settings)
             })
         },
 

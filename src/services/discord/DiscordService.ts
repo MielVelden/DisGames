@@ -21,6 +21,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { InteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
 import { Component, SelectMenu } from '../../interfaces/application/Message';
+import { ModalDefinition, ModalResult, ModalTextField } from '../../interfaces/application/Modal';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
@@ -120,6 +121,10 @@ class DiscordService {
 
     public async getUserInputByButtonsAsync(event: InteractionEvent, question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
         return await DiscordMessageHandler.getUserInputByButtonsAsync(event, question, buttons);
+    }
+
+    public async askUserAsync<const TFields extends Record<string, ModalTextField>>(event: InteractionEvent, modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
+        return await DiscordMessageHandler.askUserAsync(event, modal);
     }
 
     // #endregion

@@ -230,6 +230,12 @@ export interface I18nTranslations {
                 changeLanguage: LanguageTranslations;
                 languageChanged: LanguageTranslations;
                 clickHereToChangeLanguage: LanguageTranslations;
+                changeEmojis: LanguageTranslations;
+                emojisChanged: LanguageTranslations;
+                emojiModalTitle: LanguageTranslations;
+                acceptEmojiLabel: LanguageTranslations;
+                rejectEmojiLabel: LanguageTranslations;
+                invalidEmoji: LanguageTranslations;
             };
         },
         aboutme: {

@@ -15,7 +15,8 @@ import {
     SlashCommandDiscordEvent,
     MessageDiscordEvent,
     ButtonDiscordEvent,
-    SelectMenuDiscordEvent
+    SelectMenuDiscordEvent,
+    ModalSubmitDiscordEvent
 } from '../events';
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
@@ -107,6 +108,29 @@ class DiscordInteractionMapper {
                 baseParams.messageId,
                 interaction.customId,
                 interaction.values[0]
+            );
+        } else if (interaction.isModalSubmit()) {
+            const tempEvent = new ModalSubmitDiscordEvent(
+                interaction,
+                this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
+                getTempServer(interaction.guild as DiscordServer),
+                baseParams.channelId,
+                baseParams.guildId,
+                baseParams.messageId,
+                interaction.customId
+            );
+
+            const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
+            const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer, tempEvent);
+
+            event = new ModalSubmitDiscordEvent(
+                interaction,
+                user,
+                server,
+                baseParams.channelId,
+                baseParams.guildId,
+                baseParams.messageId,
+                interaction.customId
             );
         } else {
             throw new Error(`Unsupported interaction type: ${interaction.type}`);

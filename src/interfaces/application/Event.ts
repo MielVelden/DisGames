@@ -6,9 +6,11 @@ import {
     ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
     Guild as DiscordGuild,
     Message as DiscordMessage,
+    ModalSubmitInteraction as DiscordModalSubmitInteraction,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { ModalDefinition, ModalResult, ModalTextField } from "./Modal";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
@@ -43,6 +45,7 @@ export interface BaseInteractionEvent {
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUserAsync(container: Component[]): Promise<InteractionEvent | null>;
+    askUserAsync<const TFields extends Record<string, ModalTextField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null>;
     getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null>;
 
     getChannelNameAsync(channelId: string): Promise<string>;
@@ -111,13 +114,22 @@ export interface SelectMenuInteractionEvent extends BaseInteractionEvent, ReplyI
     sendAsync(): Promise<void>;
 }
 
-export type InteractionEvent = 
-    | SlashCommandInteractionEvent 
-    | ButtonInteractionEvent 
-    | SelectMenuInteractionEvent 
+export interface ModalSubmitInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {
+    type: EventTypeEnum.MODAL_SUBMIT;
+    currentInteraction: DiscordModalSubmitInteraction;
+
+    getValue(key: string): string;
+    deferReplyAsync(): Promise<void>;
+}
+
+export type InteractionEvent =
+    | SlashCommandInteractionEvent
+    | ButtonInteractionEvent
+    | SelectMenuInteractionEvent
+    | ModalSubmitInteractionEvent
     | MessageInteractionEvent;
 
-export function isReplyInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent | ButtonInteractionEvent | SelectMenuInteractionEvent | MessageInteractionEvent {
+export function isReplyInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent | ButtonInteractionEvent | SelectMenuInteractionEvent | ModalSubmitInteractionEvent | MessageInteractionEvent {
     switch (event.type) {
         case EventTypeEnum.SLASH_COMMAND:
         case EventTypeEnum.MESSAGE:
@@ -125,6 +137,7 @@ export function isReplyInteractionEvent(event: InteractionEvent): event is Slash
         case EventTypeEnum.MESSAGE_DELETE:
         case EventTypeEnum.BUTTON:
         case EventTypeEnum.SELECT_MENU:
+        case EventTypeEnum.MODAL_SUBMIT:
             return true;
         default:
             return false;
@@ -149,6 +162,10 @@ export function isSelectMenuInteractionEvent(event: InteractionEvent): event is 
     return event.type === EventTypeEnum.SELECT_MENU;
 }
 
+export function isModalSubmitInteractionEvent(event: InteractionEvent): event is ModalSubmitInteractionEvent {
+    return event.type === EventTypeEnum.MODAL_SUBMIT;
+}
+
 export interface Handler {
     id: string;
     userId?: string;
@@ -164,4 +181,7 @@ export interface ButtonHandler extends Handler {
 }
 
 export interface SelectMenuHandler extends Handler {
+}
+
+export interface ModalHandler extends Handler {
 }

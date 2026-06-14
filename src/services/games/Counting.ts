@@ -7,7 +7,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../domain/GameService";
 import ComponentService from "../application/ComponentService";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
 
 export default {
@@ -59,7 +59,7 @@ export default {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: DEFAULT_WRONG_ANSWER_EMOJI
+                    component: getRejectEmoji(event.server.Settings)
                 });
 
                 event.addAction({

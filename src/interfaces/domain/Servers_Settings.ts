@@ -1,3 +1,4 @@
 export interface Servers_Settings {
-    defaultAcceptEmoji: string;
+    defaultAcceptEmoji?: string;
+    defaultRejectEmoji?: string;
 }

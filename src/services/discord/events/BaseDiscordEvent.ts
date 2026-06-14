@@ -3,6 +3,7 @@ import { Component, BaseSelectMenu, SelectMenu } from "../../../interfaces/appli
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
+import { ModalDefinition, ModalResult, ModalTextField } from "../../../interfaces/application/Modal";
 import { BaseInteractionEvent, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
@@ -89,6 +90,10 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
 
     public async getConfirmationFromUserAsync(container: Component[]): Promise<InteractionEvent | null> {
         return await DiscordMessageHandler.getConfirmationFromUser(this as unknown as InteractionEvent, container);
+    }
+
+    public async askUserAsync<const TFields extends Record<string, ModalTextField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
+        return await DiscordMessageHandler.askUserAsync(this as unknown as InteractionEvent, modal);
     }
 
     private updateSetting<K extends keyof GameSettingsValues>(
