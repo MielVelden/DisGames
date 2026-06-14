@@ -15,3 +15,4 @@ SetEmoji(LanguageEnum, LanguageEnum.EN, "🇺🇸");
 SetEmoji(LanguageEnum, LanguageEnum.NL, "🇳🇱");
 SetEmoji(LanguageEnum, LanguageEnum.ES, "🇪🇸");
 SetEmoji(LanguageEnum, LanguageEnum.DE, "🇩🇪");
+SetEmoji(LanguageEnum, LanguageEnum.PT, "🇵🇹");

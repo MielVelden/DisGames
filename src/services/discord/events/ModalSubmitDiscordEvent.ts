@@ -25,6 +25,14 @@ export class ModalSubmitDiscordEvent extends BaseReplyDiscordEvent<DiscordModalS
         return this.currentInteraction.fields.getTextInputValue(key);
     }
 
+    public getSelectValues(key: string): string[] {
+        return [...this.currentInteraction.fields.getStringSelectValues(key)];
+    }
+
+    public getRadioValue(key: string): string | null {
+        return this.currentInteraction.fields.getRadioGroup(key) ?? null;
+    }
+
     public async deferReplyAsync(): Promise<void> {
         await DiscordMessageHandler.deferModalSubmitAsync(this.currentInteraction);
     }

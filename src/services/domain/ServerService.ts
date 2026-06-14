@@ -15,19 +15,24 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
     protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
         savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
 
+        var server: ServersModel;
+        var entity: ServersModel | null = null;
         if (savable.isProvided(ServersModelFieldEnum.Name))
             savable.Name = normalizeString(savable.Name);
 
-        const server = await this.repository.saveAsync(savable);
-        event.server = server;
+        if (savable.Id)
+            entity = await this.repository.getByIdAsync(savable.Id);
+
+        server = await this.repository.saveAsync(savable);
 
         await TimelineBuilder.forServerUpdateAsync({
-            old: null,
+            old: entity,
             new: server,
             objectId: server.Id,
             event: event
         });
 
+        event.server = server;
         return server;
     }
 

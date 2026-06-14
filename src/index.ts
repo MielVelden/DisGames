@@ -37,7 +37,7 @@ discordClient.once('clientReady', async () => {
   });
   await createConnectionAsync().then(async (success) => {
     if (success) {
-      if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
+      if (getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
         try {
           // Pool now actually pools → these two DB-touching tasks run in parallel
           await Promise.all([syncRoutines(), validateSchemaAsync()]);

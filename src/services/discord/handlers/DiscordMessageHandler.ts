@@ -7,7 +7,7 @@ import {
     ModalSubmitInteraction as DiscordModalSubmitInteraction
 } from 'discord.js';
 import { BaseInteractionEvent, InteractionEvent, ModalSubmitInteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
-import { ModalDefinition, ModalResult, ModalTextField } from '../../../interfaces/application/Modal';
+import { ModalDefinition, ModalField, ModalResult } from '../../../interfaces/application/Modal';
 import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
 import {
     Component
@@ -563,7 +563,7 @@ class DiscordMessageHandler {
         });
     }
 
-    public async askUserAsync<const TFields extends Record<string, ModalTextField>>(
+    public async askUserAsync<const TFields extends Record<string, ModalField>>(
         event: InteractionEvent,
         modal: ModalDefinition<TFields>
     ): Promise<ModalResult<TFields> | null> {
@@ -588,8 +588,16 @@ class DiscordMessageHandler {
                         const result = {} as ModalResult<TFields>;
                         for (const key of Object.keys(modal.fields) as Array<keyof TFields>) {
                             const field = modal.fields[key];
-                            const raw = modalEvent.getValue(key as string);
-                            result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            if (field.kind === 'select') {
+                                const raw = modalEvent.getSelectValues(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'radio') {
+                                const raw = modalEvent.getRadioValue(key as string) ?? '';
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else {
+                                const raw = modalEvent.getValue(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            }
                         }
                         resolve(result);
                     } catch (error) {

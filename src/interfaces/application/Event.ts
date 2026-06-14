@@ -10,7 +10,7 @@ import {
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { ModalDefinition, ModalResult, ModalTextField } from "./Modal";
+import { ModalDefinition, ModalField, ModalResult, ModalTextField } from "./Modal";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
@@ -49,7 +49,7 @@ export interface BaseInteractionEvent {
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUserAsync(container: Component[]): Promise<InteractionEvent | null>;
-    askUserAsync<const TFields extends Record<string, ModalTextField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null>;
+    askUserAsync<const TFields extends Record<string, ModalField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null>;
     getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null>;
 
     getChannelNameAsync(channelId: string): Promise<string>;
@@ -123,6 +123,8 @@ export interface ModalSubmitInteractionEvent extends BaseInteractionEvent, Reply
     currentInteraction: DiscordModalSubmitInteraction;
 
     getValue(key: string): string;
+    getSelectValues(key: string): string[];
+    getRadioValue(key: string): string | null;
     deferReplyAsync(): Promise<void>;
 }
 

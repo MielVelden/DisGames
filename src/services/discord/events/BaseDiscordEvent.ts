@@ -3,7 +3,7 @@ import { Component, BaseSelectMenu, SelectMenu } from "../../../interfaces/appli
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
-import { ModalDefinition, ModalResult, ModalTextField } from "../../../interfaces/application/Modal";
+import { ModalDefinition, ModalField, ModalResult } from "../../../interfaces/application/Modal";
 import { BaseInteractionEvent, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
 import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
@@ -100,7 +100,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         return await DiscordMessageHandler.getConfirmationFromUser(this as unknown as InteractionEvent, container);
     }
 
-    public async askUserAsync<const TFields extends Record<string, ModalTextField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
+    public async askUserAsync<const TFields extends Record<string, ModalField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
         return await DiscordMessageHandler.askUserAsync(this as unknown as InteractionEvent, modal);
     }
 

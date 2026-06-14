@@ -71,6 +71,7 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
                     Datetime: new Date(),
                     Value: x.value
                 }), event);
+                x.updated = true;
             }
         });
     }
