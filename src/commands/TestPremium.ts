@@ -8,6 +8,7 @@ import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 import { getPremiumSkuId } from "../utils/application/PremiumAccess";
 import DiscordTestEntitlementService from "../services/discord/DiscordTestEntitlementService";
+import ServerService from "../services/domain/ServerService";
 import { getCommandName } from "../utils/collectors/CommandCollector";
 import { handleErrorAsync } from "../utils/application/Error";
 
@@ -81,6 +82,29 @@ const optionsConfig = [
                     }
                 }
             },
+            {
+                enumValue: TestPremiumActionEnum.TOGGLE_DB,
+                handler: async (event: SlashCommandInteractionEvent) => {
+                    const target = event.getOption(getCommandName(i18n.commands.testPremium.optionTarget)) as string | undefined;
+                    const guildId = (target && target.trim()) || event.guildId;
+                    if (!guildId) {
+                        await event.replyAsync(new MultiLingualString(i18n.commands.testPremium.labels.missingGuild), true);
+                        return;
+                    }
+                    try {
+                        const server = await ServerService.getByExternalIdAsync(guildId);
+                        if (server.IsPremium) {
+                            await ServerService.handlePremiumRevokedAsync(guildId);
+                            await event.replyAsync(new MultiLingualString(i18n.commands.testPremium.labels.toggledOff), true);
+                        } else {
+                            await ServerService.handlePremiumGrantedAsync(guildId);
+                            await event.replyAsync(new MultiLingualString(i18n.commands.testPremium.labels.toggledOn), true);
+                        }
+                    } catch (error) {
+                        await handleErrorAsync(error, event);
+                    }
+                }
+            },
         ],
     },
     {
@@ -94,7 +118,7 @@ const optionsConfig = [
 export class TestPremiumCommand implements Command {
     name = CommandEnum.TEST_PREMIUM;
     description = new MultiLingualString(i18n.commands.testPremium.description);
-    isSlashCommand = true;
+    isSlashCommand = !getConfigValue(EnvConfigEnum.IS_PRODUCTION);
     isMessageCommand = false;
     permissions = [];
     options = optionsConfig;

@@ -1,4 +1,5 @@
 import { InteractionEvent } from "../../interfaces/application/Event";
+import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 import { getConfigValue } from "./Config";
 
@@ -14,4 +15,11 @@ export function hasPremiumAccess(event: InteractionEvent, skuId: string): boolea
         return false;
 
     return event.hasEntitlementForSku(skuId);
+}
+
+export function isServerPremium(server: ServersModel): boolean {
+    if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION))
+        return true;
+
+    return server.IsPremium;
 }

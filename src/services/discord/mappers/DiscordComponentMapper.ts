@@ -135,19 +135,7 @@ class DiscordComponentMapper {
             const premium = button as PremiumButton;
             const discordButton = new DiscordButtonBuilder()
                 .setStyle(DiscordJsButtonStyle.Premium)
-                .setSKUId(premium.sku_id)
-                .setLabel(premium.label?.getMessage() || "Premium");
-
-            if (premium.emoji) {
-                if (typeof premium.emoji === "string")
-                    discordButton.setEmoji(premium.emoji);
-                else
-                    discordButton.setEmoji({
-                        name: premium.emoji.name,
-                        id: premium.emoji.id,
-                        animated: premium.emoji.animated
-                    });
-            }
+                .setSKUId(premium.sku_id);
 
             if (premium.disabled)
                 discordButton.setDisabled(true);

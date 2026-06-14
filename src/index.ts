@@ -33,11 +33,11 @@ discordClient.on('error', (error: Error) => {
 
 discordClient.once('clientReady', async () => {
   Logger.logInfo(`Logged in as ${discordClient.user?.tag}`, {
-    sendToDiscord: true
+    sendToDiscord: getConfigValue(EnvConfigEnum.IS_PRODUCTION)
   });
   await createConnectionAsync().then(async (success) => {
     if (success) {
-      if (!getConfigValue(EnvConfigEnum.DEBUG_MODE)) {
+      if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
         try {
           // Pool now actually pools → these two DB-touching tasks run in parallel
           await Promise.all([syncRoutines(), validateSchemaAsync()]);

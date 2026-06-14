@@ -13,6 +13,8 @@ import { LanguageEnum } from "../interfaces/enums";
 import { createLanguageSelectMenu } from "../builders/selectmenus/LanguageSelectMenu";
 import GameService from "../services/domain/GameService";
 import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI, isValidEmoji } from "../utils/constants/Emojis";
+import { isServerPremium } from "../utils/application/PremiumAccess";
+import { createProPurchaseButton } from "../builders/buttons/PremiumPurchaseButton";
 
 export class SettingsCommand implements Command {
     name = CommandEnum.SETTINGS;
@@ -39,46 +41,48 @@ export class SettingsCommand implements Command {
             }
         });
 
-        const changeEmojisButton = createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeEmojis), ButtonStyle.SECONDARY, "😀", event.user.userId, async (buttonEvent: InteractionEvent) => {
-            const result = await buttonEvent.askUserAsync({
-                title: new MultiLingualString(i18n.commands.settings.labels.emojiModalTitle),
-                fields: {
-                    acceptEmoji: {
-                        label: new MultiLingualString(i18n.commands.settings.labels.acceptEmojiLabel),
-                        value: server.Settings?.defaultAcceptEmoji ?? DEFAULT_ACCEPT_EMOJI,
-                        minLength: 1,
-                        maxLength: 10,
-                    },
-                    rejectEmoji: {
-                        label: new MultiLingualString(i18n.commands.settings.labels.rejectEmojiLabel),
-                        value: server.Settings?.defaultRejectEmoji ?? DEFAULT_WRONG_ANSWER_EMOJI,
-                        minLength: 1,
-                        maxLength: 10,
+        const emojiButton = isServerPremium(server)
+            ? createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeEmojis), ButtonStyle.SECONDARY, "😀", event.user.userId, async (buttonEvent: InteractionEvent) => {
+                const result = await buttonEvent.askUserAsync({
+                    title: new MultiLingualString(i18n.commands.settings.labels.emojiModalTitle),
+                    fields: {
+                        acceptEmoji: {
+                            label: new MultiLingualString(i18n.commands.settings.labels.acceptEmojiLabel),
+                            value: server.Settings?.defaultAcceptEmoji ?? DEFAULT_ACCEPT_EMOJI,
+                            minLength: 1,
+                            maxLength: 10,
+                        },
+                        rejectEmoji: {
+                            label: new MultiLingualString(i18n.commands.settings.labels.rejectEmojiLabel),
+                            value: server.Settings?.defaultRejectEmoji ?? DEFAULT_WRONG_ANSWER_EMOJI,
+                            minLength: 1,
+                            maxLength: 10,
+                        }
                     }
-                }
-            });
-            if (result) {
-                if (!isValidEmoji(result.acceptEmoji) || !isValidEmoji(result.rejectEmoji)) {
-                    await event.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.invalidEmoji))]);
-                    return;
-                }
-                await ServerService.saveAsync(new ServersSaveModel({
-                    Id: server.Id,
-                    SettingsJSON: {
-                        ...server.Settings,
-                        defaultAcceptEmoji: result.acceptEmoji.trim(),
-                        defaultRejectEmoji: result.rejectEmoji.trim()
+                });
+                if (result) {
+                    if (!isValidEmoji(result.acceptEmoji) || !isValidEmoji(result.rejectEmoji)) {
+                        await event.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.invalidEmoji))]);
+                        return;
                     }
-                }), buttonEvent);
-                await event.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.emojisChanged))]);
-            }
-        });
+                    await ServerService.saveAsync(new ServersSaveModel({
+                        Id: server.Id,
+                        SettingsJSON: {
+                            ...server.Settings,
+                            defaultAcceptEmoji: result.acceptEmoji.trim(),
+                            defaultRejectEmoji: result.rejectEmoji.trim()
+                        }
+                    }), buttonEvent);
+                    await event.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.emojisChanged))]);
+                }
+            })
+            : createProPurchaseButton(new MultiLingualString(i18n.commands.settings.labels.changeEmojis));
 
         const settingsContainer = createSettingsContainer({
             LanguageEnum: server.LanguageEnum,
             ServerName: server.Name,
             GamesEnabled: activeGames.length
-        }, [changeLanguageButton, changeEmojisButton]);
+        }, [changeLanguageButton, emojiButton]);
         await event.addComponentsAsync(settingsContainer);
         await event.replyAsync();
     }

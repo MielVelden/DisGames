@@ -1,4 +1,4 @@
-import { ActionButton, Component } from "../../interfaces/application/Message";
+import { ActionButton, PremiumButton, Component } from "../../interfaces/application/Message";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import ComponentService from "../../services/application/ComponentService";
@@ -6,7 +6,7 @@ import { createTitle } from "../../utils/helpers/Markdown";
 import MediaService from "../../services/application/MediaService";
 import { SettingsResponse } from "../../interfaces/view/Settings";
 
-export function createSettingsContainer(settings: SettingsResponse, actions: ActionButton[]): Component[] {
+export function createSettingsContainer(settings: SettingsResponse, actions: (ActionButton | PremiumButton)[]): Component[] {
     const settingsContainerImage = MediaService.getBaseImage('settings');
     const language = new MultiLingualString(i18n.enums.languages[settings.LanguageEnum]).getMessage(settings.LanguageEnum);
 

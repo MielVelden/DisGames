@@ -269,6 +269,8 @@ export interface I18nTranslations {
                 missingTarget: LanguageTranslations;
                 missingGuild: LanguageTranslations;
                 clientNotReady: LanguageTranslations;
+                toggledOn: LanguageTranslations;
+                toggledOff: LanguageTranslations;
             };
         },
         handoff: {

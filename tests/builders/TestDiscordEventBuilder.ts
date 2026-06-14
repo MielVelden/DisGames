@@ -1,9 +1,10 @@
-import { 
+import {
     BaseInteractionEvent,
     InteractionEvent,
     MessageInteractionEvent,
     SelectMenuInteractionEvent
 } from '../../src/interfaces/application/Event';
+import { AppEntitlement } from '../../src/interfaces/application/Entitlement';
 import { User } from '../../src/interfaces/domain/User';
 import { ServersModel } from '../../src/interfaces/database/TableInterfaces';
 import { Command } from '../../src/interfaces/application/Command';
@@ -62,7 +63,7 @@ export class MockDiscordEvent implements BaseInteractionEvent {
         this.messageId = messageId;
         this.inputSimulator = inputSimulator || new TestInputSimulator();
     }
-    
+
     public async addComponentAsync(component: Component): Promise<void> {
         this.components.push(component);
     }
@@ -162,21 +163,26 @@ export class MockDiscordEvent implements BaseInteractionEvent {
 
     public async reactAsync(emoji: string): Promise<void> {
         this.inputSimulator.trackReaction(this.messageId, emoji, this.user.userId, true);
-        
+
         Logger.logTest(`Reacted with emoji: ${emoji}`);
     }
 
     public async unreactAsync(emoji: string): Promise<void> {
         this.inputSimulator.trackReaction(this.messageId, emoji, this.user.userId, false);
-        
+
         Logger.logTest(`Removed reaction emoji: ${emoji}`);
     }
 
     public async replyAsync(content?: MultiLingualString): Promise<void> {
-        if(content)
+        if (content)
             Logger.logTest(`Replied with: ${content?.getMessage()}`);
         else
             Logger.logTest(`Replied with no content`);
+    }
+
+    public readonly entitlements: readonly AppEntitlement[] = [];
+    public hasEntitlementForSku(_skuId: string): boolean {
+        return false;
     }
 
     public messageDeleted: boolean = false;
@@ -185,9 +191,9 @@ export class MockDiscordEvent implements BaseInteractionEvent {
     private createSelectMenuEvent(selectedValue: string): SelectMenuInteractionEvent {
         const event = { ...this } as MockEventWithCommand;
         event.selected = selectedValue;
-        event.deferReplyAsync = async () => {};
-        event.sendAsync = async () => {};
-        event.replyAsync = async () => {};
+        event.deferReplyAsync = async () => { };
+        event.sendAsync = async () => { };
+        event.replyAsync = async () => { };
         return event as SelectMenuInteractionEvent;
     }
 
@@ -243,7 +249,7 @@ export class TestDiscordEventBuilder {
     public withUser(user: Partial<TestUser>): TestDiscordEventBuilder {
         this.inputSimulator.setUser(user);
         return this;
-    }   
+    }
 
     public withServer(server: Partial<TestServer>): TestDiscordEventBuilder {
         this.inputSimulator.setServer(server);
@@ -280,14 +286,14 @@ export class TestDiscordEventBuilder {
     public buildSlashCommandEvent(commandName: CommandEnum, options: Record<string, any> = {}): InteractionEvent {
         const mockCommand: Command = {
             name: commandName,
-            description: new MultiLingualString({ 
+            description: new MultiLingualString({
                 [LanguageEnum.EN]: `Test command ${commandName}`,
                 [LanguageEnum.NL]: `Test commando ${commandName}`
             }),
             isSlashCommand: true,
             isMessageCommand: false,
             options: [],
-            executeAsync: async () => {}
+            executeAsync: async () => { }
         };
 
         const user: User = {
@@ -298,7 +304,7 @@ export class TestDiscordEventBuilder {
             bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {},
+            sendMessageAsync: async () => { },
             role: UserRoleEnum.USER
         };
 
@@ -307,6 +313,7 @@ export class TestDiscordEventBuilder {
             Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
+            IsPremium: this.inputSimulator.getServer().isPremium ?? false,
         });
 
         const channelId = this.resolveChannelId();
@@ -318,8 +325,8 @@ export class TestDiscordEventBuilder {
             guild: { id: this.inputSimulator.getServer().id },
             channel: { id: channelId },
             id: this.inputSimulator.getMessage().id,
-            reply: async () => {},
-            editReply: async () => {},
+            reply: async () => { },
+            editReply: async () => { },
             getOption: (name: string) => options[name]
         };
 
@@ -352,7 +359,7 @@ export class TestDiscordEventBuilder {
             bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {},
+            sendMessageAsync: async () => { },
             role: UserRoleEnum.USER
         };
 
@@ -361,22 +368,23 @@ export class TestDiscordEventBuilder {
             Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
+            IsPremium: this.inputSimulator.getServer().isPremium ?? false,
         });
 
         const channelId = this.resolveChannelId();
 
         const mockMessage = {
             content,
-            author: { 
+            author: {
                 id: userId || this.inputSimulator.getUser().id,
                 bot: this.inputSimulator.getUser().bot || false
             },
             channel: { id: channelId },
             guild: { id: this.inputSimulator.getServer().id },
             id: this.inputSimulator.getMessage().id,
-            reply: async () => {},
-            edit: async () => {},
-            delete: async () => {}
+            reply: async () => { },
+            edit: async () => { },
+            delete: async () => { }
         };
 
         const event = new MockDiscordEvent(
@@ -405,7 +413,7 @@ export class TestDiscordEventBuilder {
             bot: this.inputSimulator.getUser().bot || false,
             hasPermissions: () => true,
             hasPermission: () => true,
-            sendMessageAsync: async () => {},
+            sendMessageAsync: async () => { },
             role: UserRoleEnum.USER
         };
 
@@ -414,6 +422,7 @@ export class TestDiscordEventBuilder {
             Name: this.inputSimulator.getServer().name,
             ServerId: this.inputSimulator.getServer().id,
             LanguageEnum: this.inputSimulator.getServer().languageEnum,
+            IsPremium: this.inputSimulator.getServer().isPremium ?? false,
         });
 
         const channelId = this.resolveChannelId();
@@ -424,8 +433,8 @@ export class TestDiscordEventBuilder {
             guild: { id: this.inputSimulator.getServer().id },
             channel: { id: channelId },
             id: this.inputSimulator.getMessage().id,
-            reply: async () => {},
-            update: async () => {}
+            reply: async () => { },
+            update: async () => { }
         };
 
         return new MockDiscordEvent(

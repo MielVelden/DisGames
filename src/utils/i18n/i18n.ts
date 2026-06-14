@@ -883,6 +883,10 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.EN]: "Revoke test entitlement by id",
                         [LanguageEnum.NL]: "Test-entitlement intrekken op id",
                     },
+                    [TestPremiumActionEnum.TOGGLE_DB]: {
+                        [LanguageEnum.EN]: "Toggle IsPremium in database",
+                        [LanguageEnum.NL]: "IsPremium in database omzetten",
+                    },
                 },
             },
             optionTarget: {
@@ -924,6 +928,14 @@ export const i18n: I18nTranslations = {
                 clientNotReady: {
                     [LanguageEnum.EN]: "Discord client is not ready yet.",
                     [LanguageEnum.NL]: "Discord-client is nog niet klaar.",
+                },
+                toggledOn: {
+                    [LanguageEnum.EN]: "Server premium enabled in database (IsPremium = true).",
+                    [LanguageEnum.NL]: "Server premium ingeschakeld in database (IsPremium = true).",
+                },
+                toggledOff: {
+                    [LanguageEnum.EN]: "Server premium disabled in database (IsPremium = false).",
+                    [LanguageEnum.NL]: "Server premium uitgeschakeld in database (IsPremium = false).",
                 },
             },
         },

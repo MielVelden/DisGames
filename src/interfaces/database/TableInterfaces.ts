@@ -600,6 +600,7 @@ export interface ServersModel {
   Name: string;
   LanguageEnum: enums.LanguageEnum;
   MemberCount: number;
+  IsPremium: boolean;
   Settings: Servers_Settings;
 }
 
@@ -609,6 +610,7 @@ export enum ServersModelFieldEnum {
   Name = "Name",
   LanguageEnum = "LanguageEnum",
   MemberCount = "MemberCount",
+  IsPremium = "IsPremium",
   Settings = "Settings"
 }
 
@@ -624,6 +626,8 @@ export function getServersFieldType(field: ServersModelFieldEnum): BaseEntityFie
       return BaseEntityFieldType.Enum;
     case ServersModelFieldEnum.MemberCount:
       return BaseEntityFieldType.Number;
+    case ServersModelFieldEnum.IsPremium:
+      return BaseEntityFieldType.Boolean;
     case ServersModelFieldEnum.Settings:
       return BaseEntityFieldType.Json;
   }
@@ -637,6 +641,7 @@ export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> impleme
   Name: string;
   LanguageEnum: enums.LanguageEnum;
   MemberCount: number;
+  IsPremium: boolean;
   Settings: Servers_Settings;
 
   constructor(data: Partial<ServersModel>) {
@@ -646,6 +651,7 @@ export class ServersModel extends BaseEntityClass<ServersModelFieldEnum> impleme
     this.Name = data.Name!;
     this.LanguageEnum = data.LanguageEnum!;
     this.MemberCount = data.MemberCount!;
+    this.IsPremium = data.IsPremium!;
     this.Settings = data.Settings!;
   }
 }
@@ -656,6 +662,7 @@ export interface ServersSaveModel {
   Name?: string;
   LanguageEnum?: enums.LanguageEnum;
   MemberCount?: number;
+  IsPremium?: boolean;
   SettingsJSON?: Servers_Settings;
 }
 
@@ -668,6 +675,7 @@ export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> imp
   Name?: string;
   LanguageEnum?: enums.LanguageEnum;
   MemberCount?: number;
+  IsPremium?: boolean;
   SettingsJSON?: Servers_Settings;
 
   constructor(data: Partial<ServersSaveModel>) {
@@ -677,6 +685,7 @@ export class ServersSaveModel extends BaseEntityClass<ServersModelFieldEnum> imp
     if (data.Name !== undefined) this.Name = data.Name;
     if (data.LanguageEnum !== undefined) this.LanguageEnum = data.LanguageEnum;
     if (data.MemberCount !== undefined) this.MemberCount = data.MemberCount;
+    if (data.IsPremium !== undefined) this.IsPremium = data.IsPremium;
     if (data.SettingsJSON !== undefined) this.SettingsJSON = data.SettingsJSON;
   }
 }
