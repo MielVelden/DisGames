@@ -1,4 +1,5 @@
 export enum EnvConfigEnum {
+    IS_PRODUCTION = "IS_PRODUCTION",
     DISGAMES_API_PORT = "DISGAMES_API_PORT",
     DATABASE_URL = "DATABASE_URL",
     DEBUG_DISCORD_WEBHOOK_URL = "DEBUG_DISCORD_WEBHOOK_URL",
@@ -12,9 +13,11 @@ export enum EnvConfigEnum {
     TEST_DISCORD_WEBHOOK_URL = "TEST_DISCORD_WEBHOOK_URL",
 	DISGAMES_DASHBOARD_API_KEYS = "DISGAMES_DASHBOARD_API_KEYS",
 	DISGAMES_SERVER_ID = "DISGAMES_SERVER_ID",
+	DISCORD_PREMIUM_SKU_ID = "DISCORD_PREMIUM_SKU_ID",
 }
 
 const configTypeDefaults = {
+    [EnvConfigEnum.IS_PRODUCTION]: false,
     [EnvConfigEnum.DISGAMES_API_PORT]: 3600,
     [EnvConfigEnum.DATABASE_URL]: "",
     [EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL]: "",
@@ -28,6 +31,7 @@ const configTypeDefaults = {
     [EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL]: "",
     [EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS]: "changeme1,changeme2",
     [EnvConfigEnum.DISGAMES_SERVER_ID]: "",
+    [EnvConfigEnum.DISCORD_PREMIUM_SKU_ID]: "",
 } as const satisfies Record<EnvConfigEnum, boolean | number | string | string[]>;
 
 type ConfigTypeDefaults = typeof configTypeDefaults;

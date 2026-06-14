@@ -8,4 +8,5 @@ export enum CommandEnum {
     ABOUTME = "aboutme",
     JOB = "job",
     HANDOFF = "handoff",
+    TEST_PREMIUM = "testpremium",
 }

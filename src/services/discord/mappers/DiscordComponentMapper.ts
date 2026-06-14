@@ -5,13 +5,14 @@ import {
     MentionableSelectMenuBuilder as DiscordMentionableSelectMenuBuilder,
     ChannelSelectMenuBuilder as DiscordChannelSelectMenuBuilder,
     ButtonBuilder as DiscordButtonBuilder,
+    ButtonStyle as DiscordJsButtonStyle,
     ActionRowBuilder as DiscordActionRowBuilder,
     MessageFlags as DiscordMessageFlags,
     AttachmentBuilder
 } from 'discord.js';
 import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { BaseInteractionEvent, InteractionEvent } from '../../../interfaces/application/Event';
-import { ActionButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
+import { ActionButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, PremiumButton, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -129,13 +130,37 @@ class DiscordComponentMapper {
         }
     }
 
-    public async mapButtonToDiscordButtonAsync(button: ActionButton | LinkButton): Promise<DiscordButtonBuilder> {
+    public async mapButtonToDiscordButtonAsync(button: ActionButton | LinkButton | PremiumButton): Promise<DiscordButtonBuilder> {
+        if (button.style === ButtonStyle.PREMIUM) {
+            const premium = button as PremiumButton;
+            const discordButton = new DiscordButtonBuilder()
+                .setStyle(DiscordJsButtonStyle.Premium)
+                .setSKUId(premium.sku_id)
+                .setLabel(premium.label?.getMessage() || "Premium");
+
+            if (premium.emoji) {
+                if (typeof premium.emoji === "string")
+                    discordButton.setEmoji(premium.emoji);
+                else
+                    discordButton.setEmoji({
+                        name: premium.emoji.name,
+                        id: premium.emoji.id,
+                        animated: premium.emoji.animated
+                    });
+            }
+
+            if (premium.disabled)
+                discordButton.setDisabled(true);
+
+            return discordButton;
+        }
+
         const discordButton = new DiscordButtonBuilder()
-            .setLabel(button.label?.getMessage() || "Button")
+            .setLabel((button as ActionButton | LinkButton).label?.getMessage() || "Button")
             .setStyle(DiscordEnumMapper.mapButtonStyleToDiscordButtonStyle(button.style));
 
         if (button.style !== ButtonStyle.LINK)
-            discordButton.setCustomId(button.custom_id);
+            discordButton.setCustomId((button as ActionButton).custom_id);
 
         if (button.emoji) {
             if (typeof button.emoji === "string")
@@ -149,7 +174,7 @@ class DiscordComponentMapper {
         }
 
         if (button.style === ButtonStyle.LINK)
-            discordButton.setURL(button.url);
+            discordButton.setURL((button as LinkButton).url);
 
         if (button.disabled)
             discordButton.setDisabled(true);
@@ -160,7 +185,7 @@ class DiscordComponentMapper {
     public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder> {
         switch (component.type) {
             case ComponentType.BUTTON:
-                return await this.mapButtonToDiscordButtonAsync(component as ActionButton);
+                return await this.mapButtonToDiscordButtonAsync(component as ActionButton | LinkButton | PremiumButton);
             case ComponentType.TEXT_DISPLAY:
                 return await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
             case ComponentType.SEPARATOR:
@@ -335,13 +360,12 @@ class DiscordComponentMapper {
             }
 
             if (component.type === ComponentType.BUTTON) {
-                // Collect consecutive buttons
-                const consecutiveButtons: ActionButton[] = [];
+                const consecutiveButtons: (ActionButton | LinkButton | PremiumButton)[] = [];
                 let j = i;
 
                 while (j < container.components.length &&
                     container.components[j]?.type === ComponentType.BUTTON) {
-                    consecutiveButtons.push(container.components[j] as ActionButton);
+                    consecutiveButtons.push(container.components[j] as ActionButton | LinkButton | PremiumButton);
                     j++;
                 }
 

@@ -2,6 +2,7 @@ import { StringSelectMenuInteraction as DiscordStringSelectMenuInteraction } fro
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
+import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum } from "../../../interfaces/enums";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
@@ -18,9 +19,10 @@ export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringS
         guildId: string,
         messageId: string,
         customId: string,
-        selected: string
+        selected: string,
+        entitlements: readonly AppEntitlement[] = []
     ) {
-        super(EventTypeEnum.SELECT_MENU, customId, interaction, user, server, channelId, guildId, messageId);
+        super(EventTypeEnum.SELECT_MENU, customId, interaction, user, server, channelId, guildId, messageId, entitlements);
         this.selected = selected;
     }
 

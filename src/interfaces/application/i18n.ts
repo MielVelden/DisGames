@@ -1,5 +1,6 @@
 import { ExceptionEnum, MetricEnum, UserRoleEnum } from "../enums";
 import { GamesCommandActionEnum } from "../enums/commands/Games";
+import { TestPremiumActionEnum } from "../enums/commands/TestPremium";
 import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
@@ -256,6 +257,19 @@ export interface I18nTranslations {
         },
         job: {
             description: LanguageTranslations;
+        },
+        testPremium: {
+            description: LanguageTranslations;
+            option: LanguageCommandOptionTranslations<TestPremiumActionEnum>;
+            optionTarget: LanguageCommandOptionTranslations<never>;
+            labels: {
+                created: LanguageTranslations;
+                deleted: LanguageTranslations;
+                missingSku: LanguageTranslations;
+                missingTarget: LanguageTranslations;
+                missingGuild: LanguageTranslations;
+                clientNotReady: LanguageTranslations;
+            };
         },
         handoff: {
             description: LanguageTranslations;
