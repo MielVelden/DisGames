@@ -4,13 +4,13 @@ import { TextInputStyle } from "./Message";
 export interface ModalTextField {
     kind?: 'text';
     label: MultiLingualString;
-    style?: TextInputStyle;                  // default SHORT
+    style?: TextInputStyle; // default SHORT
     placeholder?: MultiLingualString;
-    value?: MultiLingualString | string;     // initial value
-    required?: boolean;                       // default true
+    value?: MultiLingualString | string; // initial value
+    required?: boolean; // default true
     minLength?: number;
     maxLength?: number;
-    parse?: (raw: string) => unknown;         // optional typed transform
+    parse?: (raw: string) => unknown; // optional typed transform
 }
 
 export interface ModalSelectOption {
@@ -54,7 +54,7 @@ export interface ModalDefinition<TFields extends Record<string, ModalField>> {
 // Infer the value type per field from `parse`, else string[] for selects and string for text inputs
 export type ModalResult<TFields extends Record<string, ModalField>> = {
     [K in keyof TFields]:
-        TFields[K] extends { parse: (raw: any) => infer T } ? T :
-        TFields[K] extends { kind: 'select' } ? string[] :
-        string;
+    TFields[K] extends { parse: (raw: any) => infer T } ? T :
+    TFields[K] extends { kind: 'select' } ? string[] :
+    string;
 };

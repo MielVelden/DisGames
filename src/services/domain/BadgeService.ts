@@ -11,6 +11,8 @@ import Logger from "../../utils/application/Logger";
 import ComponentService from "../application/ComponentService";
 import BadgeCard from "../../builders/images/BadgeCard";
 import { RegisterInit } from "../../utils/registries/InitRegistry";
+import { getConfigValue } from "../../utils/application/Config";
+import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 
 @RegisterInit()
 class BadgeService {
@@ -54,6 +56,10 @@ class BadgeService {
     }
 
     public async evaluateAll(event: InteractionEvent, trigger: BadgeTriggerEnum): Promise<BadgeResult[]> {
+        // TODO: Disable this in production
+        if(getConfigValue(EnvConfigEnum.IS_PRODUCTION)) 
+            return [];
+
         const context = this.createBadgeContext(event, trigger);
         const stored = await BadgeRepository.getLevelsForUserAsync(context.userId);
         const earned: BadgeResult[] = [];

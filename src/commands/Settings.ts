@@ -27,7 +27,7 @@ export class SettingsCommand implements Command {
     async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {
         const server = await ServerService.getByExternalIdAsync(event.guildId);
         const activeGames = await GameService.getActiveGamesAsync(server.ServerId);
-        
+
         const changeLanguageButton = createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeLanguage), ButtonStyle.SECONDARY, "🌐", event.user.userId, async (buttonEvent: InteractionEvent) => {
             const result = await buttonEvent.askUserAsync({
                 title: new MultiLingualString(i18n.commands.settings.labels.changeLanguage),
@@ -37,6 +37,7 @@ export class SettingsCommand implements Command {
                         label: new MultiLingualString(i18n.commands.settings.labels.changeLanguage),
                         options: Object.keys(LanguageEnum)
                             .filter(key => isNaN(Number(key)))
+                            .filter(key => getEnumProperty(LanguageEnum, LanguageEnum[key as keyof typeof LanguageEnum], MetadataKeyEnum.IsRequired))
                             .map(key => {
                                 const language = LanguageEnum[key as keyof typeof LanguageEnum];
                                 const emoji = getEnumProperty(LanguageEnum, language, MetadataKeyEnum.Emoji) as string | undefined;
@@ -55,6 +56,7 @@ export class SettingsCommand implements Command {
                     }
                 }
             });
+
             if (result) {
                 const languageKey = result.language as keyof typeof LanguageEnum;
                 const language = LanguageEnum[languageKey];
@@ -67,7 +69,7 @@ export class SettingsCommand implements Command {
         });
 
         const emojiButton = isServerPremium(server)
-            ? createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeEmojis), ButtonStyle.SECONDARY, "😀", event.user.userId, async (buttonEvent: InteractionEvent) => {
+            ? createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeEmojis), ButtonStyle.SECONDARY, "✅", event.user.userId, async (buttonEvent: InteractionEvent) => {
                 const result = await buttonEvent.askUserAsync({
                     title: new MultiLingualString(i18n.commands.settings.labels.emojiModalTitle),
                     fields: {
@@ -85,6 +87,7 @@ export class SettingsCommand implements Command {
                         }
                     }
                 });
+
                 if (result) {
                     if (!isValidEmoji(result.acceptEmoji) || !isValidEmoji(result.rejectEmoji)) {
                         await event.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.invalidEmoji))]);
@@ -108,6 +111,7 @@ export class SettingsCommand implements Command {
             ServerName: server.Name,
             GamesEnabled: activeGames.length
         }, [changeLanguageButton, emojiButton]);
+
         await event.addComponentsAsync(settingsContainer);
         await event.replyAsync();
     }

@@ -9,7 +9,7 @@ import { User } from '../../src/interfaces/domain/User';
 import { ServersModel } from '../../src/interfaces/database/TableInterfaces';
 import { Command } from '../../src/interfaces/application/Command';
 import { Component } from '../../src/interfaces/application/Message';
-import { ModalDefinition, ModalResult, ModalTextField } from '../../src/interfaces/application/Modal';
+import { ModalDefinition, ModalField, ModalResult } from '../../src/interfaces/application/Modal';
 import { TestInputSimulator } from './TestInputSimulator';
 import { TimelineEntriesSaveModel } from '../../src/interfaces/database/TableInterfaces';
 import { GameSettingsSchema, GameSettingsValues } from '../../src/interfaces/domain/GameSettings';
@@ -37,6 +37,8 @@ export class MockDiscordEvent implements BaseInteractionEvent {
     public readonly guildId: string;
     public components: Component[] = [];
     public timelineEntries: TimelineEntriesSaveModel[] = [];
+
+    private static globalPendingActions: Promise<void>[] = [];
 
     private inputSimulator: TestInputSimulator;
     private sentMessages: Component[][] = [];
@@ -120,7 +122,7 @@ export class MockDiscordEvent implements BaseInteractionEvent {
         return confirmation?.value as boolean ? this as unknown as InteractionEvent : null;
     }
 
-    public async askUserAsync<const TFields extends Record<string, ModalTextField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
+    public async askUserAsync<const TFields extends Record<string, ModalField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
         const response = this.inputSimulator.getNextInputResponse();
         if (!response)
             return null;
@@ -130,7 +132,14 @@ export class MockDiscordEvent implements BaseInteractionEvent {
         for (const key of Object.keys(modal.fields) as Array<keyof TFields>) {
             const field = modal.fields[key];
             const raw = rawValues[key as string] ?? '';
-            result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+            if (field.kind === 'select') {
+                const values = raw ? raw.split(',') : [];
+                result[key] = (field.parse ? field.parse(values) : values) as ModalResult<TFields>[keyof TFields];
+            } else if (field.kind === 'radio') {
+                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+            } else {
+                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+            }
         }
         return result;
     }
@@ -238,7 +247,12 @@ export class MockDiscordEvent implements BaseInteractionEvent {
     }
 
     public scheduleAction(task: () => Promise<void>): void {
-        task().catch(err => Logger.logTest(`Scheduled action failed: ${(err as Error).message}`));
+        const promise = task().catch(err => Logger.logTest(`Scheduled action failed: ${(err as Error).message}`));
+        MockDiscordEvent.globalPendingActions.push(promise);
+    }
+
+    public static async flushScheduledActionsAsync(): Promise<void> {
+        await Promise.all(MockDiscordEvent.globalPendingActions.splice(0));
     }
 }
 

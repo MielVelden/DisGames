@@ -94,7 +94,7 @@ export interface LinkButton extends BaseButton {
 
 export interface PremiumButton extends BaseButton {
     style: ButtonStyle.PREMIUM;
-    sku_id: string;
+    sku_id?: string;
 }
 
 export function isActionButton(button: Component): button is ActionButton {

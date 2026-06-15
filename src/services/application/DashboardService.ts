@@ -34,6 +34,8 @@ class DashboardService {
                 return this.getGamesDashboardAsync(identity);
             case DashboardEnum.PERFORMANCE:
                 return this.getCachePerformanceDashboardAsync();
+            case DashboardEnum.METRICS:
+                return this.getMetricsDashboardAsync();
             default:
                 assertNever(dashboardEnum, DashboardEnum)
         }
@@ -175,6 +177,16 @@ class DashboardService {
                 pieChart
             ]
         }
+    }
+
+    private async getMetricsDashboardAsync(): Promise<DashboardResponse> {
+        const metricEnums = Object.values(MetricEnum).filter((v): v is MetricEnum => typeof v === "number");
+        const cards = await Promise.all(metricEnums.map(metric => this.createDashboardCardByMetricAsync(metric)));
+
+        return {
+            title: "Metrics",
+            cards
+        };
     }
 
     private getCachePerformanceDashboardAsync(): DashboardResponse {

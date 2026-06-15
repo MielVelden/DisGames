@@ -29,6 +29,8 @@ import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
 import { withEventContextAsync } from '../../../middleware/EventContext';
+import { isPremiumEnabled } from '../../../utils/application/PremiumAccess';
+import { UniqueCodes } from '../../../utils/helpers/UniqueCodes';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -133,6 +135,14 @@ class DiscordComponentMapper {
     public async mapButtonToDiscordButtonAsync(button: ActionButton | LinkButton | PremiumButton): Promise<DiscordButtonBuilder> {
         if (button.style === ButtonStyle.PREMIUM) {
             const premium = button as PremiumButton;
+            if (isPremiumEnabled() || !premium.sku_id) {
+                return new DiscordButtonBuilder()
+                    .setCustomId(UniqueCodes.generateUUID())
+                    .setLabel(button.label?.getMessage() || "Button")
+                    .setStyle(DiscordJsButtonStyle.Secondary)
+                    .setDisabled(true);
+            }
+
             const discordButton = new DiscordButtonBuilder()
                 .setStyle(DiscordJsButtonStyle.Premium)
                 .setSKUId(premium.sku_id);

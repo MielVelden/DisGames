@@ -10,6 +10,8 @@ export enum LanguageEnum {
 
 SetIsRequired(LanguageEnum, LanguageEnum.EN);
 SetIsRequired(LanguageEnum, LanguageEnum.NL);
+SetIsRequired(LanguageEnum, LanguageEnum.ES);
+SetIsRequired(LanguageEnum, LanguageEnum.DE);
 
 SetEmoji(LanguageEnum, LanguageEnum.EN, "🇺🇸");
 SetEmoji(LanguageEnum, LanguageEnum.NL, "🇳🇱");
