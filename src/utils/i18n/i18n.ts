@@ -683,6 +683,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: `Beigetreten am: ${joinedAt}`,
                     [LanguageEnum.PT]: `Registrado em: ${joinedAt}`,
                 }),
+                memberSince: (date: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: `Member since ${date}`,
+                    [LanguageEnum.NL]: `Lid sinds ${date}`,
+                    [LanguageEnum.ES]: `Miembro desde ${date}`,
+                    [LanguageEnum.DE]: `Mitglied seit ${date}`,
+                    [LanguageEnum.PT]: `Membro desde ${date}`,
+                }),
             }
         },
         settings: {

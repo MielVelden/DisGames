@@ -218,6 +218,7 @@ export interface I18nTranslations {
                 globalUserRank: (rank: number) => MultiLingualString;
                 globalPoints: (points: number) => MultiLingualString;
                 joinedAt: (joinedAt: Date) => MultiLingualString;
+                memberSince: (date: string) => MultiLingualString;
             };
         },
         settings: {

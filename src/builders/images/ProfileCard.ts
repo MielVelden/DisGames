@@ -138,7 +138,7 @@ class ProfileCardService extends BaseCard {
         this.drawRoleBadge(ctx, data.UserRoleEnum, badgeX, badgeY, language);
 
         const subY = nameY + 22 * SCALE + 8 * SCALE;
-        this.drawHeaderSub(ctx, data, textLeft, subY, textMaxWidth);
+        this.drawHeaderSub(ctx, data, textLeft, subY, textMaxWidth, language);
     }
 
     private drawAvatar(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number): void {
@@ -213,7 +213,7 @@ class ProfileCardService extends BaseCard {
         });
     }
 
-    private drawHeaderSub(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, maxWidth: number): void {
+    private drawHeaderSub(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number, maxWidth: number, language: LanguageEnum): void {
         const pillH = 14 * SCALE;
         const pillPad = 4 * SCALE;
         const pillFont = 9 * SCALE;
@@ -245,7 +245,7 @@ class ProfileCardService extends BaseCard {
         const dotCy = y + pillH / 2;
         this.fillCircle(ctx, dotX, dotCy, 1.5 * SCALE, COLOR_TEXT_FAINT);
 
-        this.drawText(ctx, this.formatJoined(data.CreatedAt), dotX + 8 * SCALE, y + pillH / 2 + 0.5 * SCALE, {
+        this.drawText(ctx, this.formatJoined(data.CreatedAt, language), dotX + 8 * SCALE, y + pillH / 2 + 0.5 * SCALE, {
             font: `500 ${11 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT_MUTED,
             baseline: 'middle',
@@ -518,9 +518,8 @@ class ProfileCardService extends BaseCard {
         this.fillCircle(ctx, x + w * 0.84, y + h * 0.55, h * 0.1, 'rgba(0,0,0,0.35)');
     }
 
-    private formatJoined(date: Date): string {
-        // TODO: i18n
-        return `Member since ${formatDate(date, true)}`;
+    private formatJoined(date: Date, language: LanguageEnum): string {
+        return i18n.commands.profile.labels.memberSince(formatDate(date, true)).getMessage(language);
     }
 }
 
