@@ -280,6 +280,17 @@ export interface I18nTranslations {
                 activated: LanguageTranslations;
                 shuttingDown: LanguageTranslations;
             };
+        },
+        generateData: {
+            description: LanguageTranslations;
+            labels: {
+                generating: LanguageTranslations;
+                translating: LanguageTranslations;
+                generateSummary: (generated: number, skipped: number, failed: number) => MultiLingualString;
+                translateSummary: (translated: number, skipped: number, failed: number) => MultiLingualString;
+                unknownSubcommand: LanguageTranslations;
+                unknownGameType: LanguageTranslations;
+            };
         }
     }
     enums: {

@@ -13,20 +13,22 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
     }
 
     protected async performSaveAsync(savable: GameDataSaveModel, _event: InteractionEvent): Promise<GameDataModel> {
+        if (savable.Response) {
+            savable.Response = savable.Response.changeText(text => text.trim().toLowerCase());
+            if (!savable.Response.getMessage())
+                ErrorHelper.throw(ExceptionEnum.INVALID_ARGUMENT);
+        }
 
-        if(savable.isUpdate()) {
+        if (savable.isUpdate()) {
             const model = await this.repository.getByIdAsync(savable.getId()!);
-
             savable.validateHasNotChanged(GameDataModelFieldEnum.DataSheetId, model?.DataSheetId);
             savable.validateHasNotChanged(GameDataModelFieldEnum.GameId, model?.GameId);
         } else {
-            // Check for duplicates
             const gameId = savable.validateIsNotNull(GameDataModelFieldEnum.GameId);
             const response = savable.validateIsNotNull(GameDataModelFieldEnum.Response);
-
             const primaryValue = response?.getMessage();
             const duplicates = await this.repository.getAllDuplicatesAsync(gameId, primaryValue);
-            if(duplicates.length > 0)
+            if (duplicates.length > 0)
                 ErrorHelper.throw(ExceptionEnum.RECORD_IS_DUPLICATE);
         }
 

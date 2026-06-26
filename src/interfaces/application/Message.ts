@@ -5,9 +5,15 @@ export interface MessageContainer {
     components: Component[];
 }
 
+export enum ComponentVisibility {
+    PRIVATE = 'PRIVATE',
+    PUBLIC = 'PUBLIC',
+}
+
 export interface Component {
     id?: string;
     type: ComponentType;
+    visibility?: ComponentVisibility;
 }
 
 export enum ComponentType {

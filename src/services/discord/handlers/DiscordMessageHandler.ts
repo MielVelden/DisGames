@@ -8,10 +8,7 @@ import {
 } from 'discord.js';
 import { BaseInteractionEvent, InteractionEvent, ModalSubmitInteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
 import { ModalDefinition, ModalField, ModalResult } from '../../../interfaces/application/Modal';
-import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
-import {
-    Component
-} from '../../../interfaces/application/Message';
+import { ActionButton, ButtonStyle, Component, ComponentType, ComponentVisibility, SelectMenu } from '../../../interfaces/application/Message';
 import ComponentService from '../../application/ComponentService';
 import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { InteractionService } from '../../application/InteractionService';
@@ -33,9 +30,10 @@ class DiscordMessageHandler {
     }
 
     public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined, ephemeral?: boolean): Promise<void> {
+        const resolvedEphemeral = ephemeral ?? this.resolveEphemeral(event.components);
         let content: DiscordMessageContent | null;
         try {
-            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, ephemeral);
+            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, resolvedEphemeral);
         } catch (error) {
             await Logger.logError(`Failed to build reply content for event type ${event.type}`, error as Error);
             throw error;
@@ -150,6 +148,11 @@ class DiscordMessageHandler {
                 }
             }
         }
+    }
+
+    private resolveEphemeral(components: Component[]): boolean {
+        const usefulComponents = components.filter(c => c.type !== ComponentType.SEPARATOR);
+        return usefulComponents.length > 0 && usefulComponents.every(c => c.visibility === ComponentVisibility.PRIVATE);
     }
 
     private isMissingPermissionsError(error: unknown): boolean {

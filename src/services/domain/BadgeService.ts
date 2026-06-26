@@ -9,6 +9,7 @@ import UserRepository from "../../repositories/UserRepository";
 import PointRepository from "../../repositories/PointRepository";
 import Logger from "../../utils/application/Logger";
 import ComponentService from "../application/ComponentService";
+import { ComponentVisibility } from "../../interfaces/application/Message";
 import BadgeCard from "../../builders/images/BadgeCard";
 import { RegisterInit } from "../../utils/registries/InitRegistry";
 import { getConfigValue } from "../../utils/application/Config";
@@ -84,8 +85,11 @@ class BadgeService {
                         badge: { achievementEnum: badge.config.id, date: new Date(), level: achieved, threshold },
                     });
 
+                    const badgeImage = ComponentService.createImage(media, false);
+                    badgeImage.visibility = ComponentVisibility.PRIVATE;
+
                     await event.addComponentsAsync([
-                        ComponentService.createImage(media, false),
+                        badgeImage,
                         ...(event.components.length ? [ComponentService.createSeparator()] : [])
                     ], true);
                 }

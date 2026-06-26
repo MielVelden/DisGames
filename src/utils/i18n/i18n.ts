@@ -1018,6 +1018,59 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.PT]: "Executar um trabalho",
             },
         },
+        generateData: {
+            description: {
+                [LanguageEnum.EN]: "Generate or translate game data using AI",
+                [LanguageEnum.NL]: "Genereer of vertaal speldata met AI",
+                [LanguageEnum.ES]: "Generar o traducir datos de juego con IA",
+                [LanguageEnum.DE]: "Spieledaten mit KI generieren oder übersetzen",
+                [LanguageEnum.PT]: "Gerar ou traduzir dados de jogo com IA",
+            },
+            labels: {
+                generating: {
+                    [LanguageEnum.EN]: "Generating...",
+                    [LanguageEnum.NL]: "Bezig met genereren...",
+                    [LanguageEnum.ES]: "Generando...",
+                    [LanguageEnum.DE]: "Wird generiert...",
+                    [LanguageEnum.PT]: "A gerar...",
+                },
+                translating: {
+                    [LanguageEnum.EN]: "Translating...",
+                    [LanguageEnum.NL]: "Bezig met vertalen...",
+                    [LanguageEnum.ES]: "Traduciendo...",
+                    [LanguageEnum.DE]: "Wird übersetzt...",
+                    [LanguageEnum.PT]: "A traduzir...",
+                },
+                generateSummary: (generated: number, skipped: number, failed: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: `Done — generated: ${generated}, skipped (duplicates): ${skipped}, failed: ${failed}`,
+                    [LanguageEnum.NL]: `Klaar — gegenereerd: ${generated}, overgeslagen (duplicaten): ${skipped}, mislukt: ${failed}`,
+                    [LanguageEnum.ES]: `Listo — generados: ${generated}, omitidos (duplicados): ${skipped}, fallidos: ${failed}`,
+                    [LanguageEnum.DE]: `Fertig — generiert: ${generated}, übersprungen (Duplikate): ${skipped}, fehlgeschlagen: ${failed}`,
+                    [LanguageEnum.PT]: `Concluído — gerados: ${generated}, ignorados (duplicados): ${skipped}, falhados: ${failed}`,
+                }),
+                translateSummary: (translated: number, skipped: number, failed: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: `Done — translated: ${translated}, skipped (complete): ${skipped}, failed: ${failed}`,
+                    [LanguageEnum.NL]: `Klaar — vertaald: ${translated}, overgeslagen (volledig): ${skipped}, mislukt: ${failed}`,
+                    [LanguageEnum.ES]: `Listo — traducidos: ${translated}, omitidos (completos): ${skipped}, fallidos: ${failed}`,
+                    [LanguageEnum.DE]: `Fertig — übersetzt: ${translated}, übersprungen (vollständig): ${skipped}, fehlgeschlagen: ${failed}`,
+                    [LanguageEnum.PT]: `Concluído — traduzidos: ${translated}, ignorados (completos): ${skipped}, falhados: ${failed}`,
+                }),
+                unknownSubcommand: {
+                    [LanguageEnum.EN]: "Unknown subcommand. Use: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.NL]: "Onbekend subcommando. Gebruik: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.ES]: "Subcomando desconocido. Uso: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.DE]: "Unbekannter Unterbefehl. Verwendung: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.PT]: "Subcomando desconhecido. Uso: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                },
+                unknownGameType: {
+                    [LanguageEnum.EN]: "Unknown game type. Valid options: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.NL]: "Onbekend speltype. Geldige opties: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.ES]: "Tipo de juego desconocido. Opciones válidas: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.DE]: "Unbekannter Spieltyp. Gültige Optionen: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.PT]: "Tipo de jogo desconhecido. Opções válidas: anagram, trivia, wordsnake, connections",
+                },
+            },
+        },
         handoff: {
             description: {
                 [LanguageEnum.EN]: "Transfer control to a standby instance",

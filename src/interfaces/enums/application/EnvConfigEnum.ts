@@ -14,6 +14,8 @@ export enum EnvConfigEnum {
 	DISGAMES_DASHBOARD_API_KEYS = "DISGAMES_DASHBOARD_API_KEYS",
 	DISGAMES_SERVER_ID = "DISGAMES_SERVER_ID",
 	DISCORD_PREMIUM_SKU_ID = "DISCORD_PREMIUM_SKU_ID",
+    OLLAMA_BASE_URL = "OLLAMA_BASE_URL",
+    OLLAMA_MODEL = "OLLAMA_MODEL",
 }
 
 const configTypeDefaults = {
@@ -32,6 +34,8 @@ const configTypeDefaults = {
     [EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS]: "changeme1,changeme2",
     [EnvConfigEnum.DISGAMES_SERVER_ID]: "",
     [EnvConfigEnum.DISCORD_PREMIUM_SKU_ID]: "",
+    [EnvConfigEnum.OLLAMA_BASE_URL]: "http://localhost:11434",
+    [EnvConfigEnum.OLLAMA_MODEL]: "llama3.2",
 } as const satisfies Record<EnvConfigEnum, boolean | number | string | string[]>;
 
 type ConfigTypeDefaults = typeof configTypeDefaults;

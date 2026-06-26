@@ -9,4 +9,5 @@ export enum CommandEnum {
     JOB = "job",
     HANDOFF = "handoff",
     TEST_PREMIUM = "testpremium",
+    GENERATE_DATA = "generatedata",
 }

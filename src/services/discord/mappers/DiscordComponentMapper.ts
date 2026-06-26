@@ -440,7 +440,9 @@ class DiscordComponentMapper {
     public createReplyOptions(components: any[], files: AttachmentBuilder[], ephemeral?: boolean): DiscordMessageContent {
         return {
             components: components,
-            flags: DiscordMessageFlags.IsComponentsV2,
+            flags: ephemeral
+                ? DiscordMessageFlags.IsComponentsV2 | DiscordMessageFlags.Ephemeral
+                : DiscordMessageFlags.IsComponentsV2,
             files: files.length > 0 ? files : undefined,
             ephemeral: ephemeral
         };
