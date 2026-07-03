@@ -1,4 +1,4 @@
-import { Client, Entitlement } from "discord.js";
+import { Entitlement } from "discord.js";
 import { discordClient } from "../..";
 
 class DiscordTestEntitlementService {

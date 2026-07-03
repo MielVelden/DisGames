@@ -1,6 +1,6 @@
 import { UsersModel, UsersSaveModel, UsersModelFieldEnum } from "../../interfaces/database/TableInterfaces";
 import { GameTypeEnum, MetricEnum, UserRoleEnum } from "../../interfaces/enums";
-import { ProfileCardData, ProfileGameResponse, ProfileResponse } from "../../interfaces/view";
+import { ProfileCardData, ProfileGameResponse } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import EventRepository from "../../repositories/EventRepository";

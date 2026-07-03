@@ -12,7 +12,7 @@ import {
 } from 'discord.js';
 import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { BaseInteractionEvent, InteractionEvent } from '../../../interfaces/application/Event';
-import { ActionButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, PremiumButton, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
+import { ActionButton, BaseButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -28,8 +28,8 @@ import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
-import { withEventContextAsync } from '../../../middleware/EventContext';
-import { isPremiumEnabled } from '../../../utils/application/PremiumAccess';
+import { withEventContextAsync, getCurrentServer } from '../../../middleware/EventContext';
+import { isPremiumEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
 import { UniqueCodes } from '../../../utils/helpers/UniqueCodes';
 
 class DiscordComponentMapper {
@@ -132,10 +132,13 @@ class DiscordComponentMapper {
         }
     }
 
-    public async mapButtonToDiscordButtonAsync(button: ActionButton | LinkButton | PremiumButton): Promise<DiscordButtonBuilder> {
-        if (button.style === ButtonStyle.PREMIUM) {
-            const premium = button as PremiumButton;
-            if (isPremiumEnabled() || !premium.sku_id) {
+    public async mapButtonToDiscordButtonAsync(button: BaseButton): Promise<DiscordButtonBuilder> {
+        // TODO: Make this method return a array of buttons
+        const server = getCurrentServer();
+
+        if (button.premiumSkuId && server && isServerPremium(server)) {
+            // TODO: Add this button instead of replacing it with a disabled button
+            if (!isPremiumEnabled()) {
                 return new DiscordButtonBuilder()
                     .setCustomId(UniqueCodes.generateUUID())
                     .setLabel(button.label?.getMessage() || "Button")
@@ -145,9 +148,9 @@ class DiscordComponentMapper {
 
             const discordButton = new DiscordButtonBuilder()
                 .setStyle(DiscordJsButtonStyle.Premium)
-                .setSKUId(premium.sku_id);
+                .setSKUId(button.premiumSkuId);
 
-            if (premium.disabled)
+            if (button.disabled)
                 discordButton.setDisabled(true);
 
             return discordButton;
@@ -183,7 +186,7 @@ class DiscordComponentMapper {
     public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder> {
         switch (component.type) {
             case ComponentType.BUTTON:
-                return await this.mapButtonToDiscordButtonAsync(component as ActionButton | LinkButton | PremiumButton);
+                return await this.mapButtonToDiscordButtonAsync(component as BaseButton);
             case ComponentType.TEXT_DISPLAY:
                 return await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
             case ComponentType.SEPARATOR:
@@ -358,12 +361,12 @@ class DiscordComponentMapper {
             }
 
             if (component.type === ComponentType.BUTTON) {
-                const consecutiveButtons: (ActionButton | LinkButton | PremiumButton)[] = [];
+                const consecutiveButtons: (ActionButton | LinkButton)[] = [];
                 let j = i;
 
                 while (j < container.components.length &&
                     container.components[j]?.type === ComponentType.BUTTON) {
-                    consecutiveButtons.push(container.components[j] as ActionButton | LinkButton | PremiumButton);
+                    consecutiveButtons.push(container.components[j] as ActionButton | LinkButton);
                     j++;
                 }
 

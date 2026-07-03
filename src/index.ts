@@ -22,7 +22,7 @@ export const discordClient = new DiscordClient({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
+    // GatewayIntentBits.MessageContent, WAIT FOR VERIFICATION
     GatewayIntentBits.GuildMessageReactions,
   ],
 });
@@ -52,8 +52,10 @@ discordClient.once('clientReady', async () => {
         loadCommands(discordClient),
         loadEvents(discordClient),
       ]);
-      const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);
-      startHttpServer(port);
+      if (getConfigValue(EnvConfigEnum.DISGAMES_API_ENABLED)) {
+        const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);
+        startHttpServer(port);
+      }
 
       // Initialize the job scheduler
       JobScheduler.getInstance();

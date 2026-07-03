@@ -1,5 +1,6 @@
 export enum EnvConfigEnum {
     IS_PRODUCTION = "IS_PRODUCTION",
+    DISGAMES_API_ENABLED = "DISGAMES_API_ENABLED",
     DISGAMES_API_PORT = "DISGAMES_API_PORT",
     DATABASE_URL = "DATABASE_URL",
     DEBUG_DISCORD_WEBHOOK_URL = "DEBUG_DISCORD_WEBHOOK_URL",
@@ -7,7 +8,6 @@ export enum EnvConfigEnum {
     DISCORD_CLIENT_ID = "DISCORD_CLIENT_ID",
     DISCORD_OWNER_ID = "DISCORD_OWNER_ID",
     DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL",
-    PREFIX = "PREFIX",
     TOKEN = "TOKEN",
     TEST_TIMEOUT = "TEST_TIMEOUT",
     TEST_DISCORD_WEBHOOK_URL = "TEST_DISCORD_WEBHOOK_URL",
@@ -20,6 +20,7 @@ export enum EnvConfigEnum {
 
 const configTypeDefaults = {
     [EnvConfigEnum.IS_PRODUCTION]: false,
+    [EnvConfigEnum.DISGAMES_API_ENABLED]: false,
     [EnvConfigEnum.DISGAMES_API_PORT]: 3600,
     [EnvConfigEnum.DATABASE_URL]: "",
     [EnvConfigEnum.DEBUG_DISCORD_WEBHOOK_URL]: "",
@@ -27,7 +28,6 @@ const configTypeDefaults = {
     [EnvConfigEnum.DISCORD_CLIENT_ID]: "",
     [EnvConfigEnum.DISCORD_OWNER_ID]: "",
     [EnvConfigEnum.DISCORD_WEBHOOK_URL]: "",
-    [EnvConfigEnum.PREFIX]: "!",
     [EnvConfigEnum.TOKEN]: "",
     [EnvConfigEnum.TEST_TIMEOUT]: 30000,
     [EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL]: "",

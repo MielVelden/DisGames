@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "async_hooks";
 import { BaseInteractionEvent } from "../interfaces/application/Event";
 import { LanguageEnum } from "../interfaces/enums/database/LanguageEnum";
+import { ServersModel } from "../interfaces/database";
 
 type EventStore = { event: BaseInteractionEvent };
 
@@ -20,4 +21,8 @@ export function getCurrentEvent(): BaseInteractionEvent | undefined {
 
 export function getCurrentLanguage(): LanguageEnum | undefined {
     return eventContext.getStore()?.event?.server?.LanguageEnum;
+}
+
+export function getCurrentServer(): ServersModel | undefined {
+    return eventContext.getStore()?.event?.server;
 }

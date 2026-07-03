@@ -19,6 +19,7 @@ class OllamaClient {
     async generateAsync(prompt: string): Promise<string> {
         Logger.logInfo(`[OllamaClient] Sending prompt to ${this.baseUrl} using model ${this.model}`);
 
+        // TODO: Implement keep_alive functionality and turn up randomness via sampling parameters when generating game data
         const response = await fetch(`${this.baseUrl}/api/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

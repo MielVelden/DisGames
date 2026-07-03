@@ -51,7 +51,7 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
             Id: server.Id,
             IsPremium: true
         }));
-        Logger.logInfo(`Server ${guildId} granted premium access`);
+        Logger.logInfo(`Server ${guildId} granted premium access`, { sendToDiscord: true });
     }
 
     public async handlePremiumRevokedAsync(guildId: string): Promise<void> {
@@ -69,7 +69,7 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
             Id: server.Id,
             IsPremium: false
         }));
-        Logger.logInfo(`Server ${guildId} had premium access revoked`);
+        Logger.logInfo(`Server ${guildId} had premium access revoked`, { sendToDiscord: true });
     }
 
     public async getAllAsync(): Promise<ServersModel[]> {

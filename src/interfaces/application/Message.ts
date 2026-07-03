@@ -85,6 +85,7 @@ export interface BaseButton extends Component {
         id?: string;
         animated?: boolean;
     } | string;
+    premiumSkuId?: string;
     disabled?: boolean;
 }
 
@@ -98,17 +99,8 @@ export interface LinkButton extends BaseButton {
     url: string;
 }
 
-export interface PremiumButton extends BaseButton {
-    style: ButtonStyle.PREMIUM;
-    sku_id?: string;
-}
-
 export function isActionButton(button: Component): button is ActionButton {
     return button.type === ComponentType.BUTTON && ((button as ActionButton).style === ButtonStyle.PRIMARY || (button as ActionButton).style === ButtonStyle.SECONDARY || (button as ActionButton).style === ButtonStyle.SUCCESS || (button as ActionButton).style === ButtonStyle.DANGER);
-}
-
-export function isPremiumButton(button: Component): button is PremiumButton {
-    return button.type === ComponentType.BUTTON && (button as BaseButton).style === ButtonStyle.PREMIUM;
 }
 
 // #endregion

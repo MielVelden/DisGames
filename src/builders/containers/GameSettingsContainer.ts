@@ -174,26 +174,22 @@ export class GameSettingsContainer {
     static createReadOnlyDisplay(config: GameSettingsDisplayConfig): Component[] {
         const components: Component[] = [];
 
+        const ALL_LANGUAGES = Object.values(LanguageEnum).filter((v): v is LanguageEnum => typeof v === "number");
+
         const format = (label: string, status: string) => `> ${label}: **${status}**`;
         const mls = (label: MultiLingualString, status: string | boolean | MultiLingualString) => {
-            if (typeof status === "boolean") {
-                const statusLabel = status ? i18n.labels.common.enabled : i18n.labels.common.disabled;
-                return new MultiLingualString({
-                    [LanguageEnum.EN]: format(label.getMessage(LanguageEnum.EN), statusLabel[LanguageEnum.EN]),
-                    [LanguageEnum.NL]: format(label.getMessage(LanguageEnum.NL), statusLabel[LanguageEnum.NL]),
-                })
-            }
-            else if (isMultiLingualString(status)) {
-                return new MultiLingualString({
-                    [LanguageEnum.EN]: format(label.getMessage(LanguageEnum.EN), status.getMessage(LanguageEnum.EN)),
-                    [LanguageEnum.NL]: format(label.getMessage(LanguageEnum.NL), status.getMessage(LanguageEnum.NL)),
-                })
+            const translations = {} as Record<LanguageEnum, string>;
+
+            for (const lang of ALL_LANGUAGES) {
+                const statusText = typeof status === "boolean"
+                    ? new MultiLingualString(status ? i18n.labels.common.enabled : i18n.labels.common.disabled).getMessage(lang)
+                    : isMultiLingualString(status)
+                        ? status.getMessage(lang)
+                        : status;
+                translations[lang] = format(label.getMessage(lang), statusText);
             }
 
-            return new MultiLingualString({
-                [LanguageEnum.EN]: format(label.getMessage(LanguageEnum.EN), status),
-                [LanguageEnum.NL]: format(label.getMessage(LanguageEnum.NL), status),
-            })
+            return new MultiLingualString(translations);
         };
 
         config.settingsSchema.forEach((setting) => {
@@ -222,21 +218,17 @@ export class GameSettingsContainer {
                 });
 
                 const hasAny = selectedOptions.length > 0;
-                const statusLabel = hasAny ? i18n.labels.common.enabled : i18n.labels.common.disabled;
-                // TODO: Improve this
-                const labelEn = setting.label.getMessage(LanguageEnum.EN);
-                const labelNl = setting.label.getMessage(LanguageEnum.NL);
-                const valuesEn = selectedOptions.map(opt => opt.label.getMessage(LanguageEnum.EN)).join(", ");
-                const valuesNl = selectedOptions.map(opt => opt.label.getMessage(LanguageEnum.NL)).join(", ");
+                const statusLabel = new MultiLingualString(hasAny ? i18n.labels.common.enabled : i18n.labels.common.disabled);
 
-                display = new MultiLingualString({
-                    [LanguageEnum.EN]: hasAny
-                        ? format(labelEn, `${statusLabel[LanguageEnum.EN]} ${valuesEn}`)
-                        : format(labelEn, statusLabel[LanguageEnum.EN]),
-                    [LanguageEnum.NL]: hasAny
-                        ? format(labelNl, `${statusLabel[LanguageEnum.NL]} ${valuesNl}`)
-                        : format(labelNl, statusLabel[LanguageEnum.NL]),
-                });
+                const translations = {} as Record<LanguageEnum, string>;
+                for (const lang of ALL_LANGUAGES) {
+                    const label = setting.label.getMessage(lang);
+                    translations[lang] = hasAny
+                        ? format(label, `${statusLabel.getMessage(lang)} ${selectedOptions.map(opt => opt.label.getMessage(lang)).join(", ")}`)
+                        : format(label, statusLabel.getMessage(lang));
+                }
+
+                display = new MultiLingualString(translations);
             }
 
             if (!display)
