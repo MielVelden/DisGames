@@ -30,7 +30,7 @@ import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
 import { withEventContextAsync, getCurrentServer } from '../../../middleware/EventContext';
 import { isPremiumEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
-import { UniqueCodes } from '../../../utils/helpers/UniqueCodes';
+import { DEFAULT_PREMIUM_EMOJI } from '../../../utils/constants/Emojis';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -132,30 +132,37 @@ class DiscordComponentMapper {
         }
     }
 
-    public async mapButtonToDiscordButtonAsync(button: BaseButton): Promise<DiscordButtonBuilder> {
-        // TODO: Make this method return a array of buttons
+    public async mapButtonToDiscordButtonAsync(button: BaseButton): Promise<DiscordButtonBuilder[]> {
         const server = getCurrentServer();
 
-        if (button.premiumSkuId && server && isServerPremium(server)) {
-            // TODO: Add this button instead of replacing it with a disabled button
+        const discordButtons = [];
+        if (button.premiumSkuId && server && !isServerPremium(server)) {
             if (!isPremiumEnabled()) {
-                return new DiscordButtonBuilder()
-                    .setCustomId(UniqueCodes.generateUUID())
-                    .setLabel(button.label?.getMessage() || "Button")
-                    .setStyle(DiscordJsButtonStyle.Secondary)
-                    .setDisabled(true);
+                button.emoji = DEFAULT_PREMIUM_EMOJI;
+                button.disabled = true;
+                
+                const discordButton = this.buildRegularDiscordButton(button)
+                discordButtons.push(discordButton.setDisabled(true));
+            } else {
+                const discordButton = new DiscordButtonBuilder()
+                    .setStyle(DiscordJsButtonStyle.Premium)
+                    .setSKUId(button.premiumSkuId);
+
+                if (button.disabled)
+                    discordButton.setDisabled(true);
+
+                discordButtons.push(discordButton);
+
+                button.emoji = DEFAULT_PREMIUM_EMOJI;
+                button.disabled = true;
             }
-
-            const discordButton = new DiscordButtonBuilder()
-                .setStyle(DiscordJsButtonStyle.Premium)
-                .setSKUId(button.premiumSkuId);
-
-            if (button.disabled)
-                discordButton.setDisabled(true);
-
-            return discordButton;
         }
 
+        discordButtons.unshift(this.buildRegularDiscordButton(button));
+        return discordButtons;
+    }
+
+    private buildRegularDiscordButton(button: BaseButton): DiscordButtonBuilder {
         const discordButton = new DiscordButtonBuilder()
             .setLabel((button as ActionButton | LinkButton).label?.getMessage() || "Button")
             .setStyle(DiscordEnumMapper.mapButtonStyleToDiscordButtonStyle(button.style));
@@ -183,7 +190,7 @@ class DiscordComponentMapper {
         return discordButton;
     }
 
-    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder> {
+    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder | DiscordComponentBuilder[]> {
         switch (component.type) {
             case ComponentType.BUTTON:
                 return await this.mapButtonToDiscordButtonAsync(component as BaseButton);
@@ -239,7 +246,7 @@ class DiscordComponentMapper {
         // Exclude buttons that are already inside containers
         const componentsToProcess = this.excludeComponentsInContainers(components);
 
-        const discordComponents = await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)));
+        const discordComponents = (await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)))).flat();
 
         // Group components by type - only including ActionRow-compatible components
         const buttons = discordComponents.filter(c => c instanceof DiscordButtonBuilder);
@@ -372,7 +379,7 @@ class DiscordComponentMapper {
 
                 // Map all consecutive buttons and group them in one ActionRow
                 const buttonPromises = consecutiveButtons.map(btn => this.mapButtonToDiscordButtonAsync(btn));
-                const discordButtons = await Promise.all(buttonPromises);
+                const discordButtons = (await Promise.all(buttonPromises)).flat();
                 const buttonActionRow = this.createActionRowWithComponents(discordButtons);
                 discordContainer.addActionRowComponents([buttonActionRow]);
 

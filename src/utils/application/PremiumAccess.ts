@@ -22,8 +22,7 @@ export function hasPremiumAccess(event: InteractionEvent, skuId: string): boolea
 }
 
 export function isServerPremium(server: ServersModel): boolean {
-    if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION))
-        return true;
-
+    // if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION))
+    //     return true;
     return server.IsPremium;
 }

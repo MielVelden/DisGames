@@ -17,7 +17,7 @@ export class GenerateDataCommand implements Command {
     name = CommandEnum.GENERATE_DATA;
     description = new MultiLingualString(i18n.commands.generateData.description);
     isSlashCommand = false;
-    isMessageCommand = true;
+    isMessageCommand = !getConfigValue(EnvConfigEnum.IS_PRODUCTION);
     options = optionsConfig;
     canExecute = (event: InteractionEvent): boolean => {
         return event.user.userId === getConfigValue(EnvConfigEnum.DISCORD_OWNER_ID);

@@ -19,7 +19,7 @@ import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordServ
 import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
 import { createDenyButton } from '../../../builders/buttons/DenyButton';
 import { EventTypeEnum, ExceptionEnum } from '../../../interfaces/enums';
-import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
+import { ServersModel } from '../../../interfaces/database/TableInterfaces';
 import { ErrorHelper } from '../../../utils/application/Error';
 import Logger from '../../../utils/application/Logger';
 import { createTitle } from '../../../utils/helpers/Markdown';
@@ -533,7 +533,7 @@ class DiscordMessageHandler {
 
     public async getUserInputByButtonsAsync(event: InteractionEvent, question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
         return new Promise(async (resolve) => {
-            const discordButtons = await Promise.all(buttons.map(button => {
+            const discordButtons = (await Promise.all(buttons.map(button => {
                 const btn = ComponentService.createButton({
                     type: ComponentType.BUTTON,
                     label: button,
@@ -548,7 +548,7 @@ class DiscordMessageHandler {
                     }
                 })
                 return DiscordComponentMapper.mapButtonToDiscordButtonAsync(btn);
-            }));
+            }))).flat();
 
             const discordMessage = ComponentService.createContent(question);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordButtons)], []);
@@ -678,13 +678,12 @@ class DiscordMessageHandler {
         }
     }
 
-    public async sendToGuildChannelAsync(guild: DiscordGuild, channelId: string, components: Component[], language: LanguageEnum): Promise<void> {
+    public async sendToGuildChannelAsync(guild: DiscordGuild, channelId: string, components: Component[], server: ServersModel): Promise<void> {
         const channel = await guild.channels.fetch(channelId).catch(() => null);
         if (!channel || !channel.isTextBased())
             return;
 
-        // TODO: Add actual event
-        const minimalEvent = { server: { LanguageEnum: language } } as BaseInteractionEvent;
+        const minimalEvent = { server } as BaseInteractionEvent;
 
         const content = await DiscordComponentMapper.buildMessageContentAsync(minimalEvent, components);
         if (!content)

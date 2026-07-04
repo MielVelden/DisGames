@@ -60,7 +60,7 @@ class DiscordService {
     }
 
     // Component Mapping
-    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder> {
+    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder | DiscordComponentBuilder[]> {
         return await DiscordComponentMapper.mapComponentToDiscordComponentAsync(component);
     }
 
@@ -79,7 +79,7 @@ class DiscordService {
         Logger.logInfo(`Joined Discord guild ${guild.name} (${guild.id})`);
         if (event.systemChannelId) {
             const components = createWelcomeContainer();
-            await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server.LanguageEnum);
+            await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server);
         }
     }
 

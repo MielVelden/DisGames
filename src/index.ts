@@ -39,7 +39,6 @@ discordClient.once('clientReady', async () => {
     if (success) {
       if (getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
         try {
-          // Pool now actually pools → these two DB-touching tasks run in parallel
           await Promise.all([syncRoutines(), validateSchemaAsync()]);
         } catch (err) {
           Logger.logError('Routine sync failed, shutting down', err as Error, { sendToDiscord: true });
@@ -47,7 +46,6 @@ discordClient.once('clientReady', async () => {
         }
       }
       await initAsync();
-      // Command + event collectors are independent — load concurrently
       await Promise.all([
         loadCommands(discordClient),
         loadEvents(discordClient),

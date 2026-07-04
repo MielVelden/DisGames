@@ -1,5 +1,5 @@
 import { CanvasRenderingContext2D } from 'canvas';
-import { PROJECT_NAME } from '../../utils/constants/Project';
+import packageJson from "../../../package.json";
 import {
     BRAND_RIGHT,
     BRAND_TOP,
@@ -44,7 +44,7 @@ export function drawCardBackground(ctx: CanvasRenderingContext2D, width: number,
 }
 
 export function drawBrand(ctx: CanvasRenderingContext2D, width: number): void {
-    const text = PROJECT_NAME.toUpperCase();
+    const text = packageJson.name.toUpperCase();
     const fontSize = 10 * SCALE;
     const brandStyle: TextStyle = {
         font: `600 ${fontSize}px ${FONT_MONO}`,
