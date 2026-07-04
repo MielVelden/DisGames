@@ -13,7 +13,7 @@ import { GameSettingsValues, GameSettingsSchema, Games_Settings, GameSettingOpti
 import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSetting";
 import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
 import GameService from "../../domain/GameService";
-import { GameSettingsContainer } from "../../../builders/containers/GameSettingsContainer";
+import { createGameSettingsContainer } from "../../../builders/containers/GameSettingsContainer";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
@@ -179,23 +179,47 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                         }
                     }
                 },
-                onListClick: async (btnEvent, key, listSetting, toggledValue, isSelected, newValues) => {
+                onListClick: async (btnEvent, key, listSetting, currentValues) => {
                     if (isResolved)
                         return;
 
-                    this.updateSetting(currentSettings, key, newValues);
-                    config.currentSettings = currentSettings;
-                    await updateContainer(btnEvent);
+                    const selectMenu: StringSelect = {
+                        type: ComponentType.STRING_SELECT,
+                        custom_id: crypto.randomUUID(),
+                        title: listSetting.label,
+                        placeholder: listSetting.label,
+                        description: listSetting.label,
+                        min_values: 0,
+                        max_values: listSetting.options.length,
+                        options: listSetting.options.map((option: GameSettingOption): SelectOption => ({
+                            label: option.label,
+                            value: option.value.toString(),
+                            description: option.description,
+                            default: currentValues.includes(typeof option.value === "number" ? option.value : Number(option.value))
+                        }))
+                    };
+
+                    const selectResult = await btnEvent.getUserInputBySelectMenuAsync(selectMenu);
+                    if (selectResult && !isResolved) {
+                        const newValues = listSetting.options
+                            .map(opt => opt.value)
+                            .filter(value => selectResult.selectedValues.includes(value.toString()))
+                            .map(value => typeof value === "number" ? value : Number(value));
+
+                        this.updateSetting(currentSettings, key, newValues);
+                        config.currentSettings = currentSettings;
+                        await updateContainer(selectResult);
+                    }
                 }
             };
             
             const updateContainer = async (btnEvent?: InteractionEvent): Promise<void> => {
-                const container = GameSettingsContainer.createInteractiveContainer(config, handlers);
-                
+                const components = createGameSettingsContainer(config, handlers);
+
                 if (btnEvent) {
-                    await btnEvent.editWithComponentsAsync([container]);
+                    await btnEvent.editWithComponentsAsync(components);
                 } else {
-                    await this.editWithComponentsAsync([container]);
+                    await this.editWithComponentsAsync(components);
                 }
             };
             

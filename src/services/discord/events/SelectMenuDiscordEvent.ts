@@ -10,6 +10,7 @@ import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringSelectMenuInteraction> implements SelectMenuInteractionEvent {
     public readonly type: EventTypeEnum.SELECT_MENU = EventTypeEnum.SELECT_MENU;
     public readonly selected: string;
+    public readonly selectedValues: string[];
 
     constructor(
         interaction: DiscordStringSelectMenuInteraction,
@@ -19,11 +20,12 @@ export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringS
         guildId: string,
         messageId: string,
         customId: string,
-        selected: string,
+        selectedValues: string[],
         entitlements: readonly AppEntitlement[] = []
     ) {
         super(EventTypeEnum.SELECT_MENU, customId, interaction, user, server, channelId, guildId, messageId, entitlements);
-        this.selected = selected;
+        this.selectedValues = selectedValues;
+        this.selected = selectedValues[0];
     }
 
     public async deferReplyAsync(): Promise<void> {

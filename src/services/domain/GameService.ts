@@ -89,18 +89,27 @@ class GameService {
             try {
                 const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
                 if (datasheets.length > 0) {
+                    const options = await Promise.all(datasheets.map(async (datasheet: DatasheetsModel) => {
+                        const datasheetCount = await DataSheetService.getCountByGameIdAsync(gameConfig.id, datasheet.Id);
+                        datasheet.Description.replaceParameters({
+                            items: datasheetCount.toString(),
+                        });
+
+                        return {
+                            value: datasheet.Id,
+                            label: datasheet.Name,
+                            description: datasheet.Description,
+                        };
+                    }));
+                    
                     gameConfig.settings.push({
                         key: GameSettingsEnum.DATASHEETS,
                         type: GameSettingType.LIST,
                         label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
                         description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
-                        options: datasheets.map((datasheet: DatasheetsModel) => ({
-                            value: datasheet.Id,
-                            label: datasheet.Name,
-                            description: datasheet.Description,
-                        }))
-                    });
-                }
+                        options: options
+                    })
+                };
             } catch (error) {
                 Logger.logError(`Failed to load datasheets for game ${gameConfig.id}, continuing without datasheet settings`, error as Error);
             }
@@ -127,8 +136,8 @@ class GameService {
     }
 
     public async checkActiveGameInChannel(channelId: string): Promise<boolean> {
-         const externalIds = await GameRepository.getExternalIdsAsync();
-         return externalIds.includes(channelId);
+        const externalIds = await GameRepository.getExternalIdsAsync();
+        return externalIds.includes(channelId);
     }
 
     public async getActiveGamesAsync(serverId: string): Promise<GameModule[]> {
@@ -137,7 +146,7 @@ class GameService {
     }
 
     public async getGameByTypeAsync(gameTypeEnum: GameTypeEnum): Promise<GameModule | undefined> {
-        if(this.games.length === 0)
+        if (this.games.length === 0)
             await this.loadGamesAsync();
         return this.games.find(game => game.config.id === gameTypeEnum);
     }
@@ -334,7 +343,7 @@ class GameService {
         await this.handleGameOptionsAsync(gameEvent, event);
 
         await BadgeService.evaluateAll(event, BadgeTriggerEnum.BEFORE_GAME);
-        
+
         if (gameEvent.validateAnswer(gameEvent) && gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Add correct reaction
             if (gameEvent.gameConfig.addCorrectReaction)
@@ -349,12 +358,14 @@ class GameService {
 
             const gameData = gameEvent.getGameData();
             event.scheduleAction(() => UserService.addExperiencePointsAsync(gameEvent.user.userId, gameEvent.gameConfig.points));
-            event.scheduleAction(async () => { await PointService.saveAsync(new PointsSaveModel({
-                UserId: gameEvent.user.userId,
-                ServerId: gameEvent.server.ServerId,
-                GameId: gameEvent.gameId,
-                Points: gameEvent.gameConfig.points
-            }), event); });
+            event.scheduleAction(async () => {
+                await PointService.saveAsync(new PointsSaveModel({
+                    UserId: gameEvent.user.userId,
+                    ServerId: gameEvent.server.ServerId,
+                    GameId: gameEvent.gameId,
+                    Points: gameEvent.gameConfig.points
+                }), event);
+            });
 
             event.scheduleAction(async () => {
                 await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {

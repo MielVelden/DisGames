@@ -104,7 +104,7 @@ class DiscordInteractionMapper {
                 baseParams.guildId,
                 baseParams.messageId,
                 interaction.customId,
-                interaction.values[0],
+                interaction.values,
                 entitlements
             );
 
@@ -119,7 +119,7 @@ class DiscordInteractionMapper {
                 baseParams.guildId,
                 baseParams.messageId,
                 interaction.customId,
-                interaction.values[0],
+                interaction.values,
                 entitlements
             );
         } else if (interaction.isModalSubmit()) {

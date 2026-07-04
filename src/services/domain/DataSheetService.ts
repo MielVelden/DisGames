@@ -26,6 +26,11 @@ class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSave
         const ids = Array.from(new Set(gameDataModels.map(model => model.DataSheetId)));
         return datasheets.filter(datasheet => ids.includes(datasheet.Id));
     }
+
+    public async getCountByGameIdAsync(gameId: GameTypeEnum, dataSheetId: number): Promise<number> {
+        const gameDataModels = await GameDataService.getByGameIdAsync(gameId);
+        return gameDataModels.filter(model => model.DataSheetId === dataSheetId).length;
+    }
 }
 
 export default new DataSheetService();

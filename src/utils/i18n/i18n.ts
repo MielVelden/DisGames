@@ -411,6 +411,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Unbekannt",
                     [LanguageEnum.PT]: "Desconhecido",
                 },
+                selectedCount: (count: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: "{count} selected",
+                    [LanguageEnum.NL]: "{count} geselecteerd",
+                    [LanguageEnum.ES]: "{count} seleccionado(s)",
+                    [LanguageEnum.DE]: "{count} ausgewählt",
+                    [LanguageEnum.PT]: "{count} selecionado(s)",
+                }, { count }),
                 gameDescription: {
                     [LanguageEnum.EN]: "Game description",
                     [LanguageEnum.NL]: "Spelbeschrijving",

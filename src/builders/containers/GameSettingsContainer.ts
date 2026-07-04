@@ -1,5 +1,4 @@
-import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../../interfaces/application/Message";
-import { ButtonStyle } from "../../interfaces/application/Message";
+import { Component, ButtonStyle } from "../../interfaces/application/Message";
 import {
     GameSettingType,
     EnumGameSetting,
@@ -18,228 +17,183 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import { ButtonInteractionEvent, InteractionEvent } from "../../interfaces/application/Event";
 import { isMultiLingualString } from "../../interfaces/application/i18n";
+import { createTitle } from "../../utils/helpers/Markdown";
 
-export class GameSettingsContainer {
+export function createGameSettingsContainer(config: GameSettingsContainerConfig, handlers?: GameSettingsHandler): Component[] {
+    const components: Component[] = [
+        ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.settings.title))),
+        ComponentService.createContent(new MultiLingualString(i18n.commands.games.settings.description)),
+        ComponentService.createSeparator(),
+    ];
 
-    static createInteractiveContainer(config: GameSettingsContainerConfig, handlers?: GameSettingsHandler): Container {
-        const components: Component[] = [];
+    config.settingsSchema.forEach((setting) => {
+        const currentValue = config.currentSettings[setting.key];
 
-        // Add title
-        components.push({
-            type: ComponentType.TITLE,
-            content: new MultiLingualString(i18n.commands.games.settings.title)
-        } as Title);
+        components.push(ComponentService.createContent(createTitle(setting.label)));
 
-        components.push({
-            type: ComponentType.TEXT_DISPLAY,
-            content: new MultiLingualString(i18n.commands.games.settings.description)
-        } as TextDisplay);
+        if (setting.description)
+            components.push(ComponentService.createContent(setting.description));
 
-        // Add separator
-        components.push({
-            type: ComponentType.SEPARATOR,
-            divider: true,
-            spacing: 1
-        } as Separator);
-
-        // Create settings components
-        config.settingsSchema.forEach((setting) => {
-            const currentValue = config.currentSettings[setting.key];
-
-            // Setting title
-            components.push({
-                type: ComponentType.TITLE,
-                content: setting.label
-            } as Title);
-
-            // Setting description
-            if (setting.description) {
-                components.push({
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: setting.description
-                } as TextDisplay);
-            }
-
-            if (isBooleanGameSetting(setting)) {
-                const boolValue = currentValue as boolean;
-                components.push(ComponentService.createButton({
-                    style: boolValue ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
-                    label: new MultiLingualString(boolValue ? i18n.commands.games.settings.enabled : i18n.commands.games.settings.disabled),
-                }, {
-                    userId: config.userId,
-                    handle: async (btnEvent: InteractionEvent) => {
-                        if (handlers?.onBooleanClick)
-                            await handlers.onBooleanClick(btnEvent as ButtonInteractionEvent, setting.key, boolValue);
-                        else if (config.onSettingChange)
-                            config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, !boolValue);
-                    }
-                }));
-            }
-            if (isEnumGameSetting(setting)) {
-                const selectedOption = setting.options.find(opt => opt.value === currentValue);
-
-                components.push(ComponentService.createButton({
-                    style: ButtonStyle.PRIMARY,
-                    label: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown),
-                }, {
-                    userId: config.userId,
-                    handle: async (btnEvent: InteractionEvent) => {
-                        if (handlers?.onEnumClick)
-                            await handlers.onEnumClick(btnEvent as ButtonInteractionEvent, setting.key, setting, currentValue);
-                    }
-                }));
-            }
-            if (isListGameSetting(setting)) {
-                const listValues = Array.isArray(currentValue)
-                    ? (currentValue as number[])
-                    : currentValue !== undefined && currentValue !== null
-                        ? [Number(currentValue)]
-                        : [];
-
-                setting.options.forEach(option => {
-                    const optionValue = typeof option.value === "number" ? option.value : Number(option.value);
-                    if (Number.isNaN(optionValue))
-                        return;
-
-                    const isSelected = listValues.includes(optionValue);
-
-                    components.push(ComponentService.createButton({
-                        style: isSelected ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
-                        label: option.label,
-                    }, {
-                        userId: config.userId,
-                        handle: async (btnEvent: InteractionEvent) => {
-                            const newValues = isSelected
-                                ? listValues.filter(v => v !== optionValue)
-                                : [...listValues, optionValue];
-
-                            if (handlers?.onListClick) {
-                                await handlers.onListClick(btnEvent as ButtonInteractionEvent, setting.key, setting, optionValue, !isSelected, newValues);
-                            } else if (config.onSettingChange) {
-                                config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, newValues);
-                            }
-                        }
-                    }));
-                });
-            }
-
-            // Add separator between settings
-            components.push({
-                type: ComponentType.SEPARATOR,
-                divider: true,
-                spacing: 1
-            } as Separator);
-        });
-
-        // Add Accept button
-        if (config.onAccept || handlers?.onAcceptClick) {
+        if (isBooleanGameSetting(setting)) {
+            const boolValue = currentValue as boolean;
             components.push(ComponentService.createButton({
-                style: ButtonStyle.SUCCESS,
-                label: new MultiLingualString(i18n.labels.common.accept),
+                style: boolValue ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
+                label: new MultiLingualString(boolValue ? i18n.commands.games.settings.enabled : i18n.commands.games.settings.disabled),
             }, {
                 userId: config.userId,
                 handle: async (btnEvent: InteractionEvent) => {
-                    if (handlers?.onAcceptClick) {
-                        await handlers.onAcceptClick(btnEvent as ButtonInteractionEvent);
-                    } else if (config.onAccept) {
-                        config.onAccept();
-                    }
+                    if (handlers?.onBooleanClick)
+                        await handlers.onBooleanClick(btnEvent as ButtonInteractionEvent, setting.key, boolValue);
+                    else if (config.onSettingChange)
+                        config.onSettingChange(btnEvent as ButtonInteractionEvent, setting.key, !boolValue);
                 }
             }));
         }
 
-        // Add Cancel button
-        if (config.onCancel || handlers?.onCancelClick) {
+        if (isEnumGameSetting(setting)) {
+            const selectedOption = setting.options.find(opt => opt.value === currentValue);
+
             components.push(ComponentService.createButton({
-                style: ButtonStyle.SECONDARY,
-                label: new MultiLingualString(i18n.labels.common.cancel),
+                style: ButtonStyle.PRIMARY,
+                label: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown),
             }, {
                 userId: config.userId,
-                handle: async (btnEvent) => {
-                    if (handlers?.onCancelClick) {
-                        await handlers.onCancelClick(btnEvent as ButtonInteractionEvent);
-                    } else if (config.onCancel) {
-                        config.onCancel();
-                    }
+                handle: async (btnEvent: InteractionEvent) => {
+                    if (handlers?.onEnumClick)
+                        await handlers.onEnumClick(btnEvent as ButtonInteractionEvent, setting.key, setting, currentValue);
                 }
             }));
         }
 
-        return {
-            type: ComponentType.CONTAINER,
-            components
-        } as Container;
-    }
+        if (isListGameSetting(setting)) {
+            const listValues = Array.isArray(currentValue)
+                ? (currentValue as number[])
+                : currentValue !== undefined && currentValue !== null
+                    ? [Number(currentValue)]
+                    : [];
 
-    static createReadOnlyDisplay(config: GameSettingsDisplayConfig): Component[] {
-        const components: Component[] = [];
+            const selectedCount = setting.options.filter(option => {
+                const optionValue = typeof option.value === "number" ? option.value : Number(option.value);
+                return !Number.isNaN(optionValue) && listValues.includes(optionValue);
+            }).length;
 
-        const ALL_LANGUAGES = Object.values(LanguageEnum).filter((v): v is LanguageEnum => typeof v === "number");
-
-        const format = (label: string, status: string) => `> ${label}: **${status}**`;
-        const mls = (label: MultiLingualString, status: string | boolean | MultiLingualString) => {
-            const translations = {} as Record<LanguageEnum, string>;
-
-            for (const lang of ALL_LANGUAGES) {
-                const statusText = typeof status === "boolean"
-                    ? new MultiLingualString(status ? i18n.labels.common.enabled : i18n.labels.common.disabled).getMessage(lang)
-                    : isMultiLingualString(status)
-                        ? status.getMessage(lang)
-                        : status;
-                translations[lang] = format(label.getMessage(lang), statusText);
-            }
-
-            return new MultiLingualString(translations);
-        };
-
-        config.settingsSchema.forEach((setting) => {
-            const currentValue = config.settings[setting.key];
-            let display: MultiLingualString | undefined;
-
-            if (setting.type === GameSettingType.BOOLEAN) {
-                const statusLabel = currentValue ? "Enabled" : "Disabled";
-                display = mls(setting.label, statusLabel);
-            } else if (setting.type === GameSettingType.ENUM) {
-                const enumSetting = setting as EnumGameSetting;
-                const option = enumSetting.options.find(opt => opt.value === currentValue);
-                display = mls(setting.label, option?.label || new MultiLingualString(i18n.commands.games.settings.unknown));
-            } else if (setting.type === GameSettingType.LIST) {
-                const listValues = Array.isArray(currentValue)
-                    ? (currentValue as number[])
-                    : currentValue !== undefined && currentValue !== null
-                        ? [Number(currentValue)]
-                        : [];
-
-                const selectedOptions = setting.options.filter(opt => {
-                    const optionValue = typeof opt.value === "number" ? opt.value : Number(opt.value);
-                    if (Number.isNaN(optionValue))
-                        return false;
-                    return listValues.includes(optionValue);
-                });
-
-                const hasAny = selectedOptions.length > 0;
-                const statusLabel = new MultiLingualString(hasAny ? i18n.labels.common.enabled : i18n.labels.common.disabled);
-
-                const translations = {} as Record<LanguageEnum, string>;
-                for (const lang of ALL_LANGUAGES) {
-                    const label = setting.label.getMessage(lang);
-                    translations[lang] = hasAny
-                        ? format(label, `${statusLabel.getMessage(lang)} ${selectedOptions.map(opt => opt.label.getMessage(lang)).join(", ")}`)
-                        : format(label, statusLabel.getMessage(lang));
+            components.push(ComponentService.createButton({
+                style: selectedCount > 0 ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
+                label: selectedCount > 0
+                    ? i18n.commands.games.settings.selectedCount(selectedCount)
+                    : new MultiLingualString(i18n.commands.games.settings.unknown),
+            }, {
+                userId: config.userId,
+                handle: async (btnEvent: InteractionEvent) => {
+                    if (handlers?.onListClick)
+                        await handlers.onListClick(btnEvent as ButtonInteractionEvent, setting.key, setting, listValues);
                 }
+            }));
+        }
 
-                display = new MultiLingualString(translations);
+        components.push(ComponentService.createSeparator());
+    });
+
+    if (config.onAccept || handlers?.onAcceptClick) {
+        components.push(ComponentService.createButton({
+            style: ButtonStyle.SUCCESS,
+            label: new MultiLingualString(i18n.labels.common.accept),
+        }, {
+            userId: config.userId,
+            handle: async (btnEvent: InteractionEvent) => {
+                if (handlers?.onAcceptClick) {
+                    await handlers.onAcceptClick(btnEvent as ButtonInteractionEvent);
+                } else if (config.onAccept) {
+                    config.onAccept();
+                }
+            }
+        }));
+    }
+
+    if (config.onCancel || handlers?.onCancelClick) {
+        components.push(ComponentService.createButton({
+            style: ButtonStyle.SECONDARY,
+            label: new MultiLingualString(i18n.labels.common.cancel),
+        }, {
+            userId: config.userId,
+            handle: async (btnEvent) => {
+                if (handlers?.onCancelClick) {
+                    await handlers.onCancelClick(btnEvent as ButtonInteractionEvent);
+                } else if (config.onCancel) {
+                    config.onCancel();
+                }
+            }
+        }));
+    }
+
+    return components;
+}
+
+export function createGameSettingsDisplay(config: GameSettingsDisplayConfig): Component[] {
+    const components: Component[] = [];
+
+    const ALL_LANGUAGES = Object.values(LanguageEnum).filter((v): v is LanguageEnum => typeof v === "number");
+
+    const format = (label: string, status: string) => `> ${label}: **${status}**`;
+    const mls = (label: MultiLingualString, status: string | boolean | MultiLingualString) => {
+        const translations = {} as Record<LanguageEnum, string>;
+
+        for (const lang of ALL_LANGUAGES) {
+            const statusText = typeof status === "boolean"
+                ? new MultiLingualString(status ? i18n.labels.common.enabled : i18n.labels.common.disabled).getMessage(lang)
+                : isMultiLingualString(status)
+                    ? status.getMessage(lang)
+                    : status;
+            translations[lang] = format(label.getMessage(lang), statusText);
+        }
+
+        return new MultiLingualString(translations);
+    };
+
+    config.settingsSchema.forEach((setting) => {
+        const currentValue = config.settings[setting.key];
+        let display: MultiLingualString | undefined;
+
+        if (setting.type === GameSettingType.BOOLEAN) {
+            const statusLabel = currentValue ? "Enabled" : "Disabled";
+            display = mls(setting.label, statusLabel);
+        } else if (setting.type === GameSettingType.ENUM) {
+            const enumSetting = setting as EnumGameSetting;
+            const option = enumSetting.options.find(opt => opt.value === currentValue);
+            display = mls(setting.label, option?.label || new MultiLingualString(i18n.commands.games.settings.unknown));
+        } else if (setting.type === GameSettingType.LIST) {
+            const listValues = Array.isArray(currentValue)
+                ? (currentValue as number[])
+                : currentValue !== undefined && currentValue !== null
+                    ? [Number(currentValue)]
+                    : [];
+
+            const selectedOptions = setting.options.filter(opt => {
+                const optionValue = typeof opt.value === "number" ? opt.value : Number(opt.value);
+                if (Number.isNaN(optionValue))
+                    return false;
+                return listValues.includes(optionValue);
+            });
+
+            const hasAny = selectedOptions.length > 0;
+            const statusLabel = new MultiLingualString(hasAny ? i18n.labels.common.enabled : i18n.labels.common.disabled);
+
+            const translations = {} as Record<LanguageEnum, string>;
+            for (const lang of ALL_LANGUAGES) {
+                const label = setting.label.getMessage(lang);
+                translations[lang] = hasAny
+                    ? format(label, `${statusLabel.getMessage(lang)} ${selectedOptions.map(opt => opt.label.getMessage(lang)).join(", ")}`)
+                    : format(label, statusLabel.getMessage(lang));
             }
 
-            if (!display)
-                return;
+            display = new MultiLingualString(translations);
+        }
 
-            components.push({
-                type: ComponentType.TEXT_DISPLAY,
-                content: display
-            } as TextDisplay);
-        });
+        if (!display)
+            return;
 
-        return components;
-    }
-} 
+        components.push(ComponentService.createContent(display));
+    });
+
+    return components;
+}

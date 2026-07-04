@@ -20,9 +20,7 @@ export interface GameSettingsHandler {
         btnEvent: ButtonInteractionEvent,
         key: GameSettingsEnum,
         listSetting: ListGameSetting,
-        toggledValue: number,
-        isSelected: boolean,
-        newValues: number[]
+        currentValues: number[]
     ) => Promise<void>;
     onAcceptClick?: (btnEvent: ButtonInteractionEvent) => Promise<void>;
     onCancelClick?: (btnEvent: ButtonInteractionEvent) => Promise<void>;

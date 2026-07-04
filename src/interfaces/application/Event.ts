@@ -114,6 +114,7 @@ export interface SelectMenuInteractionEvent extends BaseInteractionEvent, ReplyI
     currentInteraction: DiscordStringSelectMenuInteraction;
 
     selected: string;
+    selectedValues: string[];
     deferReplyAsync(): Promise<void>;
     sendAsync(): Promise<void>;
 }

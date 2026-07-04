@@ -22,7 +22,7 @@ export const discordClient = new DiscordClient({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    // GatewayIntentBits.MessageContent, WAIT FOR VERIFICATION
+    GatewayIntentBits.MessageContent, // WAIT FOR VERIFICATION
     GatewayIntentBits.GuildMessageReactions,
   ],
 });

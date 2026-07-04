@@ -56,7 +56,7 @@ class DiscordComponentMapper {
                     .setCustomId(stringSelect.custom_id)
                     .setDisabled(stringSelect.disabled || false)
                     .setPlaceholder(stringSelect.placeholder?.getMessage() || "Select an option")
-                    .setMinValues(stringSelect.min_values || 1)
+                    .setMinValues(stringSelect.min_values ?? 1)
                     .setMaxValues(stringSelect.max_values || 1);
 
                 if (stringSelect.options) {

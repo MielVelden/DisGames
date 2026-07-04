@@ -6,7 +6,7 @@ import ComponentService from "../../services/application/ComponentService";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import GameService from "../../services/domain/GameService";
-import { GameSettingsContainer } from "./GameSettingsContainer";
+import { createGameSettingsDisplay } from "./GameSettingsContainer";
 import MediaService from "../../services/application/MediaService";
 import { createTitle } from "../../utils/helpers/Markdown";
 
@@ -31,7 +31,7 @@ export async function createGameSetupConfirmationContainerAsync(
     if (gameTypeEnum && settings) {
         const gameModule = await GameService.getGameByTypeAsync(gameTypeEnum);
         if (gameModule?.config.settings) {
-            const compactSettingsDisplay = GameSettingsContainer.createReadOnlyDisplay({
+            const compactSettingsDisplay = createGameSettingsDisplay({
                 settingsSchema: gameModule.config.settings,
                 settings: settings,
                 languageEnum: languageEnum

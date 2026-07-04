@@ -32,6 +32,7 @@ export default {
         isCalculated: false,
         expectedType: "string",
         addCorrectReaction: true,
+        hasDataSheets: true,
         options: {
             [GameOptionEnum.IS_INACTIVE]: false,
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: false,
