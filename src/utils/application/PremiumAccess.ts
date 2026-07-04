@@ -11,6 +11,16 @@ export function isPremiumEnabled(): boolean {
     return Boolean(getPremiumSkuId());
 }
 
+let purchaseButtonEnabled = true;
+
+export function isPurchaseButtonEnabled(): boolean {
+    return purchaseButtonEnabled;
+}
+
+export function setPurchaseButtonEnabled(enabled: boolean): void {
+    purchaseButtonEnabled = enabled;
+}
+
 export function hasPremiumAccess(event: InteractionEvent, skuId: string): boolean {
     if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION))
         return true;

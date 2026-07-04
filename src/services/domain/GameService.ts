@@ -40,6 +40,8 @@ import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decora
 import { RegisterInit } from "../../utils/registries/InitRegistry";
 import UserService from "./UserService";
 import BadgeService from "./BadgeService";
+import { isServerPremium } from "../../utils/application/PremiumAccess";
+import { NON_PREMIUM_GAME_LIMIT } from "../../constants";
 
 @RegisterInit()
 @RegisterMetricPulls()
@@ -271,6 +273,12 @@ class GameService {
                 }),
                 createCancelButton(event.user.userId)]
             );
+        }
+
+        if (!isServerPremium(event.server)) {
+            const activeGames = await GameRepository.getByServerIdAsync(savable.ServerId);
+            if (activeGames.length >= NON_PREMIUM_GAME_LIMIT)
+                ErrorHelper.throwWithParameters(ExceptionEnum.NON_PREMIUM_GAME_LIMIT_REACHED, { limit: NON_PREMIUM_GAME_LIMIT });
         }
 
         // Get the game module

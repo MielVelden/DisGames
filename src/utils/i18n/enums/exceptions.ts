@@ -340,4 +340,11 @@ export const exceptionTranslations: LanguageExceptionTranslations = {
         [LanguageEnum.DE]: "Antwort übersprungen",
         [LanguageEnum.PT]: "Resposta ignorada",
     },
+    [ExceptionEnum.NON_PREMIUM_GAME_LIMIT_REACHED]: ({ limit }) => new MultiLingualString({
+        [LanguageEnum.EN]: "Non-premium servers can have up to {limit} active games. Upgrade to premium for unlimited games.",
+        [LanguageEnum.NL]: "Niet-premium servers kunnen tot {limit} actieve spellen hebben. Upgrade naar premium voor onbeperkte spellen.",
+        [LanguageEnum.ES]: "Los servidores sin premium pueden tener hasta {limit} juegos activos. Actualiza a premium para juegos ilimitados.",
+        [LanguageEnum.DE]: "Nicht-Premium-Server können bis zu {limit} aktive Spiele haben. Upgrade auf Premium für unbegrenzte Spiele.",
+        [LanguageEnum.PT]: "Servidores sem premium podem ter até {limit} jogos ativos. Atualiza para premium para jogos ilimitados.",
+    }, { limit }),
 };

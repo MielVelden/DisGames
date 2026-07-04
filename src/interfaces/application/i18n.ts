@@ -1,6 +1,6 @@
 import { ExceptionEnum, MetricEnum, UserRoleEnum } from "../enums";
 import { GamesCommandActionEnum } from "../enums/commands/Games";
-import { TestPremiumActionEnum } from "../enums/commands/TestPremium";
+import { PremiumActionEnum } from "../enums/commands/Premium";
 import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
@@ -39,6 +39,7 @@ export type ExceptionTranslationParams = {
     [ExceptionEnum.FIELD_HAS_INVALID_TYPE]: { key: string; received: string; expected: string };
     [ExceptionEnum.FIELD_HAS_INVALID_VALUE]: { key: string };
     [ExceptionEnum.TABLE_NOT_FOUND]: { tableName: string };
+    [ExceptionEnum.NON_PREMIUM_GAME_LIMIT_REACHED]: { limit: number };
 };
 
 export type LanguageExceptionTranslations = {
@@ -259,9 +260,9 @@ export interface I18nTranslations {
         job: {
             description: LanguageTranslations;
         },
-        testPremium: {
+        premium: {
             description: LanguageTranslations;
-            option: LanguageCommandOptionTranslations<TestPremiumActionEnum>;
+            option: LanguageCommandOptionTranslations<PremiumActionEnum>;
             optionTarget: LanguageCommandOptionTranslations<never>;
             labels: {
                 created: LanguageTranslations;
@@ -272,6 +273,8 @@ export interface I18nTranslations {
                 clientNotReady: LanguageTranslations;
                 toggledOn: LanguageTranslations;
                 toggledOff: LanguageTranslations;
+                purchaseButtonEnabled: LanguageTranslations;
+                purchaseButtonDisabled: LanguageTranslations;
             };
         },
         handoff: {

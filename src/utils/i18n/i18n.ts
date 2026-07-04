@@ -1,6 +1,6 @@
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
 import { ProfileCommandActionEnum } from "../../interfaces/enums/commands/Profile";
-import { TestPremiumActionEnum } from "../../interfaces/enums/commands/TestPremium";
+import { PremiumActionEnum } from "../../interfaces/enums/commands/Premium";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
@@ -865,13 +865,13 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.PT]: "Reiniciar o jogo",
             },
         },
-        testPremium: {
+        premium: {
             description: {
-                [LanguageEnum.EN]: "Create or revoke test Discord entitlements (owner only)",
-                [LanguageEnum.NL]: "Test Discord-entitlements aanmaken of intrekken (alleen eigenaar)",
-                [LanguageEnum.ES]: "Crear o revocar entitlements de prueba de Discord (solo propietario)",
-                [LanguageEnum.DE]: "Test-Discord-Berechtigungen erstellen oder widerrufen (nur Besitzer)",
-                [LanguageEnum.PT]: "Criar ou revogar entitlements de teste do Discord (apenas proprietário)",
+                [LanguageEnum.EN]: "Manage premium access and entitlements (owner only)",
+                [LanguageEnum.NL]: "Premiumtoegang en entitlements beheren (alleen eigenaar)",
+                [LanguageEnum.ES]: "Gestionar el acceso premium y los entitlements (solo propietario)",
+                [LanguageEnum.DE]: "Premium-Zugang und Berechtigungen verwalten (nur Besitzer)",
+                [LanguageEnum.PT]: "Gerir o acesso premium e os entitlements (apenas proprietário)",
             },
             option: {
                 action: {
@@ -896,33 +896,40 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.PT]: "Escolha uma ação",
                 },
                 choices: {
-                    [TestPremiumActionEnum.GRANT_USER]: {
+                    [PremiumActionEnum.GRANT_USER]: {
                         [LanguageEnum.EN]: "Grant user test entitlement",
                         [LanguageEnum.NL]: "Gebruiker test-entitlement geven",
                         [LanguageEnum.ES]: "Conceder entitlement de prueba a un usuario",
                         [LanguageEnum.DE]: "Test-Berechtigung für Benutzer gewähren",
                         [LanguageEnum.PT]: "Conceder entitlement de teste ao usuário",
                     },
-                    [TestPremiumActionEnum.GRANT_GUILD]: {
+                    [PremiumActionEnum.GRANT_GUILD]: {
                         [LanguageEnum.EN]: "Grant guild test entitlement",
                         [LanguageEnum.NL]: "Server test-entitlement geven",
                         [LanguageEnum.ES]: "Conceder entitlement de prueba a un servidor",
                         [LanguageEnum.DE]: "Test-Berechtigung für Server gewähren",
                         [LanguageEnum.PT]: "Conceder entitlement de teste ao servidor",
                     },
-                    [TestPremiumActionEnum.REVOKE]: {
+                    [PremiumActionEnum.REVOKE]: {
                         [LanguageEnum.EN]: "Revoke test entitlement by id",
                         [LanguageEnum.NL]: "Test-entitlement intrekken op id",
                         [LanguageEnum.ES]: "Revocar entitlement de prueba por id",
                         [LanguageEnum.DE]: "Test-Berechtigung per ID widerrufen",
                         [LanguageEnum.PT]: "Revogar entitlement de teste por id",
                     },
-                    [TestPremiumActionEnum.TOGGLE_DB]: {
+                    [PremiumActionEnum.TOGGLE_DB]: {
                         [LanguageEnum.EN]: "Toggle IsPremium in database",
                         [LanguageEnum.NL]: "IsPremium in database omzetten",
                         [LanguageEnum.ES]: "Alternar IsPremium en la base de datos",
                         [LanguageEnum.DE]: "IsPremium in der Datenbank umschalten",
                         [LanguageEnum.PT]: "Alternar IsPremium na base de dados",
+                    },
+                    [PremiumActionEnum.TOGGLE_PURCHASE_BUTTON]: {
+                        [LanguageEnum.EN]: "Toggle the purchase button on premium features (runtime only)",
+                        [LanguageEnum.NL]: "Aankoopknop op premiumfuncties omzetten (alleen tijdens runtime)",
+                        [LanguageEnum.ES]: "Alternar el botón de compra en las funciones premium (solo en tiempo de ejecución)",
+                        [LanguageEnum.DE]: "Kaufen-Button bei Premium-Funktionen umschalten (nur zur Laufzeit)",
+                        [LanguageEnum.PT]: "Alternar o botão de compra nas funcionalidades premium (apenas em tempo de execução)",
                     },
                 },
             },
@@ -1006,6 +1013,20 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.ES]: "Premium del servidor desactivado en la base de datos (IsPremium = false).",
                     [LanguageEnum.DE]: "Server-Premium in der Datenbank deaktiviert (IsPremium = false).",
                     [LanguageEnum.PT]: "Premium do servidor desativado na base de dados (IsPremium = false).",
+                },
+                purchaseButtonEnabled: {
+                    [LanguageEnum.EN]: "Purchase button enabled (runtime only, resets on restart).",
+                    [LanguageEnum.NL]: "Aankoopknop ingeschakeld (alleen tijdens runtime, reset bij herstart).",
+                    [LanguageEnum.ES]: "Botón de compra activado (solo en tiempo de ejecución, se reinicia al reiniciar).",
+                    [LanguageEnum.DE]: "Kaufen-Button aktiviert (nur zur Laufzeit, wird bei Neustart zurückgesetzt).",
+                    [LanguageEnum.PT]: "Botão de compra ativado (apenas em tempo de execução, reinicia ao reiniciar).",
+                },
+                purchaseButtonDisabled: {
+                    [LanguageEnum.EN]: "Purchase button disabled (runtime only, resets on restart).",
+                    [LanguageEnum.NL]: "Aankoopknop uitgeschakeld (alleen tijdens runtime, reset bij herstart).",
+                    [LanguageEnum.ES]: "Botón de compra desactivado (solo en tiempo de ejecución, se reinicia al reiniciar).",
+                    [LanguageEnum.DE]: "Kaufen-Button deaktiviert (nur zur Laufzeit, wird bei Neustart zurückgesetzt).",
+                    [LanguageEnum.PT]: "Botão de compra desativado (apenas em tempo de execução, reinicia ao reiniciar).",
                 },
             },
         },

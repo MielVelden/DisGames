@@ -29,7 +29,7 @@ import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
 import { withEventContextAsync, getCurrentServer } from '../../../middleware/EventContext';
-import { isPremiumEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
+import { isPremiumEnabled, isPurchaseButtonEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
 import { DEFAULT_PREMIUM_EMOJI } from '../../../utils/constants/Emojis';
 
 class DiscordComponentMapper {
@@ -137,13 +137,7 @@ class DiscordComponentMapper {
 
         const discordButtons = [];
         if (button.premiumSkuId && server && !isServerPremium(server)) {
-            if (!isPremiumEnabled()) {
-                button.emoji = DEFAULT_PREMIUM_EMOJI;
-                button.disabled = true;
-                
-                const discordButton = this.buildRegularDiscordButton(button)
-                discordButtons.push(discordButton.setDisabled(true));
-            } else {
+            if (isPremiumEnabled() && isPurchaseButtonEnabled()) {
                 const discordButton = new DiscordButtonBuilder()
                     .setStyle(DiscordJsButtonStyle.Premium)
                     .setSKUId(button.premiumSkuId);
@@ -152,10 +146,10 @@ class DiscordComponentMapper {
                     discordButton.setDisabled(true);
 
                 discordButtons.push(discordButton);
-
-                button.emoji = DEFAULT_PREMIUM_EMOJI;
-                button.disabled = true;
             }
+            
+            button.emoji = DEFAULT_PREMIUM_EMOJI;
+            button.disabled = true;
         }
 
         discordButtons.unshift(this.buildRegularDiscordButton(button));
