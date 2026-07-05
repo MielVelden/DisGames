@@ -7,8 +7,11 @@ import {
     StringSelectMenuBuilder as DiscordStringSelectMenuBuilder,
     RadioGroupBuilder as DiscordRadioGroupBuilder,
     RadioGroupOptionBuilder as DiscordRadioGroupOptionBuilder,
+    CheckboxBuilder as DiscordCheckboxBuilder,
+    CheckboxGroupBuilder as DiscordCheckboxGroupBuilder,
+    CheckboxGroupOptionBuilder as DiscordCheckboxGroupOptionBuilder,
 } from 'discord.js';
-import { ModalDefinition, ModalField, ModalRadioField, ModalSelectField, ModalTextField } from '../../../interfaces/application/Modal';
+import { ModalCheckboxField, ModalCheckboxGroupField, ModalDefinition, ModalField, ModalRadioField, ModalSelectField, ModalTextField } from '../../../interfaces/application/Modal';
 import { TextInputStyle } from '../../../interfaces/application/Message';
 import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
@@ -28,6 +31,10 @@ class DiscordModalMapper {
                 return this.mapFieldToRadioLabelBuilder(key, field, language);
             if (field.kind === 'select')
                 return this.mapFieldToSelectLabelBuilder(key, field, language);
+            if (field.kind === 'checkbox')
+                return this.mapFieldToCheckboxLabelBuilder(key, field, language);
+            if (field.kind === 'checkboxGroup')
+                return this.mapFieldToCheckboxGroupLabelBuilder(key, field, language);
             return new DiscordActionRowBuilder<DiscordTextInputBuilder>()
                 .addComponents(this.mapFieldToTextInput(key, field as ModalTextField, language));
         });
@@ -78,6 +85,48 @@ class DiscordModalMapper {
         return new DiscordLabelBuilder()
             .setLabel(field.label.getMessage(language))
             .setStringSelectMenuComponent(select);
+    }
+
+    private mapFieldToCheckboxLabelBuilder(key: string, field: ModalCheckboxField, language: LanguageEnum): DiscordLabelBuilder {
+        const checkbox = new DiscordCheckboxBuilder()
+            .setCustomId(key)
+            .setDefault(field.defaultValue ?? false);
+
+        const label = new DiscordLabelBuilder()
+            .setLabel(field.label.getMessage(language))
+            .setCheckboxComponent(checkbox);
+
+        if (field.description)
+            label.setDescription(field.description.getMessage(language));
+
+        return label;
+    }
+
+    private mapFieldToCheckboxGroupLabelBuilder(key: string, field: ModalCheckboxGroupField, language: LanguageEnum): DiscordLabelBuilder {
+        const checkboxGroup = new DiscordCheckboxGroupBuilder()
+            .setCustomId(key)
+            .setRequired(field.required ?? false)
+            .addOptions(field.options.map(opt => {
+                const option = new DiscordCheckboxGroupOptionBuilder()
+                    .setLabel(opt.label.getMessage(language))
+                    .setValue(opt.value);
+
+                if (opt.description)
+                    option.setDescription(opt.description.getMessage(language));
+                if (opt.default)
+                    option.setDefault(true);
+
+                return option;
+            }));
+
+        if (field.minValues !== undefined)
+            checkboxGroup.setMinValues(field.minValues);
+        if (field.maxValues !== undefined)
+            checkboxGroup.setMaxValues(field.maxValues);
+
+        return new DiscordLabelBuilder()
+            .setLabel(field.label.getMessage(language))
+            .setCheckboxGroupComponent(checkboxGroup);
     }
 
     private mapFieldToTextInput(key: string, field: ModalTextField, language: LanguageEnum): DiscordTextInputBuilder {

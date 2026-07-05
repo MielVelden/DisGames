@@ -9,16 +9,20 @@ import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
-import { GameSettingsValues, GameSettingsSchema, Games_Settings, GameSettingOption } from "../../../interfaces/domain/GameSettings";
-import { GameSettingsContainerConfig, GameSettingsHandler } from "../../../interfaces/application/GameSetting";
-import { StringSelect, SelectOption, ComponentType } from "../../../interfaces/application/Message";
+import { GameSettingsValues, GameSettingsSchema, Games_Settings } from "../../../interfaces/domain/GameSettings";
+import { ButtonStyle } from "../../../interfaces/application/Message";
 import GameService from "../../domain/GameService";
-import { createGameSettingsContainer } from "../../../builders/containers/GameSettingsContainer";
+import { buildGameSettingsModal, mapGameSettingsModalResult } from "../../../builders/modals/GameSettingsModal";
+import { createGenericButton } from "../../../builders/buttons/GenericButton";
+import ComponentService from "../../application/ComponentService";
+import { i18n } from "../../../utils/i18n/i18n";
+import { createTitle } from "../../../utils/helpers/Markdown";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 import { ErrorHelper } from "../../../utils/application/Error";
 import Logger from "../../../utils/application/Logger";
+import { createGameSetupConfirmationContainerAsync } from "../../../builders/containers/GameSetupConfirmationContainer";
 
 export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> implements BaseInteractionEvent {
     public readonly type: EventTypeEnum;
@@ -104,15 +108,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         return await DiscordMessageHandler.askUserAsync(this as unknown as InteractionEvent, modal);
     }
 
-    private updateSetting<K extends keyof GameSettingsValues>(
-        settings: GameSettingsValues,
-        key: K,
-        value: GameSettingsValues[K]
-    ): void {
-        settings[key] = value;
-    }
-
-    public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {
+    public async getGameSettingsViaModalAsync(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues, components?: Component[]): Promise<{ settings: Games_Settings; event: InteractionEvent } | null> {
         const mapSettings = (settings: GameSettingsValues): Games_Settings => {
             return {
                 difficulty: settings.difficulty as DifficultyEnum,
@@ -120,110 +116,43 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
                 datasheets: settings.datasheets as number[]
             };
         };
-        
+
+        const currentSettings = initialSettings || GameService.getDefaultSettings(settingsSchema);
+
         return new Promise(async (resolve) => {
-            let currentSettings = initialSettings || GameService.getDefaultSettings(settingsSchema);
-            let isResolved = false;
-            
-            const config: GameSettingsContainerConfig = {
-                settingsSchema,
-                currentSettings,
-                languageEnum: this.server.LanguageEnum,
-                userId: this.user.userId,
-                onSettingChange: (btnEvent, key, value) => {
-                    if (!isResolved) {
-                        this.updateSetting(currentSettings, key, value);
-                        updateContainer(btnEvent);
-                    }
-                },
-                onAccept: () => {
-                    if (!isResolved) {
-                        isResolved = true;
-                        resolve(mapSettings(currentSettings));
-                    }
-                },
-                onCancel: () => {
-                    if (!isResolved) {
-                        isResolved = true;
-                        resolve(null);
-                    }
-                }
-            };
+            const showConfigureStepAsync = async (targetEvent: InteractionEvent, extraComponents: Component[]): Promise<void> => {
+                const configureButton = createGenericButton(
+                    new MultiLingualString(i18n.commands.games.settings.configureButton),
+                    ButtonStyle.SECONDARY,
+                    "⚙️",
+                    this.user.userId,
+                    false,
+                    async (btnEvent: InteractionEvent) => {
+                        const modal = buildGameSettingsModal(settingsSchema, currentSettings, new MultiLingualString(i18n.commands.games.settings.title), this.server);
+                        const submission = await DiscordMessageHandler.showModalAndAwaitSubmissionAsync(btnEvent, modal);
 
-            const handlers: GameSettingsHandler = {
-                onEnumClick: async (btnEvent, key, enumSetting, currentValue) => {
-                    if (isResolved) 
-                        return;
-                    
-                    const selectMenu: StringSelect = {
-                        type: ComponentType.STRING_SELECT,
-                        custom_id: crypto.randomUUID(),
-                        title: enumSetting.label,
-                        placeholder: enumSetting.label,
-                        description: enumSetting.label,
-                        options: enumSetting.options.map((option: GameSettingOption): SelectOption => ({
-                            label: option.label,
-                            value: option.value.toString(),
-                            description: option.description,
-                            default: option.value === currentValue
-                        }))
-                    };
-                    
-                    const selectResult = await btnEvent.getUserInputBySelectMenuAsync(selectMenu);
-                    if (selectResult && !isResolved) {
-                        const newValue = enumSetting.options.find((opt: GameSettingOption) => opt.value.toString() === selectResult.selected)?.value;
-                        if (newValue !== undefined) {
-                            this.updateSetting(currentSettings, key, newValue);
-                            config.currentSettings = currentSettings;
-                            await updateContainer(selectResult);
+                        if (!submission) {
+                            resolve(null);
+                            return;
                         }
+
+                        const { values, premiumRejected } = mapGameSettingsModalResult(settingsSchema, submission.result as unknown as Record<string, unknown>, this.server);
+
+                        if (premiumRejected) {
+                            const errorMessage = ComponentService.createContent(new MultiLingualString(i18n.commands.games.settings.premiumRequired));
+                            await showConfigureStepAsync(submission.event, [...(components || []), errorMessage]);
+                            return;
+                        }
+
+                        const updatedSettings = { ...currentSettings, ...values };
+                        resolve({ settings: mapSettings(updatedSettings), event: submission.event });
                     }
-                },
-                onListClick: async (btnEvent, key, listSetting, currentValues) => {
-                    if (isResolved)
-                        return;
+                );
 
-                    const selectMenu: StringSelect = {
-                        type: ComponentType.STRING_SELECT,
-                        custom_id: crypto.randomUUID(),
-                        title: listSetting.label,
-                        placeholder: listSetting.label,
-                        description: listSetting.label,
-                        min_values: 0,
-                        max_values: listSetting.options.length,
-                        options: listSetting.options.map((option: GameSettingOption): SelectOption => ({
-                            label: option.label,
-                            value: option.value.toString(),
-                            description: option.description,
-                            default: currentValues.includes(typeof option.value === "number" ? option.value : Number(option.value))
-                        }))
-                    };
-
-                    const selectResult = await btnEvent.getUserInputBySelectMenuAsync(selectMenu);
-                    if (selectResult && !isResolved) {
-                        const newValues = listSetting.options
-                            .map(opt => opt.value)
-                            .filter(value => selectResult.selectedValues.includes(value.toString()))
-                            .map(value => typeof value === "number" ? value : Number(value));
-
-                        this.updateSetting(currentSettings, key, newValues);
-                        config.currentSettings = currentSettings;
-                        await updateContainer(selectResult);
-                    }
-                }
+                await targetEvent.editWithComponentsAsync([...extraComponents, configureButton]);
             };
-            
-            const updateContainer = async (btnEvent?: InteractionEvent): Promise<void> => {
-                const components = createGameSettingsContainer(config, handlers);
 
-                if (btnEvent) {
-                    await btnEvent.editWithComponentsAsync(components);
-                } else {
-                    await this.editWithComponentsAsync(components);
-                }
-            };
-            
-            await updateContainer();
+            await showConfigureStepAsync(this as unknown as InteractionEvent, components || []);
         });
     }
 

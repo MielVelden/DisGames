@@ -27,7 +27,7 @@ class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSave
         return datasheets.filter(datasheet => ids.includes(datasheet.Id));
     }
 
-    public async getCountByGameIdAsync(gameId: GameTypeEnum, dataSheetId: number): Promise<number> {
+    public async getCountByGameIdAsync(gameId: GameTypeEnum, dataSheetId: number | null = null): Promise<number> {
         const gameDataModels = await GameDataService.getByGameIdAsync(gameId);
         return gameDataModels.filter(model => model.DataSheetId === dataSheetId).length;
     }

@@ -570,6 +570,17 @@ class DiscordMessageHandler {
         event: InteractionEvent,
         modal: ModalDefinition<TFields>
     ): Promise<ModalResult<TFields> | null> {
+        const submission = await this.showModalAndAwaitSubmissionAsync(event, modal);
+        return submission ? submission.result : null;
+    }
+
+    // Same as askUserAsync, but also exposes the modal-submit event itself so callers can
+    // edit the originating message afterward (the button interaction that opened the modal
+    // is consumed by showModal and can no longer be used to edit that message).
+    public async showModalAndAwaitSubmissionAsync<const TFields extends Record<string, ModalField>>(
+        event: InteractionEvent,
+        modal: ModalDefinition<TFields>
+    ): Promise<{ event: ModalSubmitInteractionEvent; result: ModalResult<TFields> } | null> {
         // Showing a modal must be the FIRST response to an interaction. Buttons and slash
         // commands are un-deferred at handle time; select-menu/message events are already
         // deferred, so a modal cannot be shown from them.
@@ -578,7 +589,7 @@ class DiscordMessageHandler {
             return null;
         }
 
-        return new Promise<ModalResult<TFields> | null>(async (resolve) => {
+        return new Promise<{ event: ModalSubmitInteractionEvent; result: ModalResult<TFields> } | null>(async (resolve) => {
             const customId = crypto.randomUUID();
 
             InteractionService.registerHandler(EventTypeEnum.MODAL_SUBMIT, {
@@ -597,12 +608,18 @@ class DiscordMessageHandler {
                             } else if (field.kind === 'radio') {
                                 const raw = modalEvent.getRadioValue(key as string) ?? '';
                                 result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'checkbox') {
+                                const raw = modalEvent.getCheckboxValue(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'checkboxGroup') {
+                                const raw = modalEvent.getCheckboxGroupValues(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
                             } else {
                                 const raw = modalEvent.getValue(key as string);
                                 result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
                             }
                         }
-                        resolve(result);
+                        resolve({ event: modalEvent, result });
                     } catch (error) {
                         await Logger.logWarning(`Failed to parse modal submission for ${customId}: ${(error as Error).message}`);
                         resolve(null);

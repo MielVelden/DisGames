@@ -50,7 +50,7 @@ export interface BaseInteractionEvent {
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUserAsync(container: Component[]): Promise<InteractionEvent | null>;
     askUserAsync<const TFields extends Record<string, ModalField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null>;
-    getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null>;
+    getGameSettingsViaModalAsync(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues, components?: Component[]): Promise<{ settings: Games_Settings; event: InteractionEvent } | null>;
 
     getChannelNameAsync(channelId: string): Promise<string>;
 
@@ -126,6 +126,8 @@ export interface ModalSubmitInteractionEvent extends BaseInteractionEvent, Reply
     getValue(key: string): string;
     getSelectValues(key: string): string[];
     getRadioValue(key: string): string | null;
+    getCheckboxValue(key: string): boolean;
+    getCheckboxGroupValues(key: string): string[];
     deferReplyAsync(): Promise<void>;
 }
 

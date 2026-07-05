@@ -11,11 +11,11 @@ import MediaService from "../../services/application/MediaService";
 import { createTitle } from "../../utils/helpers/Markdown";
 
 export async function createGameSetupConfirmationContainerAsync(
-    gameName: string, 
-    channelName: string, 
+    gameName: string,
+    channelName: string,
     gameTypeEnum: GameTypeEnum,
     settings?: GameSettingsValues,
-    languageEnum: LanguageEnum = LanguageEnum.NL
+    languageEnum: LanguageEnum = LanguageEnum.NL,
 ): Promise<Component[]> {
     const gameImage = MediaService.getGameImage(gameTypeEnum);
 

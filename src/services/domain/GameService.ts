@@ -8,6 +8,7 @@ import {
     GameSettingType,
     BooleanGameSetting,
     EnumGameSetting,
+    ListGameSetting,
     GameSettingsValidationResult
 } from "../../interfaces/domain/GameSettings";
 import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
@@ -25,7 +26,7 @@ import { createCancelButton } from "../../builders/buttons/CancelButton";
 import { createMoveButton as createMoveButtonAsync } from "../../builders/buttons/MoveButton";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import MediaService from "../application/MediaService";
 import Logger from "../../utils/application/Logger";
 import TimelineBuilder from "./TimelineBuilder";
@@ -89,19 +90,31 @@ class GameService {
             try {
                 const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
                 if (datasheets.length > 0) {
-                    const options = await Promise.all(datasheets.map(async (datasheet: DatasheetsModel) => {
-                        const datasheetCount = await DataSheetService.getCountByGameIdAsync(gameConfig.id, datasheet.Id);
-                        datasheet.Description.replaceParameters({
-                            items: datasheetCount.toString(),
-                        });
+                    const generalDatasheetCount = await DataSheetService.getCountByGameIdAsync(gameConfig.id);
 
-                        return {
-                            value: datasheet.Id,
-                            label: datasheet.Name,
-                            description: datasheet.Description,
-                        };
-                    }));
-                    
+                    const options = [{
+                        value: 0,
+                        label: createMultiLingualString('General'),
+                        description: createMultiLingualString(`General Desc (${generalDatasheetCount} items)`),
+                        isDefault: true
+                    }];
+
+                    options.push(...
+                        await Promise.all(datasheets.map(async (datasheet: DatasheetsModel) => {
+                            const datasheetCount = await DataSheetService.getCountByGameIdAsync(gameConfig.id, datasheet.Id);
+                            datasheet.Description.replaceParameters({
+                                items: datasheetCount.toString(),
+                            });
+
+                            return {
+                                value: datasheet.Id,
+                                label: datasheet.Name,
+                                description: datasheet.Description,
+                                isDefault: false
+                            };
+                        }))
+                    );
+
                     gameConfig.settings.push({
                         key: GameSettingsEnum.DATASHEETS,
                         type: GameSettingType.LIST,
@@ -632,6 +645,10 @@ class GameService {
                 defaultValues[setting.key] = (setting as BooleanGameSetting).defaultValue;
             } else if (setting.type === GameSettingType.ENUM) {
                 defaultValues[setting.key] = (setting as EnumGameSetting).defaultValue;
+            } else if (setting.type === GameSettingType.LIST) {
+                defaultValues[setting.key] = (setting as ListGameSetting).options
+                    .filter(option => option.isDefault)
+                    .map(option => typeof option.value === "number" ? option.value : Number(option.value));
             }
         });
 

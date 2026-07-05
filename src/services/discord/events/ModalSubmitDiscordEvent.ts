@@ -33,6 +33,14 @@ export class ModalSubmitDiscordEvent extends BaseReplyDiscordEvent<DiscordModalS
         return this.currentInteraction.fields.getRadioGroup(key) ?? null;
     }
 
+    public getCheckboxValue(key: string): boolean {
+        return this.currentInteraction.fields.getCheckbox(key);
+    }
+
+    public getCheckboxGroupValues(key: string): string[] {
+        return [...this.currentInteraction.fields.getCheckboxGroup(key)];
+    }
+
     public async deferReplyAsync(): Promise<void> {
         await DiscordMessageHandler.deferModalSubmitAsync(this.currentInteraction);
     }

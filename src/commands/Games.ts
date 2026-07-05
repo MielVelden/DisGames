@@ -12,7 +12,6 @@ import { createChannelSelectMenu } from "../builders/selectmenus/ChannelSelectMe
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { createGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
-import { Games_Settings } from "../interfaces/domain/GameSettings";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { createGameHelpContainer } from "../builders/containers/GameHelpContainer";
 import { createMoveButton } from "../builders/buttons/MoveButton";
@@ -33,7 +32,7 @@ const optionsConfig = [
                     type: CommandOptionFollowUpType.SELECT_MENU,
                     isRequiredAsync: async (event: SlashCommandInteractionEvent) => {
                         const game = await GameService.getGameByChannelIdAsync(event.channelId);
-                        if(game) {
+                        if (game) {
                             event.setFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES, game.GameTypeEnum);
                             return false;
                         }
@@ -46,16 +45,16 @@ const optionsConfig = [
                 }],
                 permissions: [Permission.ADMINISTRATOR],
                 handler: async (event: SlashCommandInteractionEvent) => {
-                    const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;  
+                    const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ACTIVE_GAMES)) as GameTypeEnum;
                     const game = await GameService.getGameByServerIdAndGameIdAsync(event.guildId, gameId);
-                    
+
                     await event.addComponentsAsync(await createGameContainerAsync(game, [
                         createMoveButton(event.user.userId, async (btnEvent) => {
                             const channelSelectMenu = createChannelSelectMenu();
                             const channelEvent = await btnEvent.getUserInputBySelectMenuAsync(channelSelectMenu);
-                            if(channelEvent) {
+                            if (channelEvent) {
                                 const channelName = await channelEvent.getChannelNameAsync(channelEvent.selected);
-                                
+
                                 await GameService.saveAsync(new GamesSaveModel({
                                     Id: game.Id,
                                     ChannelId: channelEvent.selected
@@ -104,43 +103,48 @@ const optionsConfig = [
                     const gameTypeEnum = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)) as GameTypeEnum;
                     const gameModule = await GameService.getGameByTypeAsync(gameTypeEnum);
                     const channelName = await event.getChannelNameAsync(event.channelId);
-                    
-                    let gameSettings: Games_Settings = {};
-                    
-                    // Check if game has settings and show settings configuration
-                    if (gameModule?.config.settings && gameModule.config.settings.length > 0) {
-                        const defaultSettings = GameService.getDefaultSettings(gameModule.config.settings);
-                        
-                        // Use the new interactive settings container
-                        const userSelectedSettings = await event.getSettingsContainer(gameModule.config.settings, defaultSettings);
-                        
-                        if (userSelectedSettings) {
-                            gameSettings = userSelectedSettings;
-                        } else {
-                            // User cancelled, exit setup
-                            return;
-                        }
-                    }
-                    
-                    const confirmationContainer = await createGameSetupConfirmationContainerAsync(
-                        gameModule?.config.name.getMessage(event.server.LanguageEnum) || 'Unknown',
-                        channelName,
-                        gameTypeEnum,
-                        gameSettings,
-                        event.server.LanguageEnum
-                    );
+                    const gameName = gameModule?.config.name.getMessage(event.server.LanguageEnum) || 'Unknown';
 
-                    const confirmedEvent = await event.getConfirmationFromUserAsync(confirmationContainer);
-                    
-                    if (confirmedEvent) {
-                        // Save the game with settings
+                    // Games with settings: a single modal covers configuration and confirmation at once
+                    if (gameModule?.config.settings && gameModule.config.settings.length > 0) {
+
+                        const defaultSettings = GameService.getDefaultSettings(gameModule.config.settings);
+                        const draftSummary = await createGameSetupConfirmationContainerAsync(gameName, channelName, gameTypeEnum, defaultSettings, event.server.LanguageEnum);
+                        const result = await event.getGameSettingsViaModalAsync(gameModule.config.settings, defaultSettings, draftSummary);
+
+                        if (!result)
+                            return; // User cancelled or the modal timed out
+
                         await GameService.saveAsync(new GamesSaveModel({
                             GameTypeEnum: gameTypeEnum,
                             ChannelId: event.channelId,
                             ServerId: event.guildId,
-                            SettingsJSON: gameSettings
+                            SettingsJSON: result.settings
+                        }), result.event);
+
+                        await result.event.editAsync();
+                        return;
+                    }
+
+                    // Games without settings: unchanged accept/deny confirmation
+                    const confirmationContainer = await createGameSetupConfirmationContainerAsync(
+                        gameName,
+                        channelName,
+                        gameTypeEnum,
+                        {},
+                        event.server.LanguageEnum
+                    );
+
+                    const confirmedEvent = await event.getConfirmationFromUserAsync(confirmationContainer);
+
+                    if (confirmedEvent) {
+                        await GameService.saveAsync(new GamesSaveModel({
+                            GameTypeEnum: gameTypeEnum,
+                            ChannelId: event.channelId,
+                            ServerId: event.guildId,
+                            SettingsJSON: {}
                         }), confirmedEvent);
-                        
+
                         await confirmedEvent.editAsync();
                     }
                 }

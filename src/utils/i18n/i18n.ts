@@ -411,13 +411,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Unbekannt",
                     [LanguageEnum.PT]: "Desconhecido",
                 },
-                selectedCount: (count: number) => new MultiLingualString({
-                    [LanguageEnum.EN]: "{count} selected",
-                    [LanguageEnum.NL]: "{count} geselecteerd",
-                    [LanguageEnum.ES]: "{count} seleccionado(s)",
-                    [LanguageEnum.DE]: "{count} ausgewählt",
-                    [LanguageEnum.PT]: "{count} selecionado(s)",
-                }, { count }),
+                configureButton: {
+                    [LanguageEnum.EN]: "Configure & Create",
+                    [LanguageEnum.NL]: "Configureer & Maak Aan",
+                    [LanguageEnum.ES]: "Configurar y crear",
+                    [LanguageEnum.DE]: "Konfigurieren & Erstellen",
+                    [LanguageEnum.PT]: "Configurar e criar",
+                },
                 gameDescription: {
                     [LanguageEnum.EN]: "Game description",
                     [LanguageEnum.NL]: "Spelbeschrijving",
@@ -522,6 +522,20 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.PT]: "Escolha as planilhas de dados para este jogo",
                     },
                 },
+                premiumOnly: {
+                    [LanguageEnum.EN]: "(Premium)",
+                    [LanguageEnum.NL]: "(Premium)",
+                    [LanguageEnum.ES]: "(Premium)",
+                    [LanguageEnum.DE]: "(Premium)",
+                    [LanguageEnum.PT]: "(Premium)",
+                },
+                premiumRequired: {
+                    [LanguageEnum.EN]: "⚠️ Some of the datasheets you selected require premium. Only 'General' is available without premium — please try again.",
+                    [LanguageEnum.NL]: "⚠️ Sommige geselecteerde datasheets vereisen premium. Zonder premium is alleen 'General' beschikbaar — probeer het opnieuw.",
+                    [LanguageEnum.ES]: "⚠️ Algunas de las hojas de datos seleccionadas requieren premium. Sin premium solo está disponible 'General' — inténtalo de nuevo.",
+                    [LanguageEnum.DE]: "⚠️ Einige der ausgewählten Datenblätter erfordern Premium. Ohne Premium ist nur 'General' verfügbar — bitte versuche es erneut.",
+                    [LanguageEnum.PT]: "⚠️ Algumas das planilhas de dados selecionadas requerem premium. Sem premium, apenas 'General' está disponível — tenta novamente.",
+                },
                 confirm: {
                     title: {
                         [LanguageEnum.EN]: "Confirm Game Setup",
@@ -536,6 +550,22 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.ES]: "Valida todas las opciones a continuación y confirma la configuración",
                         [LanguageEnum.DE]: "Überprüfe alle Optionen unten und bestätige die Konfiguration",
                         [LanguageEnum.PT]: "Valide todas as opções abaixo e confirme a configuração",
+                    },
+                },
+                created: {
+                    title: {
+                        [LanguageEnum.EN]: "Game Created",
+                        [LanguageEnum.NL]: "Spel Aangemaakt",
+                        [LanguageEnum.ES]: "Juego creado",
+                        [LanguageEnum.DE]: "Spiel erstellt",
+                        [LanguageEnum.PT]: "Jogo criado",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Your game has been set up with the following settings:",
+                        [LanguageEnum.NL]: "Je spel is ingesteld met de volgende instellingen:",
+                        [LanguageEnum.ES]: "Tu juego ha sido configurado con los siguientes ajustes:",
+                        [LanguageEnum.DE]: "Dein Spiel wurde mit den folgenden Einstellungen eingerichtet:",
+                        [LanguageEnum.PT]: "O teu jogo foi configurado com as seguintes definições:",
                     },
                 },
             },

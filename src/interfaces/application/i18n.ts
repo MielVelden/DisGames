@@ -171,7 +171,7 @@ export interface I18nTranslations {
                 enabled: LanguageTranslations;
                 disabled: LanguageTranslations;
                 unknown: LanguageTranslations;
-                selectedCount: (count: number) => MultiLingualString;
+                configureButton: LanguageTranslations;
                 gameDescription: LanguageTranslations;
                 currentChannel: LanguageTranslations;
                 resetOnFail: {
@@ -192,7 +192,13 @@ export interface I18nTranslations {
                     label: LanguageTranslations;
                     description: LanguageTranslations;
                 };
+                premiumOnly: LanguageTranslations;
+                premiumRequired: LanguageTranslations;
                 confirm: {
+                    title: LanguageTranslations;
+                    description: LanguageTranslations;
+                };
+                created: {
                     title: LanguageTranslations;
                     description: LanguageTranslations;
                 }
