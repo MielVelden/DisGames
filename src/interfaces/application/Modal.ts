@@ -69,7 +69,17 @@ export interface ModalCheckboxGroupField {
     parse?: (raw: string[]) => unknown;
 }
 
-export type ModalField = ModalTextField | ModalSelectField | ModalRadioField | ModalCheckboxField | ModalCheckboxGroupField;
+export interface ModalFileUploadField {
+    kind: 'fileUpload';
+    label: MultiLingualString;
+    description?: MultiLingualString;
+    required?: boolean; // default true
+    minValues?: number;
+    maxValues?: number;
+    parse?: (raw: string[]) => unknown; // raw = uploaded attachment URLs
+}
+
+export type ModalField = ModalTextField | ModalSelectField | ModalRadioField | ModalCheckboxField | ModalCheckboxGroupField | ModalFileUploadField;
 
 export interface ModalDefinition<TFields extends Record<string, ModalField>> {
     title: MultiLingualString;
@@ -80,7 +90,7 @@ export interface ModalDefinition<TFields extends Record<string, ModalField>> {
 export type ModalResult<TFields extends Record<string, ModalField>> = {
     [K in keyof TFields]:
     TFields[K] extends { parse: (raw: any) => infer T } ? T :
-    TFields[K] extends { kind: 'select' | 'checkboxGroup' } ? string[] :
+    TFields[K] extends { kind: 'select' | 'checkboxGroup' | 'fileUpload' } ? string[] :
     TFields[K] extends { kind: 'checkbox' } ? boolean :
     string;
 };

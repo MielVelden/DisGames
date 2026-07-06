@@ -17,6 +17,7 @@ export function createSettingsContainer(settings: SettingsResponse, actions: (Ba
         ComponentService.createContent(i18n.commands.settings.labels.serverName(settings.ServerName)),
         ComponentService.createContent(i18n.commands.settings.labels.currentLanguage(language)),
         ComponentService.createContent(i18n.commands.settings.labels.gamesEnabled(settings.GamesEnabled)),
+        ...(settings.BotName ? [ComponentService.createContent(i18n.commands.settings.labels.botName(settings.BotName))] : []),
         ComponentService.createSeparator(),
         ...actions,
     ] as Component[];

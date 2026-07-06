@@ -14,6 +14,7 @@ import GameService from "../services/domain/GameService";
 import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI, isValidEmoji } from "../utils/constants/Emojis";
 import { getEnumProperty } from "../utils/helpers/EnumMetadata";
 import { MetadataKeyEnum } from "../interfaces/enums/application/MetadataKeyEnum";
+import DiscordMemberService from "../services/discord/DiscordMemberService";
 
 export class SettingsCommand implements Command {
     name = CommandEnum.SETTINGS;
@@ -102,11 +103,52 @@ export class SettingsCommand implements Command {
             }
         });
 
+        const identityButton = createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeIdentity), ButtonStyle.SECONDARY, "🪪", event.user.userId, true, async (buttonEvent: InteractionEvent) => {
+            const result = await buttonEvent.askUserAsync({
+                title: new MultiLingualString(i18n.commands.settings.labels.identityModalTitle),
+                fields: {
+                    nickname: {
+                        label: new MultiLingualString(i18n.commands.settings.labels.nicknameLabel),
+                        value: server.Settings?.botNickname ?? '',
+                        required: false,
+                        maxLength: 32,
+                    },
+                    avatarImage: {
+                        kind: 'fileUpload',
+                        label: new MultiLingualString(i18n.commands.settings.labels.avatarImageLabel),
+                        required: false,
+                        maxValues: 1,
+                    }
+                }
+            });
+
+            if (result) {
+                const nickname = result.nickname.trim();
+                const avatarUrl = result.avatarImage[0];
+
+                await DiscordMemberService.setGuildIdentityAsync(event.guildId, {
+                    nickname: nickname || null,
+                    avatarUrl: avatarUrl,
+                });
+
+                await ServerService.saveAsync(new ServersSaveModel({
+                    Id: server.Id,
+                    SettingsJSON: {
+                        ...server.Settings,
+                        botNickname: nickname || undefined,
+                        botAvatarUrl: avatarUrl ?? server.Settings?.botAvatarUrl,
+                    }
+                }), buttonEvent);
+                await event.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(i18n.commands.settings.labels.identityChanged))]);
+            }
+        });
+
         const settingsContainer = createSettingsContainer({
             LanguageEnum: server.LanguageEnum,
             ServerName: server.Name,
-            GamesEnabled: activeGames.length
-        }, [changeLanguageButton, emojiButton]);
+            GamesEnabled: activeGames.length,
+            BotName: server.Settings?.botNickname
+        }, [changeLanguageButton, emojiButton, identityButton]);
 
         await event.addComponentsAsync(settingsContainer);
         await event.replyAsync();

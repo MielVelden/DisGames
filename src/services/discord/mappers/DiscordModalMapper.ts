@@ -10,8 +10,9 @@ import {
     CheckboxBuilder as DiscordCheckboxBuilder,
     CheckboxGroupBuilder as DiscordCheckboxGroupBuilder,
     CheckboxGroupOptionBuilder as DiscordCheckboxGroupOptionBuilder,
+    FileUploadBuilder as DiscordFileUploadBuilder,
 } from 'discord.js';
-import { ModalCheckboxField, ModalCheckboxGroupField, ModalDefinition, ModalField, ModalRadioField, ModalSelectField, ModalTextField } from '../../../interfaces/application/Modal';
+import { ModalCheckboxField, ModalCheckboxGroupField, ModalDefinition, ModalField, ModalFileUploadField, ModalRadioField, ModalSelectField, ModalTextField } from '../../../interfaces/application/Modal';
 import { TextInputStyle } from '../../../interfaces/application/Message';
 import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
@@ -35,6 +36,8 @@ class DiscordModalMapper {
                 return this.mapFieldToCheckboxLabelBuilder(key, field, language);
             if (field.kind === 'checkboxGroup')
                 return this.mapFieldToCheckboxGroupLabelBuilder(key, field, language);
+            if (field.kind === 'fileUpload')
+                return this.mapFieldToFileUploadLabelBuilder(key, field, language);
             return new DiscordActionRowBuilder<DiscordTextInputBuilder>()
                 .addComponents(this.mapFieldToTextInput(key, field as ModalTextField, language));
         });
@@ -127,6 +130,26 @@ class DiscordModalMapper {
         return new DiscordLabelBuilder()
             .setLabel(field.label.getMessage(language))
             .setCheckboxGroupComponent(checkboxGroup);
+    }
+
+    private mapFieldToFileUploadLabelBuilder(key: string, field: ModalFileUploadField, language: LanguageEnum): DiscordLabelBuilder {
+        const fileUpload = new DiscordFileUploadBuilder()
+            .setCustomId(key)
+            .setRequired(field.required ?? true);
+
+        if (field.minValues !== undefined)
+            fileUpload.setMinValues(field.minValues);
+        if (field.maxValues !== undefined)
+            fileUpload.setMaxValues(field.maxValues);
+
+        const label = new DiscordLabelBuilder()
+            .setLabel(field.label.getMessage(language))
+            .setFileUploadComponent(fileUpload);
+
+        if (field.description)
+            label.setDescription(field.description.getMessage(language));
+
+        return label;
     }
 
     private mapFieldToTextInput(key: string, field: ModalTextField, language: LanguageEnum): DiscordTextInputBuilder {

@@ -128,6 +128,7 @@ export interface ModalSubmitInteractionEvent extends BaseInteractionEvent, Reply
     getRadioValue(key: string): string | null;
     getCheckboxValue(key: string): boolean;
     getCheckboxGroupValues(key: string): string[];
+    getFileUploadUrls(key: string): string[];
     deferReplyAsync(): Promise<void>;
 }
 

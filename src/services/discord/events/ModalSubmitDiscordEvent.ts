@@ -41,6 +41,11 @@ export class ModalSubmitDiscordEvent extends BaseReplyDiscordEvent<DiscordModalS
         return [...this.currentInteraction.fields.getCheckboxGroup(key)];
     }
 
+    public getFileUploadUrls(key: string): string[] {
+        const files = this.currentInteraction.fields.getUploadedFiles(key);
+        return files ? [...files.values()].map(file => file.url) : [];
+    }
+
     public async deferReplyAsync(): Promise<void> {
         await DiscordMessageHandler.deferModalSubmitAsync(this.currentInteraction);
     }

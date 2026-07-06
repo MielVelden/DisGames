@@ -614,6 +614,9 @@ class DiscordMessageHandler {
                             } else if (field.kind === 'checkboxGroup') {
                                 const raw = modalEvent.getCheckboxGroupValues(key as string);
                                 result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'fileUpload') {
+                                const raw = modalEvent.getFileUploadUrls(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
                             } else {
                                 const raw = modalEvent.getValue(key as string);
                                 result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];

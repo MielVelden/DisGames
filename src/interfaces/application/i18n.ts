@@ -246,6 +246,12 @@ export interface I18nTranslations {
                 acceptEmojiLabel: LanguageTranslations;
                 rejectEmojiLabel: LanguageTranslations;
                 invalidEmoji: LanguageTranslations;
+                botName: (botName: string) => MultiLingualString;
+                changeIdentity: LanguageTranslations;
+                identityModalTitle: LanguageTranslations;
+                nicknameLabel: LanguageTranslations;
+                avatarImageLabel: LanguageTranslations;
+                identityChanged: LanguageTranslations;
             };
         },
         aboutme: {
