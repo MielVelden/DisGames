@@ -10,4 +10,5 @@ export enum CommandEnum {
     HANDOFF = "handoff",
     PREMIUM = "premium",
     GENERATE_DATA = "generatedata",
+    LEADERBOARD = "leaderboard",
 }

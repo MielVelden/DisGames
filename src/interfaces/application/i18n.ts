@@ -267,6 +267,22 @@ export interface I18nTranslations {
         impersonate: {
             description: LanguageTranslations;
         },
+        leaderboard: {
+            description: LanguageTranslations;
+            labels: {
+                title: LanguageTranslations;
+                serversCount: (count: string) => MultiLingualString;
+                allTimePoints: LanguageTranslations;
+                rankLeader: LanguageTranslations;
+                leadVsSecond: (lead: string) => MultiLingualString;
+                membersCount: (count: string) => MultiLingualString;
+                points: LanguageTranslations;
+                noPointsRecorded: LanguageTranslations;
+                updatedJustNow: LanguageTranslations;
+                boardFooter: (brand: string) => MultiLingualString;
+                ptsSuffix: (points: string) => MultiLingualString;
+            };
+        },
         restartGame: {
             description: LanguageTranslations;
         },

@@ -7,7 +7,7 @@ import { MetadataKeyEnum } from '../../../interfaces/enums/application/MetadataK
 import { BadgeTranslationParams, LanguageTranslations } from '../../../interfaces/application/i18n';
 import { getMultiLingualString, MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { i18n } from '../../../utils/i18n/i18n';
-import { loadBadgeImage } from '../BadgeAsset';
+import { loadBadgeImageAsync } from '../BadgeAsset';
 import { COLOR_TEXT } from '../CardTokens';
 
 export interface BadgeVisuals {
@@ -41,7 +41,7 @@ export async function resolveBadgeVisuals(achievementEnum: BadgeEnum, language: 
     return {
         color: getEnumProperty(BadgeEnum, achievementEnum, MetadataKeyEnum.Color) as Color,
         icon: getEnumProperty(BadgeEnum, achievementEnum, MetadataKeyEnum.Emoji) as string,
-        image: await loadBadgeImage(achievementEnum, COLOR_TEXT),
+        image: await loadBadgeImageAsync(achievementEnum, COLOR_TEXT),
         title: resolveBadgeField(badge.title as BadgeField, language, params),
         description: resolveBadgeField(badge.description as BadgeField, language, params),
     };
