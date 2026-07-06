@@ -8,6 +8,9 @@ import { DEFAULT_LANGUAGE } from "../../utils/i18n/MultiLingualString";
 import { BaseDomainService } from "./BaseDomainService";
 import TimelineBuilder from "./TimelineBuilder";
 import Logger from "../../utils/application/Logger";
+import DiscordMemberService from "../discord/DiscordMemberService";
+import { PREMIUM_NAME } from "../../utils/application/PremiumAccess";
+import packageJson from "../../../package.json";
 
 class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
     protected readonly repository = ServerRepository;
@@ -51,6 +54,12 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
             Id: server.Id,
             IsPremium: true
         }));
+
+        DiscordMemberService.setGuildIdentityAsync(guildId, {
+            nickname: packageJson.name + " " + PREMIUM_NAME,
+            avatarUrl: null
+        });
+
         Logger.logInfo(`Server ${guildId} granted premium access`, { sendToDiscord: true });
     }
 
@@ -69,6 +78,12 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
             Id: server.Id,
             IsPremium: false
         }));
+
+        DiscordMemberService.setGuildIdentityAsync(guildId, {
+            nickname: null,
+            avatarUrl: null
+        });
+
         Logger.logInfo(`Server ${guildId} had premium access revoked`, { sendToDiscord: true });
     }
 

@@ -3,6 +3,8 @@ import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 import { getConfigValue } from "./Config";
 
+export const PREMIUM_NAME = "Pro";
+
 export function getPremiumSkuId(): string {
     return String(getConfigValue(EnvConfigEnum.DISCORD_PREMIUM_SKU_ID)).trim();
 }

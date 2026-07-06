@@ -28,7 +28,7 @@ import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
-import { withEventContextAsync, getCurrentServer } from '../../../middleware/EventContext';
+import { withEventContextAsync, getCurrentServer, getCurrentComponents } from '../../../middleware/EventContext';
 import { isPremiumEnabled, isPurchaseButtonEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
 import { DEFAULT_PREMIUM_EMOJI } from '../../../utils/constants/Emojis';
 
@@ -134,10 +134,13 @@ class DiscordComponentMapper {
 
     public async mapButtonToDiscordButtonAsync(button: BaseButton): Promise<DiscordButtonBuilder[]> {
         const server = getCurrentServer();
+        const components = getCurrentComponents();
 
         const discordButtons = [];
         if (button.premiumSkuId && server && !isServerPremium(server)) {
-            if (isPremiumEnabled() && isPurchaseButtonEnabled()) {
+            const premiumButtons = components?.filter(comp => comp.type === ComponentType.BUTTON && (comp as BaseButton).premiumSkuId === button.premiumSkuId);
+            const isButtonFirstInGroup = premiumButtons && premiumButtons.length > 0 && premiumButtons[0] === button;
+            if (isPremiumEnabled() && isPurchaseButtonEnabled() && isButtonFirstInGroup) {
                 const discordButton = new DiscordButtonBuilder()
                     .setStyle(DiscordJsButtonStyle.Premium)
                     .setSKUId(button.premiumSkuId);
@@ -147,13 +150,19 @@ class DiscordComponentMapper {
 
                 discordButtons.push(discordButton);
             }
-            
+
             button.emoji = DEFAULT_PREMIUM_EMOJI;
             button.disabled = true;
         }
 
         discordButtons.unshift(this.buildRegularDiscordButton(button));
         return discordButtons;
+    }
+
+    private movePremiumButtonsToEnd(buttons: DiscordButtonBuilder[]): DiscordButtonBuilder[] {
+        const regularButtons = buttons.filter(button => button.data.style !== DiscordJsButtonStyle.Premium);
+        const premiumButtons = buttons.filter(button => button.data.style === DiscordJsButtonStyle.Premium);
+        return [...regularButtons, ...premiumButtons];
     }
 
     private buildRegularDiscordButton(button: BaseButton): DiscordButtonBuilder {
@@ -243,7 +252,7 @@ class DiscordComponentMapper {
         const discordComponents = (await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)))).flat();
 
         // Group components by type - only including ActionRow-compatible components
-        const buttons = discordComponents.filter(c => c instanceof DiscordButtonBuilder);
+        const buttons = this.movePremiumButtonsToEnd(discordComponents.filter(c => c instanceof DiscordButtonBuilder) as DiscordButtonBuilder[]);
         const selectMenus = discordComponents.filter(c =>
             c instanceof DiscordStringSelectMenuBuilder ||
             c instanceof DiscordUserSelectMenuBuilder ||
@@ -269,6 +278,9 @@ class DiscordComponentMapper {
     }
 
     public async mapRootComponentsAsync(components: Component[]): Promise<any[]> {
+        // Deduplicate premium purchase buttons by skuId across the entire reply
+        const seenPremiumSkuIds = new Set<string>();
+
         // ActionRow components
         const actionRowComponents = await this.mapActionRowComponentsAsync(components.filter(
             component => DiscordEnumMapper.isActionRowComponent(component)
@@ -342,7 +354,7 @@ class DiscordComponentMapper {
             }));
     }
 
-    public async mapContainerToDiscordContainerAsync(container: Container): Promise<DiscordContainerBuilder> {
+    public async mapContainerToDiscordContainerAsync(container: Container, seenPremiumSkuIds: Set<string> = new Set()): Promise<DiscordContainerBuilder> {
         const discordContainer = new DiscordContainerBuilder()
             .setAccentColor(container.accent_color || DEFAULT_EMBED_COLOR)
             .setSpoiler(container.spoiler || false);
@@ -373,7 +385,7 @@ class DiscordComponentMapper {
 
                 // Map all consecutive buttons and group them in one ActionRow
                 const buttonPromises = consecutiveButtons.map(btn => this.mapButtonToDiscordButtonAsync(btn));
-                const discordButtons = (await Promise.all(buttonPromises)).flat();
+                const discordButtons = this.movePremiumButtonsToEnd((await Promise.all(buttonPromises)).flat());
                 const buttonActionRow = this.createActionRowWithComponents(discordButtons);
                 discordContainer.addActionRowComponents([buttonActionRow]);
 
