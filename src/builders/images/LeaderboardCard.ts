@@ -24,7 +24,7 @@ import { Color } from '../../utils/helpers/Color';
 import { LanguageEnum } from '../../interfaces/enums';
 import { DEFAULT_LANGUAGE, getMultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { i18n } from '../../utils/i18n/i18n';
-import { LeaderboardServerEntry } from '../../interfaces/view';
+import { LeaderboardEntry, LeaderboardSubtitleTypeEnum } from '../../interfaces/view';
 import { loadLanguageImageAsync, loadMedalImageAsync } from './BadgeAsset';
 
 const CARD_WIDTH = 580 * SCALE;
@@ -56,7 +56,7 @@ class LeaderboardCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generateAsync(entries: LeaderboardServerEntry[], language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
+    public async generateAsync(entries: LeaderboardEntry[], language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `leaderboard-${uniqueCode}.png`);
 
@@ -114,7 +114,7 @@ class LeaderboardCardService extends BaseCard {
         this.drawText(ctx, title, x, y, titleStyle);
         const titleWidth = ctx.measureText(title).width;
 
-        const chipText = i18n.commands.leaderboard.labels.serversCount(formatNumber(count)).getMessage(language);
+        const chipText = i18n.commands.leaderboard.labels.entriesCount(formatNumber(count)).getMessage(language);
         const chipFont = `600 ${10.5 * SCALE}px ${FONT_MONO}`;
         ctx.font = chipFont;
         const chipTextWidth = ctx.measureText(chipText).width;
@@ -142,7 +142,7 @@ class LeaderboardCardService extends BaseCard {
         return labelY + SECTION_LABEL_HEIGHT;
     }
 
-    private async drawHero(ctx: CanvasRenderingContext2D, top: LeaderboardServerEntry, second: LeaderboardServerEntry | undefined, x: number, y: number, width: number, language: LanguageEnum): Promise<void> {
+    private async drawHero(ctx: CanvasRenderingContext2D, top: LeaderboardEntry, second: LeaderboardEntry | undefined, x: number, y: number, width: number, language: LanguageEnum): Promise<void> {
         this.fillRoundedRect(ctx, x, y, width, HERO_HEIGHT, HERO_RADIUS, this.withAlpha(GOLD, 0.08));
         this.strokeRoundedRect(ctx, x, y, width, HERO_HEIGHT, HERO_RADIUS, {
             color: this.withAlpha(GOLD, 0.28),
@@ -190,7 +190,7 @@ class LeaderboardCardService extends BaseCard {
             ctx.drawImage(flag, textLeft + nameWidth + 6 * SCALE, nameY + 2 * SCALE, flagSize, flagSize);
         }
 
-        this.drawText(ctx, i18n.commands.leaderboard.labels.membersCount(formatNumber(top.MemberCount)).getMessage(language), textLeft, nameY + 22 * SCALE, {
+        this.drawText(ctx, this.getSubtitleText(top, language), textLeft, nameY + 22 * SCALE, {
             font: `500 ${11 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT_MUTED,
             baseline: 'top',
@@ -212,7 +212,7 @@ class LeaderboardCardService extends BaseCard {
         });
     }
 
-    private async drawRows(ctx: CanvasRenderingContext2D, rows: LeaderboardServerEntry[], x: number, y: number, width: number, height: number, language: LanguageEnum): Promise<void> {
+    private async drawRows(ctx: CanvasRenderingContext2D, rows: LeaderboardEntry[], x: number, y: number, width: number, height: number, language: LanguageEnum): Promise<void> {
         this.fillRoundedRect(ctx, x, y, width, height, ROWS_RADIUS, COLOR_PANEL);
         this.strokeRoundedRect(ctx, x, y, width, height, ROWS_RADIUS, {
             color: COLOR_PANEL_BORDER,
@@ -237,7 +237,7 @@ class LeaderboardCardService extends BaseCard {
         ctx.restore();
     }
 
-    private async drawRow(ctx: CanvasRenderingContext2D, entry: LeaderboardServerEntry, rank: number, x: number, y: number, width: number, language: LanguageEnum): Promise<void> {
+    private async drawRow(ctx: CanvasRenderingContext2D, entry: LeaderboardEntry, rank: number, x: number, y: number, width: number, language: LanguageEnum): Promise<void> {
         const stripeColor = RANK_COLORS[rank - 1] ?? COLOR_PACK.accent;
         this.fillRoundedRect(ctx, x, y, 3 * SCALE, ROW_HEIGHT, 1.5 * SCALE, stripeColor);
 
@@ -279,7 +279,7 @@ class LeaderboardCardService extends BaseCard {
             ctx.drawImage(flag, textLeft + nameWidth + 6 * SCALE, nameY + 1 * SCALE, flagSize, flagSize);
         }
 
-        this.drawText(ctx, i18n.commands.leaderboard.labels.membersCount(formatNumber(entry.MemberCount)).getMessage(language), textLeft, nameY + 19 * SCALE, {
+        this.drawText(ctx, this.getSubtitleText(entry, language), textLeft, nameY + 19 * SCALE, {
             font: `500 ${10.5 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT_MUTED,
             baseline: 'top',
@@ -339,8 +339,20 @@ class LeaderboardCardService extends BaseCard {
         });
     }
 
-    private async getFlagAsync(entry: LeaderboardServerEntry): Promise<Image | null> {
-        return await loadLanguageImageAsync(entry.LanguageEnum);
+    private async getFlagAsync(entry: LeaderboardEntry): Promise<Image | null> {
+        if (!entry.Flag)
+            return null;
+        return await loadLanguageImageAsync(entry.Flag);
+    }
+
+    private getSubtitleText(entry: LeaderboardEntry, language: LanguageEnum): string {
+        switch (entry.SubtitleType) {
+            case LeaderboardSubtitleTypeEnum.LEVEL:
+                return i18n.commands.leaderboard.labels.levelLabel(String(entry.SubtitleValue)).getMessage(language);
+            case LeaderboardSubtitleTypeEnum.MEMBERS:
+            default:
+                return i18n.commands.leaderboard.labels.membersCount(formatNumber(entry.SubtitleValue)).getMessage(language);
+        }
     }
 
     private async drawMedalIcon(ctx: CanvasRenderingContext2D, rank: number, centerX: number, centerY: number, size: number): Promise<void> {

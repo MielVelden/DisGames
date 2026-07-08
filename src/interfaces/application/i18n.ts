@@ -1,5 +1,6 @@
 import { ExceptionEnum, MetricEnum, UserRoleEnum } from "../enums";
 import { GamesCommandActionEnum } from "../enums/commands/Games";
+import { LeaderboardCommandActionEnum } from "../enums/commands/Leaderboard";
 import { PremiumActionEnum } from "../enums/commands/Premium";
 import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
@@ -269,13 +270,15 @@ export interface I18nTranslations {
         },
         leaderboard: {
             description: LanguageTranslations;
+            option: LanguageCommandOptionTranslations<LeaderboardCommandActionEnum>;
             labels: {
                 title: LanguageTranslations;
-                serversCount: (count: string) => MultiLingualString;
+                entriesCount: (count: string) => MultiLingualString;
                 allTimePoints: LanguageTranslations;
                 rankLeader: LanguageTranslations;
                 leadVsSecond: (lead: string) => MultiLingualString;
                 membersCount: (count: string) => MultiLingualString;
+                levelLabel: (level: string) => MultiLingualString;
                 points: LanguageTranslations;
                 noPointsRecorded: LanguageTranslations;
                 updatedJustNow: LanguageTranslations;

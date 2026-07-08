@@ -1,4 +1,5 @@
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
+import { LeaderboardCommandActionEnum } from "../../interfaces/enums/commands/Leaderboard";
 import { ProfileCommandActionEnum } from "../../interfaces/enums/commands/Profile";
 import { PremiumActionEnum } from "../../interfaces/enums/commands/Premium";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
@@ -937,11 +938,50 @@ export const i18n: I18nTranslations = {
         },
         leaderboard: {
             description: {
-                [LanguageEnum.EN]: "Show the top servers by points",
-                [LanguageEnum.NL]: "Toon de topservers op punten",
-                [LanguageEnum.ES]: "Mostrar los mejores servidores por puntos",
-                [LanguageEnum.DE]: "Die besten Server nach Punkten anzeigen",
-                [LanguageEnum.PT]: "Mostrar os melhores servidores por pontos",
+                [LanguageEnum.EN]: "Show the leaderboard",
+                [LanguageEnum.NL]: "Toon de ranglijst",
+                [LanguageEnum.ES]: "Mostrar la clasificación",
+                [LanguageEnum.DE]: "Bestenliste anzeigen",
+                [LanguageEnum.PT]: "Mostrar a classificação",
+            },
+            option: {
+                action: {
+                    [LanguageEnum.EN]: "Board",
+                    [LanguageEnum.NL]: "Bord",
+                    [LanguageEnum.ES]: "Tablero",
+                    [LanguageEnum.DE]: "Tafel",
+                    [LanguageEnum.PT]: "Quadro",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "Select which leaderboard to show",
+                    [LanguageEnum.NL]: "Kies welke ranglijst je wilt tonen",
+                    [LanguageEnum.ES]: "Selecciona qué clasificación mostrar",
+                    [LanguageEnum.DE]: "Wähle, welche Bestenliste angezeigt werden soll",
+                    [LanguageEnum.PT]: "Selecione qual classificação mostrar",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "Please choose a leaderboard to continue",
+                    [LanguageEnum.NL]: "Selecteer een ranglijst om door te gaan",
+                    [LanguageEnum.ES]: "Por favor, elige una clasificación para continuar",
+                    [LanguageEnum.DE]: "Bitte wähle eine Bestenliste, um fortzufahren",
+                    [LanguageEnum.PT]: "Por favor, escolha uma classificação para continuar",
+                },
+                choices: {
+                    [LeaderboardCommandActionEnum.SERVERS]: {
+                        [LanguageEnum.EN]: "Top servers by points",
+                        [LanguageEnum.NL]: "Topservers op punten",
+                        [LanguageEnum.ES]: "Mejores servidores por puntos",
+                        [LanguageEnum.DE]: "Beste Server nach Punkten",
+                        [LanguageEnum.PT]: "Melhores servidores por pontos",
+                    },
+                    [LeaderboardCommandActionEnum.USERS]: {
+                        [LanguageEnum.EN]: "Top players by experience",
+                        [LanguageEnum.NL]: "Topspelers op ervaring",
+                        [LanguageEnum.ES]: "Mejores jugadores por experiencia",
+                        [LanguageEnum.DE]: "Beste Spieler nach Erfahrung",
+                        [LanguageEnum.PT]: "Melhores jogadores por experiência",
+                    },
+                },
             },
             labels: {
                 title: {
@@ -951,12 +991,12 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Bestenliste",
                     [LanguageEnum.PT]: "Classificação",
                 },
-                serversCount: (count: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "{count} servers",
-                    [LanguageEnum.NL]: "{count} servers",
-                    [LanguageEnum.ES]: "{count} servidores",
-                    [LanguageEnum.DE]: "{count} Server",
-                    [LanguageEnum.PT]: "{count} servidores",
+                entriesCount: (count: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "{count} entries",
+                    [LanguageEnum.NL]: "{count} vermeldingen",
+                    [LanguageEnum.ES]: "{count} entradas",
+                    [LanguageEnum.DE]: "{count} Einträge",
+                    [LanguageEnum.PT]: "{count} entradas",
                 }, { count }),
                 allTimePoints: {
                     [LanguageEnum.EN]: "All-time points",
@@ -986,6 +1026,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "{count} Mitglieder",
                     [LanguageEnum.PT]: "{count} membros",
                 }, { count }),
+                levelLabel: (level: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Level {level}",
+                    [LanguageEnum.NL]: "Level {level}",
+                    [LanguageEnum.ES]: "Nivel {level}",
+                    [LanguageEnum.DE]: "Level {level}",
+                    [LanguageEnum.PT]: "Nível {level}",
+                }, { level }),
                 points: {
                     [LanguageEnum.EN]: "POINTS",
                     [LanguageEnum.NL]: "PUNTEN",

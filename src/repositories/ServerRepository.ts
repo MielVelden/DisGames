@@ -3,7 +3,7 @@ import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ComponentError } from "../utils/application/Error";
 import { runQueryAsync, getTableName } from "./util/ConnectionHandler";
-import { LeaderboardServerEntry } from "../interfaces/view";
+import { ServerLeaderboardRow } from "../interfaces/view";
 
 class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum> {
     public readonly baseRepository: BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>;
@@ -49,7 +49,7 @@ class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveMo
         return await this.baseRepository.Select().Sum("MemberCount");
     }
 
-    async getTopServersByPointsAsync(limit: number = 5): Promise<LeaderboardServerEntry[]> {
+    async getTopServersByPointsAsync(limit: number = 5): Promise<ServerLeaderboardRow[]> {
         const serversTable = getTableName(TableEnum.SERVERS);
         const pointsTable = getTableName(TableEnum.POINTS);
         const query = `
@@ -61,7 +61,7 @@ class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveMo
             LIMIT ?
         `;
         const results = await runQueryAsync(query, [limit]);
-        return (results ?? []) as LeaderboardServerEntry[];
+        return (results ?? []) as ServerLeaderboardRow[];
     }
 }
 

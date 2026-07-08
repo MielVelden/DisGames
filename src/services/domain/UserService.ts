@@ -1,6 +1,6 @@
 import { UsersModel, UsersSaveModel, UsersModelFieldEnum } from "../../interfaces/database/TableInterfaces";
 import { GameTypeEnum, MetricEnum, UserRoleEnum } from "../../interfaces/enums";
-import { ProfileCardData, ProfileGameResponse } from "../../interfaces/view";
+import { ProfileCardData, ProfileGameResponse, UserLeaderboardRow } from "../../interfaces/view";
 import PointRepository from "../../repositories/PointRepository";
 import UserRepository from "../../repositories/UserRepository";
 import EventRepository from "../../repositories/EventRepository";
@@ -124,6 +124,10 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
             gameRank: gameRank.rank,
             gameRankPlayerCount: gameRank.total,
         } satisfies ProfileGameResponse;
+    }
+
+    public async getTopUsersByExperienceAsync(limit: number = 5): Promise<UserLeaderboardRow[]> {
+        return await UserRepository.getTopUsersByExperienceAsync(limit);
     }
 
     public async getSystemUserAsync(): Promise<User> {
