@@ -7,6 +7,7 @@ import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { BadgeEnum } from "../enums/application/BadgeEnum";
+import { CountryEnum } from "../enums/application/CountryEnum";
 
 export type LanguageTranslations = {
     [LanguageEnum.EN]: string;
@@ -332,6 +333,7 @@ export interface I18nTranslations {
     }
     enums: {
         badges: LanguageBadgeTranslations;
+        countries: LanguageEnumTranslations<CountryEnum>;
         gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
         exceptions: LanguageExceptionTranslations;
         languages: LanguageEnumTranslations<LanguageEnum>;

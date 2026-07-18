@@ -16,6 +16,7 @@ export enum EnvConfigEnum {
 	DISCORD_PREMIUM_SKU_ID = "DISCORD_PREMIUM_SKU_ID",
     OLLAMA_BASE_URL = "OLLAMA_BASE_URL",
     OLLAMA_MODEL = "OLLAMA_MODEL",
+    MAPILLARY_ACCESS_TOKEN = "MAPILLARY_ACCESS_TOKEN",
 }
 
 const configTypeDefaults = {
@@ -36,6 +37,7 @@ const configTypeDefaults = {
     [EnvConfigEnum.DISCORD_PREMIUM_SKU_ID]: "",
     [EnvConfigEnum.OLLAMA_BASE_URL]: "http://localhost:11434",
     [EnvConfigEnum.OLLAMA_MODEL]: "llama3.2",
+    [EnvConfigEnum.MAPILLARY_ACCESS_TOKEN]: "",
 } as const satisfies Record<EnvConfigEnum, boolean | number | string | string[]>;
 
 type ConfigTypeDefaults = typeof configTypeDefaults;

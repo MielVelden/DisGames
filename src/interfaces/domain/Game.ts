@@ -45,6 +45,7 @@ export interface GameConfig {
     addCorrectReaction: boolean;
     hasImages?: boolean;
     hasDataSheets?: boolean;
+    allowDuplicatesResponse?: boolean;
     options: {
         [key in GameOptionEnum]: boolean;
     };

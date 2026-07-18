@@ -12,15 +12,16 @@ import { createBlock } from "../../utils/helpers/Markdown";
 
 export default {
     config: {
-        id: GameTypeEnum.GUESS_THE_FLAG,
-        emoji: "🏳️",
-        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].name),
-        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].description),
+        id: GameTypeEnum.GUESS_THE_COUNTRY,
+        emoji: "🌍",
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_COUNTRY].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_COUNTRY].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
         addCorrectReaction: true,
         hasImages: true,
+        allowDuplicatesResponse: true,
         options: {
             [GameOptionEnum.ALLOW_SKIPPING]: true,
         }
@@ -28,7 +29,6 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
-            // TODO: Check against the CountryEnum value
             return compareStrings(event.userInput as string, event.getGameDataAnswer());
         },
 
@@ -40,7 +40,7 @@ export default {
 
         async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
+                ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_COUNTRY].startMessage!()))
             ];
         },
 

@@ -379,4 +379,48 @@ export const gameTypeTranslations: LanguageGameTypeTranslations<GameTypeEnum> = 
             [LanguageEnum.PT]: "Você encontrou as 4 categorias! Excelentes habilidades de associação de palavras!",
         }),
     },
+    [GameTypeEnum.GUESS_THE_COUNTRY]: {
+        name: {
+            [LanguageEnum.EN]: "Guess the Country",
+            [LanguageEnum.NL]: "Raad het Land",
+            [LanguageEnum.ES]: "Adivina el país",
+            [LanguageEnum.DE]: "Errate das Land",
+            [LanguageEnum.PT]: "Adivinha o país",
+        },
+        description: {
+            [LanguageEnum.EN]: "Identify the country from a street-level photo",
+            [LanguageEnum.NL]: "Herken het land aan een straatniveau-foto",
+            [LanguageEnum.ES]: "Identifica el país a partir de una foto a nivel de calle",
+            [LanguageEnum.DE]: "Erkenne das Land anhand eines Straßenfotos",
+            [LanguageEnum.PT]: "Identifica o país a partir de uma foto ao nível da rua",
+        },
+        longDescription: {
+            [LanguageEnum.EN]: "Explore the world through real street-level photos in this geography guessing game. Study the scenery, road signs, and surroundings to figure out which country the photo was taken in.",
+            [LanguageEnum.NL]: "Ontdek de wereld via echte straatniveau-foto's in dit aardrijkskundig raadspel. Bestudeer het landschap, verkeersborden en omgeving om te achterhalen in welk land de foto is genomen.",
+            [LanguageEnum.ES]: "Explora el mundo a través de fotos reales a nivel de calle en este juego de adivinanzas de geografía. Estudia el paisaje, las señales de tráfico y el entorno para descubrir en qué país se tomó la foto.",
+            [LanguageEnum.DE]: "Erkunde die Welt anhand echter Straßenfotos in diesem geografischen Ratespiel. Betrachte die Landschaft, Verkehrsschilder und Umgebung, um herauszufinden, in welchem Land das Foto aufgenommen wurde.",
+            [LanguageEnum.PT]: "Explore o mundo através de fotos reais ao nível da rua neste jogo de adivinhação de geografia. Estude a paisagem, os sinais de trânsito e os arredores para descobrir em que país a foto foi tirada.",
+        },
+        howToPlay: {
+            [LanguageEnum.EN]: "You'll be shown a real street-level photo and need to identify which country it was taken in. Type the country name as your answer. Look for clues like road signs, license plates, vegetation, and architecture!",
+            [LanguageEnum.NL]: "Je krijgt een echte straatniveau-foto te zien en moet herkennen in welk land deze is genomen. Typ de landnaam als je antwoord. Let op aanwijzingen zoals verkeersborden, kentekenplaten, begroeiing en architectuur!",
+            [LanguageEnum.ES]: "Se te mostrará una foto real a nivel de calle y deberás identificar en qué país fue tomada. Escribe el nombre del país como tu respuesta. ¡Busca pistas como señales de tráfico, matrículas, vegetación y arquitectura!",
+            [LanguageEnum.DE]: "Dir wird ein echtes Straßenfoto gezeigt und du musst erkennen, in welchem Land es aufgenommen wurde. Tippe den Ländernamen als Antwort. Achte auf Hinweise wie Verkehrsschilder, Kennzeichen, Vegetation und Architektur!",
+            [LanguageEnum.PT]: "Ser-lhe-á mostrada uma foto real ao nível da rua e precisará identificar em que país foi tirada. Digite o nome do país como sua resposta. Procure pistas como sinais de trânsito, placas de matrícula, vegetação e arquitetura!",
+        },
+        startMessage: () => new MultiLingualString({
+            [LanguageEnum.EN]: "You can start guessing the country by typing its name",
+            [LanguageEnum.NL]: "Je kan beginnen met raden naar het land door de naam te typen",
+            [LanguageEnum.ES]: "Puedes empezar a adivinar el país escribiendo su nombre",
+            [LanguageEnum.DE]: "Du kannst beginnen, das Land zu erraten, indem du den Namen eingibst",
+            [LanguageEnum.PT]: "Você pode começar a adivinhar o país digitando o seu nome",
+        }),
+        nextAnswer: (_nextAnswer?: string | number) => new MultiLingualString({
+            [LanguageEnum.EN]: "> Can you guess the country?",
+            [LanguageEnum.NL]: "> Kun jij het land raden?",
+            [LanguageEnum.ES]: "> ¿Puedes adivinar el país?",
+            [LanguageEnum.DE]: "> Kannst du das Land erraten?",
+            [LanguageEnum.PT]: "> Você consegue adivinhar o país?",
+        }),
+    },
 };

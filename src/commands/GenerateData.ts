@@ -7,6 +7,7 @@ import { i18n } from '../utils/i18n/i18n';
 import { getConfigValue } from '../utils/application/Config';
 import { EnvConfigEnum } from '../interfaces/enums/application/EnvConfigEnum';
 import ContentGenerationService from '../services/application/ContentGenerationService';
+import GeoDataGenerationService from '../services/application/GeoDataGenerationService';
 import ContentTranslationService from '../services/application/ContentTranslationService';
 import { isValidEnumValue } from '../utils/helpers/Enum';
 import { GameTypeEnum } from '../interfaces/enums';
@@ -45,12 +46,14 @@ export class GenerateDataCommand implements Command {
             return;
         }
 
-        const dataSheetId = dataSheetIdRaw ? parseInt(dataSheetIdRaw, 10) : undefined;
+        const dataSheetId = dataSheetIdRaw !== '0' ? parseInt(dataSheetIdRaw, 10) : undefined;
         const count = countRaw ? parseInt(countRaw, 10) : 20;
 
         await event.replyAsync(new MultiLingualString(i18n.commands.generateData.labels.generating));
 
-        const result = await ContentGenerationService.generateAsync(event, gameTypeId as GameTypeEnum, dataSheetId, theme, count);
+        const result = gameTypeId === GameTypeEnum.GUESS_THE_COUNTRY
+            ? await GeoDataGenerationService.generateAsync(event, dataSheetId, theme, count)
+            : await ContentGenerationService.generateAsync(event, gameTypeId as GameTypeEnum, dataSheetId, theme, count);
 
         await event.clearComponentsAsync();
         await event.replyAsync(i18n.commands.generateData.labels.generateSummary(

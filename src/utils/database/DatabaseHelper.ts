@@ -46,6 +46,7 @@ export class DatabaseHelper {
     return deserialized;
   }
 
+  // TODO: Refactor using the fieldEnum and fieldType
   public static serializeJsonFields(entity: any): any {
     if (!entity || typeof entity !== 'object') 
       return entity;
