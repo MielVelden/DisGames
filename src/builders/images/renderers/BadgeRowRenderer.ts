@@ -2,7 +2,7 @@ import { CanvasRenderingContext2D } from 'canvas';
 import { Color } from '../../../utils/helpers/Color';
 import { formatDate } from '../../../utils/helpers/Date';
 import { toRoman } from '../../../utils/helpers/Number';
-import { LanguageEnum } from '../../../interfaces/enums';
+import { ExceptionEnum, LanguageEnum } from '../../../interfaces/enums';
 import { BadgeEnum } from '../../../interfaces/enums/application/BadgeEnum';
 import {
     COLOR_TEXT,
@@ -13,7 +13,8 @@ import {
     SCALE,
 } from '../CardTokens';
 import { drawText, fillRoundedRect, strokeRoundedRect, TextStyle, truncateText, withAlpha, wrapText } from '../CardPrimitives';
-import { resolveBadgeVisuals } from './BadgeVisuals';
+import { resolveBadgeVisualsAsync } from './BadgeVisuals';
+import { ErrorHelper } from '../../../utils/application/Error';
 
 export interface BadgeRowData {
     achievementEnum: BadgeEnum;
@@ -41,7 +42,7 @@ class BadgeRowRenderer {
         language: LanguageEnum,
         iconSize: number = DEFAULT_ICON_SIZE,
     ): Promise<void> {
-        const { color, icon, image, title, description } = await resolveBadgeVisuals(badge.achievementEnum, language, badge.level, badge.threshold);
+        const { color, image, title, description } = await resolveBadgeVisualsAsync(badge.achievementEnum, language, badge.level, badge.threshold);
 
         ctx.fillStyle = color;
         ctx.fillRect(x, y, ACCENT_WIDTH, height);
@@ -59,16 +60,7 @@ class BadgeRowRenderer {
         if (image) {
             ctx.drawImage(image, iconX + iconPad, iconY + iconPad, iconSize - iconPad * 2, iconSize - iconPad * 2);
         } else {
-            drawText(ctx, icon,
-                iconX + iconSize / 2,
-                iconY + iconSize / 2 + 1 * SCALE,
-                {
-                    font: `${iconSize * EMOJI_FONT_RATIO}px ${FONT_SANS}`,
-                    color: COLOR_TEXT,
-                    align: 'center',
-                    baseline: 'middle',
-                },
-            );
+            ErrorHelper.throwSilently(ExceptionEnum.RECORD_NOT_FOUND);
         }
 
         this.drawLevelChip(ctx, badge.level, iconX, iconY, iconSize, color);

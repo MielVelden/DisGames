@@ -15,12 +15,13 @@ import {
 } from './CardTokens';
 import { drawCardBackground } from './CardChrome';
 import { BadgeRowData } from './renderers/BadgeRowRenderer';
-import { resolveBadgeVisuals } from './renderers/BadgeVisuals';
+import { resolveBadgeVisualsAsync } from './renderers/BadgeVisuals';
 import { Color } from '../../utils/helpers/Color';
 import { formatDate } from '../../utils/helpers/Date';
 import { toRoman } from '../../utils/helpers/Number';
-import { LanguageEnum } from '../../interfaces/enums';
+import { ExceptionEnum, LanguageEnum } from '../../interfaces/enums';
 import { DEFAULT_LANGUAGE } from '../../utils/i18n/MultiLingualString';
+import { ErrorHelper } from '../../utils/application/Error';
 
 export interface BadgeCardData {
     userId: string;
@@ -56,7 +57,7 @@ class BadgeCardService extends BaseCard {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
-        const visuals = await resolveBadgeVisuals(data.badge.achievementEnum, language, data.badge.level, data.badge.threshold);
+        const visuals = await resolveBadgeVisualsAsync(data.badge.achievementEnum, language, data.badge.level, data.badge.threshold);
 
         measureCtx.font = `500 ${DESC_FONT}px ${FONT_SANS}`;
         const descLines = this.wrapText(measureCtx, visuals.description, CARD_WIDTH - PADDING * 2.4, DESC_MAX_LINES);
@@ -82,7 +83,7 @@ class BadgeCardService extends BaseCard {
         ctx.clip();
 
         this.drawThemedGlow(ctx, visuals.color, cx, iconCenterY, cardHeight);
-        this.drawIcon(ctx, visuals.image, visuals.icon, visuals.color, cx, iconCenterY);
+        this.drawIcon(ctx, visuals.image, visuals.color, cx, iconCenterY);
         this.drawTier(ctx, data.badge.level, visuals.color, cx, tierTop);
         this.drawTitle(ctx, visuals.title, cx, titleTop);
         this.drawDescriptionLines(ctx, descLines, cx, descTop);
@@ -106,7 +107,7 @@ class BadgeCardService extends BaseCard {
         ctx.fillRect(0, 0, CARD_WIDTH, height);
     }
 
-    private drawIcon(ctx: CanvasRenderingContext2D, image: Image | null, icon: string, color: Color, cx: number, cy: number): void {
+    private drawIcon(ctx: CanvasRenderingContext2D, image: Image | null, color: Color, cx: number, cy: number): void {
         // Soft outer glow in the badge color so the icon pops off the background.
         this.drawRadialGlow(ctx, cx, cy, ICON_SIZE * 0.8, color, [
             [0, 0.4],
@@ -120,13 +121,7 @@ class BadgeCardService extends BaseCard {
             return;
         }
 
-        // Fallback when the emoji asset is missing: neutral glyph.
-        this.drawText(ctx, icon, cx, cy + 2 * SCALE, {
-            font: `${ICON_SIZE}px ${FONT_SANS}`,
-            color: COLOR_TEXT,
-            align: 'center',
-            baseline: 'middle',
-        });
+        ErrorHelper.throwSilently(ExceptionEnum.RECORD_NOT_FOUND);
     }
 
     private drawTier(ctx: CanvasRenderingContext2D, level: number, color: Color, cx: number, y: number): void {

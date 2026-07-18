@@ -1,7 +1,7 @@
 import { TimelineEvent } from "../../interfaces/application/Event";
 import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../../interfaces/database/TableInterfaces";
-import { MetricEnum } from "../../interfaces/enums";
 import { ServerLeaderboardRow } from "../../interfaces/view";
+import { MetricEnum } from "../../interfaces/enums";
 import ServerRepository from "../../repositories/ServerRepository";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { normalizeString } from "../../utils/helpers/String";
@@ -104,6 +104,10 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
     @TrackMetricPull(MetricEnum.ServerMembers)
     public async getTotalServerMembersAsync(): Promise<number> {
         return await this.repository.getTotalServerMembersAsync();
+    }
+
+    public async getServersWithLeaderboardLiveAsync(): Promise<ServersModel[]> {
+        return await this.repository.getServersWithLeaderboardLiveAsync();
     }
 
     public async getTopServersByPointsAsync(limit: number = 5): Promise<ServerLeaderboardRow[]> {

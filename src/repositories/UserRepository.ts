@@ -1,6 +1,7 @@
 import { getUsersFieldType, RepositoryWithBase, UsersModel, UsersModelFieldEnum, UsersSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, UserRoleEnum } from "../interfaces/enums/index";
+import { StoredProcedureEnum } from "../interfaces/enums/database/StoredProcedureEnum";
 import { UserLeaderboardRow } from "../interfaces/view";
 
 class UserRepository implements RepositoryWithBase<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum> {
@@ -46,16 +47,7 @@ class UserRepository implements RepositoryWithBase<UsersModel, UsersSaveModel, t
     }
 
     async getTopUsersByExperienceAsync(limit: number = 5): Promise<UserLeaderboardRow[]> {
-        const model = await this.baseRepository.Select()
-            .Where({ UserRoleEnum: { operator: '!=', value: UserRoleEnum.SYSTEM } })
-            .OrderBy('ExperiencePoints', 'DESC')
-            .Limit(limit)
-            .Execute();
-        return model.map(user => ({
-            UserId: user.UserId,
-            Username: user.Username,
-            ExperiencePoints: user.ExperiencePoints,
-        }));
+        return this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetTopUsersByExperience, [limit]);
     }
 }
 

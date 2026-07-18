@@ -12,7 +12,6 @@ import { COLOR_TEXT } from '../CardTokens';
 
 export interface BadgeVisuals {
     color: Color;
-    icon: string;
     image: Image | null;
     title: string;
     description: string;
@@ -34,13 +33,12 @@ function resolveBadgeField(field: BadgeField, language: LanguageEnum, params: Re
         : getMultiLingualString(field, language);
 }
 
-export async function resolveBadgeVisuals(achievementEnum: BadgeEnum, language: LanguageEnum, level: number = 0, threshold: number = 0): Promise<BadgeVisuals> {
+export async function resolveBadgeVisualsAsync(achievementEnum: BadgeEnum, language: LanguageEnum, level: number = 0, threshold: number = 0): Promise<BadgeVisuals> {
     const badge = i18n.enums.badges[achievementEnum];
     const paramMapper = badgeThresholdParams[achievementEnum as keyof BadgeTranslationParams];
     const params = paramMapper ? paramMapper(threshold) as Record<string, number> : {};
     return {
         color: getEnumProperty(BadgeEnum, achievementEnum, MetadataKeyEnum.Color) as Color,
-        icon: getEnumProperty(BadgeEnum, achievementEnum, MetadataKeyEnum.Emoji) as string,
         image: await loadBadgeImageAsync(achievementEnum, COLOR_TEXT),
         title: resolveBadgeField(badge.title as BadgeField, language, params),
         description: resolveBadgeField(badge.description as BadgeField, language, params),

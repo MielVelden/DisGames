@@ -981,6 +981,13 @@ export const i18n: I18nTranslations = {
                         [LanguageEnum.DE]: "Beste Spieler nach Erfahrung",
                         [LanguageEnum.PT]: "Melhores jogadores por experiência",
                     },
+                    [LeaderboardCommandActionEnum.LIVE]: {
+                        [LanguageEnum.EN]: "Live leaderboard (auto-updates daily)",
+                        [LanguageEnum.NL]: "Live ranglijst (dagelijks automatisch bijgewerkt)",
+                        [LanguageEnum.ES]: "Clasificación en vivo (se actualiza a diario)",
+                        [LanguageEnum.DE]: "Live-Bestenliste (täglich automatisch aktualisiert)",
+                        [LanguageEnum.PT]: "Classificação em tempo real (atualiza diariamente)",
+                    },
                 },
             },
             labels: {
@@ -1068,6 +1075,20 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "{points} Pkt.",
                     [LanguageEnum.PT]: "{points} pts",
                 }, { points }),
+                liveEnabled: {
+                    [LanguageEnum.EN]: "Live leaderboard enabled. This message will refresh automatically once a day.",
+                    [LanguageEnum.NL]: "Live ranglijst ingeschakeld. Dit bericht wordt eenmaal per dag automatisch bijgewerkt.",
+                    [LanguageEnum.ES]: "Clasificación en vivo activada. Este mensaje se actualizará automáticamente una vez al día.",
+                    [LanguageEnum.DE]: "Live-Bestenliste aktiviert. Diese Nachricht wird einmal täglich automatisch aktualisiert.",
+                    [LanguageEnum.PT]: "Classificação em tempo real ativada. Esta mensagem será atualizada automaticamente uma vez por dia.",
+                },
+                liveDisabled: {
+                    [LanguageEnum.EN]: "Live leaderboard disabled for this server.",
+                    [LanguageEnum.NL]: "Live ranglijst uitgeschakeld voor dit server.",
+                    [LanguageEnum.ES]: "Clasificación en vivo desactivada para este servidor.",
+                    [LanguageEnum.DE]: "Live-Bestenliste für diesen Server deaktiviert.",
+                    [LanguageEnum.PT]: "Classificação em tempo real desativada para este servidor.",
+                },
             },
         },
         restartGame: {

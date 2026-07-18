@@ -2,7 +2,7 @@ import { getServersFieldType, ServersModel, ServersModelFieldEnum, ServersSaveMo
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ComponentError } from "../utils/application/Error";
-import { runQueryAsync, getTableName } from "./util/ConnectionHandler";
+import { StoredProcedureEnum } from "../interfaces/enums/database/StoredProcedureEnum";
 import { ServerLeaderboardRow } from "../interfaces/view";
 
 class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum> {
@@ -49,19 +49,13 @@ class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveMo
         return await this.baseRepository.Select().Sum("MemberCount");
     }
 
+    async getServersWithLeaderboardLiveAsync(): Promise<ServersModel[]> {
+        return this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetServersWithLeaderboardLive);
+    }
+
     async getTopServersByPointsAsync(limit: number = 5): Promise<ServerLeaderboardRow[]> {
-        const serversTable = getTableName(TableEnum.SERVERS);
-        const pointsTable = getTableName(TableEnum.POINTS);
-        const query = `
-            SELECT s.ServerId, s.Name, s.LanguageEnum, s.MemberCount, SUM(p.Points) AS TotalPoints
-            FROM ${serversTable} s
-            JOIN ${pointsTable} p ON p.ServerId = s.ServerId
-            GROUP BY s.ServerId, s.Name, s.LanguageEnum, s.MemberCount
-            ORDER BY TotalPoints DESC
-            LIMIT ?
-        `;
-        const results = await runQueryAsync(query, [limit]);
-        return (results ?? []) as ServerLeaderboardRow[];
+        const results = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetTopServersByPoints, [limit]);
+        return results as unknown as ServerLeaderboardRow[];
     }
 }
 

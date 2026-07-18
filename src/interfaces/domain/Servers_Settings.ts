@@ -3,4 +3,8 @@ export interface Servers_Settings {
     defaultRejectEmoji?: string;
     botNickname?: string;
     botAvatarUrl?: string;
+    leaderboardLive?: {
+        channelId: string;
+        messageId: string;
+    };
 }

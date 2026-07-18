@@ -284,6 +284,8 @@ export interface I18nTranslations {
                 updatedJustNow: LanguageTranslations;
                 boardFooter: (brand: string) => MultiLingualString;
                 ptsSuffix: (points: string) => MultiLingualString;
+                liveEnabled: LanguageTranslations;
+                liveDisabled: LanguageTranslations;
             };
         },
         restartGame: {
