@@ -4,8 +4,12 @@ import { ChartDefinition } from "../../interfaces/application/Chart";
 import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import { RepositoryUtils } from "../../repositories/BaseRepository";
 import { ExceptionEnum, StoredProcedureEnum } from "../../interfaces/enums";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class ChartService {
+export class ChartService extends Service {
+    public async initAsync(): Promise<void> {}
+
     public async getChartAsync(chartEnum: ChartTypeEnum, identity: User): Promise<ChartDefinition> {
         switch (chartEnum) {
             case ChartTypeEnum.LineChart_User_NewUser:
@@ -241,4 +245,6 @@ class ChartService {
     // #endregion
 }
 
-export default new ChartService();
+const chartService = new ChartService();
+registerService(chartService);
+export default chartService;

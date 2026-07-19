@@ -38,15 +38,15 @@ import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
-import { RegisterInit } from "../../utils/registries/InitRegistry";
 import UserService from "./UserService";
 import BadgeService from "./BadgeService";
 import { isServerPremium } from "../../utils/application/PremiumAccess";
 import { NON_PREMIUM_GAME_LIMIT } from "../../constants";
+import { registerService } from "../../utils/container/Container";
+import { Service } from "../../interfaces/application/Service";
 
-@RegisterInit()
 @RegisterMetricPulls()
-class GameService {
+export class GameService extends Service {
     private games: GameModule[] = [];
 
     public async initAsync(): Promise<void> {
@@ -784,4 +784,6 @@ class GameService {
     }
 }
 
-export default new GameService();
+const gameService = new GameService();
+registerService(gameService);
+export default gameService;

@@ -1,7 +1,7 @@
 import { PersistentButton } from "../../interfaces/application/PersistentButton";
-import { PersistentButtonEnum } from "../../interfaces/enums/application/ButtonId";
+import { PersistentButtonEnum } from "../../interfaces/enums/application/PersistentButtonEnum";
 import { InteractionEvent, isButtonInteractionEvent } from "../../interfaces/application/Event";
-import { createPersistentButton, parsePersistentCustomId } from "../../builders/buttons/PersistentButtonBuilder";
+import { createPersistentButton, parsePersistentCustomId } from "../../builders/buttons/PersistentButton";
 import { createMultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { ButtonStyle } from "../../interfaces/application/Message";
 

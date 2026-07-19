@@ -10,8 +10,12 @@ import MediaService from "./MediaService";
 import Logger from "../../utils/application/Logger";
 import { toonEncode } from "../../utils/helpers/Toon";
 import { addPrefix, createBlock, createTitle } from "../../utils/helpers/Markdown";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class ComponentService {
+export class ComponentService extends Service {
+    public async initAsync(): Promise<void> {}
+
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
         return this.createComponent({
             type: ComponentType.BUTTON,
@@ -159,4 +163,6 @@ class ComponentService {
     }
 }
 
-export default new ComponentService();
+const componentService = new ComponentService();
+registerService(componentService);
+export default componentService;

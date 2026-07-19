@@ -11,12 +11,12 @@ import Logger from "../../utils/application/Logger";
 import ComponentService from "../application/ComponentService";
 import { ComponentVisibility } from "../../interfaces/application/Message";
 import BadgeCard from "../../builders/images/BadgeCard";
-import { RegisterInit } from "../../utils/registries/InitRegistry";
 import { getConfigValue } from "../../utils/application/Config";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-@RegisterInit()
-class BadgeService {
+export class BadgeService extends Service {
     private badges: BadgeModule[] = [];
 
     public async initAsync(): Promise<void> {
@@ -139,4 +139,6 @@ class BadgeService {
     }
 }
 
-export default new BadgeService();
+const badgeService = new BadgeService();
+registerService(badgeService);
+export default badgeService;

@@ -7,7 +7,7 @@ import { assertNever, ErrorHelper } from '../../utils/application/Error';
 import { withEventContextAsync } from '../../middleware/EventContext';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { i18n } from '../../utils/i18n/i18n';
-import { parsePersistentCustomId } from '../../builders/buttons/PersistentButtonBuilder';
+import { parsePersistentCustomId } from '../../builders/buttons/PersistentButton';
 import { getPersistentButton } from '../../utils/collectors/PersistentButtonCollector';
 
 const DEFAULT_TIMEOUT = calculateDuration(1, DurationEnum.MINUTE);

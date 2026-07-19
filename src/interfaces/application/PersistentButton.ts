@@ -1,5 +1,5 @@
 import { InteractionEvent } from "./Event";
-import { PersistentButtonEnum } from "../enums/application/ButtonId";
+import { PersistentButtonEnum } from "../enums/application/PersistentButtonEnum";
 
 export interface PersistentButton {
     id: PersistentButtonEnum;

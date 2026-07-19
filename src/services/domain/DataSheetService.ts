@@ -4,9 +4,12 @@ import { GameTypeEnum } from "../../interfaces/enums";
 import DataSheetRepository from "../../repositories/DataSheetRepository";
 import { BaseDomainService } from "./BaseDomainService";
 import GameDataService from "./GameDataService";
+import { registerService } from "../../utils/container/Container";
 
-class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSaveModel, typeof DataSheetRepository> {
+export class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSaveModel, typeof DataSheetRepository> {
     protected readonly repository = DataSheetRepository;
+
+    public async initAsync(): Promise<void> {}
 
     public getAllAsync(): Promise<DatasheetsModel[]> {
         return this.repository.getAllAsync();
@@ -33,4 +36,6 @@ class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSave
     }
 }
 
-export default new DataSheetService();
+const dataSheetService = new DataSheetService();
+registerService(dataSheetService);
+export default dataSheetService;

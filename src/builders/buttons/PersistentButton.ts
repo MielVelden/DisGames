@@ -1,6 +1,6 @@
 import { ActionButton, ComponentType } from "../../interfaces/application/Message";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { PersistentButtonEnum } from "../../interfaces/enums/application/ButtonId";
+import { PersistentButtonEnum } from "../../interfaces/enums/application/PersistentButtonEnum";
 
 const PREFIX = "p";
 

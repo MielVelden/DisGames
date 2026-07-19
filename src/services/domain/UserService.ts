@@ -10,15 +10,14 @@ import TimelineBuilder from "./TimelineBuilder";
 import { DurationEnum, InteractionEvent } from "../../interfaces/application";
 import { BaseDomainService } from "./BaseDomainService";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
-import { RegisterInit } from "../../utils/registries/InitRegistry";
 import { calculateDuration } from "../../utils/helpers/Duration";
 import ServerService from "./ServerService";
 import BadgeRepository from "../../repositories/BadgeRepository";
 import BadgeService from "./BadgeService";
 import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
+import { registerService } from "../../utils/container/Container";
 
-@RegisterInit()
-class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
+export class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof UserRepository> {
     protected readonly repository = UserRepository;
 
     public async initAsync(): Promise<void> {
@@ -182,4 +181,6 @@ class UserService extends BaseDomainService<UsersModel, UsersSaveModel, typeof U
     }
 }
 
-export default new UserService();
+const userService = new UserService();
+registerService(userService);
+export default userService;

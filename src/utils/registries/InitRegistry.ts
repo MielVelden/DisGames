@@ -9,16 +9,3 @@ export async function initAsync(): Promise<void> {
         await fn();
     }
 }
-
-export function RegisterInit() {
-    return function <T extends new (...args: any[]) => {}>(constructor: T) {
-        return class extends constructor {
-            constructor(...args: any[]) {
-                super(...args);
-                if (typeof (this as any).initAsync === 'function') {
-                    registerInit(() => (this as any).initAsync());
-                }
-            }
-        };
-    };
-}

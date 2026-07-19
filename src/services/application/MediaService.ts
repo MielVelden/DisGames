@@ -4,15 +4,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { GameTypeEnum } from "../../interfaces/enums";
 import Logger from "../../utils/application/Logger";
-import { RegisterInit } from "../../utils/registries/InitRegistry";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-@RegisterInit()
-class MediaService {
+export class MediaService extends Service {
     private readonly imagesPath: string;
     private readonly notFoundImage: Media;
     private readonly bufferCache: Map<string, Buffer> = new Map();
 
     constructor() {
+        super();
         this.imagesPath = path.join(process.cwd(), 'images');
         this.notFoundImage = {
             url: path.join(this.imagesPath, 'NotFound.png'),
@@ -303,4 +304,6 @@ class MediaService {
     }
 }
 
-export default new MediaService();
+const mediaService = new MediaService();
+registerService(mediaService);
+export default mediaService;

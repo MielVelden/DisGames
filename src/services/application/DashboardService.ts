@@ -18,8 +18,12 @@ import { i18n } from "../../utils/i18n/i18n";
 import { ExceptionEnum, MetricEnum } from "../../interfaces/enums";
 import MetricService from "../domain/MetricService";
 import { humanizeDateFromNow } from "../../utils/helpers/Date";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class DashboardService {
+export class DashboardService extends Service {
+    public async initAsync(): Promise<void> {}
+
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
         switch (dashboardEnum) {
             case DashboardEnum.HOME:
@@ -301,4 +305,6 @@ class DashboardService {
     }
 }
 
-export default new DashboardService();
+const dashboardService = new DashboardService();
+registerService(dashboardService);
+export default dashboardService;

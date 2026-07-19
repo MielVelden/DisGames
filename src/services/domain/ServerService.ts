@@ -12,9 +12,12 @@ import Logger from "../../utils/application/Logger";
 import DiscordMemberService from "../discord/DiscordMemberService";
 import { PREMIUM_NAME } from "../../utils/application/PremiumAccess";
 import packageJson from "../../../package.json";
+import { registerService } from "../../utils/container/Container";
 
-class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
+export class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
     protected readonly repository = ServerRepository;
+
+    public async initAsync(): Promise<void> {}
 
     protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
         savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
@@ -115,4 +118,6 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
     }
 }
 
-export default new ServerService();
+const serverService = new ServerService();
+registerService(serverService);
+export default serverService;

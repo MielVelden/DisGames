@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { PersistentButton } from "../../interfaces/application/PersistentButton";
-import { PersistentButtonEnum } from "../../interfaces/enums/application/ButtonId";
+import { PersistentButtonEnum } from "../../interfaces/enums/application/PersistentButtonEnum";
 import Logger from "../application/Logger";
 import { resolvePath } from "../helpers/PathResolver";
 

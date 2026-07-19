@@ -8,6 +8,8 @@ import { MetadataKeyEnum } from '../../interfaces/enums/application/MetadataKeyE
 import OllamaClient from '../../utils/api/OllamaClient';
 import GameDataService from '../domain/GameDataService';
 import Logger from '../../utils/application/Logger';
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
 export interface TranslationResult {
     translated: number;
@@ -57,7 +59,9 @@ function getMissingLanguages(multiLingualString: MultiLingualString): LanguageEn
     return getRequiredLanguages().filter(lang => !existing[lang]);
 }
 
-class ContentTranslationService {
+export class ContentTranslationService extends Service {
+    public async initAsync(): Promise<void> {}
+
     async translateAsync(gameType: GameTypeEnum, event: InteractionEvent): Promise<TranslationResult> {
         const records = await GameDataService.getByGameIdAsync(gameType);
         const result: TranslationResult = { translated: 0, skipped: 0, failed: [] };
@@ -105,4 +109,6 @@ class ContentTranslationService {
     }
 }
 
-export default new ContentTranslationService();
+const contentTranslationService = new ContentTranslationService();
+registerService(contentTranslationService);
+export default contentTranslationService;

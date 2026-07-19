@@ -13,8 +13,12 @@ import { getCountryBoundingBox } from '../../utils/constants/CountryBoundingBoxe
 import GameDataService from '../domain/GameDataService';
 import Logger from '../../utils/application/Logger';
 import { GenerationResult } from './ContentGenerationService';
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class GeoDataGenerationService {
+export class GeoDataGenerationService extends Service {
+    public async initAsync(): Promise<void> {}
+
     async generateAsync(
         event: InteractionEvent,
         dataSheetId: number | undefined,
@@ -72,4 +76,6 @@ class GeoDataGenerationService {
     }
 }
 
-export default new GeoDataGenerationService();
+const geoDataGenerationService = new GeoDataGenerationService();
+registerService(geoDataGenerationService);
+export default geoDataGenerationService;

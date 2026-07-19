@@ -8,6 +8,8 @@ import { ComponentError } from '../../utils/application/Error';
 import OllamaClient from '../../utils/api/OllamaClient';
 import GameDataService from '../domain/GameDataService';
 import Logger from '../../utils/application/Logger';
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
 export interface GenerationResult {
     generated: number;
@@ -58,7 +60,9 @@ function parseResponse(raw: string, gameType: GameTypeEnum): GeneratedItem[] {
     return allItems;
 }
 
-class ContentGenerationService {
+export class ContentGenerationService extends Service {
+    public async initAsync(): Promise<void> {}
+
     async generateAsync(
         event: InteractionEvent,
         gameType: GameTypeEnum,
@@ -105,4 +109,6 @@ class ContentGenerationService {
     }
 }
 
-export default new ContentGenerationService();
+const contentGenerationService = new ContentGenerationService();
+registerService(contentGenerationService);
+export default contentGenerationService;

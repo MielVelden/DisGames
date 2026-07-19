@@ -8,11 +8,13 @@ import { MetadataKeyEnum } from "../../interfaces/enums/application/MetadataKeyE
 import { BaseEntity } from "../../interfaces/database/BaseEntity";
 import { registerPull } from "../../utils/registries/MetricRegistry";
 import { METRIC_PULL_KEY } from '../../interfaces/domain';
+import { Service } from "../../interfaces/application/Service";
 
-export abstract class BaseDomainService<T extends BaseEntity & { getId(): number | undefined; getExternalId(): string | number | undefined; }, S extends BaseEntity, R extends Repository<T> = Repository<T>> {
+export abstract class BaseDomainService<T extends BaseEntity & { getId(): number | undefined; getExternalId(): string | number | undefined; }, S extends BaseEntity, R extends Repository<T> = Repository<T>> extends Service {
     protected abstract readonly repository: R;
 
     constructor() {
+        super();
         const proto = Object.getPrototypeOf(this);
         for (const key of Object.getOwnPropertyNames(proto)) {
             const metric = Reflect.getMetadata(METRIC_PULL_KEY, proto, key);

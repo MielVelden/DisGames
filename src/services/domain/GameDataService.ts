@@ -1,21 +1,16 @@
 import { InteractionEvent } from "../../interfaces/application";
 import { GameDataModel, GameDataModelFieldEnum, GameDataSaveModel } from "../../interfaces/database/TableInterfaces";
 import { ExceptionEnum, GameTypeEnum } from "../../interfaces/enums";
-import { GameOptionEnum } from "../../interfaces/domain/Game";
 import GameDataRepository from "../../repositories/GameDataRepository";
 import { ErrorHelper } from "../../utils/application/Error";
+import { getService, registerService } from "../../utils/container/Container";
 import { BaseDomainService } from "./BaseDomainService";
+import { GameService } from "./GameService";
 
-// Lazily required to avoid a circular-require deadlock: GameService transitively
-// imports GameDataService (via DataSheetService), so GameService must only be
-// resolved here at call-time, never at module load time.
-// TODO: WRONG
-function getGameServiceLazily(): typeof import("./GameService").default {
-    return require("./GameService").default;
-}
-
-class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel, typeof GameDataRepository> {
+export class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel, typeof GameDataRepository> {
     protected readonly repository = GameDataRepository;
+
+    public async initAsync(): Promise<void> {}
 
     public getAllAsync(): Promise<GameDataModel[]> {
         return this.repository.getAllAsync();
@@ -36,7 +31,8 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
             const gameId = savable.validateIsNotNull(GameDataModelFieldEnum.GameId);
             const response = savable.validateIsNotNull(GameDataModelFieldEnum.Response);
 
-            const gameModule = await getGameServiceLazily().getGameByTypeAsync(gameId as GameTypeEnum);
+            const gameService = getService<GameService>(GameService.serviceToken);
+            const gameModule = await gameService.getGameByTypeAsync(gameId as GameTypeEnum);
 
             if(!gameModule?.config.hasDataSheets) {
                 if(savable.DataSheetId === undefined || savable.DataSheetId === 0)
@@ -73,4 +69,6 @@ class GameDataService extends BaseDomainService<GameDataModel, GameDataSaveModel
     }
 }
 
-export default new GameDataService();
+const gameDataService = new GameDataService();
+registerService(gameDataService);
+export default gameDataService;
