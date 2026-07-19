@@ -3,6 +3,7 @@ import { GatewayIntentBits } from 'discord.js';
 import { DiscordClient } from './interfaces/application/DiscordClient';
 import { loadEvents } from './utils/collectors/EventCollector';
 import { loadCommands } from './utils/collectors/CommandCollector';
+import { loadPersistentButtons } from './utils/collectors/PersistentButtonCollector';
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
 import Logger from './utils/application/Logger';
 import { startHttpServer } from './server';
@@ -50,6 +51,7 @@ discordClient.once('clientReady', async () => {
         loadCommands(discordClient),
         loadEvents(discordClient),
       ]);
+      loadPersistentButtons();
       if (getConfigValue(EnvConfigEnum.DISGAMES_API_ENABLED)) {
         const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);
         startHttpServer(port);

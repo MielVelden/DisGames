@@ -137,6 +137,12 @@ export class MockDiscordEvent implements BaseInteractionEvent {
                 result[key] = (field.parse ? field.parse(values) : values) as ModalResult<TFields>[keyof TFields];
             } else if (field.kind === 'radio') {
                 result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+            } else if (field.kind === 'checkbox') {
+                const value = raw === 'true';
+                result[key] = (field.parse ? field.parse(value) : value) as ModalResult<TFields>[keyof TFields];
+            } else if (field.kind === 'checkboxGroup' || field.kind === 'fileUpload') {
+                const values = raw ? raw.split(',') : [];
+                result[key] = (field.parse ? field.parse(values) : values) as ModalResult<TFields>[keyof TFields];
             } else {
                 result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
             }
@@ -144,9 +150,12 @@ export class MockDiscordEvent implements BaseInteractionEvent {
         return result;
     }
 
-    public async getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null> {
+    public async getGameSettingsViaModalAsync(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues, components?: Component[]): Promise<{ settings: Games_Settings; event: InteractionEvent } | null> {
         const settings = this.inputSimulator.getNextSettingsResponse();
-        return settings?.value as Games_Settings || null;
+        if (!settings)
+            return null;
+
+        return { settings: settings.value as Games_Settings, event: this as unknown as InteractionEvent };
     }
 
     public async getChannelNameAsync(channelId: string): Promise<string> {

@@ -7,6 +7,8 @@ import { assertNever, ErrorHelper } from '../../utils/application/Error';
 import { withEventContextAsync } from '../../middleware/EventContext';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { i18n } from '../../utils/i18n/i18n';
+import { parsePersistentCustomId } from '../../builders/buttons/PersistentButtonBuilder';
+import { getPersistentButton } from '../../utils/collectors/PersistentButtonCollector';
 
 const DEFAULT_TIMEOUT = calculateDuration(1, DurationEnum.MINUTE);
 
@@ -98,6 +100,16 @@ export class InteractionService {
   }
 
   public static async handleButtonInteraction(interaction: InteractionEvent): Promise<void> {
+    const persistent = parsePersistentCustomId(interaction.customId);
+    if (persistent) {
+      const button = getPersistentButton(persistent.id);
+      if (button)
+        await button.handleAsync(interaction);
+      else
+        Logger.logDebug(`No persistent handler found for button: ${persistent.id}`);
+      return;
+    }
+
     const handler = InteractionService.buttonHandlers.get(interaction.customId);
     if (handler) {
       if (handler.userId && handler.userId !== interaction.user.userId)

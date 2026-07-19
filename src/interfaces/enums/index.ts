@@ -14,6 +14,7 @@ export * from './games/DifficultyEnum';
 export * from './games/GameSettingsEnum';
 export * from './commands/Games';
 export * from './application/EventTypeEnum';
+export * from './application/ButtonId';
 
 // Import metadata options to trigger registrations
 import './database/TableEnumOptions';
