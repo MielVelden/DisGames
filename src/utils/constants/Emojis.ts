@@ -1,8 +1,13 @@
 import { Servers_Settings } from "../../interfaces/domain/Servers_Settings";
+import { getConfigValue } from "../application/Config";
+import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 
 export const DEFAULT_ACCEPT_EMOJI = '✅';
 export const DEFAULT_WRONG_ANSWER_EMOJI = '❌';
-export const DEFAULT_PREMIUM_EMOJI = '1522962406832341144';
+
+export function getDefaultPremiumEmoji(): string {
+    return getConfigValue(EnvConfigEnum.DEFAULT_PREMIUM_EMOJI);
+}
 
 export function getAcceptEmoji(settings?: Servers_Settings): string {
     return settings?.defaultAcceptEmoji ?? DEFAULT_ACCEPT_EMOJI;

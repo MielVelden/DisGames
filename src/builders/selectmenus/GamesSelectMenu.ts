@@ -17,7 +17,8 @@ export function createGamesSelectMenu(gameModules: GameModule[], handlerConfig?:
             label: game.config.name,
             emoji: game.config.emoji,
             description: game.config.description,
-            value: game.config.id.toString()
+            value: game.config.id.toString(),
+            isPremium: game.config.isPremiumOnly ?? false
         }))
     }, handlerConfig);
 }

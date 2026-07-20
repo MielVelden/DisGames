@@ -382,4 +382,11 @@ export const exceptionTranslations: LanguageExceptionTranslations = {
         [LanguageEnum.DE]: "Name oder Avatar des Bots für diesen Server konnten nicht aktualisiert werden. Bitte versuche es später erneut.",
         [LanguageEnum.PT]: "Não foi possível atualizar o nome ou o avatar do bot para este servidor. Tenta novamente mais tarde.",
     },
+    [ExceptionEnum.PREMIUM_ONLY_GAME]: {
+        [LanguageEnum.EN]: "This game is only available for premium servers. Upgrade to premium to play this game.",
+        [LanguageEnum.NL]: "Dit spel is alleen beschikbaar voor premium servers. Upgrade naar premium om dit spel te spelen.",
+        [LanguageEnum.ES]: "Este juego solo está disponible para servidores premium. Actualiza a premium para jugar este juego.",
+        [LanguageEnum.DE]: "Dieses Spiel ist nur für Premium-Server verfügbar. Upgrade auf Premium, um dieses Spiel zu spielen.",
+        [LanguageEnum.PT]: "Este jogo só está disponível para servidores premium. Atualiza para premium para jogar este jogo.",
+    },
 };

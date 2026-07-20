@@ -1,5 +1,5 @@
 import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
-import { DatasheetsModel, GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
+import { DatasheetsModel, GameDataModel, GamesModel, GamesModelFieldEnum, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
 import {
@@ -40,7 +40,7 @@ import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
 import UserService from "./UserService";
 import BadgeService from "./BadgeService";
-import { isServerPremium } from "../../utils/application/PremiumAccess";
+import { isPremiumEnabled, isServerPremium } from "../../utils/application/PremiumAccess";
 import { NON_PREMIUM_GAME_LIMIT } from "../../constants";
 import { registerService } from "../../utils/container/Container";
 import { Service } from "../../interfaces/application/Service";
@@ -230,6 +230,8 @@ export class GameService extends Service {
                 savable.Answer = gameData.map(data => data.Response.getMessage(event.server.LanguageEnum)).join(ARRAY_JOIN_DELIMITER);
             }
 
+            savable.validateHasNotChanged(GamesModelFieldEnum.GameTypeEnum, model.GameTypeEnum);
+
             // Update
             const savedModel = await GameRepository.saveAsync(savable);
 
@@ -258,6 +260,14 @@ export class GameService extends Service {
 
         if (!isValidEnumValue(GameTypeEnum, savable.GameTypeEnum as GameTypeEnum))
             ErrorHelper.throw(ExceptionEnum.INVALID_GAME_TYPE);
+
+        // Get the game module
+        const gameModule = await this.getGameByTypeAsync(savable.GameTypeEnum as GameTypeEnum);
+        if (!gameModule)
+            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+
+        if (gameModule.config.isPremiumOnly && !isServerPremium(event.server) && isPremiumEnabled())
+            ErrorHelper.throw(ExceptionEnum.PREMIUM_ONLY_GAME);
 
         // Check if game exists in channel or server
         const [activeChannelGame, activeServerGame] = await Promise.all([
@@ -302,11 +312,6 @@ export class GameService extends Service {
             if (activeGames.length >= NON_PREMIUM_GAME_LIMIT)
                 ErrorHelper.throwWithParameters(ExceptionEnum.NON_PREMIUM_GAME_LIMIT_REACHED, { limit: NON_PREMIUM_GAME_LIMIT });
         }
-
-        // Get the game module
-        const gameModule = await this.getGameByTypeAsync(savable.GameTypeEnum as GameTypeEnum);
-        if (!gameModule)
-            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
         // Set the answer
         if (gameModule.config.firstAnswer)

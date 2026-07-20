@@ -29,8 +29,8 @@ import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
 import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
 import { withEventContextAsync, getCurrentServer, getCurrentComponents } from '../../../middleware/EventContext';
-import { isPremiumEnabled, isPurchaseButtonEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
-import { DEFAULT_PREMIUM_EMOJI } from '../../../utils/constants/Emojis';
+import { addPremiumSuffix, isPremiumEnabled, isPurchaseButtonEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
+import { getDefaultPremiumEmoji } from '../../../utils/constants/Emojis';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -44,6 +44,14 @@ class DiscordComponentMapper {
 
         if (option.emoji)
             discordSelectMenuOption.setEmoji({ name: option.emoji });
+
+        if (option.isPremium) {
+            const server = getCurrentServer();
+            if (isPremiumEnabled() && server && !isServerPremium(server)) {
+                discordSelectMenuOption.setEmoji({ id: getDefaultPremiumEmoji() });
+                discordSelectMenuOption.setLabel(addPremiumSuffix(option.label).getMessage());
+            }
+        }
 
         return discordSelectMenuOption;
     }
@@ -151,7 +159,7 @@ class DiscordComponentMapper {
                 discordButtons.push(discordButton);
             }
 
-            button.emoji = DEFAULT_PREMIUM_EMOJI;
+            button.emoji = getDefaultPremiumEmoji();
             button.disabled = true;
         }
 

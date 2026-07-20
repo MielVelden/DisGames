@@ -124,6 +124,7 @@ export interface SelectOption {
     description?: MultiLingualString;
     emoji?: string;
     default?: boolean;
+    isPremium?: boolean;
 }
 
 export interface StringSelect extends BaseSelectMenu {

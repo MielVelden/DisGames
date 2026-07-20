@@ -18,6 +18,7 @@ export default {
         description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_COUNTRY].description),
         points: 1,
         isCalculated: false,
+        isPremiumOnly: true,
         expectedType: "string",
         addCorrectReaction: true,
         hasImages: true,

@@ -39,6 +39,7 @@ export interface GameConfig {
     name: MultiLingualString;
     description: MultiLingualString;
     points: number;
+    isPremiumOnly?: boolean;
     isCalculated: boolean;
     expectedType: "string" | "number" | "boolean";
     firstAnswer: string;
