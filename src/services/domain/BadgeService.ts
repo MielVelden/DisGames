@@ -10,7 +10,7 @@ import PointRepository from "../../repositories/PointRepository";
 import Logger from "../../utils/application/Logger";
 import ComponentService from "../application/ComponentService";
 import { ComponentVisibility } from "../../interfaces/application/Message";
-import BadgeCard from "../../builders/images/BadgeCard";
+import BadgeCard from "../../builders/cards/BadgeCard";
 import { getConfigValue } from "../../utils/application/Config";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 import { Service } from "../../interfaces/application/Service";

@@ -10,7 +10,7 @@ import { STRING_DELIMITER } from "../../constants";
 import { getRejectEmoji } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
 import { createBlock } from "../../utils/helpers/Markdown";
-import ConnectionImageService from "../../builders/images/ConnectionGameCard";
+import ConnectionImageService from "../../builders/cards/ConnectionGameCard";
 
 interface ConnectionsGameState {
     gameDataArray: GameDataModel[];

@@ -3,7 +3,7 @@ import { LanguageEnum } from "../../interfaces/enums";
 import { LeaderboardEntry, LeaderboardSubtitleTypeEnum, ServerLeaderboardRow, UserLeaderboardRow } from "../../interfaces/view";
 import ComponentService from "../../services/application/ComponentService";
 import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
-import LeaderboardCard from "../images/LeaderboardCard";
+import LeaderboardCard from "../cards/LeaderboardCard";
 
 export function mapServerEntries(rows: ServerLeaderboardRow[]): LeaderboardEntry[] {
     return rows.map(row => ({
