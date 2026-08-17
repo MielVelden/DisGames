@@ -36,6 +36,9 @@ export default {
             if (!/^[A-Za-z]+$/.test(input))
                 return false;
 
+            if (/^(.)\1*$/i.test(input))
+                return false;
+
             return compareStrings(input.charAt(0), event.getGameDataAnswer());
         },
 

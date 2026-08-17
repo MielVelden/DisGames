@@ -25,8 +25,8 @@ export class MediaService extends Service {
     public async initAsync(): Promise<void> {
         const preloadPaths: string[] = [this.notFoundImage.url];
 
-        const baseNames: Array<'welcome' | 'profile' | 'aboutme' | 'settings'> =
-            ['welcome', 'profile', 'aboutme', 'settings'];
+        const baseNames: Array<'welcome' | 'profile' | 'aboutme' | 'settings' | 'pro'> =
+            ['welcome', 'profile', 'aboutme', 'settings', 'pro'];
         for (const name of baseNames)
             preloadPaths.push(path.join(this.imagesPath, `${name}.${MediaType.PNG}`));
 
@@ -280,7 +280,7 @@ export class MediaService extends Service {
         }
     }
 
-    public getBaseImage(name: 'welcome' | 'profile' | 'aboutme' | 'settings'): Media {
+    public getBaseImage(name: 'welcome' | 'profile' | 'aboutme' | 'settings' | 'pro'): Media {
         const baseImagePath = path.join(this.imagesPath, `${name}.${MediaType.PNG}`);
 
         if (fs.existsSync(baseImagePath)) {

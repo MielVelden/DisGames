@@ -282,8 +282,7 @@ export interface I18nTranslations {
                 levelLabel: (level: string) => MultiLingualString;
                 points: LanguageTranslations;
                 noPointsRecorded: LanguageTranslations;
-                updatedJustNow: LanguageTranslations;
-                boardFooter: (brand: string) => MultiLingualString;
+                updatedLabel: LanguageTranslations;
                 ptsSuffix: (points: string) => MultiLingualString;
                 liveEnabled: LanguageTranslations;
                 liveDisabled: LanguageTranslations;

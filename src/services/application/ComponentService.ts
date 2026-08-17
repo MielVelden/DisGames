@@ -108,17 +108,22 @@ export class ComponentService extends Service {
         ];
     }
 
-    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string): Component[] {
+    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string, skipDefaultStartMessage: boolean = false): Component[] {
         const gameImage = MediaService.getGameImage(gameTypeEnum);
 
-        return [
+        const components = [
             this.createImage(gameImage, false),
             this.createSeparator(),
             this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].name), gameEmoji))),
             this.createContent(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].howToPlay)),
-            this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()),
-            this.createContent(createBlock(createMultiLingualString(firstAnswer))),
         ];
+
+        if (!skipDefaultStartMessage)
+            components.push(this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()));
+
+        components.push(this.createContent(createBlock(createMultiLingualString(firstAnswer))));
+
+        return components;
     }
 
     public createImage(image: Media, includeContainer: boolean = true): Component {

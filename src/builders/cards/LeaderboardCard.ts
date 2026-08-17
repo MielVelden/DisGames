@@ -1,7 +1,6 @@
 import { createCanvas, CanvasRenderingContext2D, Image } from 'canvas';
 import * as fs from 'fs';
 import * as path from 'path';
-import packageJson from '../../../package.json';
 import { GeneratedMedia } from '../../interfaces/application/Media';
 import { BaseCard, TextStyle } from './BaseCard';
 import {
@@ -310,17 +309,27 @@ class LeaderboardCardService extends BaseCard {
 
     private drawFooter(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, language: LanguageEnum): void {
         this.fillCircle(ctx, x + 2.5 * SCALE, y + FOOTER_HEIGHT / 2, 2.5 * SCALE, COLOR_PACK.accent);
-        this.drawText(ctx, getMultiLingualString(i18n.commands.leaderboard.labels.updatedJustNow, language), x + 10 * SCALE, y + FOOTER_HEIGHT / 2, {
+        this.drawText(ctx, getMultiLingualString(i18n.commands.leaderboard.labels.updatedLabel, language), x + 10 * SCALE, y + FOOTER_HEIGHT / 2, {
             font: `500 ${9.5 * SCALE}px ${FONT_SANS}`,
             color: COLOR_TEXT_FAINT,
             baseline: 'middle',
         });
-        const boardText = i18n.commands.leaderboard.labels.boardFooter(packageJson.name.toUpperCase()).getMessage(language);
-        this.drawText(ctx, boardText, x + width, y + FOOTER_HEIGHT / 2, {
+        const timestampText = this.getFooterTimestamp();
+        this.drawText(ctx, timestampText, x + width, y + FOOTER_HEIGHT / 2, {
             font: `${9.5 * SCALE}px ${FONT_MONO}`,
             color: COLOR_TEXT_FAINT,
             align: 'right',
             baseline: 'middle',
+        });
+    }
+
+    private getFooterTimestamp(): string {
+        return new Date().toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     }
 

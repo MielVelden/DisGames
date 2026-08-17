@@ -22,6 +22,7 @@ export default {
         expectedType: "string",
         addCorrectReaction: true,
         hasImages: true,
+        skipDefaultStartMessage: true,
         allowDuplicatesResponse: true,
         options: {
             [GameOptionEnum.ALLOW_SKIPPING]: true,

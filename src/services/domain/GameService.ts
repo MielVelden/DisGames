@@ -179,7 +179,7 @@ export class GameService extends Service {
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
-        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string);
+        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string, gameModule.config.skipDefaultStartMessage);
 
         if (gameModule.functions.getStartComponentsAsync) {
             const server = await ServerService.getByExternalIdAsync(game.ServerId);

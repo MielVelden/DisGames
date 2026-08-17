@@ -12,7 +12,7 @@ SetIsRequired(LanguageEnum, LanguageEnum.EN);
 SetIsRequired(LanguageEnum, LanguageEnum.NL);
 SetIsRequired(LanguageEnum, LanguageEnum.ES);
 SetIsRequired(LanguageEnum, LanguageEnum.DE);
-SetIsRequired(LanguageEnum, LanguageEnum.PT);
+// SetIsRequired(LanguageEnum, LanguageEnum.PT);
 
 // https://nucleoapp.com/svg-flag-icons
 SetEmoji(LanguageEnum, LanguageEnum.EN, "🇺🇸");

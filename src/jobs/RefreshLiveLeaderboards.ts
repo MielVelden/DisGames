@@ -1,3 +1,4 @@
+import { DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
 import { JobModule } from "../interfaces/application/Job";
 import { discordClient } from "..";
 import { BaseInteractionEvent } from "../interfaces/application/Event";
@@ -37,7 +38,12 @@ export default {
                         }
                     }
                 } catch (error) {
-                    await Logger.logError(`Failed to refresh live leaderboard for server ${server.ServerId}`, error as Error);
+                    if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotEditMessageAuthoredByAnotherUser) {
+                        await ServerService.clearLeaderboardLiveAsync(server);
+                        await Logger.logWarning(`Disabled live leaderboard for server ${server.ServerId}: stored message is no longer editable`);
+                    } else {
+                        await Logger.logError(`Failed to refresh live leaderboard for server ${server.ServerId}`, error as Error);
+                    }
                 }
             }
 

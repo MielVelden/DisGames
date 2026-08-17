@@ -1055,20 +1055,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Noch keine Punkte erfasst",
                     [LanguageEnum.PT]: "Ainda não há pontos registrados",
                 },
-                updatedJustNow: {
-                    [LanguageEnum.EN]: "Updated just now",
-                    [LanguageEnum.NL]: "Zojuist bijgewerkt",
-                    [LanguageEnum.ES]: "Actualizado hace un momento",
-                    [LanguageEnum.DE]: "Gerade aktualisiert",
-                    [LanguageEnum.PT]: "Atualizado agora mesmo",
+                updatedLabel: {
+                    [LanguageEnum.EN]: "Updated daily",
+                    [LanguageEnum.NL]: "Dagelijks bijgewerkt",
+                    [LanguageEnum.ES]: "Actualizado diariamente",
+                    [LanguageEnum.DE]: "Täglich aktualisiert",
+                    [LanguageEnum.PT]: "Atualizado diariamente",
                 },
-                boardFooter: (brand: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "{brand} BOARD",
-                    [LanguageEnum.NL]: "{brand} BORD",
-                    [LanguageEnum.ES]: "{brand} TABLERO",
-                    [LanguageEnum.DE]: "{brand} TAFEL",
-                    [LanguageEnum.PT]: "{brand} QUADRO",
-                }, { brand }),
                 ptsSuffix: (points: string) => new MultiLingualString({
                     [LanguageEnum.EN]: "{points} pts",
                     [LanguageEnum.NL]: "{points} pt",

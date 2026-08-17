@@ -10,6 +10,7 @@ import { BaseDomainService } from "./BaseDomainService";
 import TimelineBuilder from "./TimelineBuilder";
 import Logger from "../../utils/application/Logger";
 import DiscordMemberService from "../discord/DiscordMemberService";
+import MediaService from "../application/MediaService";
 import { PREMIUM_NAME } from "../../utils/application/PremiumAccess";
 import packageJson from "../../../package.json";
 import { registerService } from "../../utils/container/Container";
@@ -59,9 +60,10 @@ export class ServerService extends BaseDomainService<ServersModel, ServersSaveMo
             IsPremium: true
         }));
 
+        const proLogo = await MediaService.getMediaBufferAsync(MediaService.getBaseImage('pro'));
         DiscordMemberService.setGuildIdentityAsync(guildId, {
             nickname: packageJson.name + " " + PREMIUM_NAME,
-            avatarUrl: null
+            avatarBuffer: proLogo
         });
 
         Logger.logInfo(`Server ${guildId} granted premium access`, { sendToDiscord: true });
@@ -85,7 +87,7 @@ export class ServerService extends BaseDomainService<ServersModel, ServersSaveMo
 
         DiscordMemberService.setGuildIdentityAsync(guildId, {
             nickname: null,
-            avatarUrl: null
+            avatarBuffer: null
         });
 
         Logger.logInfo(`Server ${guildId} had premium access revoked`, { sendToDiscord: true });
@@ -111,6 +113,13 @@ export class ServerService extends BaseDomainService<ServersModel, ServersSaveMo
 
     public async getServersWithLeaderboardLiveAsync(): Promise<ServersModel[]> {
         return await this.repository.getServersWithLeaderboardLiveAsync();
+    }
+
+    public async clearLeaderboardLiveAsync(server: ServersModel): Promise<void> {
+        await this.repository.saveAsync(new ServersSaveModel({
+            Id: server.Id,
+            SettingsJSON: { ...server.Settings, leaderboardLive: undefined }
+        }));
     }
 
     public async getTopServersByPointsAsync(limit: number = 5): Promise<ServerLeaderboardRow[]> {
