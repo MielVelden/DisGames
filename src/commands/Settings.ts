@@ -15,6 +15,9 @@ import { DEFAULT_ACCEPT_EMOJI, DEFAULT_WRONG_ANSWER_EMOJI, isValidEmoji } from "
 import { getEnumProperty } from "../utils/helpers/EnumMetadata";
 import { MetadataKeyEnum } from "../interfaces/enums/application/MetadataKeyEnum";
 import DiscordMemberService from "../services/discord/DiscordMemberService";
+import { addPremiumSuffix, isPremiumEnabled, isServerPremium } from "../utils/application/PremiumAccess";
+import { ErrorHelper } from "../utils/application/Error";
+import { ExceptionEnum } from "../interfaces/enums/application/ExpectionEnum";
 
 export class SettingsCommand implements Command {
     name = CommandEnum.SETTINGS;
@@ -67,7 +70,14 @@ export class SettingsCommand implements Command {
             }
         });
 
-        const emojiButton = createGenericButton(new MultiLingualString(i18n.commands.settings.labels.changeEmojis), ButtonStyle.SECONDARY, "✅", event.user.userId, true, async (buttonEvent: InteractionEvent) => {
+        const emojiButtonLabel = isServerPremium(server)
+            ? new MultiLingualString(i18n.commands.settings.labels.changeEmojis)
+            : addPremiumSuffix(new MultiLingualString(i18n.commands.settings.labels.changeEmojis));
+
+        const emojiButton = createGenericButton(emojiButtonLabel, ButtonStyle.SECONDARY, "✅", event.user.userId, true, async (buttonEvent: InteractionEvent) => {
+            if (!isServerPremium(server) && isPremiumEnabled())
+                ErrorHelper.throw(ExceptionEnum.PREMIUM_ONLY_CUSTOM_EMOJIS);
+
             const result = await buttonEvent.askUserAsync({
                 title: new MultiLingualString(i18n.commands.settings.labels.emojiModalTitle),
                 fields: {

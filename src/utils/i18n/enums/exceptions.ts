@@ -389,4 +389,18 @@ export const exceptionTranslations: LanguageExceptionTranslations = {
         [LanguageEnum.DE]: "Dieses Spiel ist nur für Premium-Server verfügbar. Upgrade auf Premium, um dieses Spiel zu spielen.",
         [LanguageEnum.PT]: "Este jogo só está disponível para servidores premium. Atualiza para premium para jogar este jogo.",
     },
+    [ExceptionEnum.PREMIUM_ONLY_CUSTOM_EMOJIS]: {
+        [LanguageEnum.EN]: "Custom accept/reject emojis are a Pro feature. Upgrade to Pro to customize them.",
+        [LanguageEnum.NL]: "Aangepaste accept-/afwijsemoji's zijn een Pro-functie. Upgrade naar Pro om ze aan te passen.",
+        [LanguageEnum.ES]: "Los emojis personalizados de aceptar/rechazar son una función Pro. Actualiza a Pro para personalizarlos.",
+        [LanguageEnum.DE]: "Individuelle Annehmen-/Ablehnen-Emojis sind eine Pro-Funktion. Upgrade auf Pro, um sie anzupassen.",
+        [LanguageEnum.PT]: "Emojis personalizados de aceitar/rejeitar são um recurso Pro. Atualiza para Pro para os personalizares.",
+    },
+    [ExceptionEnum.PREMIUM_ONLY_LIVE_LEADERBOARD]: {
+        [LanguageEnum.EN]: "The live, daily auto-updating leaderboard is a Pro feature. Upgrade to Pro to enable it.",
+        [LanguageEnum.NL]: "De live, dagelijks automatisch bijgewerkte ranglijst is een Pro-functie. Upgrade naar Pro om deze in te schakelen.",
+        [LanguageEnum.ES]: "La clasificación en vivo con actualización diaria automática es una función Pro. Actualiza a Pro para activarla.",
+        [LanguageEnum.DE]: "Die live, täglich automatisch aktualisierte Bestenliste ist eine Pro-Funktion. Upgrade auf Pro, um sie zu aktivieren.",
+        [LanguageEnum.PT]: "A classificação em tempo real com atualização diária automática é um recurso Pro. Atualiza para Pro para a ativares.",
+    },
 };

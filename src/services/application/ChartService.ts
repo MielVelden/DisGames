@@ -33,7 +33,17 @@ export class ChartService extends Service {
         }
     }
 
-    // #region Bar Charts
+    // #region Bar & Line Charts
+
+    private async getLineChartServerNewServerAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.LineChartServerNewServer, [90]);
+
+        return {
+            title: "Server Growth",
+            type: ChartEnum.Line,
+            ...chartData,
+        };
+    }
 
     private async getBarChartEventsEventsByTypeAsync(identity: User): Promise<ChartDefinition> {
         const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [1]);
@@ -224,21 +234,6 @@ export class ChartService extends Service {
             xAxisKey: "device",
             valueKeys: ["value"],
             type: ChartEnum.Pie,
-        };
-    }
-
-    private async getLineChartServerNewServerAsync(identity: User): Promise<ChartDefinition> {
-        const chartData = [
-            { date: "2024-04-01", servers: 300 },
-            { date: "2024-04-02", servers: 97 },
-        ];
-
-        return {
-            title: "New Servers",
-            data: chartData,
-            xAxisKey: "date",
-            valueKeys: ["servers"],
-            type: ChartEnum.Line,
         };
     }
 

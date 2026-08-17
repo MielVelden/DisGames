@@ -7,6 +7,7 @@ import DiscordComponentMapper from "../services/discord/mappers/DiscordComponent
 import ServerService from "../services/domain/ServerService";
 import UserService from "../services/domain/UserService";
 import Logger from "../utils/application/Logger";
+import { isPremiumEnabled, isServerPremium } from "../utils/application/PremiumAccess";
 
 export default {
     id: 'refresh-live-leaderboards',
@@ -22,7 +23,10 @@ export default {
             const server = servers[i];
             const live = server.Settings.leaderboardLive;
 
-            if (live) {
+            if (live && !isServerPremium(server) && isPremiumEnabled()) {
+                await ServerService.clearLeaderboardLiveAsync(server);
+                await Logger.logWarning(`Disabled live leaderboard for server ${server.ServerId}: server is no longer Pro`);
+            } else if (live) {
                 try {
                     const channel = await discordClient.channels.fetch(live.channelId).catch(() => null);
                     if (channel?.isTextBased()) {

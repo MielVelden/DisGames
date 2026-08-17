@@ -11,6 +11,9 @@ import ServerService from "../services/domain/ServerService";
 import UserService from "../services/domain/UserService";
 import { ServersSaveModel } from "../interfaces/database";
 import { Permission } from "../interfaces/enums/application/Permission";
+import { isPremiumEnabled, isServerPremium } from "../utils/application/PremiumAccess";
+import { ErrorHelper } from "../utils/application/Error";
+import { ExceptionEnum } from "../interfaces/enums/application/ExpectionEnum";
 
 const optionsConfig = [
     {
@@ -56,6 +59,9 @@ const optionsConfig = [
                         await event.replyAsync(undefined, true);
                         return;
                     }
+
+                    if (!isServerPremium(event.server) && isPremiumEnabled())
+                        ErrorHelper.throw(ExceptionEnum.PREMIUM_ONLY_LIVE_LEADERBOARD);
 
                     const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5))
                     const components = await createLeaderboardContainerAsync(entries, event.server.LanguageEnum);
