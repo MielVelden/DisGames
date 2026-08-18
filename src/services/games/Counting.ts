@@ -7,15 +7,15 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../domain/GameService";
 import ComponentService from "../application/ComponentService";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 import { ErrorHelper } from "../../utils/application/Error";
 
 export default {
     config: {
         id: GameTypeEnum.COUNTING,
         emoji: "📊",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.COUNTING].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.COUNTING].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.COUNTING].description),
         points: 1,
         isCalculated: true,
         expectedType: "number",
@@ -59,7 +59,7 @@ export default {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: DEFAULT_WRONG_ANSWER_EMOJI
+                    component: getRejectEmoji(event.server.Settings)
                 });
 
                 event.addAction({

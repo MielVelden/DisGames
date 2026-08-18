@@ -4,6 +4,7 @@ import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { SlashCommandInteractionEvent } from "../../../interfaces/application/Event";
 import { EventTypeEnum } from "../../../interfaces/enums";
 import { Command } from "../../../interfaces/application/Command";
+import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import { handleCommandOptionsAsync } from "../../../utils/handlers/CommandHandler";
 import DiscordService from "../DiscordService";
@@ -20,9 +21,10 @@ export class SlashCommandDiscordEvent extends BaseReplyDiscordEvent<DiscordChatI
         channelId: string,
         guildId: string,
         messageId: string,
-        command: Command
+        command: Command,
+        entitlements: readonly AppEntitlement[] = []
     ) {
-        super(EventTypeEnum.SLASH_COMMAND, interaction.id, interaction, user, server, channelId, guildId, messageId);
+        super(EventTypeEnum.SLASH_COMMAND, interaction.id, interaction, user, server, channelId, guildId, messageId, entitlements);
         this.command = command;
     }
 

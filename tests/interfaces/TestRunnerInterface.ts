@@ -5,11 +5,18 @@ export interface TestCase {
     timeout?: number;
     skip?: boolean;
     only?: boolean;
+    /**
+     * If true, the test body runs OUTSIDE the per-test database transaction.
+     * Required for tests that exercise the pool/transaction layer itself, or that
+     * need parallel connections (the ambient transaction pins everything to one).
+     */
+    bypassTransaction?: boolean;
 }
 
 export interface TestSuite {
     name: string;
     description?: string;
+    disabled?: boolean;
     setup?: () => Promise<void>;
     teardown?: () => Promise<void>;
     beforeEach?: () => Promise<void>;

@@ -1,5 +1,5 @@
 import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
-import { DatasheetsModel, GameDataModel, GamesModel, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
+import { DatasheetsModel, GameDataModel, GamesModel, GamesModelFieldEnum, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
 import {
@@ -8,6 +8,7 @@ import {
     GameSettingType,
     BooleanGameSetting,
     EnumGameSetting,
+    ListGameSetting,
     GameSettingsValidationResult
 } from "../../interfaces/domain/GameSettings";
 import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
@@ -15,7 +16,7 @@ import { Component, ComponentType, Container, TextDisplay, Title, Separator, But
 import GameRepository from "../../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
-import { GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
+import { BadgeTriggerEnum, GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/helpers/Enum";
 import GameDataRepository from "../../repositories/GameDataRepository";
@@ -25,25 +26,32 @@ import { createCancelButton } from "../../builders/buttons/CancelButton";
 import { createMoveButton as createMoveButtonAsync } from "../../builders/buttons/MoveButton";
 import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import MediaService from "../application/MediaService";
 import Logger from "../../utils/application/Logger";
 import TimelineBuilder from "./TimelineBuilder";
 import { ARRAY_JOIN_DELIMITER } from "../../constants";
-import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
+import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
+import UserService from "./UserService";
+import BadgeService from "./BadgeService";
+import { isPremiumEnabled, isServerPremium } from "../../utils/application/PremiumAccess";
+import { NON_PREMIUM_GAME_LIMIT } from "../../constants";
+import { registerService } from "../../utils/container/Container";
+import { Service } from "../../interfaces/application/Service";
 
 @RegisterMetricPulls()
-class GameService {
+export class GameService extends Service {
     private games: GameModule[] = [];
 
     public async initAsync(): Promise<void> {
         await this.loadGamesAsync();
+        await this.validateGameImagesAsync();
     }
 
     private async loadGamesAsync(): Promise<void> {
@@ -82,20 +90,56 @@ class GameService {
             try {
                 const datasheets = await DataSheetService.getByGameIdAsync(gameConfig.id);
                 if (datasheets.length > 0) {
+                    const generalDatasheetCount = await DataSheetService.getCountByGameIdAsync(gameConfig.id);
+
+                    const options = [{
+                        value: 0,
+                        label: createMultiLingualString('General'),
+                        description: createMultiLingualString(`General Desc (${generalDatasheetCount} items)`),
+                        isDefault: true
+                    }];
+
+                    options.push(...
+                        await Promise.all(datasheets.map(async (datasheet: DatasheetsModel) => {
+                            const datasheetCount = await DataSheetService.getCountByGameIdAsync(gameConfig.id, datasheet.Id);
+                            datasheet.Description.replaceParameters({
+                                items: datasheetCount.toString(),
+                            });
+
+                            return {
+                                value: datasheet.Id,
+                                label: datasheet.Name,
+                                description: datasheet.Description,
+                                isDefault: false
+                            };
+                        }))
+                    );
+
                     gameConfig.settings.push({
                         key: GameSettingsEnum.DATASHEETS,
                         type: GameSettingType.LIST,
                         label: new MultiLingualString(i18n.commands.games.settings.datasheets.label),
                         description: new MultiLingualString(i18n.commands.games.settings.datasheets.description),
-                        options: datasheets.map((datasheet: DatasheetsModel) => ({
-                            value: datasheet.Id,
-                            label: datasheet.Name,
-                            description: datasheet.Description,
-                        }))
-                    });
-                }
+                        options: options
+                    })
+                };
             } catch (error) {
                 Logger.logError(`Failed to load datasheets for game ${gameConfig.id}, continuing without datasheet settings`, error as Error);
+            }
+        }
+    }
+
+    private async validateGameImagesAsync(): Promise<void> {
+        for (const game of this.games) {
+            if (game.config.hasImages) {
+                const gameDataArray = await GameDataRepository.getAllByGameIdAsync(game.config.id);
+                for (const gameData of gameDataArray) {
+                    try {
+                        MediaService.getGameDataImage(game.config.id, gameData.Id);
+                    } catch (error) {
+                        Logger.logError(`Missing image for game ${game.config.id} with data ID ${gameData.Id}`, error as Error, { sendToDiscord: true });
+                    }
+                }
             }
         }
     }
@@ -104,13 +148,18 @@ class GameService {
         return this.games;
     }
 
+    public async checkActiveGameInChannel(channelId: string): Promise<boolean> {
+        const externalIds = await GameRepository.getExternalIdsAsync();
+        return externalIds.includes(channelId);
+    }
+
     public async getActiveGamesAsync(serverId: string): Promise<GameModule[]> {
         const activeGames = await GameRepository.getByServerIdAsync(serverId);
         return this.games.filter(game => activeGames.some(activeGame => activeGame.GameTypeEnum === game.config.id));
     }
 
     public async getGameByTypeAsync(gameTypeEnum: GameTypeEnum): Promise<GameModule | undefined> {
-        if(this.games.length === 0)
+        if (this.games.length === 0)
             await this.loadGamesAsync();
         return this.games.find(game => game.config.id === gameTypeEnum);
     }
@@ -130,7 +179,7 @@ class GameService {
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
-        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string);
+        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string, gameModule.config.skipDefaultStartMessage);
 
         if (gameModule.functions.getStartComponentsAsync) {
             const server = await ServerService.getByExternalIdAsync(game.ServerId);
@@ -181,6 +230,8 @@ class GameService {
                 savable.Answer = gameData.map(data => data.Response.getMessage(event.server.LanguageEnum)).join(ARRAY_JOIN_DELIMITER);
             }
 
+            savable.validateHasNotChanged(GamesModelFieldEnum.GameTypeEnum, model.GameTypeEnum);
+
             // Update
             const savedModel = await GameRepository.saveAsync(savable);
 
@@ -209,6 +260,14 @@ class GameService {
 
         if (!isValidEnumValue(GameTypeEnum, savable.GameTypeEnum as GameTypeEnum))
             ErrorHelper.throw(ExceptionEnum.INVALID_GAME_TYPE);
+
+        // Get the game module
+        const gameModule = await this.getGameByTypeAsync(savable.GameTypeEnum as GameTypeEnum);
+        if (!gameModule)
+            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+
+        if (gameModule.config.isPremiumOnly && !isServerPremium(event.server) && isPremiumEnabled())
+            ErrorHelper.throw(ExceptionEnum.PREMIUM_ONLY_GAME);
 
         // Check if game exists in channel or server
         const [activeChannelGame, activeServerGame] = await Promise.all([
@@ -248,10 +307,11 @@ class GameService {
             );
         }
 
-        // Get the game module
-        const gameModule = await this.getGameByTypeAsync(savable.GameTypeEnum as GameTypeEnum);
-        if (!gameModule)
-            ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
+        if (!isServerPremium(event.server)) {
+            const activeGames = await GameRepository.getByServerIdAsync(savable.ServerId);
+            if (activeGames.length >= NON_PREMIUM_GAME_LIMIT)
+                ErrorHelper.throwWithParameters(ExceptionEnum.NON_PREMIUM_GAME_LIMIT_REACHED, { limit: NON_PREMIUM_GAME_LIMIT });
+        }
 
         // Set the answer
         if (gameModule.config.firstAnswer)
@@ -300,31 +360,39 @@ class GameService {
 
         await this.handleGameOptionsAsync(gameEvent, event);
 
+        await BadgeService.evaluateAll(event, BadgeTriggerEnum.BEFORE_GAME);
+
         if (gameEvent.validateAnswer(gameEvent) && gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Add correct reaction
             if (gameEvent.gameConfig.addCorrectReaction)
                 gameEvent.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: DEFAULT_ACCEPT_EMOJI
+                    component: getAcceptEmoji(gameEvent.server.Settings)
                 })
 
             // Answer is correct
             await this.handleValidAnswerAsync(gameEvent);
-            // Add points to the user
-            await PointService.saveAsync(new PointsSaveModel({
-                UserId: gameEvent.user.userId,
-                ServerId: gameEvent.server.ServerId,
-                GameId: gameEvent.gameId,
-                Points: gameEvent.gameConfig.points
-            }), event);
 
-            // Timeline for correct answer
-            await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
-                event: event,
-                old: null,
-                new: gameEvent.getGameData(),
-                objectId: gameEvent.getGameData().Id
+            const gameData = gameEvent.getGameData();
+            event.scheduleAction(() => UserService.addExperiencePointsAsync(gameEvent.user.userId, gameEvent.gameConfig.points));
+            event.scheduleAction(async () => {
+                await PointService.saveAsync(new PointsSaveModel({
+                    UserId: gameEvent.user.userId,
+                    ServerId: gameEvent.server.ServerId,
+                    GameId: gameEvent.gameId,
+                    Points: gameEvent.gameConfig.points
+                }), event);
+            });
+
+            event.scheduleAction(async () => {
+                await TimelineBuilder.forGamePlayedAsync(gameEvent.gameId, {
+                    event: event,
+                    old: null,
+                    new: gameData,
+                    objectId: gameData.Id
+                });
+                await event.commitTimelineAsync();
             });
         } else if (gameEvent.eventType === EventTypeEnum.MESSAGE) {
             // Answer is incorrect - handle via game module if available
@@ -344,8 +412,7 @@ class GameService {
         // Loop through all actions and handle them
         await this.handleGameActionsAsync(gameEvent, event);
 
-        // Commit timeline
-        await event.commitTimelineAsync();
+        await BadgeService.evaluateAll(event, BadgeTriggerEnum.AFTER_GAME);
 
         // Reply to the game channel
         await event.replyAsync();
@@ -375,9 +442,9 @@ class GameService {
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.CRITICAL,
                 component: [
-                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[gameEvent.gameConfig.id].name), gameEvent.gameConfig.emoji))),
-                    ComponentService.createContent(new MultiLingualString(i18n.commands.games.types[gameEvent.gameConfig.id].howToPlay)),
-                    ComponentService.createContent(i18n.commands.games.types[gameEvent.gameConfig.id].nextAnswer!()),
+                    ComponentService.createContent(createTitle(addPrefix(new MultiLingualString(i18n.enums.gameTypes[gameEvent.gameConfig.id].name), gameEvent.gameConfig.emoji))),
+                    ComponentService.createContent(new MultiLingualString(i18n.enums.gameTypes[gameEvent.gameConfig.id].howToPlay)),
+                    ComponentService.createContent(i18n.enums.gameTypes[gameEvent.gameConfig.id].nextAnswer!()),
                 ]
             })
         }
@@ -540,14 +607,14 @@ class GameService {
             const value = values[setting.key];
 
             if (setting.required && (value === undefined || value === null)) {
-                errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_REQUIRED]));
+                errors.push(new MultiLingualString(i18n.enums.exceptions[ExceptionEnum.SETTING_REQUIRED]));
                 return;
             }
 
             if (value !== undefined && value !== null) {
                 if (setting.type === GameSettingType.BOOLEAN) {
                     if (typeof value !== 'boolean') {
-                        errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_INVALID_TYPE]));
+                        errors.push(new MultiLingualString(i18n.enums.exceptions[ExceptionEnum.SETTING_INVALID_TYPE]));
                         return;
                     }
                     validatedValues[setting.key] = value;
@@ -555,7 +622,7 @@ class GameService {
                     const enumSetting = setting as EnumGameSetting;
                     const validValues = enumSetting.options.map(opt => opt.value);
                     if (!validValues.includes(value as string | number)) {
-                        errors.push(new MultiLingualString(i18n.exceptions[ExceptionEnum.SETTING_INVALID_VALUE]));
+                        errors.push(new MultiLingualString(i18n.enums.exceptions[ExceptionEnum.SETTING_INVALID_VALUE]));
                         return;
                     }
                     validatedValues[setting.key] = value;
@@ -583,6 +650,10 @@ class GameService {
                 defaultValues[setting.key] = (setting as BooleanGameSetting).defaultValue;
             } else if (setting.type === GameSettingType.ENUM) {
                 defaultValues[setting.key] = (setting as EnumGameSetting).defaultValue;
+            } else if (setting.type === GameSettingType.LIST) {
+                defaultValues[setting.key] = (setting as ListGameSetting).options
+                    .filter(option => option.isDefault)
+                    .map(option => typeof option.value === "number" ? option.value : Number(option.value));
             }
         });
 
@@ -718,4 +789,6 @@ class GameService {
     }
 }
 
-export default new GameService();
+const gameService = new GameService();
+registerService(gameService);
+export default gameService;

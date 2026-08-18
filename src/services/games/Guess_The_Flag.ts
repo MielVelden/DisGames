@@ -7,15 +7,15 @@ import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
 import { compareStrings } from "../../utils/helpers/String";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 import { createBlock } from "../../utils/helpers/Markdown";
 
 export default {
     config: {
         id: GameTypeEnum.GUESS_THE_FLAG,
         emoji: "🏳️",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
@@ -28,6 +28,7 @@ export default {
 
     functions: {
         validateAnswer(event: GameEvent): boolean {
+            // TODO: Check against the CountryEnum value
             return compareStrings(event.userInput as string, event.getGameDataAnswer());
         },
 
@@ -39,7 +40,7 @@ export default {
 
         async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
+                ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
             ];
         },
 
@@ -47,7 +48,7 @@ export default {
             event.addAction({
                 enum: GameActionEnum.REACTION,
                 priority: GameActionPriorityEnum.HIGH,
-                component: DEFAULT_WRONG_ANSWER_EMOJI
+                component: getRejectEmoji(event.server.Settings)
             })
         },
     } as GameFunctions

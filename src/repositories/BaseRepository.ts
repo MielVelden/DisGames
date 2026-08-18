@@ -1,6 +1,8 @@
 import { TableEnum, StoredProcedureEnum, ExceptionEnum } from "../interfaces/enums/index";
+import { MetadataKeyEnum } from "../interfaces/enums/application/MetadataKeyEnum";
+import { getEnumProperty } from "../utils/helpers/EnumMetadata";
 import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
-import { getTableName, runQueryAsync } from "./util/ConnectionHandler";
+import { getTableName, runExecuteAsync, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
 import { isValidEnumValue } from "../utils/helpers/Enum";
@@ -183,7 +185,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
     }
 
     // Non-cached query path
-    const results = await runQueryAsync(this.query, this.params);
+    const results = await runExecuteAsync(this.query, this.params);
     this.params = [];
     this.hasLimit1 = false;
 
@@ -195,7 +197,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
 
   private async executeQueryAndCache(queryHash: string): Promise<Model[]> {
     try {
-      const results = await runQueryAsync(this.query, this.params);
+      const results = await runExecuteAsync(this.query, this.params);
 
       if (!results || results.length === 0) {
         return [];
@@ -230,8 +232,10 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
     const serializedEntity = DatabaseHelper.processEntityForDatabase(entity, this.fieldEnum, this.fieldTypeFunction);
 
     if (serializedEntity.Id) {
-      // UPDATE - invalidate cache for this ID and all query cache
-      this.cacheManager.invalidateCache(serializedEntity.Id);
+      // Capture cached entry before invalidating query caches so we can merge
+      const cachedBefore = this.cacheManager.getCacheEntry(serializedEntity.Id);
+
+      // Query-by-hash cache must always be dropped; the row cache is updated below
       this.cacheManager.invalidateAllQueryCache();
 
       if (isValidEnumValue(this.fieldEnum, 'UpdatedAt'))
@@ -240,7 +244,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
       // UPDATE - only include fields that are explicitly set (not undefined)
       const fieldsToUpdate: string[] = [];
       const valuesToUpdate: any[] = [];
-      
+
       for (const [key, value] of Object.entries(serializedEntity)) {
         if (key !== 'Id' && value !== undefined) {
           fieldsToUpdate.push(key);
@@ -250,6 +254,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
 
       if (fieldsToUpdate.length === 0) {
         // No fields to update, just return the existing record
+        this.cacheManager.invalidateCache(serializedEntity.Id);
         const result = await this.Select().Where({ Id: serializedEntity.Id }).Execute();
         if (result.length === 0)
           ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
@@ -260,20 +265,38 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
       const query = `UPDATE ${this.table} SET ${setClause} WHERE Id = ?`;
       const params = [...valuesToUpdate, serializedEntity.Id];
 
-      // Run the update
-      await runQueryAsync(query, params);
+      // Run the update (single statement → execute() for prepared-statement caching)
+      await runExecuteAsync(query, params);
 
+      // Hot path: cached entry exists → merge known new values, skip the SELECT round-trip.
+      // Merge uses the caller-supplied deserialized `entity` (not `serializedEntity`) so
+      // MultiLingualString / JSON fields stay as objects, matching the cache shape.
+      if (cachedBefore) {
+        const mergedFields: Partial<Model> = {};
+        for (const [key, value] of Object.entries(entity)) {
+          if (value !== undefined)
+            (mergedFields as any)[key] = value;
+        }
+        if (isValidEnumValue(this.fieldEnum, 'UpdatedAt'))
+          (mergedFields as any).UpdatedAt = serializedEntity.UpdatedAt;
+        const merged = { ...cachedBefore, ...mergedFields } as Model;
+        this.cacheManager.setCacheEntry(serializedEntity.Id, merged);
+        return merged;
+      }
+
+      // Cold-cache fallback: read the canonical row back
+      this.cacheManager.invalidateCache(serializedEntity.Id);
       const result = await this.Select().Where({ Id: serializedEntity.Id }).Execute();
       if (result?.length === 0)
         ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
       const savedRecord = result?.[0] as Model;
-      // Update cache with fresh data
       this.cacheManager.setCacheEntry(serializedEntity.Id, savedRecord);
       return savedRecord;
     } else {
-      // INSERT - invalidate all query cache
+      // INSERT - invalidate all query cache and external ID list cache
       this.cacheManager.invalidateAllQueryCache();
+      this.cacheManager.invalidateExternalIdCache();
 
       if (isValidEnumValue(this.fieldEnum, 'CreatedAt'))
         serializedEntity.CreatedAt = new Date();
@@ -310,18 +333,43 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
     // Invalidate cache before deletion
     this.cacheManager.invalidateCache(id);
     this.cacheManager.invalidateAllQueryCache();
+    this.cacheManager.invalidateExternalIdCache();
 
     const query = `DELETE FROM ${this.table} WHERE Id = ?`;
     const params = [id];
-    await runQueryAsync(query, params);
+    await runExecuteAsync(query, params);
   }
 
-  // Utility method to get cache statistics
-  public getCacheStats(): { idCacheSize: number; queryCacheSize: number } {
+  public async getExternalIdsAsync(): Promise<string[]> {
+    const cached = this.cacheManager.getExternalIdCache();
+    if (cached !== null) 
+      return cached;
+
+    const externalIdField = getEnumProperty(TableEnum, this.tableEnum, MetadataKeyEnum.ExternalIdField);
+    if (!externalIdField) 
+      return [];
+
+    const fieldName = String(externalIdField);
+    const results = await runExecuteAsync(`SELECT ${fieldName} FROM ${this.table}`, []);
+
+    if (!results || results.length === 0) {
+      this.cacheManager.setExternalIdCache([]);
+      return [];
+    }
+
+    const lowerField = fieldName.toLowerCase();
+    const ids = (results as Array<Record<string, unknown>>)
+      .map(row => String(row[fieldName] ?? row[lowerField] ?? ''))
+      .filter(Boolean);
+
+    this.cacheManager.setExternalIdCache(ids);
+    return ids;
+  }
+
+  public getCacheStats(): { idCacheSize: number; queryCacheSize: number; externalIdCacheSize: number } {
     return this.cacheManager.getCacheStats();
   }
 
-  // Utility method to clear all cache
   public clearCache(): void {
     this.cacheManager.clearAllCache();
   }
@@ -335,7 +383,7 @@ export class RepositoryUtils {
   public static async CallStoredProcedureGeneric(procedure: StoredProcedureEnum, params: any[] = []): Promise<any[]> {
     const procedureName = procedure.toString();
     const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
-    const results = await runQueryAsync(query, params);
+    const results = await runExecuteAsync(query, params);
 
     if (!results || !results[0])
       return [];
@@ -350,7 +398,7 @@ export class RepositoryUtils {
     const functionName = fn.toString();
     const placeholders = params.map(() => '?').join(', ');
     const query = `SELECT ${functionName}(${placeholders}) AS Result`;
-    const results = await runQueryAsync(query, params);
+    const results = await runExecuteAsync(query, params);
 
     if (!results || results.length === 0)
       return undefined;

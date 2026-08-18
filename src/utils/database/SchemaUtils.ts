@@ -28,6 +28,10 @@ export class SchemaUtils {
     return logicalName + 'MLS';
   }
 
+  static isBooleanColumn(columnName: string): boolean {
+    return /^Is[A-Z]/.test(columnName);
+  }
+
   static isJsonField(columnName: string): boolean {
     return columnName.toLowerCase().endsWith('json');
   }
@@ -89,8 +93,9 @@ export class SchemaUtils {
       case 'timestamp':
         return 'Date';
       case 'boolean':
-      case 'tinyint':
         return 'boolean';
+      case 'tinyint':
+        return SchemaUtils.isBooleanColumn(columnName) ? 'boolean' : 'number';
       default:
         return 'any';
     }
@@ -129,8 +134,9 @@ export class SchemaUtils {
       case 'timestamp':
         return BaseEntityFieldType.Date;
       case 'boolean':
-      case 'tinyint':
         return BaseEntityFieldType.Boolean;
+      case 'tinyint':
+        return SchemaUtils.isBooleanColumn(columnName) ? BaseEntityFieldType.Boolean : BaseEntityFieldType.Number;
       default:
         return BaseEntityFieldType.Unknown;
     }

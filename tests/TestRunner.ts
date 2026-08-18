@@ -36,10 +36,14 @@ export class TestRunner {
 
             // Run all test suites
             for (const suite of this.suites) {
-                Logger.logInfo(`📦 Running suite: ${suite.name}`);
-                if (suite.description) {
-                    Logger.logInfo(`${suite.description}`);
+                if (suite.disabled) {
+                    Logger.logInfo(`⏭️ Skipping suite: ${suite.name}`);
+                    continue;
                 }
+
+                Logger.logInfo(`📦 Running suite: ${suite.name}`);
+                if (suite.description)
+                    Logger.logInfo(`${suite.description}`);
 
                 const suiteResults = await this.runSuiteAsync(suite);
                 this.results.push(...suiteResults);
@@ -136,16 +140,21 @@ export class TestRunner {
                 await suite.beforeEach();
             }
 
-            // Start database transaction
-            await DatabaseTestHelper.startTestCaseAsync();
+            const invokeTest = async () => {
+                if (this.debugMode) {
+                    await test.testFunction();
+                } else {
+                    const timeout = test.timeout || this.config.testTimeout;
+                    await this.runWithTimeoutAsync(test.testFunction, timeout);
+                }
+            };
 
-            if (this.debugMode) {
-                // Run the actual test without timeout
-                await test.testFunction();
+            if (test.bypassTransaction) {
+                // Tests that exercise the pool/transaction layer itself must run outside
+                // the ambient test transaction, otherwise every query is pinned to one connection.
+                await invokeTest();
             } else {
-                // Run the actual test with timeout
-                const timeout = test.timeout || this.config.testTimeout;
-                await this.runWithTimeoutAsync(test.testFunction, timeout);
+                await DatabaseTestHelper.runTestCaseAsync(invokeTest);
             }
 
             const duration = Date.now() - startTime;
@@ -173,9 +182,6 @@ export class TestRunner {
 
         } finally {
             try {
-                // Rollback database transaction
-                await DatabaseTestHelper.endTestCaseAsync();
-
                 // Run afterEach
                 if (suite.afterEach) {
                     await suite.afterEach();
@@ -366,7 +372,7 @@ export async function main(): Promise<void> {
         // Load test files based on arguments
         await runner.loadTestFiles(path.join(__dirname, 'unit'));
         await runner.loadTestFiles(path.join(__dirname, 'integration'));
-        
+
         if (args.includes('--performance') || args.includes('--all'))
             await runner.loadTestFiles(path.join(__dirname, 'performance'));
 

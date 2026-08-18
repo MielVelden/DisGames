@@ -4,7 +4,7 @@ import TestRunner from '../TestRunner';
 import { TestSuite } from '../interfaces/TestRunnerInterface';
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { ESLint } from 'eslint';
 
 const TEMP_DIR = path.join(__dirname, '..', '..', 'temp');
@@ -57,12 +57,11 @@ export default function registerTypeGeneratorTests(runner: TestRunner): void {
 
                     fs.writeFileSync(tempFile, generatedCode, 'utf-8');
 
-                    const tscCommand = `npx tsc --noEmit --skipLibCheck ${tempFile}`;
                     let compilationSuccess = true;
                     let errorOutput = '';
 
                     try {
-                        execSync(tscCommand, {
+                        execFileSync('npx', ['tsc', '--noEmit', '--skipLibCheck', tempFile], {
                             cwd: path.join(__dirname, '..', '..'),
                             stdio: 'pipe',
                             encoding: 'utf-8'
@@ -146,4 +145,3 @@ export default function registerTypeGeneratorTests(runner: TestRunner): void {
 
     runner.addSuite(suite);
 }
-

@@ -5,9 +5,15 @@ export interface MessageContainer {
     components: Component[];
 }
 
+export enum ComponentVisibility {
+    PRIVATE = 'PRIVATE',
+    PUBLIC = 'PUBLIC',
+}
+
 export interface Component {
     id?: string;
     type: ComponentType;
+    visibility?: ComponentVisibility;
 }
 
 export enum ComponentType {
@@ -79,6 +85,7 @@ export interface BaseButton extends Component {
         id?: string;
         animated?: boolean;
     } | string;
+    premiumSkuId?: string;
     disabled?: boolean;
 }
 
@@ -90,11 +97,6 @@ export interface ActionButton extends BaseButton {
 export interface LinkButton extends BaseButton {
     style: ButtonStyle.LINK;
     url: string;
-}
-
-export interface PremiumButton extends BaseButton {
-    style: ButtonStyle.PREMIUM;
-    sku_id: string;
 }
 
 export function isActionButton(button: Component): button is ActionButton {
@@ -122,6 +124,7 @@ export interface SelectOption {
     description?: MultiLingualString;
     emoji?: string;
     default?: boolean;
+    isPremium?: boolean;
 }
 
 export interface StringSelect extends BaseSelectMenu {

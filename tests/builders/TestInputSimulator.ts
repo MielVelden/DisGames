@@ -53,7 +53,8 @@ export class TestInputSimulator {
             id: server.id || this.server.id,
             name: server.name || this.server.name,
             languageEnum: server.languageEnum ?? this.server.languageEnum,
-            points: server.points ?? this.server.points
+            points: server.points ?? this.server.points,
+            isPremium: server.isPremium ?? this.server.isPremium
         };
     }
 

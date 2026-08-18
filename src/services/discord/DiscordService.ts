@@ -21,6 +21,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { InteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
 import { Component, SelectMenu } from '../../interfaces/application/Message';
+import { ModalDefinition, ModalField, ModalResult } from '../../interfaces/application/Modal';
 import { MultiLingualString } from '../../utils/i18n/MultiLingualString';
 import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../interfaces/enums';
 import { ErrorHelper } from '../../utils/application/Error';
@@ -59,7 +60,7 @@ class DiscordService {
     }
 
     // Component Mapping
-    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder> {
+    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder | DiscordComponentBuilder[]> {
         return await DiscordComponentMapper.mapComponentToDiscordComponentAsync(component);
     }
 
@@ -78,7 +79,7 @@ class DiscordService {
         Logger.logInfo(`Joined Discord guild ${guild.name} (${guild.id})`);
         if (event.systemChannelId) {
             const components = createWelcomeContainer();
-            await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server.LanguageEnum);
+            await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server);
         }
     }
 
@@ -120,6 +121,10 @@ class DiscordService {
 
     public async getUserInputByButtonsAsync(event: InteractionEvent, question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
         return await DiscordMessageHandler.getUserInputByButtonsAsync(event, question, buttons);
+    }
+
+    public async askUserAsync<const TFields extends Record<string, ModalField>>(event: InteractionEvent, modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null> {
+        return await DiscordMessageHandler.askUserAsync(event, modal);
     }
 
     // #endregion

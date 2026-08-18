@@ -18,6 +18,8 @@ export class CacheManager<Model extends BaseEntity> {
   private cache: Map<number, CacheEntry<Model>> = new Map();
   private queryCache: Map<string, QueryCacheEntry<Model>> = new Map();
   private inFlightQueries: Map<string, Promise<Model[]>> = new Map();
+  private externalIdCache: string[] | null = null;
+  private externalIdCacheExpiry: number = 0;
   private tableName: string;
   private hits: number = 0;
   private misses: number = 0;
@@ -107,10 +109,29 @@ export class CacheManager<Model extends BaseEntity> {
     this.inFlightQueries.clear();
   }
 
+  public setExternalIdCache(ids: string[]): void {
+    this.externalIdCache = [...ids];
+    this.externalIdCacheExpiry = Date.now() + durationToMilliseconds(REPOSITORY_CACHE_TTL);
+  }
+
+  public getExternalIdCache(): string[] | null {
+    if (this.externalIdCache === null) return null;
+    if (Date.now() >= this.externalIdCacheExpiry) {
+      this.externalIdCache = null;
+      return null;
+    }
+    return [...this.externalIdCache];
+  }
+
+  public invalidateExternalIdCache(): void {
+    this.externalIdCache = null;
+  }
+
   public clearAllCache(): void {
     this.cache.clear();
     this.queryCache.clear();
     this.inFlightQueries.clear();
+    this.externalIdCache = null;
   }
 
   public getInFlightQuery(queryHash: string): Promise<Model[]> | null {
@@ -125,18 +146,18 @@ export class CacheManager<Model extends BaseEntity> {
     this.inFlightQueries.delete(queryHash);
   }
 
-  public getCacheStats(): { idCacheSize: number; queryCacheSize: number } {
-    const stats = {
+  public getCacheStats(): { idCacheSize: number; queryCacheSize: number; externalIdCacheSize: number } {
+    return {
       idCacheSize: this.cache.size,
-      queryCacheSize: this.queryCache.size
+      queryCacheSize: this.queryCache.size,
+      externalIdCacheSize: this.externalIdCache?.length ?? 0,
     };
-
-    return stats;
   }
 
   public getDetailedStats(): {
     idCacheSize: number;
     queryCacheSize: number;
+    externalIdCacheSize: number;
     expiredEntries: number;
     tableName: string;
   } {
@@ -155,6 +176,7 @@ export class CacheManager<Model extends BaseEntity> {
     const stats = {
       idCacheSize: this.cache.size,
       queryCacheSize: this.queryCache.size,
+      externalIdCacheSize: this.externalIdCache?.length ?? 0,
       expiredEntries: expiredCount,
       tableName: this.tableName
     };

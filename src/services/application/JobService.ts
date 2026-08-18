@@ -3,13 +3,18 @@ import * as path from 'path';
 import { JobModule, JobItem, JobExecutionResult, JobStatus, JobProgressCallback } from '../../interfaces/application/Job';
 import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
 import Logger from '../../utils/application/Logger';
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class JobService {
+export class JobService extends Service {
     private jobModules: JobModule[] = [];
 
     constructor() {
+        super();
         this.loadJobs();
     }
+
+    public async initAsync(): Promise<void> {}
 
     private loadJobs(): void {
         const jobsPath = path.join(__dirname, '..', '..', 'jobs');
@@ -101,4 +106,6 @@ class JobService {
     }
 }
 
-export default new JobService();
+const jobService = new JobService();
+registerService(jobService);
+export default jobService;

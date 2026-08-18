@@ -7,15 +7,15 @@ import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { Component } from "../../interfaces/application/Message";
 import { compareStrings } from "../../utils/helpers/String";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 import { createBlock } from "../../utils/helpers/Markdown";
 
 export default {
     config: {
         id: GameTypeEnum.TRIVIA_QUIZ,
         emoji: "❓",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.TRIVIA_QUIZ].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.TRIVIA_QUIZ].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.TRIVIA_QUIZ].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
@@ -58,7 +58,7 @@ export default {
             event.addAction({
                 enum: GameActionEnum.REACTION,
                 priority: GameActionPriorityEnum.HIGH,
-                component: DEFAULT_WRONG_ANSWER_EMOJI
+                component: getRejectEmoji(event.server.Settings)
             })
         }
     } as GameFunctions

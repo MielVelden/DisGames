@@ -3,4 +3,5 @@ export interface TestServer {
     name: string;
     languageEnum: number;
     points?: number;
+    isPremium?: boolean;
 }

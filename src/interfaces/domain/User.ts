@@ -14,3 +14,10 @@ export interface User {
 
     sendMessageAsync(message: string): Promise<void>;
 }
+
+export interface UserLevelData {
+    currentLevel: number;
+    xpNow: number;
+    xpMax: number;
+    progress: number;
+}

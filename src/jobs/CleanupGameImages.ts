@@ -5,15 +5,16 @@ import * as path from 'path';
 import Logger from "../utils/application/Logger";
 
 export default {
-    id: 'cleanup-game-images',
-    name: 'Cleanup Game Images',
-    description: 'Cleanup game images',
+    id: 'cleanup-images',
+    name: 'Cleanup Generated Images',
+    description: 'Cleanup generated images',
     isEnabled: true,
     cronExpression: '0 0 2 * * *',
 
     handler: async (progress): Promise<void> => {
         const imagesPath = path.join(process.cwd(), 'images');
         const gameIds: GameTypeEnum[] = [GameTypeEnum.CONNECTIONS];
+        const generatedDirectory = path.join(imagesPath, 'generated');
 
         let totalFiles = 0;
         for (const gameId of gameIds) {
@@ -22,6 +23,10 @@ export default {
                 const files = fs.readdirSync(gameDirectory);
                 totalFiles += files.filter(file => file.endsWith('.png')).length;
             }
+        }
+        if (fs.existsSync(generatedDirectory)) {
+            const files = fs.readdirSync(generatedDirectory);
+            totalFiles += files.filter(file => file.endsWith('.png')).length;
         }
 
         let processedFiles = 0;
@@ -37,6 +42,19 @@ export default {
             for (const fileToDelete of filesToDelete) {
                 fs.unlinkSync(path.join(gameDirectory, fileToDelete));
                 Logger.logDebug(`Deleted game image: ${path.join(gameDirectory, fileToDelete)}`);
+
+                processedFiles++;
+                progress(processedFiles, totalFiles, `Deleting ${fileToDelete}`);
+            }
+        }
+
+        if (fs.existsSync(generatedDirectory)) {
+            const files = fs.readdirSync(generatedDirectory);
+            const filesToDelete = files.filter(file => file.endsWith('.png'));
+
+            for (const fileToDelete of filesToDelete) {
+                fs.unlinkSync(path.join(generatedDirectory, fileToDelete));
+                Logger.logDebug(`Deleted generated image: ${path.join(generatedDirectory, fileToDelete)}`);
 
                 processedFiles++;
                 progress(processedFiles, totalFiles, `Deleting ${fileToDelete}`);

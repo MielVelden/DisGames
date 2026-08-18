@@ -9,7 +9,11 @@ class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveMo
     public readonly baseRepository: BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>(TableEnum.METRICS, MetricsModelFieldEnum, getMetricsFieldType);
+        this.baseRepository = new BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>(
+            TableEnum.METRICS, 
+            MetricsModelFieldEnum, 
+            getMetricsFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<MetricsModel | null> {

@@ -29,7 +29,7 @@ class DiscordEnumMapper {
             [ButtonStyle.SUCCESS]: DiscordButtonStyle.Success,
             [ButtonStyle.DANGER]: DiscordButtonStyle.Danger,
             [ButtonStyle.LINK]: DiscordButtonStyle.Link,
-            [ButtonStyle.PREMIUM]: DiscordButtonStyle.Link
+            [ButtonStyle.PREMIUM]: DiscordButtonStyle.Premium
         } as const;
 
         const buttonStyleValue = buttonStyleMap[style];

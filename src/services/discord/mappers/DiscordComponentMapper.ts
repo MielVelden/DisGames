@@ -5,13 +5,14 @@ import {
     MentionableSelectMenuBuilder as DiscordMentionableSelectMenuBuilder,
     ChannelSelectMenuBuilder as DiscordChannelSelectMenuBuilder,
     ButtonBuilder as DiscordButtonBuilder,
+    ButtonStyle as DiscordJsButtonStyle,
     ActionRowBuilder as DiscordActionRowBuilder,
     MessageFlags as DiscordMessageFlags,
     AttachmentBuilder
 } from 'discord.js';
 import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { BaseInteractionEvent, InteractionEvent } from '../../../interfaces/application/Event';
-import { ActionButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
+import { ActionButton, BaseButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
     UserSelect,
@@ -25,9 +26,11 @@ import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
-import * as fs from 'fs';
 import Logger from '../../../utils/application/Logger';
-import { withEventContextAsync } from '../../../middleware/EventContext';
+import MediaService from '../../application/MediaService';
+import { withEventContextAsync, getCurrentServer, getCurrentComponents } from '../../../middleware/EventContext';
+import { addPremiumSuffix, isPremiumEnabled, isPurchaseButtonEnabled, isServerPremium } from '../../../utils/application/PremiumAccess';
+import { getDefaultPremiumEmoji } from '../../../utils/constants/Emojis';
 
 class DiscordComponentMapper {
     public mapSelectMenuOptionToDiscordSelectMenuOption(option: SelectOption): DiscordSelectMenuOptionBuilder {
@@ -42,6 +45,14 @@ class DiscordComponentMapper {
         if (option.emoji)
             discordSelectMenuOption.setEmoji({ name: option.emoji });
 
+        if (option.isPremium) {
+            const server = getCurrentServer();
+            if (isPremiumEnabled() && server && !isServerPremium(server)) {
+                discordSelectMenuOption.setEmoji({ id: getDefaultPremiumEmoji() });
+                discordSelectMenuOption.setLabel(addPremiumSuffix(option.label).getMessage());
+            }
+        }
+
         return discordSelectMenuOption;
     }
 
@@ -53,7 +64,7 @@ class DiscordComponentMapper {
                     .setCustomId(stringSelect.custom_id)
                     .setDisabled(stringSelect.disabled || false)
                     .setPlaceholder(stringSelect.placeholder?.getMessage() || "Select an option")
-                    .setMinValues(stringSelect.min_values || 1)
+                    .setMinValues(stringSelect.min_values ?? 1)
                     .setMaxValues(stringSelect.max_values || 1);
 
                 if (stringSelect.options) {
@@ -129,13 +140,46 @@ class DiscordComponentMapper {
         }
     }
 
-    public async mapButtonToDiscordButtonAsync(button: ActionButton | LinkButton): Promise<DiscordButtonBuilder> {
+    public async mapButtonToDiscordButtonAsync(button: BaseButton): Promise<DiscordButtonBuilder[]> {
+        const server = getCurrentServer();
+        const components = getCurrentComponents();
+
+        const discordButtons = [];
+        if (button.premiumSkuId && server && !isServerPremium(server)) {
+            const premiumButtons = components?.filter(comp => comp.type === ComponentType.BUTTON && (comp as BaseButton).premiumSkuId === button.premiumSkuId);
+            const isButtonFirstInGroup = premiumButtons && premiumButtons.length > 0 && premiumButtons[0] === button;
+            if (isPremiumEnabled() && isPurchaseButtonEnabled() && isButtonFirstInGroup) {
+                const discordButton = new DiscordButtonBuilder()
+                    .setStyle(DiscordJsButtonStyle.Premium)
+                    .setSKUId(button.premiumSkuId);
+
+                if (button.disabled)
+                    discordButton.setDisabled(true);
+
+                discordButtons.push(discordButton);
+            }
+
+            button.emoji = getDefaultPremiumEmoji();
+            button.disabled = true;
+        }
+
+        discordButtons.unshift(this.buildRegularDiscordButton(button));
+        return discordButtons;
+    }
+
+    private movePremiumButtonsToEnd(buttons: DiscordButtonBuilder[]): DiscordButtonBuilder[] {
+        const regularButtons = buttons.filter(button => button.data.style !== DiscordJsButtonStyle.Premium);
+        const premiumButtons = buttons.filter(button => button.data.style === DiscordJsButtonStyle.Premium);
+        return [...regularButtons, ...premiumButtons];
+    }
+
+    private buildRegularDiscordButton(button: BaseButton): DiscordButtonBuilder {
         const discordButton = new DiscordButtonBuilder()
-            .setLabel(button.label?.getMessage() || "Button")
+            .setLabel((button as ActionButton | LinkButton).label?.getMessage() || "Button")
             .setStyle(DiscordEnumMapper.mapButtonStyleToDiscordButtonStyle(button.style));
 
         if (button.style !== ButtonStyle.LINK)
-            discordButton.setCustomId(button.custom_id);
+            discordButton.setCustomId((button as ActionButton).custom_id);
 
         if (button.emoji) {
             if (typeof button.emoji === "string")
@@ -149,7 +193,7 @@ class DiscordComponentMapper {
         }
 
         if (button.style === ButtonStyle.LINK)
-            discordButton.setURL(button.url);
+            discordButton.setURL((button as LinkButton).url);
 
         if (button.disabled)
             discordButton.setDisabled(true);
@@ -157,10 +201,10 @@ class DiscordComponentMapper {
         return discordButton;
     }
 
-    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder> {
+    public async mapComponentToDiscordComponentAsync(component: Component): Promise<DiscordComponentBuilder | DiscordComponentBuilder[]> {
         switch (component.type) {
             case ComponentType.BUTTON:
-                return await this.mapButtonToDiscordButtonAsync(component as ActionButton);
+                return await this.mapButtonToDiscordButtonAsync(component as BaseButton);
             case ComponentType.TEXT_DISPLAY:
                 return await this.mapTextDisplayToDiscordTextDisplayAsync(component as TextDisplay);
             case ComponentType.SEPARATOR:
@@ -213,10 +257,10 @@ class DiscordComponentMapper {
         // Exclude buttons that are already inside containers
         const componentsToProcess = this.excludeComponentsInContainers(components);
 
-        const discordComponents = await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)));
+        const discordComponents = (await Promise.all(componentsToProcess.map(component => this.mapComponentToDiscordComponentAsync(component)))).flat();
 
         // Group components by type - only including ActionRow-compatible components
-        const buttons = discordComponents.filter(c => c instanceof DiscordButtonBuilder);
+        const buttons = this.movePremiumButtonsToEnd(discordComponents.filter(c => c instanceof DiscordButtonBuilder) as DiscordButtonBuilder[]);
         const selectMenus = discordComponents.filter(c =>
             c instanceof DiscordStringSelectMenuBuilder ||
             c instanceof DiscordUserSelectMenuBuilder ||
@@ -242,6 +286,9 @@ class DiscordComponentMapper {
     }
 
     public async mapRootComponentsAsync(components: Component[]): Promise<any[]> {
+        // Deduplicate premium purchase buttons by skuId across the entire reply
+        const seenPremiumSkuIds = new Set<string>();
+
         // ActionRow components
         const actionRowComponents = await this.mapActionRowComponentsAsync(components.filter(
             component => DiscordEnumMapper.isActionRowComponent(component)
@@ -315,7 +362,7 @@ class DiscordComponentMapper {
             }));
     }
 
-    public async mapContainerToDiscordContainerAsync(container: Container): Promise<DiscordContainerBuilder> {
+    public async mapContainerToDiscordContainerAsync(container: Container, seenPremiumSkuIds: Set<string> = new Set()): Promise<DiscordContainerBuilder> {
         const discordContainer = new DiscordContainerBuilder()
             .setAccentColor(container.accent_color || DEFAULT_EMBED_COLOR)
             .setSpoiler(container.spoiler || false);
@@ -335,19 +382,18 @@ class DiscordComponentMapper {
             }
 
             if (component.type === ComponentType.BUTTON) {
-                // Collect consecutive buttons
-                const consecutiveButtons: ActionButton[] = [];
+                const consecutiveButtons: (ActionButton | LinkButton)[] = [];
                 let j = i;
 
                 while (j < container.components.length &&
                     container.components[j]?.type === ComponentType.BUTTON) {
-                    consecutiveButtons.push(container.components[j] as ActionButton);
+                    consecutiveButtons.push(container.components[j] as ActionButton | LinkButton);
                     j++;
                 }
 
                 // Map all consecutive buttons and group them in one ActionRow
                 const buttonPromises = consecutiveButtons.map(btn => this.mapButtonToDiscordButtonAsync(btn));
-                const discordButtons = await Promise.all(buttonPromises);
+                const discordButtons = this.movePremiumButtonsToEnd((await Promise.all(buttonPromises)).flat());
                 const buttonActionRow = this.createActionRowWithComponents(discordButtons);
                 discordContainer.addActionRowComponents([buttonActionRow]);
 
@@ -382,8 +428,11 @@ class DiscordComponentMapper {
         event.components.push(component);
     }
 
-    public async addComponentsAsync(event: InteractionEvent, components: Component[]): Promise<void> {
-        components.forEach(component => this.addComponentAsync(event, component));
+    public async addComponentsAsync(event: InteractionEvent, components: Component[], addInFront?: boolean): Promise<void> {
+        if (addInFront)
+            event.components.unshift(...components);
+        else
+            event.components.push(...components);
     }
 
     public async clearComponentsAsync(event: InteractionEvent): Promise<void> {
@@ -406,7 +455,7 @@ class DiscordComponentMapper {
                 return null;
             }
 
-            const files: AttachmentBuilder[] = this.collectLocalAttachments(components);
+            const files: AttachmentBuilder[] = await this.collectLocalAttachmentsAsync(components);
 
             return this.createReplyOptions(rootComponents, files, ephemeral);
         });
@@ -415,53 +464,55 @@ class DiscordComponentMapper {
     public createReplyOptions(components: any[], files: AttachmentBuilder[], ephemeral?: boolean): DiscordMessageContent {
         return {
             components: components,
-            flags: DiscordMessageFlags.IsComponentsV2,
+            flags: ephemeral
+                ? DiscordMessageFlags.IsComponentsV2 | DiscordMessageFlags.Ephemeral
+                : DiscordMessageFlags.IsComponentsV2,
             files: files.length > 0 ? files : undefined,
             ephemeral: ephemeral
         };
     }
 
-    private collectLocalAttachments(components: Component[]): AttachmentBuilder[] {
-        const files: AttachmentBuilder[] = [];
+    private async collectLocalAttachmentsAsync(components: Component[]): Promise<AttachmentBuilder[]> {
+        const items: MediaGallery['items'][number][] = [];
 
-        const findMediaGalleries = (components: Component[]): void => {
+        const collect = (components: Component[]): void => {
             for (const component of components) {
                 if (!component || !component.type)
                     continue;
 
                 if (component.type === ComponentType.MEDIA_GALLERY) {
                     const mediaGallery = component as MediaGallery;
-
                     for (const item of mediaGallery.items) {
-                        if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:')) {
-                            try {
-                                // Validate that file exists before trying to read it
-                                if (!fs.existsSync(item.media.url)) {
-                                    Logger.logWarning(`File not found: ${item.media.url}`);
-                                    continue;
-                                }
-
-                                // Read file as Buffer to prevent stream issues
-                                const fileBuffer = fs.readFileSync(item.media.url);
-                                Logger.logDebug(`Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
-                                files.push(new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` }));
-                            } catch (error) {
-                                Logger.logError(`Error loading file: ${item.media.url}`, error as Error);
-                                // Skip this file if it cannot be loaded
-                            }
-                        }
+                        if (!item.media.url.startsWith('http:') && !item.media.url.startsWith('https:'))
+                            items.push(item);
                     }
                 } else if (component.type === ComponentType.CONTAINER) {
                     const container = component as Container;
-                    if (container.components) {
-                        findMediaGalleries(container.components);
-                    }
+                    if (container.components)
+                        collect(container.components);
                 }
             }
         };
 
-        findMediaGalleries(components);
-        return files;
+        collect(components);
+
+        // Read all local files concurrently — each goes through MediaService's buffer cache
+        const loaded = await Promise.all(items.map(async (item) => {
+            try {
+                if (!(await MediaService.fileExistsAsync(item.media.url))) {
+                    Logger.logWarning(`File not found: ${item.media.url}`);
+                    return null;
+                }
+                const fileBuffer = await MediaService.getBufferByPathAsync(item.media.url);
+                Logger.logDebug(() => `Attachment loaded: ${item.media.name}.${item.media.type} (${fileBuffer.length} bytes)`);
+                return new AttachmentBuilder(fileBuffer, { name: `${item.media.name}.${item.media.type}` });
+            } catch (error) {
+                Logger.logError(`Error loading file: ${item.media.url}`, error as Error);
+                return null;
+            }
+        }));
+
+        return loaded.filter((file): file is AttachmentBuilder => file !== null);
     }
 
     public mapContentComponents(interaction: InteractionEvent): string {

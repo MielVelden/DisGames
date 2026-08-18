@@ -7,7 +7,11 @@ class GameRepository implements RepositoryWithBase<GamesModel, GamesSaveModel, t
     public readonly baseRepository: BaseRepository<GamesModel, GamesSaveModel, typeof GamesModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<GamesModel, GamesSaveModel, typeof GamesModelFieldEnum>(TableEnum.GAMES, GamesModelFieldEnum, getGamesFieldType);
+        this.baseRepository = new BaseRepository<GamesModel, GamesSaveModel, typeof GamesModelFieldEnum>(
+            TableEnum.GAMES, 
+            GamesModelFieldEnum, 
+            getGamesFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<GamesModel | null> {
@@ -55,6 +59,10 @@ class GameRepository implements RepositoryWithBase<GamesModel, GamesSaveModel, t
             return 0;
         const row = results[0] as { Total?: number; total?: number };
         return row.Total ?? row.total ?? 0;
+    }
+
+    async getExternalIdsAsync(): Promise<string[]> {
+        return this.baseRepository.getExternalIdsAsync();
     }
 
     async getMostPopularGameTypeAsync(): Promise<GameTypeEnum | null> {

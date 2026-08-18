@@ -18,8 +18,12 @@ import { i18n } from "../../utils/i18n/i18n";
 import { ExceptionEnum, MetricEnum } from "../../interfaces/enums";
 import MetricService from "../domain/MetricService";
 import { humanizeDateFromNow } from "../../utils/helpers/Date";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class DashboardService {
+export class DashboardService extends Service {
+    public async initAsync(): Promise<void> {}
+
     public async getDashboardAsync(dashboardEnum: DashboardEnum, identity: User): Promise<DashboardResponse> {
         switch (dashboardEnum) {
             case DashboardEnum.HOME:
@@ -34,6 +38,8 @@ class DashboardService {
                 return this.getGamesDashboardAsync(identity);
             case DashboardEnum.PERFORMANCE:
                 return this.getCachePerformanceDashboardAsync();
+            case DashboardEnum.METRICS:
+                return this.getMetricsDashboardAsync();
             default:
                 assertNever(dashboardEnum, DashboardEnum)
         }
@@ -84,12 +90,12 @@ class DashboardService {
         return {
             id: metric.toString().toLowerCase(),
             metricEnum: metric,
-            title: i18n.metrics[metric][LanguageEnum.EN],
-            description: i18n.metrics[metric][LanguageEnum.EN],
+            title: i18n.enums.metrics[metric][LanguageEnum.EN],
+            description: i18n.enums.metrics[metric][LanguageEnum.EN],
             value: model.Value,
             trend: undefined,
             footer: {
-                primaryText: i18n.metrics[metric][LanguageEnum.EN],
+                primaryText: i18n.enums.metrics[metric][LanguageEnum.EN],
                 secondaryText: `Recorded ${humanizeDateFromNow(model.Datetime)}`
             }
         }
@@ -132,7 +138,8 @@ class DashboardService {
                 this.createDashboardCardWithTimeframe(
                     "Games Played",
                     gamesPlayedTimeFrame,
-                )
+                ),
+                await this.createDashboardCardByMetricAsync(MetricEnum.AdoptionRate),
             ],
             charts: [lineChart, pieChart]
         }
@@ -174,6 +181,16 @@ class DashboardService {
                 pieChart
             ]
         }
+    }
+
+    private async getMetricsDashboardAsync(): Promise<DashboardResponse> {
+        const metricEnums = Object.values(MetricEnum).filter((v): v is MetricEnum => typeof v === "number");
+        const cards = await Promise.all(metricEnums.map(metric => this.createDashboardCardByMetricAsync(metric)));
+
+        return {
+            title: "Metrics",
+            cards
+        };
     }
 
     private getCachePerformanceDashboardAsync(): DashboardResponse {
@@ -222,7 +239,8 @@ class DashboardService {
                     serversTimeFrame
                 ),
                 await this.createDashboardCardByMetricAsync(MetricEnum.ServerMembers),
-                await this.createDashboardCardByMetricAsync(MetricEnum.Events)
+                await this.createDashboardCardByMetricAsync(MetricEnum.Events),
+                await this.createDashboardCardByMetricAsync(MetricEnum.InactivityRate),
             ],
             charts: [
                 barChartEventsByType,
@@ -233,7 +251,7 @@ class DashboardService {
     }
 
     private getGameTypeDisplayName(gameType: GameTypeEnum): string {
-        const def = i18n.commands.games.types[gameType];
+        const def = i18n.enums.gameTypes[gameType];
         if (!def?.name)
             return String(gameType);
         return def.name[LanguageEnum.EN];
@@ -287,4 +305,6 @@ class DashboardService {
     }
 }
 
-export default new DashboardService();
+const dashboardService = new DashboardService();
+registerService(dashboardService);
+export default dashboardService;

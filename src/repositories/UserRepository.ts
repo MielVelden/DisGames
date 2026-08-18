@@ -1,12 +1,18 @@
 import { getUsersFieldType, RepositoryWithBase, UsersModel, UsersModelFieldEnum, UsersSaveModel } from "../interfaces/database";
 import BaseRepository from "./BaseRepository";
 import { TableEnum, UserRoleEnum } from "../interfaces/enums/index";
+import { StoredProcedureEnum } from "../interfaces/enums/database/StoredProcedureEnum";
+import { UserLeaderboardRow } from "../interfaces/view";
 
 class UserRepository implements RepositoryWithBase<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum> {
     public readonly baseRepository: BaseRepository<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum>(TableEnum.USERS, UsersModelFieldEnum, getUsersFieldType);
+        this.baseRepository = new BaseRepository<UsersModel, UsersSaveModel, typeof UsersModelFieldEnum>(
+            TableEnum.USERS,
+            UsersModelFieldEnum,
+            getUsersFieldType,
+        );
     }
 
     async getByIdAsync(id: number): Promise<UsersModel | null> {
@@ -38,6 +44,10 @@ class UserRepository implements RepositoryWithBase<UsersModel, UsersSaveModel, t
     async getSystemUserAsync(): Promise<UsersModel> {
         const model = await this.baseRepository.Select().Where({ UserRoleEnum: UserRoleEnum.SYSTEM }).Limit(1).Execute();
         return model[0];
+    }
+
+    async getTopUsersByExperienceAsync(limit: number = 5): Promise<UserLeaderboardRow[]> {
+        return this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetTopUsersByExperience, [limit]);
     }
 }
 

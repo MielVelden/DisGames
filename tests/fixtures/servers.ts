@@ -9,19 +9,16 @@ export const TEST_SERVERS: ServersSaveModel[] = [
         ServerId: '987654321',
         Name: 'TestServer',
         LanguageEnum: LanguageEnum.NL,
-        Points: 0
     }),
     new ServersSaveModel({
         ServerId: '123456789',
         Name: 'TestServer',
         LanguageEnum: LanguageEnum.EN,
-        Points: 100
     }),
     new ServersSaveModel({
         ServerId: '555666777',
         Name: 'TestServer',
         LanguageEnum: LanguageEnum.NL,
-        Points: 50
     }),
 ];
 
@@ -30,7 +27,6 @@ export const MOCK_SERVERS: ServersModel[] = TEST_SERVERS.map((server, index) => 
     ServerId: server.ServerId || 'default',
     Name: server.Name || 'TestServer',
     LanguageEnum: server.LanguageEnum || LanguageEnum.NL,
-    Points: server.Points || 0
 }));
 
 export function getTestServer(serverId: string): ServersModel | undefined {

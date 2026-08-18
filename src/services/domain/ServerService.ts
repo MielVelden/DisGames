@@ -1,52 +1,98 @@
 import { TimelineEvent } from "../../interfaces/application/Event";
 import { ServersModel, ServersModelFieldEnum, ServersSaveModel } from "../../interfaces/database/TableInterfaces";
+import { ServerLeaderboardRow } from "../../interfaces/view";
 import { MetricEnum } from "../../interfaces/enums";
 import ServerRepository from "../../repositories/ServerRepository";
-import Logger from "../../utils/application/Logger";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { normalizeString } from "../../utils/helpers/String";
 import { DEFAULT_LANGUAGE } from "../../utils/i18n/MultiLingualString";
 import { BaseDomainService } from "./BaseDomainService";
 import TimelineBuilder from "./TimelineBuilder";
+import Logger from "../../utils/application/Logger";
+import DiscordMemberService from "../discord/DiscordMemberService";
+import MediaService from "../application/MediaService";
+import { PREMIUM_NAME } from "../../utils/application/PremiumAccess";
+import packageJson from "../../../package.json";
+import { registerService } from "../../utils/container/Container";
 
-class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
-    protected readonly repository = ServerRepository; 
+export class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
+    protected readonly repository = ServerRepository;
 
-    public async updateNameAsync(serverId: string, name: string): Promise<ServersModel> {
-        const server = await this.getByExternalIdAsync(serverId);
-        const normalizedName = normalizeString(name);
-        server.Name = normalizedName;
-        Logger.logDebug(`Updated server name to ${normalizedName} for server ${serverId}`);
-        return await this.repository.saveAsync(server);
-    }
-
-    public async updateMemberCountAsync(serverId: string, memberCount: number): Promise<ServersModel> {
-        const server = await this.getByExternalIdAsync(serverId);
-        server.MemberCount = memberCount;
-        Logger.logDebug(`Updated server member count to ${memberCount} for server ${serverId}`);
-        return await this.repository.saveAsync(server);
-    }
+    public async initAsync(): Promise<void> {}
 
     protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
         savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
-        savable.validateIsNotNull(ServersModelFieldEnum.Points, 0);
-        
+
+        var server: ServersModel;
+        var entity: ServersModel | null = null;
         if (savable.isProvided(ServersModelFieldEnum.Name))
             savable.Name = normalizeString(savable.Name);
-       
-        const server = await this.repository.saveAsync(savable);      
-        event.server = server;
+
+        if (savable.Id)
+            entity = await this.repository.getByIdAsync(savable.Id);
+
+        server = await this.repository.saveAsync(savable);
 
         await TimelineBuilder.forServerUpdateAsync({
-            old: null,
+            old: entity,
             new: server,
             objectId: server.Id,
             event: event
         });
-        
+
+        event.server = server;
         return server;
     }
-    
+
+    public async handlePremiumGrantedAsync(guildId: string): Promise<void> {
+        let server: ServersModel | undefined;
+        try {
+            server = await this.repository.getByServerIdAsync(guildId);
+        } catch {
+            Logger.logWarning(`handlePremiumGrantedAsync: server ${guildId} not found in database`);
+            return;
+        }
+        if (server.IsPremium)
+            return;
+
+        await this.repository.saveAsync(new ServersSaveModel({
+            Id: server.Id,
+            IsPremium: true
+        }));
+
+        const proLogo = await MediaService.getMediaBufferAsync(MediaService.getBaseImage('pro'));
+        DiscordMemberService.setGuildIdentityAsync(guildId, {
+            nickname: packageJson.name + " " + PREMIUM_NAME,
+            avatarBuffer: proLogo
+        });
+
+        Logger.logInfo(`Server ${guildId} granted premium access`, { sendToDiscord: true });
+    }
+
+    public async handlePremiumRevokedAsync(guildId: string): Promise<void> {
+        let server: ServersModel | undefined;
+        try {
+            server = await this.repository.getByServerIdAsync(guildId);
+        } catch {
+            Logger.logWarning(`handlePremiumRevokedAsync: server ${guildId} not found in database`);
+            return;
+        }
+        if (!server.IsPremium)
+            return;
+
+        await this.repository.saveAsync(new ServersSaveModel({
+            Id: server.Id,
+            IsPremium: false
+        }));
+
+        DiscordMemberService.setGuildIdentityAsync(guildId, {
+            nickname: null,
+            avatarBuffer: null
+        });
+
+        Logger.logInfo(`Server ${guildId} had premium access revoked`, { sendToDiscord: true });
+    }
+
     public async getAllAsync(): Promise<ServersModel[]> {
         return await this.repository.getAllAsync();
     }
@@ -64,6 +110,23 @@ class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, ty
     public async getTotalServerMembersAsync(): Promise<number> {
         return await this.repository.getTotalServerMembersAsync();
     }
+
+    public async getServersWithLeaderboardLiveAsync(): Promise<ServersModel[]> {
+        return await this.repository.getServersWithLeaderboardLiveAsync();
+    }
+
+    public async clearLeaderboardLiveAsync(server: ServersModel): Promise<void> {
+        await this.repository.saveAsync(new ServersSaveModel({
+            Id: server.Id,
+            SettingsJSON: { ...server.Settings, leaderboardLive: undefined }
+        }));
+    }
+
+    public async getTopServersByPointsAsync(limit: number = 5): Promise<ServerLeaderboardRow[]> {
+        return await this.repository.getTopServersByPointsAsync(limit);
+    }
 }
 
-export default new ServerService();
+const serverService = new ServerService();
+registerService(serverService);
+export default serverService;

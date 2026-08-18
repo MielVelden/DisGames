@@ -7,8 +7,9 @@ import { BaseDomainService } from "./BaseDomainService";
 import { getSystemEventAsync } from "../../utils/helpers/Timeline";
 import { wsService } from "../../server";
 import { CacheMetric } from "../../interfaces/domain";
+import { registerService } from "../../utils/container/Container";
 
-class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, typeof MetricRepository> {
+export class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, typeof MetricRepository> {
     protected readonly repository = MetricRepository;
     private cache = new Map<MetricEnum, CacheMetric>();
 
@@ -69,6 +70,7 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
                     Datetime: new Date(),
                     Value: x.value
                 }), event);
+                x.updated = true;
             }
         });
     }
@@ -82,4 +84,6 @@ class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, ty
     }
 }
 
-export default new MetricService();
+const metricService = new MetricService();
+registerService(metricService);
+export default metricService;

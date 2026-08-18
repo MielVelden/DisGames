@@ -6,6 +6,7 @@ import {
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from 'discord.js';
+import { AppEntitlement } from '../../../interfaces/application/Entitlement';
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
 import { ServersModel, UsersSaveModel } from '../../../interfaces/database/TableInterfaces';
@@ -15,7 +16,8 @@ import {
     SlashCommandDiscordEvent,
     MessageDiscordEvent,
     ButtonDiscordEvent,
-    SelectMenuDiscordEvent
+    SelectMenuDiscordEvent,
+    ModalSubmitDiscordEvent
 } from '../events';
 import DiscordPermissionService from '../DiscordPermissionService';
 import DiscordMessageHandler from '../handlers/DiscordMessageHandler';
@@ -38,6 +40,8 @@ class DiscordInteractionMapper {
             if (!command)
                 throw new Error(`Command not found: ${interaction.commandName}`);
 
+            const entitlements = this.mapEntitlementsFromInteraction(interaction);
+
             const tempEvent = new SlashCommandDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
@@ -45,7 +49,8 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                command
+                command,
+                entitlements
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
@@ -58,9 +63,12 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                command
+                command,
+                entitlements
             );
         } else if (interaction.isButton()) {
+            const entitlements = this.mapEntitlementsFromInteraction(interaction);
+
             const tempEvent = new ButtonDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
@@ -68,7 +76,8 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                interaction.customId
+                interaction.customId,
+                entitlements
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
@@ -81,9 +90,12 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                interaction.customId
+                interaction.customId,
+                entitlements
             );
         } else if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
+            const entitlements = this.mapEntitlementsFromInteraction(interaction);
+
             const tempEvent = new SelectMenuDiscordEvent(
                 interaction as DiscordStringSelectMenuInteraction,
                 this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
@@ -92,7 +104,8 @@ class DiscordInteractionMapper {
                 baseParams.guildId,
                 baseParams.messageId,
                 interaction.customId,
-                interaction.values[0]
+                interaction.values,
+                entitlements
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
@@ -106,7 +119,31 @@ class DiscordInteractionMapper {
                 baseParams.guildId,
                 baseParams.messageId,
                 interaction.customId,
-                interaction.values[0]
+                interaction.values,
+                entitlements
+            );
+        } else if (interaction.isModalSubmit()) {
+            const tempEvent = new ModalSubmitDiscordEvent(
+                interaction,
+                this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
+                getTempServer(interaction.guild as DiscordServer),
+                baseParams.channelId,
+                baseParams.guildId,
+                baseParams.messageId,
+                interaction.customId
+            );
+
+            const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
+            const server = await this.mapDiscordServerToServerAsync(interaction.guild as DiscordServer, tempEvent);
+
+            event = new ModalSubmitDiscordEvent(
+                interaction,
+                user,
+                server,
+                baseParams.channelId,
+                baseParams.guildId,
+                baseParams.messageId,
+                interaction.customId
             );
         } else {
             throw new Error(`Unsupported interaction type: ${interaction.type}`);
@@ -201,6 +238,14 @@ class DiscordInteractionMapper {
 
     private async mapDiscordServerToServerAsync(discordServer: DiscordServer, event: InteractionEvent): Promise<ServersModel> {
         return getOrCreateServerAsync(discordServer, event);
+    }
+
+    private mapEntitlementsFromInteraction(interaction: DiscordInteraction): AppEntitlement[] {
+        const list: AppEntitlement[] = [];
+        for (const entitlement of interaction.entitlements.values()) {
+            list.push({ id: entitlement.id, skuId: entitlement.skuId });
+        }
+        return list;
     }
 }
 

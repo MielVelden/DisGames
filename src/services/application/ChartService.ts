@@ -4,8 +4,12 @@ import { ChartDefinition } from "../../interfaces/application/Chart";
 import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import { RepositoryUtils } from "../../repositories/BaseRepository";
 import { ExceptionEnum, StoredProcedureEnum } from "../../interfaces/enums";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class ChartService {
+export class ChartService extends Service {
+    public async initAsync(): Promise<void> {}
+
     public async getChartAsync(chartEnum: ChartTypeEnum, identity: User): Promise<ChartDefinition> {
         switch (chartEnum) {
             case ChartTypeEnum.LineChart_User_NewUser:
@@ -29,7 +33,17 @@ class ChartService {
         }
     }
 
-    // #region Bar Charts
+    // #region Bar & Line Charts
+
+    private async getLineChartServerNewServerAsync(identity: User): Promise<ChartDefinition> {
+        const chartData = await this.getChartData(StoredProcedureEnum.LineChartServerNewServer, [90]);
+
+        return {
+            title: "Server Growth",
+            type: ChartEnum.Line,
+            ...chartData,
+        };
+    }
 
     private async getBarChartEventsEventsByTypeAsync(identity: User): Promise<ChartDefinition> {
         const chartData = await this.getChartData(StoredProcedureEnum.BarChartEventsEventsByType, [1]);
@@ -223,22 +237,9 @@ class ChartService {
         };
     }
 
-    private async getLineChartServerNewServerAsync(identity: User): Promise<ChartDefinition> {
-        const chartData = [
-            { date: "2024-04-01", servers: 300 },
-            { date: "2024-04-02", servers: 97 },
-        ];
-
-        return {
-            title: "New Servers",
-            data: chartData,
-            xAxisKey: "date",
-            valueKeys: ["servers"],
-            type: ChartEnum.Line,
-        };
-    }
-
     // #endregion
 }
 
-export default new ChartService();
+const chartService = new ChartService();
+registerService(chartService);
+export default chartService;

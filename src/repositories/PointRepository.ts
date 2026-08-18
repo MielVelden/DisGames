@@ -8,7 +8,11 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
     public readonly baseRepository: BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>(TableEnum.POINTS, PointsModelFieldEnum, getPointsFieldType);
+        this.baseRepository = new BaseRepository<PointsModel, PointsSaveModel, typeof PointsModelFieldEnum>(
+            TableEnum.POINTS, 
+            PointsModelFieldEnum, 
+            getPointsFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<PointsModel | null> {
@@ -91,6 +95,15 @@ class PointRepository implements RepositoryWithBase<PointsModel, PointsSaveModel
 
     async getTotalPointsAsync(): Promise<number> {
         return await this.baseRepository.Select().Sum("Points");
+    }
+
+    async getDistinctServerCountAsync(userId: string): Promise<number> {
+        const tableName = getTableName(TableEnum.POINTS);
+        const results = await runQueryAsync(
+            `SELECT COUNT(DISTINCT ServerId) AS Count FROM ${tableName} WHERE UserId = ?`,
+            [userId]
+        );
+        return results?.[0]?.Count ?? 0;
     }
 }
 

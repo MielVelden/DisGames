@@ -2,7 +2,9 @@ import { JobModule } from "../interfaces/application/Job";
 import Logger from "../utils/application/Logger";
 import { WebhookType } from "../interfaces/enums/application/Webhook";
 import MetricService from "../services/domain/MetricService";
-import { MetricEnum } from "../interfaces/enums";
+import { LanguageEnum, MetricEnum } from "../interfaces/enums";
+import { i18n } from "../utils/i18n/i18n";
+import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 
 export default {
     id: 'basic-metrics',
@@ -34,17 +36,10 @@ export default {
             };
         }
 
-        const metricLabels: Partial<Record<MetricEnum, string>> = {
-            [MetricEnum.Guilds]: 'Guilds',
-            [MetricEnum.Members]: 'Members',
-            [MetricEnum.Users]: 'Users',
-            [MetricEnum.Servers]: 'Servers',
-            [MetricEnum.Points]: 'Total Points',
-        };
-
         let message = '**Daily Metrics:**\n';
         for (const metricType of metricTypes) {
-            message += `${metricLabels[metricType] || metricType}: ${metrics[metricType].current.Value}\n`;
+            const enumName = new MultiLingualString(i18n.enums.metrics[metricType]).getMessage(LanguageEnum.EN);
+            message += `${enumName || metricType}: ${metrics[metricType].current.Value} (+${metrics[metricType].increase})\n`;
         }
 
         Logger.logInfo(message, {

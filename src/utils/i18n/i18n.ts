@@ -1,11 +1,17 @@
 import { GamesCommandActionEnum } from "../../interfaces/enums/commands/Games";
+import { LeaderboardCommandActionEnum } from "../../interfaces/enums/commands/Leaderboard";
 import { ProfileCommandActionEnum } from "../../interfaces/enums/commands/Profile";
+import { PremiumActionEnum } from "../../interfaces/enums/commands/Premium";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
-import { GameTypeEnum } from "../../interfaces/enums/database/GameTypeEnum";
-import { ExceptionEnum } from "../../interfaces/enums/application/ExpectionEnum";
-import { MetricEnum } from "../../interfaces/enums";
+import { badgeTranslations } from "./enums/badges";
+import { countryTranslations } from "./enums/countries";
+import { exceptionTranslations } from "./enums/exceptions";
+import { gameTypeTranslations } from "./enums/gameTypes";
+import { languageTranslations } from "./enums/languages";
+import { metricTranslations } from "./enums/metrics";
+import { userRoleTranslations } from "./enums/userRoles";
 
 export const i18n: I18nTranslations = {
     labels: {
@@ -13,87 +19,144 @@ export const i18n: I18nTranslations = {
             success: {
                 [LanguageEnum.EN]: "All set",
                 [LanguageEnum.NL]: "Klaar",
+                [LanguageEnum.ES]: "Listo",
+                [LanguageEnum.DE]: "Alles erledigt",
+                [LanguageEnum.PT]: "Pronto",
             },
             enabled: {
                 [LanguageEnum.EN]: "Enabled",
                 [LanguageEnum.NL]: "Ingeschakeld",
+                [LanguageEnum.ES]: "Activado",
+                [LanguageEnum.DE]: "Aktiviert",
+                [LanguageEnum.PT]: "Ativado",
             },
             disabled: {
                 [LanguageEnum.EN]: "Disabled",
                 [LanguageEnum.NL]: "Uitgeschakeld",
+                [LanguageEnum.ES]: "Desactivado",
+                [LanguageEnum.DE]: "Deaktiviert",
+                [LanguageEnum.PT]: "Desativado",
             },
             cancel: {
                 [LanguageEnum.EN]: "Dismiss",
                 [LanguageEnum.NL]: "Annuleer",
+                [LanguageEnum.ES]: "Descartar",
+                [LanguageEnum.DE]: "Schließen",
+                [LanguageEnum.PT]: "Fechar",
             },
             accept: {
                 [LanguageEnum.EN]: "Accept",
                 [LanguageEnum.NL]: "Accepteren",
+                [LanguageEnum.ES]: "Aceptar",
+                [LanguageEnum.DE]: "Akzeptieren",
+                [LanguageEnum.PT]: "Aceitar",
             },
             deny: {
                 [LanguageEnum.EN]: "Deny",
                 [LanguageEnum.NL]: "Weigeren",
+                [LanguageEnum.ES]: "Rechazar",
+                [LanguageEnum.DE]: "Ablehnen",
+                [LanguageEnum.PT]: "Negar",
             },
             cancelled: {
                 [LanguageEnum.EN]: "This request has been cancelled",
                 [LanguageEnum.NL]: "Dit verzoek is geannuleerd",
+                [LanguageEnum.ES]: "Esta solicitud ha sido cancelada",
+                [LanguageEnum.DE]: "Diese Anfrage wurde abgebrochen",
+                [LanguageEnum.PT]: "Esta solicitação foi cancelada",
             },
             timedOut: {
                 title: {
                     [LanguageEnum.EN]: "The request has timed out",
                     [LanguageEnum.NL]: "Het verzoek is verlopen",
+                    [LanguageEnum.ES]: "La solicitud ha caducado",
+                    [LanguageEnum.DE]: "Die Anfrage ist abgelaufen",
+                    [LanguageEnum.PT]: "A solicitação expirou",
                 },
                 description: {
                     [LanguageEnum.EN]: "Please try again",
                     [LanguageEnum.NL]: "Probeer het opnieuw",
+                    [LanguageEnum.ES]: "Por favor, inténtalo de nuevo",
+                    [LanguageEnum.DE]: "Bitte versuche es erneut",
+                    [LanguageEnum.PT]: "Por favor, tente novamente",
                 },
             },
             delete: {
                 [LanguageEnum.EN]: "Remove",
                 [LanguageEnum.NL]: "Verwijderen",
+                [LanguageEnum.ES]: "Eliminar",
+                [LanguageEnum.DE]: "Entfernen",
+                [LanguageEnum.PT]: "Remover",
             },
             askQuestion: {
                 [LanguageEnum.EN]: "Please answer the question",
                 [LanguageEnum.NL]: "Vul een antwoord in",
+                [LanguageEnum.ES]: "Por favor, responde la pregunta",
+                [LanguageEnum.DE]: "Bitte beantworte die Frage",
+                [LanguageEnum.PT]: "Por favor, responda à pergunta",
             },
             notEnoughPermissions: {
                 [LanguageEnum.EN]: "You don't have the required permissions to execute this command",
                 [LanguageEnum.NL]: "Je hebt niet de benodigde rechten om dit commando uit te voeren",
+                [LanguageEnum.ES]: "No tienes los permisos necesarios para ejecutar este comando",
+                [LanguageEnum.DE]: "Du hast nicht die erforderlichen Berechtigungen, um diesen Befehl auszuführen",
+                [LanguageEnum.PT]: "Você não tem as permissões necessárias para executar este comando",
             },
             notYourEvent: {
                 [LanguageEnum.EN]: "This interaction is not for you",
                 [LanguageEnum.NL]: "Dit interactie is niet voor jou",
+                [LanguageEnum.ES]: "Esta interacción no es para ti",
+                [LanguageEnum.DE]: "Diese Interaktion ist nicht für dich",
+                [LanguageEnum.PT]: "Esta interação não é para você",
             },
             welcome: {
                 title: {
                     [LanguageEnum.EN]: "👋 Hi, I'm DisGames!",
                     [LanguageEnum.NL]: "👋 Hallo, ik ben DisGames!",
+                    [LanguageEnum.ES]: "👋 ¡Hola, soy DisGames!",
+                    [LanguageEnum.DE]: "👋 Hallo, ich bin DisGames!",
+                    [LanguageEnum.PT]: "👋 Olá, eu sou o DisGames!",
                 },
                 description: {
                     [LanguageEnum.EN]: "Step into a world of endless fun and excitement with DisGames, the ultimate minigame bot for Discord!\n\n Are you ready to keep your server members engaged and entertained like never before? Look no further. With me (DisGames), you'll dive into a collection of unique and captivating minigames carefully designed to bring your community together. From brain-teasing puzzles to thrilling action challenges, I have it all.\n\nElevate your server with DisGames today and redefine the way you connect and have fun!",
-                    [LanguageEnum.NL]: "Stap in een wereld van eindeloos plezier en spanning met DisGames, de ultieme minigame-bot voor Discord!\n\n Ben je klaar om je serverleden als nooit tevoren bezig en vermaakt te houden? Zoek niet verder. Met mij (DisGames) duik je in een verzameling unieke en boeiende minigames die zorgvuldig zijn ontworpen om je community samen te brengen. Van hersenkrakende puzzels tot spannende actie-uitdagingen, ik heb het allemaal.\n\n Til je server vandaag nog naar een hoger niveau met DisGames en geef een nieuwe invulling aan de manier waarop je contact maakt en plezier hebt!",
+                    [LanguageEnum.NL]: "Stap in een wereld van eindeloos plezier en spanning met DisGames, de ultieme minigame-bot voor Discord!\\n\\n Ben je klaar om je serverleden als nooit tevoren bezig en vermaakt te houden? Zoek niet verder. Met mij (DisGames) duik je in een verzameling unieke en boeiende minigames die zorgvuldig zijn ontworpen om je community samen te brengen. Van hersenkrakende puzzels tot spannende actie-uitdagingen, ik heb het allemaal.\\n\\n Til je server vandaag nog naar een hoger niveau met DisGames en geef een nieuwe invulling aan de manier waarop je contact maakt en plezier hebt!",
+                    [LanguageEnum.ES]: "Entra en un mundo de diversión y emoción sin fin con DisGames, ¡el bot definitivo de minijuegos para Discord!\\n\\n ¿Estás listo para mantener a los miembros de tu servidor entretenidos y participando como nunca antes? No busques más. Conmigo (DisGames), te sumergirás en una colección de minijuegos únicos y cautivadores diseñados cuidadosamente para unir a tu comunidad. Desde rompecabezas que desafían la mente hasta emocionantes desafíos de acción, lo tengo todo.\\n\\n¡Eleva tu servidor con DisGames hoy y redefine la forma en que te conectas y te diviertes!",
+                    [LanguageEnum.DE]: "Tritt ein in eine Welt endlosen Spaßes und Spannung mit DisGames, dem ultimativen Minispiel-Bot für Discord!\\n\\n Bist du bereit, deine Server-Mitglieder wie nie zuvor zu beschäftigen und zu unterhalten? Dann bist du hier richtig. Mit mir (DisGames) tauchst du in eine Sammlung einzigartiger und fesselnder Minispiele ein, die sorgfältig entwickelt wurden, um deine Community zusammenzubringen. Von kniffligen Rätseln bis zu aufregenden Action-Challenges – ich habe alles.\\n\\n Hebe deinen Server mit DisGames noch heute auf ein neues Level und verändere die Art, wie du dich verbindest und Spaß hast!",
+                    [LanguageEnum.PT]: "Entre num mundo de diversão e emoção sem fim com o DisGames, o bot definitivo de minijogos para o Discord!\\n\\n Estás pronto para manter os membros do teu servidor envolvidos e entretidos como nunca antes? Não procures mais. Comigo (DisGames), vais mergulhar numa coleção de minijogos únicos e cativantes cuidadosamente projetados para unir a tua comunidade. De quebra-cabeças desafiantes a emocionantes desafios de ação, tenho de tudo.\\n\\n Eleva o teu servidor com o DisGames hoje e redefine a forma como te conectas e te divertes!",
                 },
             },
         },
         handleNever: (uniqueCase: string, origin: string) => new MultiLingualString({
-            [LanguageEnum.EN]: "Unhandled case {uniqueCase} in {origin}",
-            [LanguageEnum.NL]: "Niet afgehandelde case {uniqueCase} in {origin}"
-        }, { uniqueCase, origin })
+            [LanguageEnum.EN]: `Unhandled case ${uniqueCase} in ${origin}`,
+            [LanguageEnum.NL]: `Niet afgehandelde case ${uniqueCase} in ${origin}`,
+            [LanguageEnum.ES]: `Caso no manejado ${uniqueCase} en ${origin}`,
+            [LanguageEnum.DE]: `Nicht behandelter Fall ${uniqueCase} in ${origin}`,
+            [LanguageEnum.PT]: `Caso não tratado ${uniqueCase} em ${origin}`,
+        })
     },
     tables: {
         users: {
             singleName: {
                 [LanguageEnum.EN]: "User",
                 [LanguageEnum.NL]: "Gebruiker",
+                [LanguageEnum.ES]: "Usuario",
+                [LanguageEnum.DE]: "Benutzer",
+                [LanguageEnum.PT]: "Usuário",
             },
             multiName: {
                 [LanguageEnum.EN]: "Users",
                 [LanguageEnum.NL]: "Gebruikers",
+                [LanguageEnum.ES]: "Usuarios",
+                [LanguageEnum.DE]: "Benutzer",
+                [LanguageEnum.PT]: "Usuários",
             },
             fields: {
                 username: {
                     [LanguageEnum.EN]: "Username",
                     [LanguageEnum.NL]: "Gebruikersnaam",
+                    [LanguageEnum.ES]: "Nombre de usuario",
+                    [LanguageEnum.DE]: "Benutzername",
+                    [LanguageEnum.PT]: "Nome de usuário",
                 },
             }
         },
@@ -101,10 +164,16 @@ export const i18n: I18nTranslations = {
             singleName: {
                 [LanguageEnum.EN]: "Point",
                 [LanguageEnum.NL]: "Punt",
+                [LanguageEnum.ES]: "Punto",
+                [LanguageEnum.DE]: "Punkt",
+                [LanguageEnum.PT]: "Ponto",
             },
             multiName: {
                 [LanguageEnum.EN]: "Points",
                 [LanguageEnum.NL]: "Punten",
+                [LanguageEnum.ES]: "Puntos",
+                [LanguageEnum.DE]: "Punkte",
+                [LanguageEnum.PT]: "Pontos",
             }
         },
     },
@@ -113,19 +182,31 @@ export const i18n: I18nTranslations = {
             description: {
                 [LanguageEnum.EN]: "Debug",
                 [LanguageEnum.NL]: "Debug",
+                [LanguageEnum.ES]: "Depurar",
+                [LanguageEnum.DE]: "Debuggen",
+                [LanguageEnum.PT]: "Depurar",
             },
             labels: {
                 title: {
                     [LanguageEnum.EN]: "Debug",
                     [LanguageEnum.NL]: "Debug",
+                    [LanguageEnum.ES]: "Depurar",
+                    [LanguageEnum.DE]: "Debuggen",
+                    [LanguageEnum.PT]: "Depurar",
                 },
                 description: (uniqueCode: string) => new MultiLingualString({
                     [LanguageEnum.EN]: "Please send the following command in any channel in the server that you need help with: 'debug {uniqueCode}'",
                     [LanguageEnum.NL]: "Stuur het volgende commando in een kanaal in de server waar je hulp nodig hebt: 'debug {uniqueCode}'",
+                    [LanguageEnum.ES]: "Por favor, envía el siguiente comando en cualquier canal del servidor donde necesites ayuda: 'debug {uniqueCode}'",
+                    [LanguageEnum.DE]: "Bitte sende den folgenden Befehl in einem Kanal des Servers, bei dem du Hilfe benötigst: 'debug {uniqueCode}'",
+                    [LanguageEnum.PT]: "Por favor, envie o seguinte comando em qualquer canal do servidor onde precisa de ajuda: 'debug {uniqueCode}'",
                 }, { uniqueCode }),
                 thanks: {
                     [LanguageEnum.EN]: "Thank you for your help, the developer will be notified and will get back to you as soon as possible.",
                     [LanguageEnum.NL]: "Bedankt voor je hulp, de ontwikkelaar wordt op de hoogte gebracht en zal zo snel mogelijk terugkomen.",
+                    [LanguageEnum.ES]: "Gracias por tu ayuda, el desarrollador será notificado y se pondrá en contacto contigo lo antes posible.",
+                    [LanguageEnum.DE]: "Vielen Dank für deine Hilfe, der Entwickler wird benachrichtigt und wird sich so schnell wie möglich bei dir melden.",
+                    [LanguageEnum.PT]: "Obrigado pela sua ajuda, o desenvolvedor será notificado e entrará em contacto consigo assim que possível.",
                 },
             }
         },
@@ -133,32 +214,53 @@ export const i18n: I18nTranslations = {
             description: {
                 [LanguageEnum.EN]: "Easily configure and manage your games",
                 [LanguageEnum.NL]: "Beheer en stel je spellen moeiteloos in",
+                [LanguageEnum.ES]: "Configura y administra tus juegos fácilmente",
+                [LanguageEnum.DE]: "Spiele einfach konfigurieren und verwalten",
+                [LanguageEnum.PT]: "Configure e gerencie seus jogos facilmente",
             },
             option: {
                 action: {
                     [LanguageEnum.EN]: "Action",
                     [LanguageEnum.NL]: "Actie",
+                    [LanguageEnum.ES]: "Acción",
+                    [LanguageEnum.DE]: "Aktion",
+                    [LanguageEnum.PT]: "Ação",
                 },
                 actionDescription: {
                     [LanguageEnum.EN]: "Select how you’d like to manage your games",
                     [LanguageEnum.NL]: "Kies hoe je je spellen wilt beheren",
+                    [LanguageEnum.ES]: "Selecciona cómo te gustaría gestionar tus juegos",
+                    [LanguageEnum.DE]: "Wähle, wie du deine Spiele verwalten möchtest",
+                    [LanguageEnum.PT]: "Selecione como deseja gerenciar seus jogos",
                 },
                 noAction: {
                     [LanguageEnum.EN]: "Please choose an action to continue",
                     [LanguageEnum.NL]: "Selecteer een actie om door te gaan",
+                    [LanguageEnum.ES]: "Por favor, elige una acción para continuar",
+                    [LanguageEnum.DE]: "Bitte wähle eine Aktion, um fortzufahren",
+                    [LanguageEnum.PT]: "Por favor, escolha uma ação para continuar",
                 },
                 choices: {
                     [GamesCommandActionEnum.MANAGE]: {
                         [LanguageEnum.EN]: "Manage games and settings",
                         [LanguageEnum.NL]: "Spellen en instellingen beheren",
+                        [LanguageEnum.ES]: "Administrar juegos y ajustes",
+                        [LanguageEnum.DE]: "Spiele und Einstellungen verwalten",
+                        [LanguageEnum.PT]: "Gerenciar jogos e configurações",
                     },
                     [GamesCommandActionEnum.HELP]: {
                         [LanguageEnum.EN]: "Get help and support",
                         [LanguageEnum.NL]: "Hulp en ondersteuning",
+                        [LanguageEnum.ES]: "Obtener ayuda y soporte",
+                        [LanguageEnum.DE]: "Hilfe und Support",
+                        [LanguageEnum.PT]: "Obter ajuda e suporte",
                     },
                     [GamesCommandActionEnum.SETUP]: {
                         [LanguageEnum.EN]: "Set up new games",
                         [LanguageEnum.NL]: "Nieuwe spellen instellen",
+                        [LanguageEnum.ES]: "Configurar nuevos juegos",
+                        [LanguageEnum.DE]: "Neue Spiele einrichten",
+                        [LanguageEnum.PT]: "Configurar novos jogos",
                     }
                 }
             },
@@ -166,161 +268,306 @@ export const i18n: I18nTranslations = {
                 noActiveGames: {
                     [LanguageEnum.EN]: "No active games",
                     [LanguageEnum.NL]: "Geen actieve spellen",
+                    [LanguageEnum.ES]: "No hay juegos activos",
+                    [LanguageEnum.DE]: "Keine aktiven Spiele",
+                    [LanguageEnum.PT]: "Nenhum jogo ativo",
                 },
                 success: {
                     [LanguageEnum.EN]: "Game setup complete",
                     [LanguageEnum.NL]: "Spel succesvol ingesteld",
+                    [LanguageEnum.ES]: "Configuración del juego completada",
+                    [LanguageEnum.DE]: "Spiel erfolgreich eingerichtet",
+                    [LanguageEnum.PT]: "Configuração do jogo concluída",
                 },
                 selectGame: {
                     title: {
                         [LanguageEnum.EN]: "Choose a game",
                         [LanguageEnum.NL]: "Kies een spel",
+                        [LanguageEnum.ES]: "Elige un juego",
+                        [LanguageEnum.DE]: "Wähle ein Spiel",
+                        [LanguageEnum.PT]: "Escolha um jogo",
                     },
                     description: {
                         [LanguageEnum.EN]: "Choose a game from the list",
                         [LanguageEnum.NL]: "Kies een spel uit de lijst",
+                        [LanguageEnum.ES]: "Elige un juego de la lista",
+                        [LanguageEnum.DE]: "Wähle ein Spiel aus der Liste",
+                        [LanguageEnum.PT]: "Escolha um jogo da lista",
                     },
                 },
                 deleteSuccess: {
                     title: {
                         [LanguageEnum.EN]: "Game successfully removed",
                         [LanguageEnum.NL]: "Spel succesvol verwijderd",
+                        [LanguageEnum.ES]: "Juego eliminado con éxito",
+                        [LanguageEnum.DE]: "Spiel erfolgreich entfernt",
+                        [LanguageEnum.PT]: "Jogo removido com sucesso",
                     },
                     description: {
                         [LanguageEnum.EN]: "The game has been successfully removed. The game will no work within this server anymore.",
                         [LanguageEnum.NL]: "Het spel is succesvol verwijderd. Het spel zal niet meer werken binnen deze server.",
+                        [LanguageEnum.ES]: "El juego ha sido eliminado correctamente. El juego ya no funcionará en este servidor.",
+                        [LanguageEnum.DE]: "Das Spiel wurde erfolgreich entfernt. Das Spiel wird auf diesem Server nicht mehr funktionieren.",
+                        [LanguageEnum.PT]: "O jogo foi removido com sucesso. O jogo não funcionará mais neste servidor.",
                     },
                 },
                 chooseChannel: {
                     [LanguageEnum.EN]: "Choose a channel",
                     [LanguageEnum.NL]: "Kies een kanaal",
+                    [LanguageEnum.ES]: "Elige un canal",
+                    [LanguageEnum.DE]: "Wähle einen Kanal",
+                    [LanguageEnum.PT]: "Escolha um canal",
                 },
                 movedToChannel: {
                     title: {
                         [LanguageEnum.EN]: "Successfully moved to a new channel",
                         [LanguageEnum.NL]: "Succesvol verplaatst naar een nieuw kanaal",
+                        [LanguageEnum.ES]: "Movido exitosamente a un nuevo canal",
+                        [LanguageEnum.DE]: "Erfolgreich in einen neuen Kanal verschoben",
+                        [LanguageEnum.PT]: "Movido com sucesso para um novo canal",
                     },
                     description: (channel: string) => new MultiLingualString({
                         [LanguageEnum.EN]: "The game has been moved to the channel: {channel}",
                         [LanguageEnum.NL]: "Het spel is verplaatst naar het kanaal: {channel}",
+                        [LanguageEnum.ES]: "El juego ha sido movido al canal: {channel}",
+                        [LanguageEnum.DE]: "Das Spiel wurde in den Kanal verschoben: {channel}",
+                        [LanguageEnum.PT]: "O jogo foi movido para o canal: {channel}",
                     }, { channel }),
                 },
                 skipAnswer: {
                     [LanguageEnum.EN]: "Not familiar with the answer? Enter '?'",
                     [LanguageEnum.NL]: "Niet bekend met het antwoord? Voer '?' in",
+                    [LanguageEnum.ES]: "¿No conoces la respuesta? Introduce '?'",
+                    [LanguageEnum.DE]: "Nicht mit der Antwort vertraut? Gib '?' ein",
+                    [LanguageEnum.PT]: "Não conhece a resposta? Digite '?'",
                 },
                 howToPlay: {
                     [LanguageEnum.EN]: "How to Play",
                     [LanguageEnum.NL]: "Hoe te spelen",
+                    [LanguageEnum.ES]: "Cómo jugar",
+                    [LanguageEnum.DE]: "So wird gespielt",
+                    [LanguageEnum.PT]: "Como jogar",
                 },
                 incorrectAnswer: {
                     [LanguageEnum.EN]: "The answer is incorrect. The counter has been reset to 1.",
                     [LanguageEnum.NL]: "Het antwoord is incorrect. De teller is teruggezet naar 1.",
+                    [LanguageEnum.ES]: "La respuesta es incorrecta. El contador se ha reiniciado a 1.",
+                    [LanguageEnum.DE]: "Die Antwort ist falsch. Der Zähler wurde auf 1 zurückgesetzt.",
+                    [LanguageEnum.PT]: "A resposta está incorreta. O contador foi reiniciado para 1.",
                 },
                 gameName: (gameName: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "> Game: `{gameName}`",
-                    [LanguageEnum.NL]: "> Spel: `{gameName}`",
-                }, { gameName }),
+                    [LanguageEnum.EN]: `> Game: \`${gameName}\``,
+                    [LanguageEnum.NL]: `> Spel: \`${gameName}\``,
+                    [LanguageEnum.ES]: `> Juego: \`${gameName}\``,
+                    [LanguageEnum.DE]: `> Spiel: \`${gameName}\``,
+                    [LanguageEnum.PT]: `> Jogo: \`${gameName}\``,
+                }),
                 channelName: (channelName: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "> Channel: `{channelName}`",
-                    [LanguageEnum.NL]: "> Kanaal: `{channelName}`",
-                }, { channelName }),
+                    [LanguageEnum.EN]: `> Channel: \`${channelName}\``,
+                    [LanguageEnum.NL]: `> Kanaal: \`${channelName}\``,
+                    [LanguageEnum.ES]: `> Canal: \`${channelName}\``,
+                    [LanguageEnum.DE]: `> Kanal: \`${channelName}\``,
+                    [LanguageEnum.PT]: `> Canal: \`${channelName}\``,
+                }),
             },
             settings: {
                 title: {
                     [LanguageEnum.EN]: "Game Settings",
                     [LanguageEnum.NL]: "Spelinstellingen",
+                    [LanguageEnum.ES]: "Configuración del juego",
+                    [LanguageEnum.DE]: "Spieleinstellungen",
+                    [LanguageEnum.PT]: "Configurações do jogo",
                 },
                 description: {
                     [LanguageEnum.EN]: "Configure the settings for this game:",
                     [LanguageEnum.NL]: "Configureer de instellingen voor dit spel:",
+                    [LanguageEnum.ES]: "Configura los ajustes de este juego:",
+                    [LanguageEnum.DE]: "Konfiguriere die Einstellungen für dieses Spiel:",
+                    [LanguageEnum.PT]: "Configura as definições deste jogo:",
                 },
                 currentSettings: {
                     [LanguageEnum.EN]: "Current Settings",
                     [LanguageEnum.NL]: "Huidige instellingen",
+                    [LanguageEnum.ES]: "Ajustes actuales",
+                    [LanguageEnum.DE]: "Aktuelle Einstellungen",
+                    [LanguageEnum.PT]: "Configurações atuais",
                 },
                 enabled: {
                     [LanguageEnum.EN]: "Enabled",
                     [LanguageEnum.NL]: "Ingeschakeld",
+                    [LanguageEnum.ES]: "Activado",
+                    [LanguageEnum.DE]: "Aktiviert",
+                    [LanguageEnum.PT]: "Ativado",
                 },
                 disabled: {
                     [LanguageEnum.EN]: "Disabled",
                     [LanguageEnum.NL]: "Uitgeschakeld",
+                    [LanguageEnum.ES]: "Desactivado",
+                    [LanguageEnum.DE]: "Deaktiviert",
+                    [LanguageEnum.PT]: "Desativado",
                 },
                 unknown: {
                     [LanguageEnum.EN]: "Unknown",
                     [LanguageEnum.NL]: "Onbekend",
+                    [LanguageEnum.ES]: "Desconocido",
+                    [LanguageEnum.DE]: "Unbekannt",
+                    [LanguageEnum.PT]: "Desconhecido",
+                },
+                configureButton: {
+                    [LanguageEnum.EN]: "Configure & Create",
+                    [LanguageEnum.NL]: "Configureer & Maak Aan",
+                    [LanguageEnum.ES]: "Configurar y crear",
+                    [LanguageEnum.DE]: "Konfigurieren & Erstellen",
+                    [LanguageEnum.PT]: "Configurar e criar",
                 },
                 gameDescription: {
                     [LanguageEnum.EN]: "Game description",
                     [LanguageEnum.NL]: "Spelbeschrijving",
+                    [LanguageEnum.ES]: "Descripción del juego",
+                    [LanguageEnum.DE]: "Spielbeschreibung",
+                    [LanguageEnum.PT]: "Descrição do jogo",
                 },
                 currentChannel: {
                     [LanguageEnum.EN]: "Current game channel",
                     [LanguageEnum.NL]: "Huidige spelkanaal",
+                    [LanguageEnum.ES]: "Canal de juego actual",
+                    [LanguageEnum.DE]: "Aktueller Spielkanal",
+                    [LanguageEnum.PT]: "Canal de jogo atual",
                 },
                 resetOnFail: {
                     title: {
                         [LanguageEnum.EN]: "Reset on Wrong Answer",
                         [LanguageEnum.NL]: "Reset bij fout antwoord",
+                        [LanguageEnum.ES]: "Reiniciar al responder mal",
+                        [LanguageEnum.DE]: "Zurücksetzen bei falscher Antwort",
+                        [LanguageEnum.PT]: "Redefinir em resposta errada",
                     },
                     description: {
                         [LanguageEnum.EN]: "When enabled, the count resets to 1 when someone gives a wrong answer",
                         [LanguageEnum.NL]: "Wanneer ingeschakeld, wordt de telling teruggezet naar 1 bij een fout antwoord",
+                        [LanguageEnum.ES]: "Cuando está activado, el contador se reinicia a 1 cuando alguien da una respuesta incorrecta",
+                        [LanguageEnum.DE]: "Wenn aktiviert, wird der Zähler auf 1 zurückgesetzt, wenn jemand eine falsche Antwort gibt",
+                        [LanguageEnum.PT]: "Quando ativado, a contagem é reiniciada para 1 quando alguém dá uma resposta errada",
                     },
                 },
                 difficulty: {
                     label: {
                         [LanguageEnum.EN]: "Difficulty Level",
                         [LanguageEnum.NL]: "Moeilijkheidsgraad",
+                        [LanguageEnum.ES]: "Nivel de dificultad",
+                        [LanguageEnum.DE]: "Schwierigkeitsgrad",
+                        [LanguageEnum.PT]: "Nível de dificuldade",
                     },
                     description: {
                         [LanguageEnum.EN]: "Choose the difficulty level for word scrambling",
                         [LanguageEnum.NL]: "Kies de moeilijkheidsgraad voor woordverwarring",
+                        [LanguageEnum.ES]: "Elige el nivel de dificultad para la mezcla de palabras",
+                        [LanguageEnum.DE]: "Wähle den Schwierigkeitsgrad für das Wortdurcheinander",
+                        [LanguageEnum.PT]: "Escolha o nível de dificuldade para a embaralhação de palavras",
                     },
                     easy: {
                         [LanguageEnum.EN]: "Easy",
                         [LanguageEnum.NL]: "Makkelijk",
+                        [LanguageEnum.ES]: "Fácil",
+                        [LanguageEnum.DE]: "Einfach",
+                        [LanguageEnum.PT]: "Fácil",
                     },
                     medium: {
                         [LanguageEnum.EN]: "Medium",
                         [LanguageEnum.NL]: "Gemiddeld",
+                        [LanguageEnum.ES]: "Medio",
+                        [LanguageEnum.DE]: "Mittel",
+                        [LanguageEnum.PT]: "Médio",
                     },
                     hard: {
                         [LanguageEnum.EN]: "Hard",
                         [LanguageEnum.NL]: "Moeilijk",
+                        [LanguageEnum.ES]: "Difícil",
+                        [LanguageEnum.DE]: "Schwer",
+                        [LanguageEnum.PT]: "Difícil",
                     },
                     easyDescription: {
                         [LanguageEnum.EN]: "Simple words, less scrambling",
                         [LanguageEnum.NL]: "Eenvoudige woorden, minder verwarring",
+                        [LanguageEnum.ES]: "Palabras simples, menos mezcla",
+                        [LanguageEnum.DE]: "Einfache Wörter, weniger Durcheinander",
+                        [LanguageEnum.PT]: "Palavras simples, menos embaralhamento",
                     },
                     mediumDescription: {
                         [LanguageEnum.EN]: "Moderate difficulty",
                         [LanguageEnum.NL]: "Gemiddelde moeilijkheid",
+                        [LanguageEnum.ES]: "Dificultad moderada",
+                        [LanguageEnum.DE]: "Mittlere Schwierigkeit",
+                        [LanguageEnum.PT]: "Dificuldade moderada",
                     },
                     hardDescription: {
                         [LanguageEnum.EN]: "Complex words, heavy scrambling",
                         [LanguageEnum.NL]: "Complexe woorden, sterke verwarring",
+                        [LanguageEnum.ES]: "Palabras complejas, mucha mezcla",
+                        [LanguageEnum.DE]: "Komplexe Wörter, starke Verwirrung",
+                        [LanguageEnum.PT]: "Palavras complexas, forte embaralhamento",
                     },
                 },
                 datasheets: {
                     label: {
                         [LanguageEnum.EN]: "Datasheets",
                         [LanguageEnum.NL]: "Datasheets",
+                        [LanguageEnum.ES]: "Hojas de datos",
+                        [LanguageEnum.DE]: "Datenblätter",
+                        [LanguageEnum.PT]: "Planilhas de dados",
                     },
                     description: {
                         [LanguageEnum.EN]: "Choose the datasheets for this game",
                         [LanguageEnum.NL]: "Kies de datasheets voor dit spel",
+                        [LanguageEnum.ES]: "Elige las hojas de datos para este juego",
+                        [LanguageEnum.DE]: "Wähle die Datenblätter für dieses Spiel",
+                        [LanguageEnum.PT]: "Escolha as planilhas de dados para este jogo",
                     },
+                },
+                premiumOnly: {
+                    [LanguageEnum.EN]: "(Premium)",
+                    [LanguageEnum.NL]: "(Premium)",
+                    [LanguageEnum.ES]: "(Premium)",
+                    [LanguageEnum.DE]: "(Premium)",
+                    [LanguageEnum.PT]: "(Premium)",
+                },
+                premiumRequired: {
+                    [LanguageEnum.EN]: "⚠️ Some of the datasheets you selected require premium. Only 'General' is available without premium — please try again.",
+                    [LanguageEnum.NL]: "⚠️ Sommige geselecteerde datasheets vereisen premium. Zonder premium is alleen 'General' beschikbaar — probeer het opnieuw.",
+                    [LanguageEnum.ES]: "⚠️ Algunas de las hojas de datos seleccionadas requieren premium. Sin premium solo está disponible 'General' — inténtalo de nuevo.",
+                    [LanguageEnum.DE]: "⚠️ Einige der ausgewählten Datenblätter erfordern Premium. Ohne Premium ist nur 'General' verfügbar — bitte versuche es erneut.",
+                    [LanguageEnum.PT]: "⚠️ Algumas das planilhas de dados selecionadas requerem premium. Sem premium, apenas 'General' está disponível — tenta novamente.",
                 },
                 confirm: {
                     title: {
                         [LanguageEnum.EN]: "Confirm Game Setup",
                         [LanguageEnum.NL]: "Bevestig Spel Instelling",
+                        [LanguageEnum.ES]: "Confirmar configuración del juego",
+                        [LanguageEnum.DE]: "Spielkonfiguration bestätigen",
+                        [LanguageEnum.PT]: "Confirmar configuração do jogo",
                     },
                     description: {
                         [LanguageEnum.EN]: "Validate all the options below and confirm the setup",
                         [LanguageEnum.NL]: "Valideer alle opties hieronder en bevestig de instelling",
+                        [LanguageEnum.ES]: "Valida todas las opciones a continuación y confirma la configuración",
+                        [LanguageEnum.DE]: "Überprüfe alle Optionen unten und bestätige die Konfiguration",
+                        [LanguageEnum.PT]: "Valide todas as opções abaixo e confirme a configuração",
+                    },
+                },
+                created: {
+                    title: {
+                        [LanguageEnum.EN]: "Game Created",
+                        [LanguageEnum.NL]: "Spel Aangemaakt",
+                        [LanguageEnum.ES]: "Juego creado",
+                        [LanguageEnum.DE]: "Spiel erstellt",
+                        [LanguageEnum.PT]: "Jogo criado",
+                    },
+                    description: {
+                        [LanguageEnum.EN]: "Your game has been set up with the following settings:",
+                        [LanguageEnum.NL]: "Je spel is ingesteld met de volgende instellingen:",
+                        [LanguageEnum.ES]: "Tu juego ha sido configurado con los siguientes ajustes:",
+                        [LanguageEnum.DE]: "Dein Spiel wurde mit den folgenden Einstellungen eingerichtet:",
+                        [LanguageEnum.PT]: "O teu jogo foi configurado com as seguintes definições:",
                     },
                 },
             },
@@ -328,348 +575,310 @@ export const i18n: I18nTranslations = {
                 delete: {
                     [LanguageEnum.EN]: "Are you sure you want to delete this game?",
                     [LanguageEnum.NL]: "Weet je zeker dat je dit spel wilt verwijderen?",
+                    [LanguageEnum.ES]: "¿Estás seguro de que quieres eliminar este juego?",
+                    [LanguageEnum.DE]: "Bist du sicher, dass du dieses Spiel löschen möchtest?",
+                    [LanguageEnum.PT]: "Tem certeza de que deseja excluir este jogo?",
                 },
                 move: {
                     [LanguageEnum.EN]: "Move Channel",
                     [LanguageEnum.NL]: "Kanaal verplaatsen",
+                    [LanguageEnum.ES]: "Mover canal",
+                    [LanguageEnum.DE]: "Kanal verschieben",
+                    [LanguageEnum.PT]: "Mover canal",
                 },
                 moveHere: {
                     [LanguageEnum.EN]: "Switch to this channel",
                     [LanguageEnum.NL]: "Overschakelen naar dit kanaal",
-                },
-            },
-            types: {
-                [GameTypeEnum.COUNTING]: {
-                    name: {
-                        [LanguageEnum.EN]: "Counting",
-                        [LanguageEnum.NL]: "Tellen",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Count incrementally from the starting number",
-                        [LanguageEnum.NL]: "Tel vanaf het startnummer op",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "A simple yet engaging counting game where players take turns adding the next number in sequence. Perfect for keeping your community active and fostering friendly competition.",
-                        [LanguageEnum.NL]: "Een eenvoudig maar boeiend telspel waarbij spelers om de beurt het volgende nummer in de reeks toevoegen. Perfect om je gemeenschap actief te houden en vriendschappelijke competitie te bevorderen.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "Players take turns sending the next number in sequence. Start from the given number and count upward. Each player can only send one number at a time, and the sequence must be continuous.",
-                        [LanguageEnum.NL]: "Spelers nemen om de beurt het volgende nummer in de reeks. Begin vanaf het gegeven nummer en tel omhoog. Elke speler kan maar één nummer per keer versturen, en de reeks moet doorlopend zijn.",
-                    },
-                    startMessage: (firstAnswer?: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "Start with {firstAnswer}",
-                        [LanguageEnum.NL]: "We beginnen met {firstAnswer}",
-                    }, { firstAnswer: firstAnswer || "" }),
-                },
-                [GameTypeEnum.WORD_SNAKE]: {
-                    name: {
-                        [LanguageEnum.EN]: "Word Snake",
-                        [LanguageEnum.NL]: "Woordslang",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Chain words together where each word starts with the last letter",
-                        [LanguageEnum.NL]: "Keten woorden aan elkaar waarbij elk woord begint met de laatste letter",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Challenge your vocabulary in this clever word-chaining game. Each player must contribute a word that begins with the last letter of the previous word, creating an endless snake of connected words.",
-                        [LanguageEnum.NL]: "Daag je vocabulaire uit in dit slimme woordkettingspel. Elke speler moet een woord bijdragen dat begint met de laatste letter van het vorige woord, waardoor een eindeloze slang van verbonden woorden ontstaat.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "Start with the given letter and create a word. The next player must create a word that starts with the last letter of your word. Continue the chain as long as possible. No repeating words!",
-                        [LanguageEnum.NL]: "Begin met de gegeven letter en maak een woord. De volgende speler moet een woord maken dat begint met de laatste letter van jouw woord. Ga zo lang mogelijk door met de keten. Geen herhalende woorden!",
-                    },
-                    startMessage: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "> Try to create a word starting with the letter:",
-                        [LanguageEnum.NL]: "> Probeer een woord te maken dat begint met de letter:",
-                    })
-                },
-                [GameTypeEnum.ANAGRAM]: {
-                    name: {
-                        [LanguageEnum.EN]: "Anagram",
-                        [LanguageEnum.NL]: "Anagram",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Solve scrambled letter puzzles to find the hidden word",
-                        [LanguageEnum.NL]: "Los puzzels met gemengde letters op om het verborgen woord te vinden",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Test your word skills with scrambled letter puzzles. Rearrange the given letters to discover the hidden word. A perfect brain teaser that challenges your pattern recognition and vocabulary.",
-                        [LanguageEnum.NL]: "Test je woordvaardigheden met puzzels van gemengde letters. Herschik de gegeven letters om het verborgen woord te ontdekken. Een perfecte hersenkraker die je patroonherkenning en vocabulaire uitdaagt.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "You'll receive a set of scrambled letters. Rearrange them to form a valid word. Type your answer when you think you've solved it. The faster you solve it, the more points you earn!",
-                        [LanguageEnum.NL]: "Je krijgt een set gemengde letters. Herschik ze om een geldig woord te vormen. Typ je antwoord wanneer je denkt dat je het hebt opgelost. Hoe sneller je het oplost, hoe meer punten je verdient!",
-                    },
-                    startMessage: (firstAnswer?: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "First letter: {firstAnswer}",
-                        [LanguageEnum.NL]: "Eerste letter: {firstAnswer}",
-                    }, { firstAnswer: firstAnswer || "" }),
-                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> I'm thinking of a word with the letters:",
-                        [LanguageEnum.NL]: "> Ik denk aan een woord met de letters:",
-                    }, { nextAnswer: nextAnswer || "" }),
-                },
-                [GameTypeEnum.NUMBER_GUESS]: {
-                    name: {
-                        [LanguageEnum.EN]: "Number Guess",
-                        [LanguageEnum.NL]: "Getal raden",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Use clues to discover the secret number",
-                        [LanguageEnum.NL]: "Gebruik aanwijzingen om het geheime getal te ontdekken",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Put your deductive reasoning to the test in this classic guessing game. Use the clues provided to narrow down and discover the hidden number. A timeless game that sharpens your logical thinking.",
-                        [LanguageEnum.NL]: "Zet je deductieve redenering op de proef in dit klassieke raadspel. Gebruik de gegeven aanwijzingen om het verborgen getal te achterhalen. Een tijdloos spel dat je logisch denken scherpt.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "A secret number is chosen within a specific range. Make guesses and receive hints like 'higher' or 'lower' to guide your next attempt. Keep guessing until you find the correct number!",
-                        [LanguageEnum.NL]: "Er wordt een geheim getal gekozen binnen een specifiek bereik. Doe gissingen en ontvang hints zoals 'hoger' of 'lager' om je volgende poging te begeleiden. Blijf raden tot je het juiste getal vindt!",
-                    },
-                    startMessage: (firstAnswer?: string) => new MultiLingualString({
-                        [LanguageEnum.EN]: "The number is between 1 and {firstAnswer}",
-                        [LanguageEnum.NL]: "Het getal is tussen 1 en {firstAnswer}",
-                    }, { firstAnswer: firstAnswer || "10000" }),
-                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> I'm thinking of a number, can you guess it?",
-                        [LanguageEnum.NL]: "> Ik denk aan een getal, kan je het raden?",
-                    }, { nextAnswer: nextAnswer || "" }),
-                },
-                [GameTypeEnum.TRIVIA_QUIZ]: {
-                    name: {
-                        [LanguageEnum.EN]: "Trivia Quiz",
-                        [LanguageEnum.NL]: "Triviaquiz",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Test your knowledge with challenging trivia questions",
-                        [LanguageEnum.NL]: "Test je kennis met uitdagende trivia-vragen",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Challenge yourself and your friends with an endless variety of trivia questions. From history and science to pop culture and sports, expand your knowledge while having fun with your community.",
-                        [LanguageEnum.NL]: "Daag jezelf en je vrienden uit met een eindeloze variatie aan trivia-vragen. Van geschiedenis en wetenschap tot popcultuur en sport, breid je kennis uit terwijl je plezier hebt met je gemeenschap.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "Read each trivia question carefully and submit your answer. Questions cover various topics and difficulty levels. The first person to answer correctly wins the round and earns points.",
-                        [LanguageEnum.NL]: "Lees elke trivia-vraag zorgvuldig en verstuur je antwoord. Vragen beslaan verschillende onderwerpen en moeilijkheidsgraden. De eerste persoon die correct antwoordt wint de ronde en verdient punten.",
-                    },
-                    startMessage: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "First question:",
-                        [LanguageEnum.NL]: "Eerste vraag:",
-                    }),
-                    nextAnswer: (nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> I'm thinking of a trivia question:",
-                        [LanguageEnum.NL]: "> Ik denk aan een trivia vraag:",
-                    }, { nextAnswer: nextAnswer || "" }),
-                },
-                [GameTypeEnum.GUESS_THE_PRICE]: {
-                    name: {
-                        [LanguageEnum.EN]: "Guess the Price",
-                        [LanguageEnum.NL]: "Raad de prijs",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Estimate the retail price of everyday items",
-                        [LanguageEnum.NL]: "Schat de winkelprijs van alledaagse producten",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Put your market knowledge to the test by estimating the prices of various products. From electronics to groceries, see how well you know the value of things around you in this engaging guessing game.",
-                        [LanguageEnum.NL]: "Zet je marktkennis op de proef door de prijzen van verschillende producten te schatten. Van elektronica tot boodschappen, kijk hoe goed je de waarde kent van dingen om je heen in dit boeiende raadspel.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "You'll be shown a product with its description. Study it carefully and submit your price estimate. The player with the closest guess without going over wins the round. Currency is usually in local format.",
-                        [LanguageEnum.NL]: "Je krijgt een product met bijbehorende beschrijving te zien. Bestudeer het zorgvuldig en verstuur je prijsschatting. De speler met de dichtste gissing zonder over te gaan wint de ronde. Valuta is meestal in lokaal formaat.",
-                    },
-                    startMessage: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "First price:",
-                        [LanguageEnum.NL]: "Eerste prijs:",
-                    }),
-                },
-                [GameTypeEnum.MATH_QUIZ]: {
-                    name: {
-                        [LanguageEnum.EN]: "Math Quiz",
-                        [LanguageEnum.NL]: "Rekenquiz",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Sharpen your skills with mathematical challenges",
-                        [LanguageEnum.NL]: "Scherp je vaardigheden aan met wiskundige uitdagingen",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Exercise your mathematical skills with a variety of problems ranging from basic arithmetic to more complex calculations. Perfect for students and anyone looking to keep their math skills sharp and quick.",
-                        [LanguageEnum.NL]: "Train je wiskundige vaardigheden met verschillende problemen, van eenvoudige rekenkunde tot complexere berekeningen. Perfect voor studenten en iedereen die hun rekenvaardigheden scherp en snel wil houden.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "Solve the mathematical equation presented to you. Problems can include addition, subtraction, multiplication, division, and more advanced operations. Submit your numerical answer as quickly as possible for maximum points.",
-                        [LanguageEnum.NL]: "Los de wiskundige vergelijking op die aan je wordt voorgelegd. Problemen kunnen optellen, aftrekken, vermenigvuldigen, delen en meer geavanceerde bewerkingen bevatten. Verstuur je numerieke antwoord zo snel mogelijk voor maximale punten.",
-                    },
-                    startMessage: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "First problem:",
-                        [LanguageEnum.NL]: "Eerste opgave:",
-                    }),
-                },
-                [GameTypeEnum.GUESS_THE_FLAG]: {
-                    name: {
-                        [LanguageEnum.EN]: "Guess the Flag",
-                        [LanguageEnum.NL]: "Raad de Vlag",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Identify countries by their national flags",
-                        [LanguageEnum.NL]: "Herken landen aan hun nationale vlaggen",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Explore the world through flags in this educational and entertaining geography game. Test your knowledge of world cultures and expand your understanding of different nations and their symbols.",
-                        [LanguageEnum.NL]: "Ontdek de wereld via vlaggen in dit educatieve en vermakelijke aardrijkskundespel. Test je kennis van wereldculturen en breid je begrip uit van verschillende naties en hun symbolen.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "You'll be shown a country's flag and need to identify which nation it represents. Type the country name as your answer. Flags range from well-known to more obscure nations, so sharpen those geography skills!",
-                        [LanguageEnum.NL]: "Je krijgt de vlag van een land te zien en moet herkennen welke natie deze vertegenwoordigt. Typ de landnaam als je antwoord. Vlaggen variëren van bekende tot meer obscure landen, dus scherp die aardrijkskundevaardigheden aan!",
-                    },
-                    startMessage: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "You can start guessing the flag by typing the country name",
-                        [LanguageEnum.NL]: "Je kan beginnen met raden aan de vlag door de landnaam te typen",
-                    }),
-                    nextAnswer: (_nextAnswer?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> Can you guess the flag?",
-                        [LanguageEnum.NL]: "> Kun jij de vlag raden?",
-                    })
-                },
-                [GameTypeEnum.CONNECTIONS]: {
-                    name: {
-                        [LanguageEnum.EN]: "Connections",
-                        [LanguageEnum.NL]: "Verbindingen",
-                    },
-                    description: {
-                        [LanguageEnum.EN]: "Find groups of four related words",
-                        [LanguageEnum.NL]: "Vind groepen van vier gerelateerde woorden",
-                    },
-                    longDescription: {
-                        [LanguageEnum.EN]: "Challenge your word association skills by identifying groups of four words that share a common theme. Each puzzle contains exactly four categories, and you need to find all connections to complete the game.",
-                        [LanguageEnum.NL]: "Daag je woordassociatievaardigheden uit door groepen van vier woorden te identificeren die een gemeenschappelijk thema delen. Elke puzzle bevat precies vier categorieën, en je moet alle verbindingen vinden om het spel te voltooien.",
-                    },
-                    howToPlay: {
-                        [LanguageEnum.EN]: "You'll see 16 words arranged in a grid. Find groups of 4 words that belong together and submit them by typing the 4 words separated by commas or spaces. Each correct group will be highlighted. Find all 4 categories to win!",
-                        [LanguageEnum.NL]: "Je ziet 16 woorden in een raster. Vind groepen van 4 woorden die bij elkaar horen en dien ze in door de 4 woorden te typen gescheiden door komma's of spaties. Elke juiste groep wordt gemarkeerd. Vind alle 4 categorieën om te winnen!",
-                    },
-                    startMessage: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "> Find groups of 4 related words. Type your guess as: `word1, word2, word3, word4`",
-                        [LanguageEnum.NL]: "> Vind groepen van 4 gerelateerde woorden. Typ je gok als: `woord1, woord2, woord3, woord4`",
-                    }),
-                    nextAnswer: (_remaining?: string | number) => new MultiLingualString({
-                        [LanguageEnum.EN]: "> Great! You found a category! Keep looking for groups of 4 related words.",
-                        [LanguageEnum.NL]: "> Geweldig! Je hebt een categorie gevonden! Blijf zoeken naar groepen van 4 gerelateerde woorden.",
-                    }),
-                    gameComplete: () => new MultiLingualString({
-                        [LanguageEnum.EN]: "You found all 4 categories! Excellent word association skills!",
-                        [LanguageEnum.NL]: "Je hebt alle 4 categorieën gevonden! Uitstekende woordassociatievaardigheden!",
-                    }),
+                    [LanguageEnum.ES]: "Cambiar a este canal",
+                    [LanguageEnum.DE]: "Zu diesem Kanal wechseln",
+                    [LanguageEnum.PT]: "Mudar para este canal",
                 },
             },
             event: {
                 messageChanged: (user: string, message: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "{user}: {message}",
-                    [LanguageEnum.NL]: "{user}: {message}",
-                }, { user, message }),
+                    [LanguageEnum.EN]: `${user}: ${message}`,
+                    [LanguageEnum.NL]: `${user}: ${message}`,
+                    [LanguageEnum.ES]: `${user}: ${message}`,
+                    [LanguageEnum.DE]: `${user}: ${message}`,
+                    [LanguageEnum.PT]: `${user}: ${message}`,
+                }),
             },
         },
         profile: {
             description: {
                 [LanguageEnum.EN]: "Manage your profile",
                 [LanguageEnum.NL]: "Beheer je profiel",
+                [LanguageEnum.ES]: "Gestiona tu perfil",
+                [LanguageEnum.DE]: "Verwalte dein Profil",
+                [LanguageEnum.PT]: "Gerencie seu perfil",
+            },
+            loadingTitle: {
+                [LanguageEnum.EN]: "Your Profile",
+                [LanguageEnum.NL]: "Jouw Profiel",
+                [LanguageEnum.ES]: "Tu Perfil",
+                [LanguageEnum.DE]: "Dein Profil",
+                [LanguageEnum.PT]: "Seu Perfil",
+            },
+            loadingProfile: {
+                [LanguageEnum.EN]: "Fetching your profile, one moment…",
+                [LanguageEnum.NL]: "Profiel wordt opgehaald, even geduld…",
+                [LanguageEnum.ES]: "Obteniendo tu perfil, un momento…",
+                [LanguageEnum.DE]: "Profil wird geladen, einen Moment…",
+                [LanguageEnum.PT]: "Obtendo seu perfil, um momento…",
             },
             option: {
                 choices: {
                     [ProfileCommandActionEnum.VIEW]: {
                         [LanguageEnum.EN]: "View",
                         [LanguageEnum.NL]: "Bekijk",
+                        [LanguageEnum.ES]: "Ver",
+                        [LanguageEnum.DE]: "Ansehen",
+                        [LanguageEnum.PT]: "Ver",
                     },
                     [ProfileCommandActionEnum.MANAGE]: {
                         [LanguageEnum.EN]: "Manage",
                         [LanguageEnum.NL]: "Beheer",
+                        [LanguageEnum.ES]: "Gestionar",
+                        [LanguageEnum.DE]: "Verwalten",
+                        [LanguageEnum.PT]: "Gerenciar",
                     },
                 },
                 action: {
                     [LanguageEnum.EN]: "Action",
                     [LanguageEnum.NL]: "Actie",
+                    [LanguageEnum.ES]: "Acción",
+                    [LanguageEnum.DE]: "Aktion",
+                    [LanguageEnum.PT]: "Ação",
                 },
                 actionDescription: {
                     [LanguageEnum.EN]: "What do you want to do?",
                     [LanguageEnum.NL]: "Wat wil je doen?",
+                    [LanguageEnum.ES]: "¿Qué quieres hacer?",
+                    [LanguageEnum.DE]: "Was möchtest du tun?",
+                    [LanguageEnum.PT]: "O que você quer fazer?",
                 },
                 noAction: {
                     [LanguageEnum.EN]: "No action",
                     [LanguageEnum.NL]: "Geen actie",
+                    [LanguageEnum.ES]: "Sin acción",
+                    [LanguageEnum.DE]: "Keine Aktion",
+                    [LanguageEnum.PT]: "Sem ação",
                 },
             },
             labels: {
                 title: {
                     [LanguageEnum.EN]: "Profile",
                     [LanguageEnum.NL]: "Profiel",
+                    [LanguageEnum.ES]: "Perfil",
+                    [LanguageEnum.DE]: "Profil",
+                    [LanguageEnum.PT]: "Perfil",
                 },
                 username: {
                     [LanguageEnum.EN]: "Username",
                     [LanguageEnum.NL]: "Gebruikersnaam",
+                    [LanguageEnum.ES]: "Nombre de usuario",
+                    [LanguageEnum.DE]: "Benutzername",
+                    [LanguageEnum.PT]: "Nome de usuário",
                 },
                 badges: {
                     [LanguageEnum.EN]: "Badges",
                     [LanguageEnum.NL]: "Badges",
+                    [LanguageEnum.ES]: "Insignias",
+                    [LanguageEnum.DE]: "Abzeichen",
+                    [LanguageEnum.PT]: "Distintivos",
                 },
                 position: {
                     [LanguageEnum.EN]: "Position",
                     [LanguageEnum.NL]: "Positie",
+                    [LanguageEnum.ES]: "Posición",
+                    [LanguageEnum.DE]: "Position",
+                    [LanguageEnum.PT]: "Posição",
                 },
                 notRanked: {
                     [LanguageEnum.EN]: "Not ranked yet",
                     [LanguageEnum.NL]: "Nog niet gerankt",
+                    [LanguageEnum.ES]: "Aún no clasificado",
+                    [LanguageEnum.DE]: "Noch nicht gewertet",
+                    [LanguageEnum.PT]: "Ainda não classificado",
                 },
                 globalUserRank: (rank: number) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Global User Rank: {rank}",
-                    [LanguageEnum.NL]: "Globale Gebruikersrang: {rank}",
-                }, { rank }),
+                    [LanguageEnum.EN]: `Global User Rank: ${rank}`,
+                    [LanguageEnum.NL]: `Globale Gebruikersrang: ${rank}`,
+                    [LanguageEnum.ES]: `Rango global de usuario: ${rank}`,
+                    [LanguageEnum.DE]: `Globale Benutzerwertung: ${rank}`,
+                    [LanguageEnum.PT]: `Classificação global do usuário: ${rank}`,
+                }),
                 globalPoints: (points: number) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Global Points: {points}",
-                    [LanguageEnum.NL]: "Globale Punten: {points}",
-                }, { points }),
+                    [LanguageEnum.EN]: `Global Points: ${points}`,
+                    [LanguageEnum.NL]: `Globale Punten: ${points}`,
+                    [LanguageEnum.ES]: `Puntos globales: ${points}`,
+                    [LanguageEnum.DE]: `Globale Punkte: ${points}`,
+                    [LanguageEnum.PT]: `Pontos globais: ${points}`,
+                }),
                 joinedAt: (joinedAt: Date) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Joined at: {joinedAt}",
-                    [LanguageEnum.NL]: "Geregistreerd op: {joinedAt}",
-                }, { joinedAt }),
+                    [LanguageEnum.EN]: `Joined at: ${joinedAt}`,
+                    [LanguageEnum.NL]: `Geregistreerd op: ${joinedAt}`,
+                    [LanguageEnum.ES]: `Registrado en: ${joinedAt}`,
+                    [LanguageEnum.DE]: `Beigetreten am: ${joinedAt}`,
+                    [LanguageEnum.PT]: `Registrado em: ${joinedAt}`,
+                }),
+                memberSince: (date: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: `Member since ${date}`,
+                    [LanguageEnum.NL]: `Lid sinds ${date}`,
+                    [LanguageEnum.ES]: `Miembro desde ${date}`,
+                    [LanguageEnum.DE]: `Mitglied seit ${date}`,
+                    [LanguageEnum.PT]: `Membro desde ${date}`,
+                }),
             }
         },
         settings: {
             description: {
                 [LanguageEnum.EN]: "Manage the settings for the bot",
                 [LanguageEnum.NL]: "Beheer de instellingen voor de bot",
+                [LanguageEnum.ES]: "Gestiona la configuración del bot",
+                [LanguageEnum.DE]: "Verwalte die Einstellungen für den Bot",
+                [LanguageEnum.PT]: "Gerencie as configurações do bot",
             },
             labels: {
                 title: {
                     [LanguageEnum.EN]: "Settings",
                     [LanguageEnum.NL]: "Instellingen",
+                    [LanguageEnum.ES]: "Ajustes",
+                    [LanguageEnum.DE]: "Einstellungen",
+                    [LanguageEnum.PT]: "Configurações",
                 },
                 description: {
                     [LanguageEnum.EN]: "Manage the settings for the bot",
                     [LanguageEnum.NL]: "Beheer de instellingen voor de bot",
+                    [LanguageEnum.ES]: "Gestiona la configuración del bot",
+                    [LanguageEnum.DE]: "Verwalte die Einstellungen für den Bot",
+                    [LanguageEnum.PT]: "Gerencie as configurações do bot",
                 },
                 serverName: (serverName: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "> Server Name: `{serverName}`",
-                    [LanguageEnum.NL]: "> Server Naam: `{serverName}`",
-                }, { serverName }),
+                    [LanguageEnum.EN]: `> Server Name: \`${serverName}\``,
+                    [LanguageEnum.NL]: `> Server Naam: \`${serverName}\``,
+                    [LanguageEnum.ES]: `> Nombre del servidor: \`${serverName}\``,
+                    [LanguageEnum.DE]: `> Servername: \`${serverName}\``,
+                    [LanguageEnum.PT]: `> Nome do servidor: \`${serverName}\``,
+                }),
                 currentLanguage: (language: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "> Current Language: `{language}`",
-                    [LanguageEnum.NL]: "> Huidige Taal: `{language}`",
-                }, { language }),
+                    [LanguageEnum.EN]: `> Current Language: \`${language}\``,
+                    [LanguageEnum.NL]: `> Huidige Taal: \`${language}\``,
+                    [LanguageEnum.ES]: `> Idioma actual: \`${language}\``,
+                    [LanguageEnum.DE]: `> Aktuelle Sprache: \`${language}\``,
+                    [LanguageEnum.PT]: `> Idioma atual: \`${language}\``,
+                }),
                 gamesEnabled: (gamesEnabled: number) => new MultiLingualString({
-                    [LanguageEnum.EN]: "> Games Enabled: `{gamesEnabled}`",
-                    [LanguageEnum.NL]: "> Spellen Ingeschakeld: `{gamesEnabled}`",
-                }, { gamesEnabled }),
+                    [LanguageEnum.EN]: `> Games Enabled: \`${gamesEnabled}\``,
+                    [LanguageEnum.NL]: `> Spellen Ingeschakeld: \`${gamesEnabled}\``,
+                    [LanguageEnum.ES]: `> Juegos habilitados: \`${gamesEnabled}\``,
+                    [LanguageEnum.DE]: `> Aktivierte Spiele: \`${gamesEnabled}\``,
+                    [LanguageEnum.PT]: `> Jogos ativados: \`${gamesEnabled}\``,
+                }),
                 changeLanguage: {
                     [LanguageEnum.EN]: "Change Language",
                     [LanguageEnum.NL]: "Taal wijzigen",
+                    [LanguageEnum.ES]: "Cambiar idioma",
+                    [LanguageEnum.DE]: "Sprache ändern",
+                    [LanguageEnum.PT]: "Mudar idioma",
                 },
                 languageChanged: {
                     [LanguageEnum.EN]: "Language changed successfully",
                     [LanguageEnum.NL]: "Taal succesvol gewijzigd",
+                    [LanguageEnum.ES]: "Idioma cambiado con éxito",
+                    [LanguageEnum.DE]: "Sprache erfolgreich geändert",
+                    [LanguageEnum.PT]: "Idioma alterado com sucesso",
                 },
                 clickHereToChangeLanguage: {
                     [LanguageEnum.EN]: "Click here to change language",
                     [LanguageEnum.NL]: "Klik hier om de taal te wijzigen",
+                    [LanguageEnum.ES]: "Haz clic aquí para cambiar el idioma",
+                    [LanguageEnum.DE]: "Klicke hier, um die Sprache zu ändern",
+                    [LanguageEnum.PT]: "Clique aqui para mudar o idioma",
+                },
+                changeEmojis: {
+                    [LanguageEnum.EN]: "Change Emojis",
+                    [LanguageEnum.NL]: "Emoji's wijzigen",
+                    [LanguageEnum.ES]: "Cambiar emojis",
+                    [LanguageEnum.DE]: "Emojis ändern",
+                    [LanguageEnum.PT]: "Alterar emojis",
+                },
+                emojisChanged: {
+                    [LanguageEnum.EN]: "Emojis updated successfully",
+                    [LanguageEnum.NL]: "Emoji's succesvol bijgewerkt",
+                    [LanguageEnum.ES]: "Emojis actualizados con éxito",
+                    [LanguageEnum.DE]: "Emojis erfolgreich aktualisiert",
+                    [LanguageEnum.PT]: "Emojis atualizados com sucesso",
+                },
+                emojiModalTitle: {
+                    [LanguageEnum.EN]: "Customize Emojis",
+                    [LanguageEnum.NL]: "Emoji's aanpassen",
+                    [LanguageEnum.ES]: "Personalizar emojis",
+                    [LanguageEnum.DE]: "Emojis anpassen",
+                    [LanguageEnum.PT]: "Personalizar emojis",
+                },
+                acceptEmojiLabel: {
+                    [LanguageEnum.EN]: "Correct answer emoji",
+                    [LanguageEnum.NL]: "Emoji juist antwoord",
+                    [LanguageEnum.ES]: "Emoji respuesta correcta",
+                    [LanguageEnum.DE]: "Emoji für richtige Antwort",
+                    [LanguageEnum.PT]: "Emoji resposta correta",
+                },
+                rejectEmojiLabel: {
+                    [LanguageEnum.EN]: "Wrong answer emoji",
+                    [LanguageEnum.NL]: "Emoji fout antwoord",
+                    [LanguageEnum.ES]: "Emoji respuesta incorrecta",
+                    [LanguageEnum.DE]: "Emoji für falsche Antwort",
+                    [LanguageEnum.PT]: "Emoji resposta incorreta",
+                },
+                invalidEmoji: {
+                    [LanguageEnum.EN]: "One or more values is not a valid emoji. Please enter a single emoji character.",
+                    [LanguageEnum.NL]: "Een of meer waarden is geen geldige emoji. Voer één emoji-teken in.",
+                    [LanguageEnum.ES]: "Uno o más valores no son un emoji válido. Por favor, introduce un único emoji.",
+                    [LanguageEnum.DE]: "Ein oder mehrere Werte sind kein gültiger Emoji. Bitte gib ein einzelnes Emoji-Zeichen ein.",
+                    [LanguageEnum.PT]: "Um ou mais valores não são um emoji válido. Por favor, insira um único emoji.",
+                },
+                botName: (botName: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: `> Bot Name: \`${botName}\``,
+                    [LanguageEnum.NL]: `> Botnaam: \`${botName}\``,
+                    [LanguageEnum.ES]: `> Nombre del bot: \`${botName}\``,
+                    [LanguageEnum.DE]: `> Bot-Name: \`${botName}\``,
+                    [LanguageEnum.PT]: `> Nome do bot: \`${botName}\``,
+                }),
+                changeIdentity: {
+                    [LanguageEnum.EN]: "Change Bot Identity",
+                    [LanguageEnum.NL]: "Bot-identiteit wijzigen",
+                    [LanguageEnum.ES]: "Cambiar identidad del bot",
+                    [LanguageEnum.DE]: "Bot-Identität ändern",
+                    [LanguageEnum.PT]: "Alterar identidade do bot",
+                },
+                identityModalTitle: {
+                    [LanguageEnum.EN]: "Customize Bot Identity",
+                    [LanguageEnum.NL]: "Bot-identiteit aanpassen",
+                    [LanguageEnum.ES]: "Personalizar identidad del bot",
+                    [LanguageEnum.DE]: "Bot-Identität anpassen",
+                    [LanguageEnum.PT]: "Personalizar identidade do bot",
+                },
+                nicknameLabel: {
+                    [LanguageEnum.EN]: "Bot nickname (leave empty to reset)",
+                    [LanguageEnum.NL]: "Bot-bijnaam (leeg laten om te resetten)",
+                    [LanguageEnum.ES]: "Apodo del bot (déjalo vacío para restablecer)",
+                    [LanguageEnum.DE]: "Bot-Spitzname (leer lassen zum Zurücksetzen)",
+                    [LanguageEnum.PT]: "Alcunha do bot (deixa vazio para repor)",
+                },
+                avatarImageLabel: {
+                    [LanguageEnum.EN]: "Avatar image (optional)",
+                    [LanguageEnum.NL]: "Avatarafbeelding (optioneel)",
+                    [LanguageEnum.ES]: "Imagen del avatar (opcional)",
+                    [LanguageEnum.DE]: "Avatar-Bild (optional)",
+                    [LanguageEnum.PT]: "Imagem do avatar (opcional)",
+                },
+                identityChanged: {
+                    [LanguageEnum.EN]: "Bot identity updated successfully",
+                    [LanguageEnum.NL]: "Bot-identiteit succesvol bijgewerkt",
+                    [LanguageEnum.ES]: "Identidad del bot actualizada con éxito",
+                    [LanguageEnum.DE]: "Bot-Identität erfolgreich aktualisiert",
+                    [LanguageEnum.PT]: "Identidade do bot atualizada com sucesso",
                 },
             },
         },
@@ -677,288 +886,475 @@ export const i18n: I18nTranslations = {
             description: {
                 [LanguageEnum.EN]: "Show information about the bot",
                 [LanguageEnum.NL]: "Toon informatie over de bot",
+                [LanguageEnum.ES]: "Mostrar información sobre el bot",
+                [LanguageEnum.DE]: "Informationen über den Bot anzeigen",
+                [LanguageEnum.PT]: "Mostrar informações sobre o bot",
             },
             labels: {
                 title: {
                     [LanguageEnum.EN]: "DisGames",
                     [LanguageEnum.NL]: "DisGames",
+                    [LanguageEnum.ES]: "DisGames",
+                    [LanguageEnum.DE]: "DisGames",
+                    [LanguageEnum.PT]: "DisGames",
                 },
                 description: {
                     [LanguageEnum.EN]: "Step into a world of endless fun with DisGames, the ultimate minigame bot for Discord. Dive into a collection of unique, captivating minigames made to bring your community together. From brain-teasing puzzles to thrilling action challenges, there is something for everyone. User-friendly slashcommands (/) make playing these games effortless and intuitive.\n\nDisGames offers a wide array of minigames for every taste and fosters camaraderie and competition. Challenge friends and fellow gamers, or team up in co-op games. Adding the bot to your Discord server is quick and easy. Elevate your server today and redefine how you connect and have fun.",
                     [LanguageEnum.NL]: "Stap in een wereld van eindeloze fun met DisGames, de ultieme minigame-bot voor Discord. Duik in een collectie unieke, meeslepende minigames die je community samenbrengen. Van hersenkrakers tot spannende actie-uitdagingen: voor ieder wat wils. Gebruiksvriendelijke slashcommands (/) maken het spelen van deze spellen moeiteloos en intuïtief.\n\nDisGames biedt een breed scala aan minigames voor elke smaak en stimuleert kameraadschap en competitie. Daag vrienden en medespelers uit, of werk samen in co-op games. De bot toevoegen aan je Discord-server gaat snel en eenvoudig. Hef je server vandaag naar een hoger niveau en herdefinieer hoe je verbindt en plezier hebt.",
+                    [LanguageEnum.ES]: "Sumérgete en un mundo de diversión sin fin con DisGames, el bot definitivo de minijuegos para Discord. Explora una colección de minijuegos únicos y cautivadores diseñados para unir a tu comunidad. Desde rompecabezas que desafían la mente hasta emocionantes desafíos de acción, hay algo para todos. Los comandos slash (/) fáciles de usar hacen que jugar sea sencillo e intuitivo.\n\nDisGames ofrece una amplia gama de minijuegos para todos los gustos y fomenta la camaradería y la competencia. Desafía a amigos y jugadores, o forma equipo en juegos cooperativos. Añadir el bot a tu servidor de Discord es rápido y fácil. ¡Eleva tu servidor hoy y redefine cómo te conectas y te diviertes!",
+                    [LanguageEnum.DE]: "Tauche ein in eine Welt endlosen Spaßes mit DisGames, dem ultimativen Minispiel-Bot für Discord. Entdecke eine Sammlung einzigartiger, fesselnder Minispiele, die deine Community zusammenbringen. Von kniffligen Rätseln bis zu aufregenden Action-Challenges ist für jeden etwas dabei. Benutzerfreundliche Slash-Befehle (/) machen das Spielen mühelos und intuitiv.\n\nDisGames bietet eine große Auswahl an Minispielen für jeden Geschmack und fördert Kameradschaft und Wettbewerb. Fordere Freunde heraus oder schließe dich in Koop-Spielen zusammen. Das Hinzufügen des Bots zu deinem Discord-Server ist schnell und einfach. Hebe deinen Server noch heute auf ein neues Level und definiere neu, wie du dich verbindest und Spaß hast!",
+                    [LanguageEnum.PT]: "Mergulhe num mundo de diversão sem fim com o DisGames, o bot definitivo de minijogos para o Discord. Explore uma coleção de minijogos únicos e cativantes feitos para unir sua comunidade. De quebra-cabeças que desafiam o cérebro a emocionantes desafios de ação, há algo para todos. Comandos slash fáceis de usar (/) tornam o jogo simples e intuitivo.\n\nO DisGames oferece uma ampla variedade de minijogos para todos os gostos e promove camaradagem e competição. Desafie amigos e jogadores, ou forme equipes em jogos cooperativos. Adicionar o bot ao seu servidor Discord é rápido e fácil. Eleve seu servidor hoje e redefina como você se conecta e se diverte!",
                 },
                 github: {
                     [LanguageEnum.EN]: "GitHub",
                     [LanguageEnum.NL]: "GitHub",
+                    [LanguageEnum.ES]: "GitHub",
+                    [LanguageEnum.DE]: "GitHub",
+                    [LanguageEnum.PT]: "GitHub",
                 },
                 invite: {
                     [LanguageEnum.EN]: "Invite",
                     [LanguageEnum.NL]: "Uitnodigen",
+                    [LanguageEnum.ES]: "Invitar",
+                    [LanguageEnum.DE]: "Einladen",
+                    [LanguageEnum.PT]: "Convidar",
                 },
                 version: (version: string) => new MultiLingualString({
-                    [LanguageEnum.EN]: "Version: {version}",
-                    [LanguageEnum.NL]: "Versie: {version}",
-                }, { version }),
+                    [LanguageEnum.EN]: `Version: ${version}`,
+                    [LanguageEnum.NL]: `Versie: ${version}`,
+                    [LanguageEnum.ES]: `Versión: ${version}`,
+                    [LanguageEnum.DE]: `Version: ${version}`,
+                    [LanguageEnum.PT]: `Versão: ${version}`,
+                }),
             },
         },
         impersonate: {
             description: {
                 [LanguageEnum.EN]: "Impersonate another user",
                 [LanguageEnum.NL]: "Impersonate een andere gebruiker",
+                [LanguageEnum.ES]: "Suplantar a otro usuario",
+                [LanguageEnum.DE]: "Einen anderen Benutzer imitieren",
+                [LanguageEnum.PT]: "Personificar outro usuário",
+            },
+        },
+        leaderboard: {
+            description: {
+                [LanguageEnum.EN]: "Show the leaderboard",
+                [LanguageEnum.NL]: "Toon de ranglijst",
+                [LanguageEnum.ES]: "Mostrar la clasificación",
+                [LanguageEnum.DE]: "Bestenliste anzeigen",
+                [LanguageEnum.PT]: "Mostrar a classificação",
+            },
+            option: {
+                action: {
+                    [LanguageEnum.EN]: "Board",
+                    [LanguageEnum.NL]: "Bord",
+                    [LanguageEnum.ES]: "Tablero",
+                    [LanguageEnum.DE]: "Tafel",
+                    [LanguageEnum.PT]: "Quadro",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "Select which leaderboard to show",
+                    [LanguageEnum.NL]: "Kies welke ranglijst je wilt tonen",
+                    [LanguageEnum.ES]: "Selecciona qué clasificación mostrar",
+                    [LanguageEnum.DE]: "Wähle, welche Bestenliste angezeigt werden soll",
+                    [LanguageEnum.PT]: "Selecione qual classificação mostrar",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "Please choose a leaderboard to continue",
+                    [LanguageEnum.NL]: "Selecteer een ranglijst om door te gaan",
+                    [LanguageEnum.ES]: "Por favor, elige una clasificación para continuar",
+                    [LanguageEnum.DE]: "Bitte wähle eine Bestenliste, um fortzufahren",
+                    [LanguageEnum.PT]: "Por favor, escolha uma classificação para continuar",
+                },
+                choices: {
+                    [LeaderboardCommandActionEnum.SERVERS]: {
+                        [LanguageEnum.EN]: "Top servers by points",
+                        [LanguageEnum.NL]: "Topservers op punten",
+                        [LanguageEnum.ES]: "Mejores servidores por puntos",
+                        [LanguageEnum.DE]: "Beste Server nach Punkten",
+                        [LanguageEnum.PT]: "Melhores servidores por pontos",
+                    },
+                    [LeaderboardCommandActionEnum.USERS]: {
+                        [LanguageEnum.EN]: "Top players by experience",
+                        [LanguageEnum.NL]: "Topspelers op ervaring",
+                        [LanguageEnum.ES]: "Mejores jugadores por experiencia",
+                        [LanguageEnum.DE]: "Beste Spieler nach Erfahrung",
+                        [LanguageEnum.PT]: "Melhores jogadores por experiência",
+                    },
+                    [LeaderboardCommandActionEnum.LIVE]: {
+                        [LanguageEnum.EN]: "Live leaderboard (auto-updates daily)",
+                        [LanguageEnum.NL]: "Live ranglijst (dagelijks automatisch bijgewerkt)",
+                        [LanguageEnum.ES]: "Clasificación en vivo (se actualiza a diario)",
+                        [LanguageEnum.DE]: "Live-Bestenliste (täglich automatisch aktualisiert)",
+                        [LanguageEnum.PT]: "Classificação em tempo real (atualiza diariamente)",
+                    },
+                },
+            },
+            labels: {
+                title: {
+                    [LanguageEnum.EN]: "Leaderboard",
+                    [LanguageEnum.NL]: "Ranglijst",
+                    [LanguageEnum.ES]: "Clasificación",
+                    [LanguageEnum.DE]: "Bestenliste",
+                    [LanguageEnum.PT]: "Classificação",
+                },
+                entriesCount: (count: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "{count} entries",
+                    [LanguageEnum.NL]: "{count} vermeldingen",
+                    [LanguageEnum.ES]: "{count} entradas",
+                    [LanguageEnum.DE]: "{count} Einträge",
+                    [LanguageEnum.PT]: "{count} entradas",
+                }, { count }),
+                allTimePoints: {
+                    [LanguageEnum.EN]: "All-time points",
+                    [LanguageEnum.NL]: "Punten aller tijden",
+                    [LanguageEnum.ES]: "Puntos históricos",
+                    [LanguageEnum.DE]: "Punkte aller Zeiten",
+                    [LanguageEnum.PT]: "Pontos de todos os tempos",
+                },
+                rankLeader: {
+                    [LanguageEnum.EN]: "Rank 01 · Leader",
+                    [LanguageEnum.NL]: "Rang 01 · Leider",
+                    [LanguageEnum.ES]: "Puesto 01 · Líder",
+                    [LanguageEnum.DE]: "Rang 01 · Anführer",
+                    [LanguageEnum.PT]: "Posição 01 · Líder",
+                },
+                leadVsSecond: (lead: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "+{lead} vs #2",
+                    [LanguageEnum.NL]: "+{lead} t.o.v. #2",
+                    [LanguageEnum.ES]: "+{lead} vs #2",
+                    [LanguageEnum.DE]: "+{lead} vs. #2",
+                    [LanguageEnum.PT]: "+{lead} vs #2",
+                }, { lead }),
+                membersCount: (count: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "{count} members",
+                    [LanguageEnum.NL]: "{count} leden",
+                    [LanguageEnum.ES]: "{count} miembros",
+                    [LanguageEnum.DE]: "{count} Mitglieder",
+                    [LanguageEnum.PT]: "{count} membros",
+                }, { count }),
+                levelLabel: (level: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "Level {level}",
+                    [LanguageEnum.NL]: "Level {level}",
+                    [LanguageEnum.ES]: "Nivel {level}",
+                    [LanguageEnum.DE]: "Level {level}",
+                    [LanguageEnum.PT]: "Nível {level}",
+                }, { level }),
+                points: {
+                    [LanguageEnum.EN]: "POINTS",
+                    [LanguageEnum.NL]: "PUNTEN",
+                    [LanguageEnum.ES]: "PUNTOS",
+                    [LanguageEnum.DE]: "PUNKTE",
+                    [LanguageEnum.PT]: "PONTOS",
+                },
+                noPointsRecorded: {
+                    [LanguageEnum.EN]: "No points recorded yet",
+                    [LanguageEnum.NL]: "Nog geen punten geregistreerd",
+                    [LanguageEnum.ES]: "Aún no hay puntos registrados",
+                    [LanguageEnum.DE]: "Noch keine Punkte erfasst",
+                    [LanguageEnum.PT]: "Ainda não há pontos registrados",
+                },
+                updatedLabel: {
+                    [LanguageEnum.EN]: "Updated daily",
+                    [LanguageEnum.NL]: "Dagelijks bijgewerkt",
+                    [LanguageEnum.ES]: "Actualizado diariamente",
+                    [LanguageEnum.DE]: "Täglich aktualisiert",
+                    [LanguageEnum.PT]: "Atualizado diariamente",
+                },
+                ptsSuffix: (points: string) => new MultiLingualString({
+                    [LanguageEnum.EN]: "{points} pts",
+                    [LanguageEnum.NL]: "{points} pt",
+                    [LanguageEnum.ES]: "{points} pts",
+                    [LanguageEnum.DE]: "{points} Pkt.",
+                    [LanguageEnum.PT]: "{points} pts",
+                }, { points }),
+                liveEnabled: {
+                    [LanguageEnum.EN]: "Live leaderboard enabled. This message will refresh automatically once a day.",
+                    [LanguageEnum.NL]: "Live ranglijst ingeschakeld. Dit bericht wordt eenmaal per dag automatisch bijgewerkt.",
+                    [LanguageEnum.ES]: "Clasificación en vivo activada. Este mensaje se actualizará automáticamente una vez al día.",
+                    [LanguageEnum.DE]: "Live-Bestenliste aktiviert. Diese Nachricht wird einmal täglich automatisch aktualisiert.",
+                    [LanguageEnum.PT]: "Classificação em tempo real ativada. Esta mensagem será atualizada automaticamente uma vez por dia.",
+                },
+                liveDisabled: {
+                    [LanguageEnum.EN]: "Live leaderboard disabled for this server.",
+                    [LanguageEnum.NL]: "Live ranglijst uitgeschakeld voor dit server.",
+                    [LanguageEnum.ES]: "Clasificación en vivo desactivada para este servidor.",
+                    [LanguageEnum.DE]: "Live-Bestenliste für diesen Server deaktiviert.",
+                    [LanguageEnum.PT]: "Classificação em tempo real desativada para este servidor.",
+                },
             },
         },
         restartGame: {
             description: {
                 [LanguageEnum.EN]: "Restart the game",
                 [LanguageEnum.NL]: "Het spel opnieuw starten",
+                [LanguageEnum.ES]: "Reiniciar el juego",
+                [LanguageEnum.DE]: "Spiel neu starten",
+                [LanguageEnum.PT]: "Reiniciar o jogo",
             },
         },
+        premium: {
+            description: {
+                [LanguageEnum.EN]: "Manage premium access and entitlements (owner only)",
+                [LanguageEnum.NL]: "Premiumtoegang en entitlements beheren (alleen eigenaar)",
+                [LanguageEnum.ES]: "Gestionar el acceso premium y los entitlements (solo propietario)",
+                [LanguageEnum.DE]: "Premium-Zugang und Berechtigungen verwalten (nur Besitzer)",
+                [LanguageEnum.PT]: "Gerir o acesso premium e os entitlements (apenas proprietário)",
+            },
+            option: {
+                action: {
+                    [LanguageEnum.EN]: "action",
+                    [LanguageEnum.NL]: "actie",
+                    [LanguageEnum.ES]: "acción",
+                    [LanguageEnum.DE]: "Aktion",
+                    [LanguageEnum.PT]: "ação",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "What to do with test entitlements",
+                    [LanguageEnum.NL]: "Wat te doen met test-entitlements",
+                    [LanguageEnum.ES]: "Qué hacer con los entitlements de prueba",
+                    [LanguageEnum.DE]: "Was mit Test-Berechtigungen geschehen soll",
+                    [LanguageEnum.PT]: "O que fazer com os entitlements de teste",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "Choose an action",
+                    [LanguageEnum.NL]: "Kies een actie",
+                    [LanguageEnum.ES]: "Elige una acción",
+                    [LanguageEnum.DE]: "Wähle eine Aktion",
+                    [LanguageEnum.PT]: "Escolha uma ação",
+                },
+                choices: {
+                    [PremiumActionEnum.GRANT_USER]: {
+                        [LanguageEnum.EN]: "Grant user test entitlement",
+                        [LanguageEnum.NL]: "Gebruiker test-entitlement geven",
+                        [LanguageEnum.ES]: "Conceder entitlement de prueba a un usuario",
+                        [LanguageEnum.DE]: "Test-Berechtigung für Benutzer gewähren",
+                        [LanguageEnum.PT]: "Conceder entitlement de teste ao usuário",
+                    },
+                    [PremiumActionEnum.GRANT_GUILD]: {
+                        [LanguageEnum.EN]: "Grant guild test entitlement",
+                        [LanguageEnum.NL]: "Server test-entitlement geven",
+                        [LanguageEnum.ES]: "Conceder entitlement de prueba a un servidor",
+                        [LanguageEnum.DE]: "Test-Berechtigung für Server gewähren",
+                        [LanguageEnum.PT]: "Conceder entitlement de teste ao servidor",
+                    },
+                    [PremiumActionEnum.REVOKE]: {
+                        [LanguageEnum.EN]: "Revoke test entitlement by id",
+                        [LanguageEnum.NL]: "Test-entitlement intrekken op id",
+                        [LanguageEnum.ES]: "Revocar entitlement de prueba por id",
+                        [LanguageEnum.DE]: "Test-Berechtigung per ID widerrufen",
+                        [LanguageEnum.PT]: "Revogar entitlement de teste por id",
+                    },
+                    [PremiumActionEnum.TOGGLE_DB]: {
+                        [LanguageEnum.EN]: "Toggle IsPremium in database",
+                        [LanguageEnum.NL]: "IsPremium in database omzetten",
+                        [LanguageEnum.ES]: "Alternar IsPremium en la base de datos",
+                        [LanguageEnum.DE]: "IsPremium in der Datenbank umschalten",
+                        [LanguageEnum.PT]: "Alternar IsPremium na base de dados",
+                    },
+                    [PremiumActionEnum.TOGGLE_PURCHASE_BUTTON]: {
+                        [LanguageEnum.EN]: "Toggle the purchase button on premium features (runtime only)",
+                        [LanguageEnum.NL]: "Aankoopknop op premiumfuncties omzetten (alleen tijdens runtime)",
+                        [LanguageEnum.ES]: "Alternar el botón de compra en las funciones premium (solo en tiempo de ejecución)",
+                        [LanguageEnum.DE]: "Kaufen-Button bei Premium-Funktionen umschalten (nur zur Laufzeit)",
+                        [LanguageEnum.PT]: "Alternar o botão de compra nas funcionalidades premium (apenas em tempo de execução)",
+                    },
+                },
+            },
+            optionTarget: {
+                action: {
+                    [LanguageEnum.EN]: "target",
+                    [LanguageEnum.NL]: "doel",
+                    [LanguageEnum.ES]: "destino",
+                    [LanguageEnum.DE]: "Ziel",
+                    [LanguageEnum.PT]: "destino",
+                },
+                actionDescription: {
+                    [LanguageEnum.EN]: "User id, guild id, or entitlement id (optional for grant; required for revoke)",
+                    [LanguageEnum.NL]: "Gebruikers-id, server-id of entitlement-id (optioneel bij grant; verplicht bij revoke)",
+                    [LanguageEnum.ES]: "ID de usuario, de servidor o de entitlement (opcional para grant; obligatorio para revoke)",
+                    [LanguageEnum.DE]: "Benutzer-ID, Server-ID oder Entitlement-ID (optional für grant; für revoke erforderlich)",
+                    [LanguageEnum.PT]: "ID de utilizador, ID de servidor ou ID de entitlement (opcional para grant; obrigatório para revoke)",
+                },
+                noAction: {
+                    [LanguageEnum.EN]: "Invalid target",
+                    [LanguageEnum.NL]: "Ongeldig doel",
+                    [LanguageEnum.ES]: "Destino inválido",
+                    [LanguageEnum.DE]: "Ungültiges Ziel",
+                    [LanguageEnum.PT]: "Destino inválido",
+                },
+                choices: {},
+            },
+            labels: {
+                created: {
+                    [LanguageEnum.EN]: "Test entitlement created: `{id}`",
+                    [LanguageEnum.NL]: "Test entitlement aangemaakt: `{id}`",
+                    [LanguageEnum.ES]: "Entitlement de prueba creado: `{id}`",
+                    [LanguageEnum.DE]: "Test-Berechtigung erstellt: `{id}`",
+                    [LanguageEnum.PT]: "Entitlement de teste criado: `{id}`",
+                },
+                deleted: {
+                    [LanguageEnum.EN]: "Test entitlement revoked.",
+                    [LanguageEnum.NL]: "Test entitlement ingetrokken.",
+                    [LanguageEnum.ES]: "Entitlement de prueba revocado.",
+                    [LanguageEnum.DE]: "Test-Berechtigung widerrufen.",
+                    [LanguageEnum.PT]: "Entitlement de teste revogado.",
+                },
+                missingSku: {
+                    [LanguageEnum.EN]: "Set DISCORD_PREMIUM_SKU_ID in your environment.",
+                    [LanguageEnum.NL]: "Zet DISCORD_PREMIUM_SKU_ID in je omgeving.",
+                    [LanguageEnum.ES]: "Configura DISCORD_PREMIUM_SKU_ID en tu entorno.",
+                    [LanguageEnum.DE]: "Setze DISCORD_PREMIUM_SKU_ID in deiner Umgebung.",
+                    [LanguageEnum.PT]: "Defina DISCORD_PREMIUM_SKU_ID no seu ambiente.",
+                },
+                missingTarget: {
+                    [LanguageEnum.EN]: "Provide the entitlement id in `target` to revoke.",
+                    [LanguageEnum.NL]: "Geef het entitlement-id op in `target` om in te trekken.",
+                    [LanguageEnum.ES]: "Proporciona el id del entitlement en `target` para revocarlo.",
+                    [LanguageEnum.DE]: "Gib die Entitlement-ID in `target` an, um sie zu widerrufen.",
+                    [LanguageEnum.PT]: "Fornece o id do entitlement em `target` para revogar.",
+                },
+                missingGuild: {
+                    [LanguageEnum.EN]: "No guild context and no guild id in `target`.",
+                    [LanguageEnum.NL]: "Geen server-context en geen server-id in `target`.",
+                    [LanguageEnum.ES]: "Sin contexto de servidor y sin id de servidor en `target`.",
+                    [LanguageEnum.DE]: "Kein Serverkontext und keine Server-ID in `target`.",
+                    [LanguageEnum.PT]: "Sem contexto de servidor e sem id de servidor em `target`.",
+                },
+                clientNotReady: {
+                    [LanguageEnum.EN]: "Discord client is not ready yet.",
+                    [LanguageEnum.NL]: "Discord-client is nog niet klaar.",
+                    [LanguageEnum.ES]: "El cliente de Discord aún no está listo.",
+                    [LanguageEnum.DE]: "Der Discord-Client ist noch nicht bereit.",
+                    [LanguageEnum.PT]: "O cliente do Discord ainda não está pronto.",
+                },
+                toggledOn: {
+                    [LanguageEnum.EN]: "Server premium enabled in database (IsPremium = true).",
+                    [LanguageEnum.NL]: "Server premium ingeschakeld in database (IsPremium = true).",
+                    [LanguageEnum.ES]: "Premium del servidor activado en la base de datos (IsPremium = true).",
+                    [LanguageEnum.DE]: "Server-Premium in der Datenbank aktiviert (IsPremium = true).",
+                    [LanguageEnum.PT]: "Premium do servidor ativado na base de dados (IsPremium = true).",
+                },
+                toggledOff: {
+                    [LanguageEnum.EN]: "Server premium disabled in database (IsPremium = false).",
+                    [LanguageEnum.NL]: "Server premium uitgeschakeld in database (IsPremium = false).",
+                    [LanguageEnum.ES]: "Premium del servidor desactivado en la base de datos (IsPremium = false).",
+                    [LanguageEnum.DE]: "Server-Premium in der Datenbank deaktiviert (IsPremium = false).",
+                    [LanguageEnum.PT]: "Premium do servidor desativado na base de dados (IsPremium = false).",
+                },
+                purchaseButtonEnabled: {
+                    [LanguageEnum.EN]: "Purchase button enabled (runtime only, resets on restart).",
+                    [LanguageEnum.NL]: "Aankoopknop ingeschakeld (alleen tijdens runtime, reset bij herstart).",
+                    [LanguageEnum.ES]: "Botón de compra activado (solo en tiempo de ejecución, se reinicia al reiniciar).",
+                    [LanguageEnum.DE]: "Kaufen-Button aktiviert (nur zur Laufzeit, wird bei Neustart zurückgesetzt).",
+                    [LanguageEnum.PT]: "Botão de compra ativado (apenas em tempo de execução, reinicia ao reiniciar).",
+                },
+                purchaseButtonDisabled: {
+                    [LanguageEnum.EN]: "Purchase button disabled (runtime only, resets on restart).",
+                    [LanguageEnum.NL]: "Aankoopknop uitgeschakeld (alleen tijdens runtime, reset bij herstart).",
+                    [LanguageEnum.ES]: "Botón de compra desactivado (solo en tiempo de ejecución, se reinicia al reiniciar).",
+                    [LanguageEnum.DE]: "Kaufen-Button deaktiviert (nur zur Laufzeit, wird bei Neustart zurückgesetzt).",
+                    [LanguageEnum.PT]: "Botão de compra desativado (apenas em tempo de execução, reinicia ao reiniciar).",
+                },
+            },
+        },
+        job: {
+            description: {
+                [LanguageEnum.EN]: "Execute a job",
+                [LanguageEnum.NL]: "Een taak uitvoeren",
+                [LanguageEnum.ES]: "Ejecutar un trabajo",
+                [LanguageEnum.DE]: "Einen Job ausführen",
+                [LanguageEnum.PT]: "Executar um trabalho",
+            },
+        },
+        generateData: {
+            description: {
+                [LanguageEnum.EN]: "Generate or translate game data using AI",
+                [LanguageEnum.NL]: "Genereer of vertaal speldata met AI",
+                [LanguageEnum.ES]: "Generar o traducir datos de juego con IA",
+                [LanguageEnum.DE]: "Spieledaten mit KI generieren oder übersetzen",
+                [LanguageEnum.PT]: "Gerar ou traduzir dados de jogo com IA",
+            },
+            labels: {
+                generating: {
+                    [LanguageEnum.EN]: "Generating...",
+                    [LanguageEnum.NL]: "Bezig met genereren...",
+                    [LanguageEnum.ES]: "Generando...",
+                    [LanguageEnum.DE]: "Wird generiert...",
+                    [LanguageEnum.PT]: "A gerar...",
+                },
+                translating: {
+                    [LanguageEnum.EN]: "Translating...",
+                    [LanguageEnum.NL]: "Bezig met vertalen...",
+                    [LanguageEnum.ES]: "Traduciendo...",
+                    [LanguageEnum.DE]: "Wird übersetzt...",
+                    [LanguageEnum.PT]: "A traduzir...",
+                },
+                generateSummary: (generated: number, skipped: number, failed: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: `Done — generated: ${generated}, skipped (duplicates): ${skipped}, failed: ${failed}`,
+                    [LanguageEnum.NL]: `Klaar — gegenereerd: ${generated}, overgeslagen (duplicaten): ${skipped}, mislukt: ${failed}`,
+                    [LanguageEnum.ES]: `Listo — generados: ${generated}, omitidos (duplicados): ${skipped}, fallidos: ${failed}`,
+                    [LanguageEnum.DE]: `Fertig — generiert: ${generated}, übersprungen (Duplikate): ${skipped}, fehlgeschlagen: ${failed}`,
+                    [LanguageEnum.PT]: `Concluído — gerados: ${generated}, ignorados (duplicados): ${skipped}, falhados: ${failed}`,
+                }),
+                translateSummary: (translated: number, skipped: number, failed: number) => new MultiLingualString({
+                    [LanguageEnum.EN]: `Done — translated: ${translated}, skipped (complete): ${skipped}, failed: ${failed}`,
+                    [LanguageEnum.NL]: `Klaar — vertaald: ${translated}, overgeslagen (volledig): ${skipped}, mislukt: ${failed}`,
+                    [LanguageEnum.ES]: `Listo — traducidos: ${translated}, omitidos (completos): ${skipped}, fallidos: ${failed}`,
+                    [LanguageEnum.DE]: `Fertig — übersetzt: ${translated}, übersprungen (vollständig): ${skipped}, fehlgeschlagen: ${failed}`,
+                    [LanguageEnum.PT]: `Concluído — traduzidos: ${translated}, ignorados (completos): ${skipped}, falhados: ${failed}`,
+                }),
+                unknownSubcommand: {
+                    [LanguageEnum.EN]: "Unknown subcommand. Use: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.NL]: "Onbekend subcommando. Gebruik: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.ES]: "Subcomando desconocido. Uso: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.DE]: "Unbekannter Unterbefehl. Verwendung: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                    [LanguageEnum.PT]: "Subcomando desconhecido. Uso: generate <gameType> <dataSheetId> <theme> [count] | translate <gameType>",
+                },
+                unknownGameType: {
+                    [LanguageEnum.EN]: "Unknown game type. Valid options: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.NL]: "Onbekend speltype. Geldige opties: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.ES]: "Tipo de juego desconocido. Opciones válidas: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.DE]: "Unbekannter Spieltyp. Gültige Optionen: anagram, trivia, wordsnake, connections",
+                    [LanguageEnum.PT]: "Tipo de jogo desconhecido. Opções válidas: anagram, trivia, wordsnake, connections",
+                },
+            },
+        },
+        handoff: {
+            description: {
+                [LanguageEnum.EN]: "Transfer control to a standby instance",
+                [LanguageEnum.NL]: "Geef controle over aan een standby instantie",
+                [LanguageEnum.ES]: "Transferir control a una instancia en espera",
+                [LanguageEnum.DE]: "Kontrolle an eine Standby-Instanz übergeben",
+                [LanguageEnum.PT]: "Transferir controlo para uma instância em espera",
+            },
+            labels: {
+                activated: {
+                    [LanguageEnum.EN]: "Handoff complete at {time}. This instance is now active.",
+                    [LanguageEnum.NL]: "Handoff voltooid om {time}. Deze instantie is nu actief.",
+                    [LanguageEnum.ES]: "Transferencia completa a las {time}. Esta instancia está ahora activa.",
+                    [LanguageEnum.DE]: "Übergabe abgeschlossen um {time}. Diese Instanz ist jetzt aktiv.",
+                    [LanguageEnum.PT]: "Transferência concluída às {time}. Esta instância está agora ativa.",
+                },
+                shuttingDown: {
+                    [LanguageEnum.EN]: "Handing off at {time}. Shutting down this instance...",
+                    [LanguageEnum.NL]: "Overdragen om {time}. Deze instantie wordt afgesloten...",
+                    [LanguageEnum.ES]: "Transfiriendo a las {time}. Apagando esta instancia...",
+                    [LanguageEnum.DE]: "Übergabe um {time}. Diese Instanz wird heruntergefahren...",
+                    [LanguageEnum.PT]: "A transferir às {time}. A desligar esta instância...",
+                },
+            }
+        },
     },
-    exceptions: {
-        [ExceptionEnum.GAME_ALREADY_EXISTS]: {
-            [LanguageEnum.EN]: "This game already exists",
-            [LanguageEnum.NL]: "Dit spel bestaat al",
-        },
-        [ExceptionEnum.CHANNEL_OR_SERVER_NOT_FOUND]: {
-            [LanguageEnum.EN]: "We couldn't find the channel or server",
-            [LanguageEnum.NL]: "Kanaal of server niet gevonden",
-        },
-        [ExceptionEnum.ANSWER_ALREADY_EXISTS]: {
-            [LanguageEnum.EN]: "You've already submitted an answer",
-            [LanguageEnum.NL]: "Je hebt al een antwoord gegeven",
-        },
-        [ExceptionEnum.INVALID_GAME_TYPE]: {
-            [LanguageEnum.EN]: "This game type isn't supported",
-            [LanguageEnum.NL]: "Dit speltype wordt niet ondersteund",
-        },
-        [ExceptionEnum.WANT_TO_REPLACE_CHANNEL]: {
-            [LanguageEnum.EN]: "This channel is already set up. Do you want to replace it?",
-            [LanguageEnum.NL]: "Dit kanaal is al ingesteld. Wil je het vervangen?",
-        },
-        [ExceptionEnum.WANT_TO_REPLACE_GAME]: {
-            [LanguageEnum.EN]: "This game is already active. Do you want to replace it?",
-            [LanguageEnum.NL]: "Dit spel is al actief. Wil je het vervangen?",
-        },
-        [ExceptionEnum.GAME_MODULE_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Game module couldn't be found",
-            [LanguageEnum.NL]: "Spelmodule niet gevonden",
-        },
-        [ExceptionEnum.SAME_USER_ALREADY_ANSWERED]: {
-            [LanguageEnum.EN]: "You've already answered",
-            [LanguageEnum.NL]: "Je hebt al een antwoord gegeven",
-        },
-        [ExceptionEnum.WRONG_ANSWER]: {
-            [LanguageEnum.EN]: "That's not the correct answer",
-            [LanguageEnum.NL]: "Dat is niet het juiste antwoord",
-        },
-        [ExceptionEnum.GAME_NOT_ACTIVE]: {
-            [LanguageEnum.EN]: "The game isn't active right now",
-            [LanguageEnum.NL]: "Het spel is momenteel niet actief",
-        },
-        [ExceptionEnum.MESSAGE_CHANGE_DISABLED]: {
-            [LanguageEnum.EN]: "Editing messages is turned off",
-            [LanguageEnum.NL]: "Berichten bewerken is uitgeschakeld",
-        },
-        [ExceptionEnum.INVALID_NUMBER]: {
-            [LanguageEnum.EN]: "That doesn't seem to be a valid number",
-            [LanguageEnum.NL]: "Dat lijkt geen geldig nummer te zijn",
-        },
-        [ExceptionEnum.GAME_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Game not found",
-            [LanguageEnum.NL]: "Spel niet gevonden",
-        },
-        [ExceptionEnum.SETTING_REQUIRED]: {
-            [LanguageEnum.EN]: "This setting is required",
-            [LanguageEnum.NL]: "Deze instelling is verplicht",
-        },
-        [ExceptionEnum.SETTING_INVALID_TYPE]: {
-            [LanguageEnum.EN]: "Invalid value type for this setting",
-            [LanguageEnum.NL]: "Ongeldig waardetype voor deze instelling",
-        },
-        [ExceptionEnum.SETTING_INVALID_VALUE]: {
-            [LanguageEnum.EN]: "Invalid value for this setting",
-            [LanguageEnum.NL]: "Ongeldige waarde voor deze instelling",
-        },
-        [ExceptionEnum.RECORD_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Record not found",
-            [LanguageEnum.NL]: "Record niet gevonden",
-        },
-        [ExceptionEnum.RECORD_IS_DUPLICATE]: {
-            [LanguageEnum.EN]: "Record is a duplicate",
-            [LanguageEnum.NL]: "Record is een duplicaat",
-        },
-        [ExceptionEnum.USER_NOT_FOUND]: {
-            [LanguageEnum.EN]: "User not found",
-            [LanguageEnum.NL]: "Gebruiker niet gevonden",
-        },
-        [ExceptionEnum.SERVER_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Server not found",
-            [LanguageEnum.NL]: "Server niet gevonden",
-        },
-        [ExceptionEnum.RECORD_ALREADY_EXISTS]: {
-            [LanguageEnum.EN]: "Record already exists",
-            [LanguageEnum.NL]: "Record bestaat al",
-        },
-        [ExceptionEnum.GAME_CHANNEL_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Game channel not found",
-            [LanguageEnum.NL]: "Spelkanaal niet gevonden",
-        },
-        [ExceptionEnum.UNAUTHORIZED]: {
-            [LanguageEnum.EN]: "Unauthorized",
-            [LanguageEnum.NL]: "Niet geautoriseerd",
-        },
-        [ExceptionEnum.METHOD_NOT_IMPLEMENTED]: {
-            [LanguageEnum.EN]: "Method not implemented",
-            [LanguageEnum.NL]: "Methode niet geïmplementeerd",
-        },
-        [ExceptionEnum.DATABASE_CONNECTION_FAILED]: {
-            [LanguageEnum.EN]: "Database connection failed",
-            [LanguageEnum.NL]: "Database verbinding mislukt",
-        },
-        [ExceptionEnum.TABLE_ENUM_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Table enum {tableEnumValue} not found",
-            [LanguageEnum.NL]: "Tabelenum {tableEnumValue} niet gevonden",
-        },
-        [ExceptionEnum.ENV_VARIABLE_NOT_SET]: {
-            [LanguageEnum.EN]: "Environment variable {environmentVariable} is not set",
-            [LanguageEnum.NL]: "Omgevingsvariabele {environmentVariable} is niet ingesteld",
-        },
-        [ExceptionEnum.FUNCTION_RETURNED_INVALID_RESULT]: {
-            [LanguageEnum.EN]: "Function {functionName} returned an invalid result",
-            [LanguageEnum.NL]: "Functie {functionName} heeft een ongeldig resultaat teruggegeven",
-        },
-        [ExceptionEnum.JOB_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Job with id {jobId} not found",
-            [LanguageEnum.NL]: "Taak met id {jobId} niet gevonden",
-        },
-        [ExceptionEnum.JOB_FAILED]: {
-            [LanguageEnum.EN]: "Job failed",
-            [LanguageEnum.NL]: "Taak mislukt",
-        },
-        [ExceptionEnum.CLIENT_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Client with id {clientId} not found",
-            [LanguageEnum.NL]: "Client met id {clientId} niet gevonden",
-        },
-        [ExceptionEnum.COMMAND_REGISTRATION_FAILED]: {
-            [LanguageEnum.EN]: "Failed to register commands",
-            [LanguageEnum.NL]: "Commands kunnen niet worden geregistreerd",
-        },
-        [ExceptionEnum.DISCORD_GUILD_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Discord guild not found",
-            [LanguageEnum.NL]: "Discord server niet gevonden",
-        },
-        [ExceptionEnum.DISCORD_CHANNEL_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Discord channel not found",
-            [LanguageEnum.NL]: "Discord kanaal niet gevonden",
-        },
-        [ExceptionEnum.JSON_INTERFACE_VALIDATION_FAILED]: {
-            [LanguageEnum.EN]: "JSON interface validation failed",
-            [LanguageEnum.NL]: "JSON interface validatie mislukt",
-        },
-        [ExceptionEnum.GAME_IMAGE_GENERATION_FAILED]: {
-            [LanguageEnum.EN]: "Game image generation failed",
-            [LanguageEnum.NL]: "Spelafbeelding generatie mislukt",
-        },
-        [ExceptionEnum.GAME_STATE_NOT_VALID]: {
-            [LanguageEnum.EN]: "Game state is not valid",
-            [LanguageEnum.NL]: "Spelstatus is ongeldig",
-        },
-        [ExceptionEnum.NO_NEXT_ANSWER_FOUND]: {
-            [LanguageEnum.EN]: "No next answer found",
-            [LanguageEnum.NL]: "Geen volgende antwoord gevonden",
-        },
-        [ExceptionEnum.SAVE_FAILED]: {
-            [LanguageEnum.EN]: "Save failed",
-            [LanguageEnum.NL]: "Opslaan mislukt",
-        },
-        [ExceptionEnum.USER_GAME_POINTS_NOT_FOUND]: {
-            [LanguageEnum.EN]: "User game points not found",
-            [LanguageEnum.NL]: "Gebruikerspelpunten niet gevonden",
-        },
-        [ExceptionEnum.INVALID_ARGUMENT]: {
-            [LanguageEnum.EN]: "Invalid argument",
-            [LanguageEnum.NL]: "Ongeldig argument",
-        },
-        [ExceptionEnum.FIELD_IS_NULL]: {
-            [LanguageEnum.EN]: "Field {field} cannot be null",
-            [LanguageEnum.NL]: "Veld {field} mag niet null zijn",
-        },
-        [ExceptionEnum.FIELD_HAS_CHANGED]: {
-            [LanguageEnum.EN]: "Field has changed",
-            [LanguageEnum.NL]: "Veld is gewijzigd",
-        },
-        [ExceptionEnum.FIELD_IS_MISSING_AND_REQUIRED]: {
-            [LanguageEnum.EN]: "Field {key} is missing and required",
-            [LanguageEnum.NL]: "Veld {key} is ontbrekend en verplicht",
-        },
-        [ExceptionEnum.FIELD_HAS_INVALID_TYPE]: {
-            [LanguageEnum.EN]: "Field {key} has type {received}, but expected {expected}.",
-            [LanguageEnum.NL]: "Veld {key} heeft type {received}, maar verwachtte {expected}.",
-        },
-        [ExceptionEnum.FIELD_HAS_INVALID_VALUE]: {
-            [LanguageEnum.EN]: "Field {key} has an invalid value",
-            [LanguageEnum.NL]: "Veld {key} heeft een ongeldige waarde",
-        },
-        [ExceptionEnum.TABLE_NOT_FOUND]: {
-            [LanguageEnum.EN]: "Table {tableName} not found",
-            [LanguageEnum.NL]: "Tabel {tableName} niet gevonden",
-        },
-        [ExceptionEnum.ANSWER_SKIPPED]: {
-            [LanguageEnum.EN]: "Answer skipped",
-            [LanguageEnum.NL]: "Antwoord overslagen",
-        },
-    },
-    languages: {
-        [LanguageEnum.EN]: {
-            [LanguageEnum.EN]: "English",
-            [LanguageEnum.NL]: "Engels"
-        },
-        [LanguageEnum.NL]: {
-            [LanguageEnum.EN]: "Dutch",
-            [LanguageEnum.NL]: "Nederlands"
-        },
-        [LanguageEnum.ES]: {
-            [LanguageEnum.EN]: "Spanish",
-            [LanguageEnum.NL]: "Spaans"
-        },
-        [LanguageEnum.DE]: {
-            [LanguageEnum.EN]: "German",
-            [LanguageEnum.NL]: "Duits"
-        },
-    },
-    metrics: {
-        [MetricEnum.ActiveGames]: {
-            [LanguageEnum.EN]: "Active Games",
-            [LanguageEnum.NL]: "Actieve spellen",
-        },
-        [MetricEnum.Servers]: {
-            [LanguageEnum.EN]: "Servers",
-            [LanguageEnum.NL]: "Servers",
-        },
-        [MetricEnum.Guilds]: {
-            [LanguageEnum.EN]: "Guilds",
-            [LanguageEnum.NL]: "Gildes",
-        },
-        [MetricEnum.Users]: {
-            [LanguageEnum.EN]: "Users",
-            [LanguageEnum.NL]: "Gebruikers",
-        },
-        [MetricEnum.Points]: {
-            [LanguageEnum.EN]: "Points",
-            [LanguageEnum.NL]: "Punten",
-        },
-        [MetricEnum.Events]: {
-            [LanguageEnum.EN]: "Events",
-            [LanguageEnum.NL]: "Evenementen",
-        },
-        [MetricEnum.Members]: {
-            [LanguageEnum.EN]: "Members",
-            [LanguageEnum.NL]: "Leden",
-        },
-        [MetricEnum.ServerMembers]: {
-            [LanguageEnum.EN]: "Server Members",
-            [LanguageEnum.NL]: "Serverleden",
-        },
+    enums: {
+        badges: badgeTranslations,
+        countries: countryTranslations,
+        exceptions: exceptionTranslations,
+        languages: languageTranslations,
+        metrics: metricTranslations,
+        userRoles: userRoleTranslations,
+        gameTypes: gameTypeTranslations,
     },
 };
 

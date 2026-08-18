@@ -1,5 +1,6 @@
 import { EnumType } from '../../interfaces/application/EnumType';
 import { EnumValue, MetadataKeyEnum, MetadataValue } from '../../interfaces/enums/application/MetadataKeyEnum';
+import { Color } from './Color';
 
 const enumMetadataRegistry = new Map<string, Map<MetadataKeyEnum, MetadataValue>>();
 const pendingRegistrations: Array<() => void> = [];
@@ -133,5 +134,16 @@ export function SetEmoji(
     queueRegistration(() => {
         const metadataMap = ensureMetadataMap(enumObject, enumValue);
         metadataMap.set(MetadataKeyEnum.Emoji, emoji);
+    });
+}
+
+export function SetColor(
+    enumObject: EnumType,
+    enumValue: EnumValue,
+    color: Color
+): void {
+    queueRegistration(() => {
+        const metadataMap = ensureMetadataMap(enumObject, enumValue);
+        metadataMap.set(MetadataKeyEnum.Color, color);
     });
 }

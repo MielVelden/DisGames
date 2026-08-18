@@ -5,4 +5,5 @@ export enum DashboardEnum {
     ANALYTICS = "statistics",
     GAMES = "games",
     PERFORMANCE = "performance",
+    METRICS = "metrics",
 }

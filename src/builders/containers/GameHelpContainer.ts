@@ -8,7 +8,7 @@ import { createTitle } from "../../utils/helpers/Markdown";
 
 export function createGameHelpContainer(gameType: GameTypeEnum): Component[] {
     const gameImage = MediaService.getGameImage(gameType);
-    const gameInfo = i18n.commands.games.types[gameType];
+    const gameInfo = i18n.enums.gameTypes[gameType];
 
     return [
         ComponentService.createImage(gameImage, false),

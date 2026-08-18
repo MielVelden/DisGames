@@ -2,8 +2,8 @@ import { SetIsRequired, SetIsRequiredInTestMode, SetValidateRegex } from "../../
 import { EnvConfigEnum } from "./EnvConfigEnum";
 
 // Basic required values
+SetIsRequired(EnvConfigEnum, EnvConfigEnum.IS_PRODUCTION);
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.DISGAMES_API_PORT);
-SetIsRequired(EnvConfigEnum, EnvConfigEnum.PREFIX);
 SetIsRequired(EnvConfigEnum, EnvConfigEnum.TOKEN);
 SetIsRequiredInTestMode(EnvConfigEnum, EnvConfigEnum.TOKEN);
 

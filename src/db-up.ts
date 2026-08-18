@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { createConnectionAsync, closeConnectionAsync } from './repositories/util/ConnectionHandler';
 import { syncRoutines } from './utils/routines/Sync';
 import Logger from './utils/application/Logger';

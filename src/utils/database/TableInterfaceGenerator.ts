@@ -68,52 +68,94 @@ export class TableInterfaceGenerator {
     });
   }
 
-  private static detectChangedTables(existingContent: string, newContent: string): string[] {
-    const extractFields = (content: string): Map<string, Map<string, string>> => {
-      const tables = new Map<string, Map<string, string>>();
-      const lines = content.split('\n');
-      let current: string | null = null;
-      let depth = 0;
+  private static generateTextDiff(oldText: string, newText: string): string {
+    const splitIntoSections = (text: string): Map<string, string> => {
+      const sections = new Map<string, string>();
+      const firstExportIdx = text.search(/^export /m);
 
-      for (const line of lines) {
-        const match = line.match(/^export interface (\w+)Model \{/);
-        if (match) {
-          current = match[1];
-          depth = 1;
-          tables.set(current, new Map());
-          continue;
-        }
-        if (!current) continue;
+      if (firstExportIdx > 0)
+        sections.set('\x00preamble', text.slice(0, firstExportIdx));
 
-        const opens = (line.match(/\{/g) || []).length;
-        const closes = (line.match(/\}/g) || []).length;
-        depth += opens - closes;
-
-        if (depth <= 0) { current = null; depth = 0; continue; }
-
-        if (depth === 1) {
-          const field = line.match(/^\s+(\w+)\??:\s+(.+?);/);
-          if (field) tables.get(current)!.set(field[1], field[2].trim());
-        }
+      const body = firstExportIdx >= 0 ? text.slice(firstExportIdx) : text;
+      for (const part of body.split(/(?=^export )/m)) {
+        if (!part.trim()) continue;
+        sections.set(part.split('\n')[0], part);
       }
-      return tables;
+      return sections;
     };
 
-    const existing = extractFields(existingContent);
-    const next = extractFields(newContent);
-    const changed = new Set<string>();
+    const oldSections = splitIntoSections(oldText);
+    const newSections = splitIntoSections(newText);
+    const diffLines: string[] = [];
 
-    for (const [table, fields] of next) {
-      const old = existing.get(table);
-      if (!old) { changed.add(table); continue; }
-      for (const [f, t] of fields) { if (old.get(f) !== t) { changed.add(table); break; } }
-      for (const f of old.keys()) { if (!fields.has(f)) { changed.add(table); break; } }
-    }
-    for (const table of existing.keys()) {
-      if (!next.has(table)) changed.add(table);
+    for (const [key, newSection] of newSections) {
+      const oldSection = oldSections.get(key);
+      const label = key === '\x00preamble' ? '(preamble)' : key;
+      if (!oldSection) {
+        diffLines.push(`+++ ${label}`);
+        newSection.split('\n').forEach(l => diffLines.push(`+ ${l}`));
+        diffLines.push('');
+      } else if (oldSection !== newSection) {
+        diffLines.push(`~~~ ${label}`);
+        diffLines.push(...this.diffSection(oldSection.split('\n'), newSection.split('\n')));
+        diffLines.push('');
+      }
     }
 
-    return [...changed];
+    for (const [key] of oldSections) {
+      if (!newSections.has(key)) {
+        const label = key === '\x00preamble' ? '(preamble)' : key;
+        diffLines.push(`--- ${label} (removed)`);
+        diffLines.push('');
+      }
+    }
+
+    return diffLines.length > 0 ? diffLines.join('\n') : '(no differences found)';
+  }
+
+  private static diffSection(oldLines: string[], newLines: string[]): string[] {
+    const m = oldLines.length;
+    const n = newLines.length;
+    const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+
+    for (let i = 1; i <= m; i++)
+      for (let j = 1; j <= n; j++)
+        dp[i][j] = oldLines[i - 1] === newLines[j - 1]
+          ? dp[i - 1][j - 1] + 1
+          : Math.max(dp[i - 1][j], dp[i][j - 1]);
+
+    type Op = { type: 'eq' | 'add' | 'del'; line: string };
+    const ops: Op[] = [];
+    let i = m, j = n;
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
+        ops.push({ type: 'eq', line: oldLines[i - 1] }); i--; j--;
+      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+        ops.push({ type: 'add', line: newLines[j - 1] }); j--;
+      } else {
+        ops.push({ type: 'del', line: oldLines[i - 1] }); i--;
+      }
+    }
+    ops.reverse();
+
+    const CONTEXT = 1;
+    const result: string[] = [];
+    let lastPrinted = -1;
+
+    for (let k = 0; k < ops.length; k++) {
+      if (ops[k].type !== 'eq') {
+        const from = Math.max(0, k - CONTEXT);
+        const to = Math.min(ops.length - 1, k + CONTEXT);
+        if (from > lastPrinted + 1) result.push('  ...');
+        for (let l = Math.max(from, lastPrinted + 1); l <= to; l++) {
+          const prefix = ops[l].type === 'add' ? '+' : ops[l].type === 'del' ? '-' : ' ';
+          result.push(`${prefix} ${ops[l].line}`);
+          lastPrinted = l;
+        }
+      }
+    }
+
+    return result;
   }
 
   static async generateTableInterfacesAsync(
@@ -270,11 +312,8 @@ export class TableInterfaceGenerator {
     if (validate) {
       const existingContent = fs.readFileSync(outputFilePath, 'utf-8');
       if (existingContent !== interfaceContent) {
-        const changedTables = this.detectChangedTables(existingContent, interfaceContent);
-        const message = changedTables.length > 0
-          ? `Interfaces have changed, please update the database. Changed tables: ${changedTables.join(', ')}`
-          : 'Interfaces have changed, please update the database';
-        Logger.logError(message, undefined, { sendToDiscord: true });
+        const diff = this.generateTextDiff(existingContent, interfaceContent);
+        Logger.logError(`Interfaces have changed, please update the database.\n${diff}`, undefined, { sendToDiscord: true });
       }
       return;
     } else {
