@@ -26,13 +26,14 @@ export async function getOrCreateServerAsync(discordGuild: DiscordGuild, event: 
         }), event);
 
     const nameChanged = normalizedGuildName !== server.Name;
-    const memberCountChanged = discordGuild.memberCount !== undefined && discordGuild.memberCount !== server.MemberCount;
+    // MemberCount updates disabled for now: concurrent saves to the same server row
+    // race between the old/new snapshot reads in ServerService.performSaveAsync,
+    // causing this field to bleed into unrelated timeline diffs (e.g. language changes).
 
-    if (nameChanged || memberCountChanged)
+    if (nameChanged)
         server = await ServerService.saveAsync(new ServersSaveModel({
             Id: server.Id,
-            ...(nameChanged && { Name: normalizedGuildName }),
-            ...(memberCountChanged && { MemberCount: discordGuild.memberCount })
+            Name: normalizedGuildName
         }), event);
 
     return server;
