@@ -1,11 +1,11 @@
-import GameService from "../../services/domain/GameService";
-import MediaService from "../../services/application/MediaService";
-import MetricService from "../../services/domain/MetricService";
-import UserService from "../../services/domain/UserService";
+const registrations: Array<() => Promise<void>> = [];
+
+export function registerInit(fn: () => Promise<void>): void {
+    registrations.push(fn);
+}
 
 export async function initAsync(): Promise<void> {
-    await MediaService.initAsync();
-    await GameService.initAsync();
-    await UserService.initAsync();
-    await MetricService.initAsync();
+    for (const fn of registrations) {
+        await fn();
+    }
 }

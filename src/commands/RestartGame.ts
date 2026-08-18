@@ -18,7 +18,7 @@ export class RestartGameCommand implements Command {
     name = CommandEnum.RESTARTGAME;
     description = new MultiLingualString(i18n.commands.restartGame.description);
     isSlashCommand = false;
-    isMessageCommand = true;
+    isMessageCommand = !getConfigValue(EnvConfigEnum.IS_PRODUCTION);
     options = optionsConfig;
     canExecute = (event: InteractionEvent): boolean => {
         return event.user.userId === getConfigValue(EnvConfigEnum.DISCORD_OWNER_ID);

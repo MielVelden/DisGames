@@ -2,6 +2,7 @@ services:
   app:
     build: .
     restart: unless-stopped
+    stop_grace_period: 30s
     command: ["sh", "-c", "npm run deploy && npm start"]
     environment:
       NODE_ENV: production

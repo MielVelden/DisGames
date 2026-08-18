@@ -6,7 +6,11 @@ class DataSheetRepository implements RepositoryWithBase<DatasheetsModel, Datashe
     public readonly baseRepository: BaseRepository<DatasheetsModel, DatasheetsSaveModel, typeof DatasheetsModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<DatasheetsModel, DatasheetsSaveModel, typeof DatasheetsModelFieldEnum>(TableEnum.DATASHEETS, DatasheetsModelFieldEnum, getDatasheetsFieldType);
+        this.baseRepository = new BaseRepository<DatasheetsModel, DatasheetsSaveModel, typeof DatasheetsModelFieldEnum>(
+            TableEnum.DATASHEETS, 
+            DatasheetsModelFieldEnum, 
+            getDatasheetsFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<DatasheetsModel | null> {

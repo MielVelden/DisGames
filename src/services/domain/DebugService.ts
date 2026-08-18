@@ -6,9 +6,12 @@ import { ErrorHelper } from "../../utils/application/Error";
 import { UniqueCodes } from "../../utils/helpers/UniqueCodes";
 import { BaseDomainService } from "./BaseDomainService";
 import Logger from "../../utils/application/Logger";
+import { registerService } from "../../utils/container/Container";
 
-class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof DebugRepository> {
+export class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof DebugRepository> {
     protected readonly repository = DebugRepository;
+
+    public async initAsync(): Promise<void> {}
 
     public async getAllAsync(): Promise<DebugModel[]> {
         return await this.repository.getAllAsync();
@@ -43,4 +46,6 @@ class DebugService extends BaseDomainService<DebugModel, DebugSaveModel, typeof 
     }
 }
 
-export default new DebugService();
+const debugService = new DebugService();
+registerService(debugService);
+export default debugService;

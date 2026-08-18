@@ -9,7 +9,7 @@ import { i18n } from "../../utils/i18n/i18n";
 import MediaService from "../../services/application/MediaService";
 import ComponentService from "../../services/application/ComponentService";
 import { createTitle } from "../../utils/helpers/Markdown";
-import { GameSettingsContainer } from "./GameSettingsContainer";
+import { createGameSettingsDisplay } from "./GameSettingsContainer";
 import { ErrorHelper } from "../../utils/application/Error";
 
 export async function createGameContainerAsync(
@@ -33,7 +33,7 @@ export async function createGameContainerAsync(
         ComponentService.createContent(gameDescription),
         ComponentService.createContent([gameName, gameChannel]),
         ...(gameModule.config.settings && settings ? [
-            ...GameSettingsContainer.createReadOnlyDisplay({
+            ...createGameSettingsDisplay({
                 settingsSchema: gameModule.config.settings,
                 settings: settings,
                 languageEnum: languageEnum

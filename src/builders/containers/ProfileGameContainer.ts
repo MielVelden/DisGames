@@ -8,7 +8,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export function createProfileGameContainer(gameProfile: ProfileGameResponse): Component[] {
     const gameImage = MediaService.getGameImage(gameProfile.gameType);
-    const gameInfo = i18n.commands.games.types[gameProfile.gameType];
+    const gameInfo = i18n.enums.gameTypes[gameProfile.gameType];
 
     return [
         ComponentService.createImage(gameImage, false),

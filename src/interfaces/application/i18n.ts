@@ -1,9 +1,13 @@
-import { ExceptionEnum, MetricEnum } from "../enums";
+import { ExceptionEnum, MetricEnum, UserRoleEnum } from "../enums";
 import { GamesCommandActionEnum } from "../enums/commands/Games";
+import { LeaderboardCommandActionEnum } from "../enums/commands/Leaderboard";
+import { PremiumActionEnum } from "../enums/commands/Premium";
 import { ProfileCommandActionEnum } from "../enums/commands/Profile";
 import { GameTypeEnum } from "../enums/database/GameTypeEnum";
 import { LanguageEnum } from "../enums/database/LanguageEnum";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { BadgeEnum } from "../enums/application/BadgeEnum";
+import { CountryEnum } from "../enums/application/CountryEnum";
 
 export type LanguageTranslations = {
     [LanguageEnum.EN]: string;
@@ -23,12 +27,53 @@ export type LanguageCommandOptionTranslations<T extends string | number> = {
 };
 
 export type LanguageEnumTranslations<T extends string | number> = {
+    [K in T]: LanguageTranslations
+};
+
+export type ExceptionTranslationParams = {
+    [ExceptionEnum.TABLE_ENUM_NOT_FOUND]: { tableEnumValue: string };
+    [ExceptionEnum.ENV_VARIABLE_NOT_SET]: { environmentVariable: string };
+    [ExceptionEnum.FUNCTION_RETURNED_INVALID_RESULT]: { functionName: string };
+    [ExceptionEnum.JOB_NOT_FOUND]: { jobId: string };
+    [ExceptionEnum.CLIENT_NOT_FOUND]: { clientId: string };
+    [ExceptionEnum.FIELD_IS_NULL]: { field: string };
+    [ExceptionEnum.FIELD_IS_MISSING_AND_REQUIRED]: { key: string };
+    [ExceptionEnum.FIELD_HAS_INVALID_TYPE]: { key: string; received: string; expected: string };
+    [ExceptionEnum.FIELD_HAS_INVALID_VALUE]: { key: string };
+    [ExceptionEnum.TABLE_NOT_FOUND]: { tableName: string };
+    [ExceptionEnum.NON_PREMIUM_GAME_LIMIT_REACHED]: { limit: number };
+};
+
+export type LanguageExceptionTranslations = {
+    [K in ExceptionEnum]: K extends keyof ExceptionTranslationParams
+        ? (params: ExceptionTranslationParams[K]) => MultiLingualString
+        : LanguageTranslations;
+};
+
+export type BadgeTranslationParams = {
+    [BadgeEnum.DAY_STREAK]: { days: number };
+    [BadgeEnum.GAMES_PLAYED]: { count: number };
+    [BadgeEnum.POINT_COLLECTOR]: { points: number };
+    [BadgeEnum.VETERAN]: { days: number };
+    [BadgeEnum.WORLD_TRAVELER]: { servers: number };
+};
+
+export type LanguageBadgeTranslations = {
+    [K in BadgeEnum]: K extends keyof BadgeTranslationParams
+        ? {
+            title: (params: BadgeTranslationParams[K]) => MultiLingualString;
+            description: (params: BadgeTranslationParams[K]) => MultiLingualString;
+          }
+        : {
+            title: LanguageTranslations;
+            description: LanguageTranslations;
+          };
+};
+
+export type LanguageAchievementEnumTranslations<T extends string | number> = {
     [K in T]: {
-        [LanguageEnum.EN]: string;
-        [LanguageEnum.NL]: string;
-        [LanguageEnum.ES]?: string;
-        [LanguageEnum.DE]?: string;
-        [LanguageEnum.PT]?: string;
+        title: LanguageTranslations,
+        description: LanguageTranslations
     }
 };
 
@@ -128,6 +173,7 @@ export interface I18nTranslations {
                 enabled: LanguageTranslations;
                 disabled: LanguageTranslations;
                 unknown: LanguageTranslations;
+                configureButton: LanguageTranslations;
                 gameDescription: LanguageTranslations;
                 currentChannel: LanguageTranslations;
                 resetOnFail: {
@@ -148,7 +194,13 @@ export interface I18nTranslations {
                     label: LanguageTranslations;
                     description: LanguageTranslations;
                 };
+                premiumOnly: LanguageTranslations;
+                premiumRequired: LanguageTranslations;
                 confirm: {
+                    title: LanguageTranslations;
+                    description: LanguageTranslations;
+                };
+                created: {
                     title: LanguageTranslations;
                     description: LanguageTranslations;
                 }
@@ -158,13 +210,14 @@ export interface I18nTranslations {
                 move: LanguageTranslations;
                 moveHere: LanguageTranslations;
             },
-            types: LanguageGameTypeTranslations<GameTypeEnum>;
             event: {
                 messageChanged: (user: string, message: string) => MultiLingualString;
             }
         },
         profile: {
             description: LanguageTranslations;
+            loadingTitle: LanguageTranslations;
+            loadingProfile: LanguageTranslations;
             option: LanguageCommandOptionTranslations<ProfileCommandActionEnum>;
             labels: {
                 title: LanguageTranslations;
@@ -175,6 +228,7 @@ export interface I18nTranslations {
                 globalUserRank: (rank: number) => MultiLingualString;
                 globalPoints: (points: number) => MultiLingualString;
                 joinedAt: (joinedAt: Date) => MultiLingualString;
+                memberSince: (date: string) => MultiLingualString;
             };
         },
         settings: {
@@ -188,6 +242,18 @@ export interface I18nTranslations {
                 changeLanguage: LanguageTranslations;
                 languageChanged: LanguageTranslations;
                 clickHereToChangeLanguage: LanguageTranslations;
+                changeEmojis: LanguageTranslations;
+                emojisChanged: LanguageTranslations;
+                emojiModalTitle: LanguageTranslations;
+                acceptEmojiLabel: LanguageTranslations;
+                rejectEmojiLabel: LanguageTranslations;
+                invalidEmoji: LanguageTranslations;
+                botName: (botName: string) => MultiLingualString;
+                changeIdentity: LanguageTranslations;
+                identityModalTitle: LanguageTranslations;
+                nicknameLabel: LanguageTranslations;
+                avatarImageLabel: LanguageTranslations;
+                identityChanged: LanguageTranslations;
             };
         },
         aboutme: {
@@ -203,11 +269,74 @@ export interface I18nTranslations {
         impersonate: {
             description: LanguageTranslations;
         },
+        leaderboard: {
+            description: LanguageTranslations;
+            option: LanguageCommandOptionTranslations<LeaderboardCommandActionEnum>;
+            labels: {
+                title: LanguageTranslations;
+                entriesCount: (count: string) => MultiLingualString;
+                allTimePoints: LanguageTranslations;
+                rankLeader: LanguageTranslations;
+                leadVsSecond: (lead: string) => MultiLingualString;
+                membersCount: (count: string) => MultiLingualString;
+                levelLabel: (level: string) => MultiLingualString;
+                points: LanguageTranslations;
+                noPointsRecorded: LanguageTranslations;
+                updatedLabel: LanguageTranslations;
+                ptsSuffix: (points: string) => MultiLingualString;
+                liveEnabled: LanguageTranslations;
+                liveDisabled: LanguageTranslations;
+            };
+        },
         restartGame: {
             description: LanguageTranslations;
+        },
+        job: {
+            description: LanguageTranslations;
+        },
+        premium: {
+            description: LanguageTranslations;
+            option: LanguageCommandOptionTranslations<PremiumActionEnum>;
+            optionTarget: LanguageCommandOptionTranslations<never>;
+            labels: {
+                created: LanguageTranslations;
+                deleted: LanguageTranslations;
+                missingSku: LanguageTranslations;
+                missingTarget: LanguageTranslations;
+                missingGuild: LanguageTranslations;
+                clientNotReady: LanguageTranslations;
+                toggledOn: LanguageTranslations;
+                toggledOff: LanguageTranslations;
+                purchaseButtonEnabled: LanguageTranslations;
+                purchaseButtonDisabled: LanguageTranslations;
+            };
+        },
+        handoff: {
+            description: LanguageTranslations;
+            labels: {
+                activated: LanguageTranslations;
+                shuttingDown: LanguageTranslations;
+            };
+        },
+        generateData: {
+            description: LanguageTranslations;
+            labels: {
+                generating: LanguageTranslations;
+                translating: LanguageTranslations;
+                generateSummary: (generated: number, skipped: number, failed: number) => MultiLingualString;
+                translateSummary: (translated: number, skipped: number, failed: number) => MultiLingualString;
+                unknownSubcommand: LanguageTranslations;
+                unknownGameType: LanguageTranslations;
+            };
         }
     }
-    exceptions: LanguageEnumTranslations<ExceptionEnum>;
-    languages: LanguageEnumTranslations<LanguageEnum>;
-    metrics: LanguageEnumTranslations<MetricEnum>;
+    enums: {
+        badges: LanguageBadgeTranslations;
+        countries: LanguageEnumTranslations<CountryEnum>;
+        gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
+        exceptions: LanguageExceptionTranslations;
+        languages: LanguageEnumTranslations<LanguageEnum>;
+        metrics: LanguageEnumTranslations<MetricEnum>;
+        userRoles: LanguageEnumTranslations<UserRoleEnum>;
+    }
 }

@@ -10,4 +10,5 @@ export enum TableEnum {
     DEBUG,
     EVENTS,
     METRICS,
+    USERS_ACHIEVEMENTS,
 }

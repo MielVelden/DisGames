@@ -6,7 +6,7 @@ import { ErrorHelper } from "../utils/application/Error";
 
 const validKeys = getConfigValue(EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS) as string;
 if (!validKeys)
-	ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { key: EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS });
+	ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { environmentVariable: EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS });
 
 const VALID_KEYS = validKeys
 	.split(",")

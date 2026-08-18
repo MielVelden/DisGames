@@ -130,3 +130,7 @@ export function createMultiLingualString(message: string): MultiLingualString {
     });
 }
 
+export function getMultiLingualString(message: LanguageTranslations, language: LanguageEnum): string {
+    const multiLingualString = new MultiLingualString(message);
+    return multiLingualString.getMessage(language);
+}

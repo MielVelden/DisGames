@@ -20,3 +20,8 @@ export function normalizeString(str: string, maxLength: number = 25): string {
         .replace(/\s+/g, ' ');
     return asciiName;
 }
+
+export function getInitials(displayName: string): string {
+    const cleaned = displayName.replace(/[^A-Za-z0-9]/g, '');
+    return (cleaned.slice(0, 2) || '?').toUpperCase();
+}

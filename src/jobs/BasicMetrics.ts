@@ -38,7 +38,7 @@ export default {
 
         let message = '**Daily Metrics:**\n';
         for (const metricType of metricTypes) {
-            const enumName = new MultiLingualString(i18n.metrics[metricType]).getMessage(LanguageEnum.EN);
+            const enumName = new MultiLingualString(i18n.enums.metrics[metricType]).getMessage(LanguageEnum.EN);
             message += `${enumName || metricType}: ${metrics[metricType].current.Value} (+${metrics[metricType].increase})\n`;
         }
 

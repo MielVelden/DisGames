@@ -24,7 +24,9 @@ const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
 wss.on("connection", () => Logger.logInfo("WS connected"));
 
 import { WebSocketService } from "./services/application/WebSocketService";
+import { registerService } from "./utils/container/Container";
 export const wsService = new WebSocketService(wss);
+registerService(wsService);
 
 export function startHttpServer(port: number) {
 	httpServer.listen(port, () => Logger.logInfo(`API listening on :${port}`));

@@ -7,9 +7,12 @@ import { BaseDomainService } from "./BaseDomainService";
 import Logger from "../../utils/application/Logger";
 import { TrackMetricPull } from "../../utils/helpers/Decorator";
 import { MetricEnum } from "../../interfaces/enums/application/MetricEnum";
+import { registerService } from "../../utils/container/Container";
 
-class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeof PointRepository> {
+export class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeof PointRepository> {
     protected readonly repository = PointRepository;
+
+    public async initAsync(): Promise<void> {}
 
     public getAllAsync(): Promise<PointsModel[]> {
         return this.repository.getAllAsync();
@@ -66,4 +69,6 @@ class PointService extends BaseDomainService<PointsModel, PointsSaveModel, typeo
     }
 }
 
-export default new PointService();
+const pointService = new PointService();
+registerService(pointService);
+export default pointService;

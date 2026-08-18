@@ -1,12 +1,13 @@
 {
-  "name": "disgames",
-  "version": "3.0.2",
+  "name": "DisGames",
+  "version": "3.1.0",
   "github": "https://github.com/MielVelden/DisGames",
   "description": "Minigame bot",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "handoff": "node dist/index.js --standby",
     "dev": "tsc && node dist/index.js",
     "dev:watch": "tsx watch src/index.ts",
     "watch": "tsc -w",
@@ -37,6 +38,7 @@
     "mysql2": "^3.14.2",
     "node-schedule": "^2.1.1",
     "reflect-metadata": "^0.2.1",
+    "tsyringe": "^4.10.0",
     "ws": "^8.18.3",
     "zod": "^3.23.8"
   },

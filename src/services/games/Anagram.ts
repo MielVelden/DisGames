@@ -11,7 +11,7 @@ import { Component } from "../../interfaces/application/Message";
 import ComponentService from "../application/ComponentService";
 import { compareStrings } from "../../utils/helpers/String";
 import { createBlock } from "../../utils/helpers/Markdown";
-import { DEFAULT_WRONG_ANSWER_EMOJI } from "../../utils/constants/Emojis";
+import { getRejectEmoji } from "../../utils/constants/Emojis";
 
 function scrambleWord(word: string): string {
     const charArray = word.split("");
@@ -26,12 +26,13 @@ export default {
     config: {
         id: GameTypeEnum.ANAGRAM,
         emoji: "🔍",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.ANAGRAM].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.ANAGRAM].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.ANAGRAM].description),
         points: 1,
         isCalculated: false,
         expectedType: "string",
         addCorrectReaction: true,
+        hasDataSheets: true,
         options: {
             [GameOptionEnum.IS_INACTIVE]: false,
             [GameOptionEnum.DISABLE_MESSAGE_CHANGE]: false,
@@ -102,7 +103,7 @@ export default {
             event.addAction({
                 enum: GameActionEnum.REACTION,
                 priority: GameActionPriorityEnum.HIGH,
-                component: DEFAULT_WRONG_ANSWER_EMOJI
+                component: getRejectEmoji(event.server.Settings)
             })
         }
     } as GameFunctions

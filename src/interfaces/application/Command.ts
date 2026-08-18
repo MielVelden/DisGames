@@ -8,9 +8,12 @@ import { Permission } from "../enums/application/Permission";
 export interface Command {
     name: CommandEnum;
     description: MultiLingualString;
-    
+
     isSlashCommand: boolean;
     isMessageCommand: boolean;
+
+    /** When true, this command bypasses standby mode and runs on all instances. */
+    forceCheck?: boolean;
 
     permissions?: Permission[];
     options?: CommandOptionConfig<string | number>[];

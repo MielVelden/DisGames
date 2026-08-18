@@ -39,12 +39,15 @@ export interface GameConfig {
     name: MultiLingualString;
     description: MultiLingualString;
     points: number;
+    isPremiumOnly?: boolean;
     isCalculated: boolean;
     expectedType: "string" | "number" | "boolean";
     firstAnswer: string;
     addCorrectReaction: boolean;
     hasImages?: boolean;
     hasDataSheets?: boolean;
+    skipDefaultStartMessage?: boolean;
+    allowDuplicatesResponse?: boolean;
     options: {
         [key in GameOptionEnum]: boolean;
     };

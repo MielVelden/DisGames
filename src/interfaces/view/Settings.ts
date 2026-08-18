@@ -4,4 +4,5 @@ export interface SettingsResponse {
     LanguageEnum: LanguageEnum;
     ServerName: string;
     GamesEnabled: number;
+    BotName?: string;
 }

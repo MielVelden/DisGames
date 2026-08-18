@@ -3,7 +3,7 @@ import { GameEvent } from "../events/GameEvent";
 import { GameTypeEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { DEFAULT_ACCEPT_EMOJI } from "../../utils/constants/Emojis";
+import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ComponentService from "../application/ComponentService";
 import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { createBlock } from "../../utils/helpers/Markdown";
@@ -19,8 +19,8 @@ export default {
     config: {
         id: GameTypeEnum.NUMBER_GUESS,
         emoji: "🔢",
-        name: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].name),
-        description: new MultiLingualString(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].description),
+        name: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].name),
+        description: new MultiLingualString(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].description),
         points: 1,
         isCalculated: true,
         expectedType: "number",
@@ -42,7 +42,7 @@ export default {
                 event.addAction({
                     enum: GameActionEnum.REACTION,
                     priority: GameActionPriorityEnum.HIGH,
-                    component: DEFAULT_ACCEPT_EMOJI
+                    component: getAcceptEmoji(event.server.Settings)
                 });
                 return true;
             }
@@ -58,13 +58,13 @@ export default {
             event.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.HIGH,
-                component: ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
+                component: ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
             });
         },
 
         async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
             return [
-                ComponentService.createContent(createBlock(i18n.commands.games.types[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
+                ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
             ];
         },
 

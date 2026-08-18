@@ -4,9 +4,12 @@ import { GameTypeEnum } from "../../interfaces/enums";
 import DataSheetRepository from "../../repositories/DataSheetRepository";
 import { BaseDomainService } from "./BaseDomainService";
 import GameDataService from "./GameDataService";
+import { registerService } from "../../utils/container/Container";
 
-class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSaveModel, typeof DataSheetRepository> {
+export class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSaveModel, typeof DataSheetRepository> {
     protected readonly repository = DataSheetRepository;
+
+    public async initAsync(): Promise<void> {}
 
     public getAllAsync(): Promise<DatasheetsModel[]> {
         return this.repository.getAllAsync();
@@ -26,6 +29,13 @@ class DataSheetService extends BaseDomainService<DatasheetsModel, DatasheetsSave
         const ids = Array.from(new Set(gameDataModels.map(model => model.DataSheetId)));
         return datasheets.filter(datasheet => ids.includes(datasheet.Id));
     }
+
+    public async getCountByGameIdAsync(gameId: GameTypeEnum, dataSheetId: number | null = null): Promise<number> {
+        const gameDataModels = await GameDataService.getByGameIdAsync(gameId);
+        return gameDataModels.filter(model => model.DataSheetId === dataSheetId).length;
+    }
 }
 
-export default new DataSheetService();
+const dataSheetService = new DataSheetService();
+registerService(dataSheetService);
+export default dataSheetService;

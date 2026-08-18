@@ -36,10 +36,14 @@ export class TestRunner {
 
             // Run all test suites
             for (const suite of this.suites) {
-                Logger.logInfo(`📦 Running suite: ${suite.name}`);
-                if (suite.description) {
-                    Logger.logInfo(`${suite.description}`);
+                if (suite.disabled) {
+                    Logger.logInfo(`⏭️ Skipping suite: ${suite.name}`);
+                    continue;
                 }
+
+                Logger.logInfo(`📦 Running suite: ${suite.name}`);
+                if (suite.description)
+                    Logger.logInfo(`${suite.description}`);
 
                 const suiteResults = await this.runSuiteAsync(suite);
                 this.results.push(...suiteResults);
@@ -368,7 +372,7 @@ export async function main(): Promise<void> {
         // Load test files based on arguments
         await runner.loadTestFiles(path.join(__dirname, 'unit'));
         await runner.loadTestFiles(path.join(__dirname, 'integration'));
-        
+
         if (args.includes('--performance') || args.includes('--all'))
             await runner.loadTestFiles(path.join(__dirname, 'performance'));
 

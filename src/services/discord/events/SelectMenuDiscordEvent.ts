@@ -2,6 +2,7 @@ import { StringSelectMenuInteraction as DiscordStringSelectMenuInteraction } fro
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
+import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum } from "../../../interfaces/enums";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
@@ -9,6 +10,7 @@ import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
 export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringSelectMenuInteraction> implements SelectMenuInteractionEvent {
     public readonly type: EventTypeEnum.SELECT_MENU = EventTypeEnum.SELECT_MENU;
     public readonly selected: string;
+    public readonly selectedValues: string[];
 
     constructor(
         interaction: DiscordStringSelectMenuInteraction,
@@ -18,10 +20,12 @@ export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringS
         guildId: string,
         messageId: string,
         customId: string,
-        selected: string
+        selectedValues: string[],
+        entitlements: readonly AppEntitlement[] = []
     ) {
-        super(EventTypeEnum.SELECT_MENU, customId, interaction, user, server, channelId, guildId, messageId);
-        this.selected = selected;
+        super(EventTypeEnum.SELECT_MENU, customId, interaction, user, server, channelId, guildId, messageId, entitlements);
+        this.selectedValues = selectedValues;
+        this.selected = selectedValues[0];
     }
 
     public async deferReplyAsync(): Promise<void> {
@@ -30,5 +34,6 @@ export class SelectMenuDiscordEvent extends BaseReplyDiscordEvent<DiscordStringS
 
     public async sendAsync(): Promise<void> {
         await DiscordMessageHandler.sendAsync(this, undefined);
+        this.flushPostSend();
     }
 } 

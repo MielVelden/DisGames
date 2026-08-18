@@ -3,14 +3,16 @@ import { ExceptionEnum, TableEnum } from "../../interfaces/enums";
 import { WebSocketEvent, WebSocketMessage, JobProgressData } from "../../interfaces/application/WebSocket";
 import { assertNever, ErrorHelper } from "../../utils/application/Error";
 import Logger from "../../utils/application/Logger";
+import { Service } from "../../interfaces/application/Service";
 
 type Subscription = { table: TableEnum; objectId?: number };
 type JobSubscription = { executionId: string };
 
-export class WebSocketService {
+export class WebSocketService extends Service {
 	private clients: Map<string, { socket: WebSocket; subs: Subscription[]; jobSubs: JobSubscription[] }> = new Map();
 
 	constructor(private wss: WebSocketServer) {
+		super();
 		wss.on("connection", (socket) => {
 			const id = Math.random().toString(36).slice(2);
 			this.clients.set(id, { socket, subs: [], jobSubs: [] });
@@ -122,4 +124,6 @@ export class WebSocketService {
 
 		client.socket.send(JSON.stringify({ event: type, data } as WebSocketMessage));
 	}
+
+	public async initAsync(): Promise<void> {}
 }

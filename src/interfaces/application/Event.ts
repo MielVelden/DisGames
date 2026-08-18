@@ -6,13 +6,16 @@ import {
     ChatInputCommandInteraction as DiscordChatInputCommandInteraction,
     Guild as DiscordGuild,
     Message as DiscordMessage,
+    ModalSubmitInteraction as DiscordModalSubmitInteraction,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { ModalDefinition, ModalField, ModalResult, ModalTextField } from "./Modal";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
 import { EventTypeEnum } from "../enums";
+import { AppEntitlement } from "./Entitlement";
 
 export interface TimelineEvent {
     user: User;
@@ -31,9 +34,12 @@ export interface GuildCreateEvent {
 export interface BaseInteractionEvent {
     customId: string;
 
+    readonly entitlements: readonly AppEntitlement[];
+    hasEntitlementForSku(skuId: string): boolean;
+
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;
-    addComponentsAsync(components: Component[]): Promise<void>;
+    addComponentsAsync(components: Component[], addInFront?: boolean): Promise<void>;
     clearComponentsAsync(): Promise<void>;
 
     sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
@@ -43,7 +49,8 @@ export interface BaseInteractionEvent {
     getUserInputBySelectMenuAsync(selectMenu: BaseSelectMenu): Promise<SelectMenuInteractionEvent | null>;
     getUserInputByButtonsAsync(question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null>;
     getConfirmationFromUserAsync(container: Component[]): Promise<InteractionEvent | null>;
-    getSettingsContainer(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues): Promise<Games_Settings | null>;
+    askUserAsync<const TFields extends Record<string, ModalField>>(modal: ModalDefinition<TFields>): Promise<ModalResult<TFields> | null>;
+    getGameSettingsViaModalAsync(settingsSchema: GameSettingsSchema, initialSettings?: GameSettingsValues, components?: Component[]): Promise<{ settings: Games_Settings; event: InteractionEvent } | null>;
 
     getChannelNameAsync(channelId: string): Promise<string>;
 
@@ -57,6 +64,8 @@ export interface BaseInteractionEvent {
     timelineEntries: TimelineEntriesSaveModel[];
     addTimelineEntry(entry: TimelineEntriesSaveModel): void;
     commitTimelineAsync(): Promise<void>;
+
+    scheduleAction(task: () => Promise<void>): void;
 }
 
 export interface ReplyInteractionEvent {
@@ -105,17 +114,32 @@ export interface SelectMenuInteractionEvent extends BaseInteractionEvent, ReplyI
     currentInteraction: DiscordStringSelectMenuInteraction;
 
     selected: string;
+    selectedValues: string[];
     deferReplyAsync(): Promise<void>;
     sendAsync(): Promise<void>;
 }
 
-export type InteractionEvent = 
-    | SlashCommandInteractionEvent 
-    | ButtonInteractionEvent 
-    | SelectMenuInteractionEvent 
+export interface ModalSubmitInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {
+    type: EventTypeEnum.MODAL_SUBMIT;
+    currentInteraction: DiscordModalSubmitInteraction;
+
+    getValue(key: string): string;
+    getSelectValues(key: string): string[];
+    getRadioValue(key: string): string | null;
+    getCheckboxValue(key: string): boolean;
+    getCheckboxGroupValues(key: string): string[];
+    getFileUploadUrls(key: string): string[];
+    deferReplyAsync(): Promise<void>;
+}
+
+export type InteractionEvent =
+    | SlashCommandInteractionEvent
+    | ButtonInteractionEvent
+    | SelectMenuInteractionEvent
+    | ModalSubmitInteractionEvent
     | MessageInteractionEvent;
 
-export function isReplyInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent | ButtonInteractionEvent | SelectMenuInteractionEvent | MessageInteractionEvent {
+export function isReplyInteractionEvent(event: InteractionEvent): event is SlashCommandInteractionEvent | ButtonInteractionEvent | SelectMenuInteractionEvent | ModalSubmitInteractionEvent | MessageInteractionEvent {
     switch (event.type) {
         case EventTypeEnum.SLASH_COMMAND:
         case EventTypeEnum.MESSAGE:
@@ -123,6 +147,7 @@ export function isReplyInteractionEvent(event: InteractionEvent): event is Slash
         case EventTypeEnum.MESSAGE_DELETE:
         case EventTypeEnum.BUTTON:
         case EventTypeEnum.SELECT_MENU:
+        case EventTypeEnum.MODAL_SUBMIT:
             return true;
         default:
             return false;
@@ -147,6 +172,10 @@ export function isSelectMenuInteractionEvent(event: InteractionEvent): event is 
     return event.type === EventTypeEnum.SELECT_MENU;
 }
 
+export function isModalSubmitInteractionEvent(event: InteractionEvent): event is ModalSubmitInteractionEvent {
+    return event.type === EventTypeEnum.MODAL_SUBMIT;
+}
+
 export interface Handler {
     id: string;
     userId?: string;
@@ -162,4 +191,7 @@ export interface ButtonHandler extends Handler {
 }
 
 export interface SelectMenuHandler extends Handler {
+}
+
+export interface ModalHandler extends Handler {
 }

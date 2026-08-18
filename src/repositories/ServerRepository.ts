@@ -2,12 +2,18 @@ import { getServersFieldType, ServersModel, ServersModelFieldEnum, ServersSaveMo
 import BaseRepository from "./BaseRepository";
 import { ExceptionEnum, TableEnum } from "../interfaces/enums/index";
 import { ComponentError } from "../utils/application/Error";
+import { StoredProcedureEnum } from "../interfaces/enums/database/StoredProcedureEnum";
+import { ServerLeaderboardRow } from "../interfaces/view";
 
 class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum> {
     public readonly baseRepository: BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>(TableEnum.SERVERS, ServersModelFieldEnum, getServersFieldType);
+        this.baseRepository = new BaseRepository<ServersModel, ServersSaveModel, typeof ServersModelFieldEnum>(
+            TableEnum.SERVERS, 
+            ServersModelFieldEnum, 
+            getServersFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<ServersModel | null> {
@@ -41,6 +47,15 @@ class ServerRepository implements RepositoryWithBase<ServersModel, ServersSaveMo
 
     async getTotalServerMembersAsync(): Promise<number> {
         return await this.baseRepository.Select().Sum("MemberCount");
+    }
+
+    async getServersWithLeaderboardLiveAsync(): Promise<ServersModel[]> {
+        return this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetServersWithLeaderboardLive);
+    }
+
+    async getTopServersByPointsAsync(limit: number = 5): Promise<ServerLeaderboardRow[]> {
+        const results = await this.baseRepository.CallStoredProcedure(StoredProcedureEnum.GetTopServersByPoints, [limit]);
+        return results as unknown as ServerLeaderboardRow[];
     }
 }
 

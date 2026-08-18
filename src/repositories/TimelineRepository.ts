@@ -9,7 +9,11 @@ class TimelineRepository implements RepositoryWithBase<TimelineEntriesModel, Tim
     public readonly baseRepository: BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel, typeof TimelineEntriesModelFieldEnum>;
 
     constructor() {
-        this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel, typeof TimelineEntriesModelFieldEnum>(TableEnum.TIMELINE_ENTRIES, TimelineEntriesModelFieldEnum, getTimelineEntriesFieldType);
+        this.baseRepository = new BaseRepository<TimelineEntriesModel, TimelineEntriesSaveModel, typeof TimelineEntriesModelFieldEnum>(
+            TableEnum.TIMELINE_ENTRIES, 
+            TimelineEntriesModelFieldEnum, 
+            getTimelineEntriesFieldType
+        );
     }
 
     async getByIdAsync(id: number): Promise<TimelineEntriesModel | null> {

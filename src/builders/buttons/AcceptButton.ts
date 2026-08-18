@@ -5,5 +5,5 @@ import { ActionButton, ButtonStyle } from "../../interfaces/application/Message"
 import { createGenericButton } from "./GenericButton";
 
 export function createAcceptButton(userId: string, handle: (event: InteractionEvent) => Promise<void>): ActionButton {
-    return createGenericButton(new MultiLingualString(i18n.labels.common.accept), ButtonStyle.SECONDARY, "🔹", userId, handle);
+    return createGenericButton(new MultiLingualString(i18n.labels.common.accept), ButtonStyle.SECONDARY, "🔹", userId, false, handle);
 }

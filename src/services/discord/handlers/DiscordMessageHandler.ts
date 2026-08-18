@@ -3,23 +3,23 @@ import {
     User as DiscordUser,
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
-    ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction
+    ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction,
+    ModalSubmitInteraction as DiscordModalSubmitInteraction
 } from 'discord.js';
-import { BaseInteractionEvent, InteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
-import { ActionButton, ButtonStyle, ComponentType, SelectMenu } from '../../../interfaces/application/Message';
-import {
-    Component
-} from '../../../interfaces/application/Message';
+import { BaseInteractionEvent, InteractionEvent, ModalSubmitInteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
+import { ModalDefinition, ModalField, ModalResult } from '../../../interfaces/application/Modal';
+import { ActionButton, ButtonStyle, Component, ComponentType, ComponentVisibility, SelectMenu } from '../../../interfaces/application/Message';
 import ComponentService from '../../application/ComponentService';
 import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { InteractionService } from '../../application/InteractionService';
 import { i18n } from '../../../utils/i18n/i18n';
 import DiscordComponentMapper from '../mappers/DiscordComponentMapper';
+import DiscordModalMapper from '../mappers/DiscordModalMapper';
 import { DiscordMessageContent, DiscordMessageInteraction } from '../DiscordService';
 import { createAcceptButton } from '../../../builders/buttons/AcceptButton';
 import { createDenyButton } from '../../../builders/buttons/DenyButton';
 import { EventTypeEnum, ExceptionEnum } from '../../../interfaces/enums';
-import { LanguageEnum } from '../../../interfaces/enums/database/LanguageEnum';
+import { ServersModel } from '../../../interfaces/database/TableInterfaces';
 import { ErrorHelper } from '../../../utils/application/Error';
 import Logger from '../../../utils/application/Logger';
 import { createTitle } from '../../../utils/helpers/Markdown';
@@ -30,9 +30,10 @@ class DiscordMessageHandler {
     }
 
     public async replyAsync(event: InteractionEvent, message: MultiLingualString | undefined, ephemeral?: boolean): Promise<void> {
+        const resolvedEphemeral = ephemeral ?? this.resolveEphemeral(event.components);
         let content: DiscordMessageContent | null;
         try {
-            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, ephemeral);
+            content = await DiscordComponentMapper.buildMessageContentAsync(event, event.components, message, resolvedEphemeral);
         } catch (error) {
             await Logger.logError(`Failed to build reply content for event type ${event.type}`, error as Error);
             throw error;
@@ -149,6 +150,11 @@ class DiscordMessageHandler {
         }
     }
 
+    private resolveEphemeral(components: Component[]): boolean {
+        const usefulComponents = components.filter(c => c.type !== ComponentType.SEPARATOR);
+        return usefulComponents.length > 0 && usefulComponents.every(c => c.visibility === ComponentVisibility.PRIVATE);
+    }
+
     private isMissingPermissionsError(error: unknown): boolean {
         if (!error || typeof error !== 'object')
             return false;
@@ -232,6 +238,15 @@ class DiscordMessageHandler {
         await interaction.deferUpdate();
     }
 
+    public async deferModalSubmitAsync(interaction: DiscordModalSubmitInteraction): Promise<void> {
+        // When the modal was opened from a message component (button), the submit can update
+        // that message; from a slash command there is no message to update, so defer a reply.
+        if (interaction.isFromMessage())
+            await interaction.deferUpdate();
+        else
+            await interaction.deferReply({ ephemeral: true });
+    }
+
 
     public async handleInteractionReplyAsync(event: InteractionEvent, content: DiscordMessageContent): Promise<void> {
         // If the message is deleted, don't reply
@@ -301,6 +316,23 @@ class DiscordMessageHandler {
                     throw error;
                 }
                 break;
+            case EventTypeEnum.MODAL_SUBMIT:
+                try {
+                    if (event.currentInteraction.deferred || event.currentInteraction.replied)
+                        await event.currentInteraction.editReply(content);
+                    else if (content.ephemeral || !event.currentInteraction.isFromMessage())
+                        await event.currentInteraction.reply(content);
+                    else
+                        await event.currentInteraction.update(content);
+                } catch (error) {
+                    if (this.isInteractionAlreadyRepliedError(error)) {
+                        await event.currentInteraction.followUp(content);
+                        return;
+                    }
+
+                    throw error;
+                }
+                break;
             default:
                 ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
         }
@@ -356,6 +388,26 @@ class DiscordMessageHandler {
                             }
 
                             await Logger.logWarning(`Interaction ${event.currentInteraction.id} could not be updated during select menu edit in channel ${event.channelId}`);
+                            return;
+                        }
+
+                        throw error;
+                    }
+                }
+                break;
+            case EventTypeEnum.MODAL_SUBMIT:
+                // Modal submits are deferred before the handler runs, so an edit maps to editReply.
+                if (event.currentInteraction.deferred || event.currentInteraction.replied) {
+                    await event.currentInteraction.editReply(content);
+                } else {
+                    try {
+                        if (event.currentInteraction.isFromMessage())
+                            await event.currentInteraction.update(content);
+                        else
+                            await event.currentInteraction.reply(content);
+                    } catch (error) {
+                        if (this.isInteractionAlreadyRepliedError(error) || this.isUnknownInteractionError(error)) {
+                            await Logger.logWarning(`Interaction ${event.currentInteraction.id} could not be updated during modal submit edit in channel ${event.channelId}`);
                             return;
                         }
 
@@ -481,7 +533,7 @@ class DiscordMessageHandler {
 
     public async getUserInputByButtonsAsync(event: InteractionEvent, question: MultiLingualString, buttons: MultiLingualString[]): Promise<string | null> {
         return new Promise(async (resolve) => {
-            const discordButtons = await Promise.all(buttons.map(button => {
+            const discordButtons = (await Promise.all(buttons.map(button => {
                 const btn = ComponentService.createButton({
                     type: ComponentType.BUTTON,
                     label: button,
@@ -496,7 +548,7 @@ class DiscordMessageHandler {
                     }
                 })
                 return DiscordComponentMapper.mapButtonToDiscordButtonAsync(btn);
-            }));
+            }))).flat();
 
             const discordMessage = ComponentService.createContent(question);
             const replyOptions = DiscordComponentMapper.createReplyOptions([discordMessage, DiscordComponentMapper.createActionRowWithComponents(discordButtons)], []);
@@ -511,6 +563,75 @@ class DiscordMessageHandler {
                 default:
                     ErrorHelper.throw(ExceptionEnum.METHOD_NOT_IMPLEMENTED);
             }
+        });
+    }
+
+    public async askUserAsync<const TFields extends Record<string, ModalField>>(
+        event: InteractionEvent,
+        modal: ModalDefinition<TFields>
+    ): Promise<ModalResult<TFields> | null> {
+        const submission = await this.showModalAndAwaitSubmissionAsync(event, modal);
+        return submission ? submission.result : null;
+    }
+
+    // Same as askUserAsync, but also exposes the modal-submit event itself so callers can
+    // edit the originating message afterward (the button interaction that opened the modal
+    // is consumed by showModal and can no longer be used to edit that message).
+    public async showModalAndAwaitSubmissionAsync<const TFields extends Record<string, ModalField>>(
+        event: InteractionEvent,
+        modal: ModalDefinition<TFields>
+    ): Promise<{ event: ModalSubmitInteractionEvent; result: ModalResult<TFields> } | null> {
+        // Showing a modal must be the FIRST response to an interaction. Buttons and slash
+        // commands are un-deferred at handle time; select-menu/message events are already
+        // deferred, so a modal cannot be shown from them.
+        if (event.type !== EventTypeEnum.BUTTON && event.type !== EventTypeEnum.SLASH_COMMAND) {
+            await Logger.logWarning(`askUserAsync is only supported from button and slash command interactions, got event type ${event.type}`);
+            return null;
+        }
+
+        return new Promise<{ event: ModalSubmitInteractionEvent; result: ModalResult<TFields> } | null>(async (resolve) => {
+            const customId = crypto.randomUUID();
+
+            InteractionService.registerHandler(EventTypeEnum.MODAL_SUBMIT, {
+                id: customId,
+                userId: event.user.userId,
+                onTimeout: async () => resolve(null),
+                handle: async (submitEvent: InteractionEvent) => {
+                    const modalEvent = submitEvent as ModalSubmitInteractionEvent;
+                    try {
+                        const result = {} as ModalResult<TFields>;
+                        for (const key of Object.keys(modal.fields) as Array<keyof TFields>) {
+                            const field = modal.fields[key];
+                            if (field.kind === 'select') {
+                                const raw = modalEvent.getSelectValues(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'radio') {
+                                const raw = modalEvent.getRadioValue(key as string) ?? '';
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'checkbox') {
+                                const raw = modalEvent.getCheckboxValue(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'checkboxGroup') {
+                                const raw = modalEvent.getCheckboxGroupValues(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else if (field.kind === 'fileUpload') {
+                                const raw = modalEvent.getFileUploadUrls(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            } else {
+                                const raw = modalEvent.getValue(key as string);
+                                result[key] = (field.parse ? field.parse(raw) : raw) as ModalResult<TFields>[keyof TFields];
+                            }
+                        }
+                        resolve({ event: modalEvent, result });
+                    } catch (error) {
+                        await Logger.logWarning(`Failed to parse modal submission for ${customId}: ${(error as Error).message}`);
+                        resolve(null);
+                    }
+                }
+            });
+
+            const discordModal = DiscordModalMapper.mapModalToDiscordModal(customId, modal, event.server.LanguageEnum);
+            await event.currentInteraction.showModal(discordModal);
         });
     }
 
@@ -577,13 +698,12 @@ class DiscordMessageHandler {
         }
     }
 
-    public async sendToGuildChannelAsync(guild: DiscordGuild, channelId: string, components: Component[], language: LanguageEnum): Promise<void> {
+    public async sendToGuildChannelAsync(guild: DiscordGuild, channelId: string, components: Component[], server: ServersModel): Promise<void> {
         const channel = await guild.channels.fetch(channelId).catch(() => null);
         if (!channel || !channel.isTextBased())
             return;
 
-        // TODO: Add actual event
-        const minimalEvent = { server: { LanguageEnum: language } } as BaseInteractionEvent;
+        const minimalEvent = { server } as BaseInteractionEvent;
 
         const content = await DiscordComponentMapper.buildMessageContentAsync(minimalEvent, components);
         if (!content)

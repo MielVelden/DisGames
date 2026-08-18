@@ -10,8 +10,12 @@ import MediaService from "./MediaService";
 import Logger from "../../utils/application/Logger";
 import { toonEncode } from "../../utils/helpers/Toon";
 import { addPrefix, createBlock, createTitle } from "../../utils/helpers/Markdown";
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-class ComponentService {
+export class ComponentService extends Service {
+    public async initAsync(): Promise<void> {}
+
     public createButton(config: Omit<ActionButton, "type" | "custom_id">, handlerConfig?: HandlerConfig): ActionButton {
         return this.createComponent({
             type: ComponentType.BUTTON,
@@ -104,17 +108,22 @@ class ComponentService {
         ];
     }
 
-    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string): Component[] {
+    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string, skipDefaultStartMessage: boolean = false): Component[] {
         const gameImage = MediaService.getGameImage(gameTypeEnum);
 
-        return [
+        const components = [
             this.createImage(gameImage, false),
             this.createSeparator(),
-            this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.commands.games.types[gameTypeEnum].name), gameEmoji))),
-            this.createContent(new MultiLingualString(i18n.commands.games.types[gameTypeEnum].howToPlay)),
-            this.createContent(i18n.commands.games.types[gameTypeEnum].startMessage!()),
-            this.createContent(createBlock(createMultiLingualString(firstAnswer))),
+            this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].name), gameEmoji))),
+            this.createContent(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].howToPlay)),
         ];
+
+        if (!skipDefaultStartMessage)
+            components.push(this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()));
+
+        components.push(this.createContent(createBlock(createMultiLingualString(firstAnswer))));
+
+        return components;
     }
 
     public createImage(image: Media, includeContainer: boolean = true): Component {
@@ -159,4 +168,6 @@ class ComponentService {
     }
 }
 
-export default new ComponentService();
+const componentService = new ComponentService();
+registerService(componentService);
+export default componentService;

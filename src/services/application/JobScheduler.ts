@@ -8,14 +8,19 @@ import { ErrorHelper } from '../../utils/application/Error';
 import { createJobReportEmbed } from '../../builders/embeds/JobEmbed';
 import { WebhookType } from '../../interfaces/application';
 import TestMode from '../../utils/application/TestMode';
+import { Service } from "../../interfaces/application/Service";
+import { registerService } from "../../utils/container/Container";
 
-export class JobScheduler {
+export class JobScheduler extends Service {
     private static instance: JobScheduler;
     private jobs: Map<string, schedule.Job> = new Map();
 
     private constructor() {
+        super();
         setImmediate(() => this.scheduleJobs());
     }
+
+    public async initAsync(): Promise<void> {}
 
     public static getInstance(): JobScheduler {
         if (!JobScheduler.instance)
@@ -78,6 +83,11 @@ export class JobScheduler {
             ErrorHelper.throwWithParameters(ExceptionEnum.JOB_NOT_FOUND, { jobId: jobId });
 
         await this.executeJob(job);
+    }
+
+    public async shutdown(): Promise<void> {
+        await schedule.gracefulShutdown();
+        this.jobs.clear();
     }
 
 
@@ -170,4 +180,6 @@ export class JobScheduler {
     }
 }
 
-export default JobScheduler.getInstance();
+const jobScheduler = JobScheduler.getInstance();
+registerService(jobScheduler);
+export default jobScheduler;
