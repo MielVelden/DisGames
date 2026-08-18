@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import 'dotenv/config';
 import { deployCommands } from './utils/handlers/CommandHandler';
 
