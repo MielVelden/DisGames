@@ -36,10 +36,14 @@ export class TestRunner {
 
             // Run all test suites
             for (const suite of this.suites) {
-                Logger.logInfo(`📦 Running suite: ${suite.name}`);
-                if (suite.description) {
-                    Logger.logInfo(`${suite.description}`);
+                if (suite.disabled) {
+                    Logger.logInfo(`⏭️ Skipping suite: ${suite.name}`);
+                    continue;
                 }
+
+                Logger.logInfo(`📦 Running suite: ${suite.name}`);
+                if (suite.description)
+                    Logger.logInfo(`${suite.description}`);
 
                 const suiteResults = await this.runSuiteAsync(suite);
                 this.results.push(...suiteResults);

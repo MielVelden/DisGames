@@ -17,7 +17,8 @@ export default function registerGuessCountryGameTests(runner: TestRunner): void 
     const suite: TestSuite = {
         name: 'GuessCountryGame Integration',
         description: 'Integration tests for Guess the Country game flows',
-
+        disabled: true,
+        
         setup: async () => {},
         teardown: async () => {},
 

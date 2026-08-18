@@ -16,6 +16,7 @@ export interface TestCase {
 export interface TestSuite {
     name: string;
     description?: string;
+    disabled?: boolean;
     setup?: () => Promise<void>;
     teardown?: () => Promise<void>;
     beforeEach?: () => Promise<void>;
