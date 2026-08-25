@@ -25,7 +25,7 @@ DB_NAME=$(field name)
 if [ "$DB_HOST" = "127.0.0.1" ] || [ "$DB_HOST" = "localhost" ]; then
     if [ ! -d "$DATA_DIR/mysql" ]; then
         echo "Initializing bundled MySQL data directory..."
-        mysqld --initialize-insecure --user=mysql --datadir="$DATA_DIR"
+        mariadb-install-db --user=mysql --datadir="$DATA_DIR" >/dev/null
     fi
 
     echo "Starting bundled MySQL server..."
