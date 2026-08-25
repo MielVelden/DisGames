@@ -83,60 +83,8 @@ src/
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 18+
-- MySQL 8.0+
-- A Discord bot application with a bot token
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/MielVelden/DisGames.git
-   cd DisGames
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**
-   ```bash
-   cp .example.env .env
-   # Add your Discord bot token and database credentials
-   ```
-
-4. **Database Setup**
-   ```bash
-   npm run db:down
-   ```
-
-5. **Deploy Commands to Discord**
-   ```bash
-   npm run deploy
-   ```
-
-6. **Start the Bot**
-   ```bash
-   # Development
-   npm run dev
-   
-   # Production
-   npm run build
-   npm start
-   ```
-
-### Running Jobs
-For scheduled maintenance tasks:
-```bash
-npm run job
-```
-
-### Testing
-```bash
-npm run test
-```
+See [INSTALL.md](INSTALL.md) for setup instructions, including a Docker
+option that bundles the app and database into a single container.
 
 ## Usage
 
