@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: ghcr.io/mielvelden/disgames:latest
     restart: unless-stopped
     stop_grace_period: 30s
     env_file:
@@ -12,21 +12,6 @@ services:
       - game_images:/app/images/games
       - mysql_data:/var/lib/mysql
 
-  test:
-    profiles:
-      - test
-    build: .
-    restart: "no"
-    command: ["npm", "run", "test:all"]
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      NODE_ENV: test
-    volumes:
-      - mysql_data_test:/var/lib/mysql
-
 volumes:
   game_images:
   mysql_data:
-  mysql_data_test:

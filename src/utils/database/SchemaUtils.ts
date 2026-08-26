@@ -40,6 +40,10 @@ export class SchemaUtils {
     return columnName.replace(/JSON$/i, '').replace(/json$/i, '');
   }
 
+  static getJsonColumnName(logicalName: string): string {
+    return logicalName + 'JSON';
+  }
+
   static convertToEnumName(procedureName: string): string {
     return procedureName
       .replace(/[^a-zA-Z0-9_]/g, '_')  // Replace special chars with underscores

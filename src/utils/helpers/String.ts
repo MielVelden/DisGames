@@ -11,17 +11,21 @@ export function compareStrings(str1: string, str2: string): boolean {
 }
 
 export function normalizeString(str: string, maxLength: number = 25): string {
-    // Replace all non-ASCII characters with '?', then normalize
-    const asciiName = Array.from(str)
-        .map(char => char.charCodeAt(0) <= 127 ? char : '?')
+    const isStrippable = (codePoint: number) =>
+        codePoint <= 0x1f
+        || codePoint === 0x7f
+        || (codePoint >= 0x200b && codePoint <= 0x200f)
+        || (codePoint >= 0x202a && codePoint <= 0x202e);
+
+    return Array.from(str)
+        .filter(char => !isStrippable(char.codePointAt(0)!))
         .slice(0, maxLength)
         .join('')
         .trim()
         .replace(/\s+/g, ' ');
-    return asciiName;
 }
 
-export function getInitials(displayName: string): string {
-    const cleaned = displayName.replace(/[^A-Za-z0-9]/g, '');
+export function getInitials(displayName: string | null | undefined): string {
+    const cleaned = (displayName ?? '').replace(/[^A-Za-z0-9]/g, '');
     return (cleaned.slice(0, 2) || '?').toUpperCase();
 }

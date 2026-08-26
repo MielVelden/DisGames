@@ -6,31 +6,30 @@
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 
-A Discord bot featuring word puzzles, logic games, and community challenges, built with TypeScript and Discord.js.
+**DisGames is a Discord bot that turns any server into a game night**: word puzzles, logic challenges, trivia, and more, all playable right in chat, with leaderboards, profile cards, and badges to keep players coming back.
+
+It's a solo project, built and maintained from the ground up: every game, every command, the API that powers the dashboard, and the pipeline that keeps it all running. This README covers what it does for players, and further down, how it's built for anyone curious about the engineering side.
+
+[**Join the support Discord**](https://discord.gg/beKZbQ9vxe) to try it out or ask questions.
 
 ## Features
 
-### Game Variety
-Eight game types with interactive components, real-time scoring, and multi-language support:
+Eight game types, played right in chat, with interactive buttons, real-time scoring, and multi-language support:
 - Word games with scrambled puzzles and word chains
 - Logic challenges including pattern recognition, number guessing, and flag/country identification
 - Trivia and connections-style community games
-- Progressive difficulty and customizable settings per server
+- Progressive difficulty and per-server customization
 
-### Platform Features
-- **Modern Discord Integration** - Slash commands, buttons, select menus, and rich embeds
-- **Multi-language Support** - Full i18n system with server-specific language settings
-- **Statistics & Leaderboards** - Track player progress and competition, including live-updating leaderboards
-- **Dynamic Image Generation** - Canvas-based cards for profiles, badges, and leaderboards
-- **Premium Features** - Optional premium tier with custom emoji support and additional customization
-- **Flexible Configuration** - Per-channel game setup with customizable rules
-- **REST API & WebSocket** - Dashboard integration and real-time updates
-- **Job Scheduling** - Automated maintenance tasks, metrics collection, and cleanup
-- **Auto-generated TypeScript Types** - Automatic generation of TypeScript definitions and an API wrapper for all endpoints
+Beyond the games themselves: live leaderboards, profile cards and badges, a premium tier, and per-channel configuration, all backed by a dashboard with its own API.
 
-## Architecture
+## Under the hood
 
-DisGames follows **Domain-Driven Design** and **clean architecture principles** with clear separation of concerns:
+This is the part that made DisGames genuinely hard to build, and worth being proud of. Eight games, real-time scoring, a REST API, a dashboard, and background jobs all had to share one codebase without turning into a mess. So it's organized like a production system, not a script: business logic (games, points, badges), Discord integration, and infrastructure (database, jobs, API) each live in their own layer and only talk to each other through clean boundaries. That's what makes it possible to add a ninth game or swap the database without rewriting everything around it.
+
+**By the numbers:** ~290 TypeScript files, ~25,000 lines of code, 8 games, 50+ tests, all written and maintained solo.
+
+<details>
+<summary><strong>Full folder structure</strong> (click to expand)</summary>
 
 ```
 src/
@@ -68,99 +67,20 @@ src/
     └── i18n/            # Internationalization system
 ```
 
-### Key Technologies
+</details>
 
-- **TypeScript 5.3+** - Strict type safety, compiled to ES2022
-- **Discord.js v14** - Full-featured Discord API integration
-- **MySQL2** - Efficient database operations with connection pooling
-- **Express 5** - REST API for dashboard integration
-- **WebSocket (ws)** - Real-time communication for live updates
-- **Canvas** - Dynamic image generation for game visuals
-- **node-schedule** - Cron-based job scheduling
-- **Zod** - Schema validation and type-safe configuration
-- **reflect-metadata** - Metadata reflection for advanced TypeScript patterns
-- **Custom Test Framework** - Unit, integration, and performance testing
+### Built with
+
+- **TypeScript** (strict mode) with auto-generated types and API wrappers for every endpoint
+- **Discord.js v14**, **MySQL2** with connection pooling, and a repository pattern for data access
+- **Express** and **WebSocket** powering the dashboard's REST API and real-time updates
+- **Canvas** for the dynamic profile, badge, and leaderboard images
+- **node-schedule** for background jobs, and a custom test framework covering unit, integration, and performance tests
+- API key authentication, OAuth-based dashboard identity, and request context isolation for security
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 18+
-- MySQL 8.0+
-- A Discord bot application with a bot token
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/MielVelden/DisGames.git
-   cd DisGames
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**
-   ```bash
-   cp .example.env .env
-   # Add your Discord bot token and database credentials
-   ```
-
-4. **Database Setup**
-   ```bash
-   npm run db:down
-   ```
-
-5. **Deploy Commands to Discord**
-   ```bash
-   npm run deploy
-   ```
-
-6. **Start the Bot**
-   ```bash
-   # Development
-   npm run dev
-   
-   # Production
-   npm run build
-   npm start
-   ```
-
-### Running Jobs
-For scheduled maintenance tasks:
-```bash
-npm run job
-```
-
-### Testing
-```bash
-npm run test
-```
-
-## Usage
-
-Configure games through slash commands in your Discord server:
-
-- `/games` - Browse and set up available games
-- `/profile` - View personal statistics and achievements
-- `/leaderboard` - View server leaderboards
-- `/settings` - Configure server-specific game and language settings
-- `/premium` - Manage premium features
-- `/debug` - Admin utilities for debugging (requires permissions)
-
-Games automatically respond to messages in configured channels with real-time validation and scoring.
-
-## Key Highlights
-
-- **Domain-Driven Design** - Clear separation between application, domain, and infrastructure layers
-- **Type Safety** - Strict TypeScript with comprehensive interface definitions and auto-generated API types
-- **Performance** - Connection pooling, efficient queries, and optimized image generation
-- **Multi-Language** - Complete i18n system with server-specific language preferences
-- **Tested** - Custom test framework with unit, integration, and performance tests
-- **API Ready** - REST endpoints with auto-generated TypeScript wrappers and WebSocket support
-- **Maintainable** - Repository pattern, dependency injection, and clean architecture
-- **Secure** - API key authentication, OAuth-based dashboard identity, and request context isolation
+See [INSTALL.md](INSTALL.md) for setup instructions, including a Docker option that bundles the app and database into a single container.
 
 ## License
 
@@ -178,5 +98,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </p>
 
 <p align="center">
-  Made by <a href="https://github.com/MielVelden">Miel</a>
+  Designed, built, and maintained solo by <a href="https://github.com/MielVelden">Miel</a>
 </p>

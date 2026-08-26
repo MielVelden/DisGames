@@ -26,7 +26,7 @@ class Webhook {
                 embeds: [embed]
             });
         } catch (error) {
-            console.error('[Webhook] Failed to send Discord webhook:', error); //TODO: FIX THIS
+            console.error('[Webhook] Failed to send Discord webhook:', error);
         }
     }
 }
