@@ -7,7 +7,7 @@ import LeaderboardCard from "../cards/LeaderboardCard";
 
 export function mapServerEntries(rows: ServerLeaderboardRow[]): LeaderboardEntry[] {
     return rows.map(row => ({
-        Name: row.Name,
+        Name: row.Name ?? "Unknown Server",
         TotalPoints: row.TotalPoints,
         SubtitleType: LeaderboardSubtitleTypeEnum.MEMBERS,
         SubtitleValue: row.MemberCount,

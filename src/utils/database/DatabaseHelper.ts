@@ -3,8 +3,25 @@ import { BaseEntityFieldType } from "../../interfaces/database/BaseEntity";
 import { MultiLingualString } from "../i18n/MultiLingualString";
 import { SchemaUtils } from "./SchemaUtils";
 
+type FieldDescriptor = { field: string; column: string };
+
 export class DatabaseHelper {
-  
+
+  private static readonly jsonDescriptorCache = new WeakMap<object, FieldDescriptor[]>();
+
+  private static getJsonDescriptors<FieldEnum extends Record<string, string>>(fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): FieldDescriptor[] {
+    const cached = this.jsonDescriptorCache.get(fieldEnum);
+    if (cached)
+      return cached;
+
+    const descriptors: FieldDescriptor[] = Object.values(fieldEnum)
+      .filter((field): field is string => typeof field === 'string' && fieldTypeFunction(field as FieldEnum[keyof FieldEnum]) === BaseEntityFieldType.Json)
+      .map(field => ({ field, column: SchemaUtils.getJsonColumnName(field) }));
+
+    this.jsonDescriptorCache.set(fieldEnum, descriptors);
+    return descriptors;
+  }
+
   public static serializeMultiLingualStrings<FieldEnum extends Record<string, string>>(entity: any, fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any {
     if (!entity || typeof entity !== 'object') 
       return entity;
@@ -46,19 +63,23 @@ export class DatabaseHelper {
     return deserialized;
   }
 
-  // TODO: Refactor using the fieldEnum and fieldType
-  public static serializeJsonFields(entity: any): any {
-    if (!entity || typeof entity !== 'object') 
+  public static serializeJsonFields<FieldEnum extends Record<string, string>>(entity: any, fieldEnum?: FieldEnum, fieldTypeFunction?: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any {
+    if (!entity || typeof entity !== 'object')
       return entity;
-    
+
+    const jsonColumns = fieldEnum && fieldTypeFunction
+      ? new Set(this.getJsonDescriptors(fieldEnum, fieldTypeFunction).map(descriptor => descriptor.column))
+      : new Set<string>();
+    const isJsonColumn = (key: string): boolean => jsonColumns.has(key) || SchemaUtils.isJsonField(key);
+
     const serialized = { ...entity };
-    
+
     // First, handle non-JSON fields that have JSON equivalents
     const jsonFieldsToProcess = new Map<string, any>();
-    
+
     for (const [key, value] of Object.entries(serialized)) {
-      if (!SchemaUtils.isJsonField(key)) {
-        const jsonFieldName = key + 'JSON';
+      if (!isJsonColumn(key)) {
+        const jsonFieldName = SchemaUtils.getJsonColumnName(key);
         // If there's a corresponding JSON field, use the non-JSON field as the source
         if (serialized[jsonFieldName] !== undefined) {
           jsonFieldsToProcess.set(jsonFieldName, value);
@@ -66,10 +87,10 @@ export class DatabaseHelper {
         }
       }
     }
-    
+
     // Process JSON fields - serialize only from their non-JSON counterparts or if they're objects
     for (const [key, value] of Object.entries(serialized)) {
-      if (SchemaUtils.isJsonField(key)) {
+      if (isJsonColumn(key)) {
         if (jsonFieldsToProcess.has(key)) {
           // Use the value from the non-JSON field (guaranteed to be an object)
           serialized[key] = JSON.stringify(jsonFieldsToProcess.get(key));
@@ -83,7 +104,7 @@ export class DatabaseHelper {
         // If it's already a string, keep it as-is (already serialized)
       }
     }
-    
+
     return serialized;
   }
 
@@ -143,7 +164,7 @@ export class DatabaseHelper {
         return entity;
     
     let processed = this.serializeMultiLingualStrings(entity, fieldEnum, fieldTypeFunction);
-    processed = this.serializeJsonFields(processed);
+    processed = this.serializeJsonFields(processed, fieldEnum, fieldTypeFunction);
     return processed;
   }
 

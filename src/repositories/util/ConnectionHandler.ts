@@ -39,6 +39,7 @@ function createPoolFromConfig(url: URL, dbName: string): mysql.Pool {
         multipleStatements: true,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
+        charset: 'utf8mb4',
     });
 }
 
