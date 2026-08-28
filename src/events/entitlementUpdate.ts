@@ -1,5 +1,5 @@
 import { Entitlement, Events } from 'discord.js';
-import ServerService from '../services/domain/ServerService';
+import DiscordPremiumService from '../services/discord/DiscordPremiumService';
 import { getPremiumSkuId } from '../utils/application/PremiumAccess';
 
 export default {
@@ -13,6 +13,6 @@ export default {
             return;
 
         if (newEntitlement.endsTimestamp !== null)
-            await ServerService.handlePremiumRevokedAsync(newEntitlement.guildId);
+            await DiscordPremiumService.handlePremiumRevokedAsync(newEntitlement.guildId);
     },
 };

@@ -8,6 +8,7 @@ import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 import { getPremiumSkuId, isPurchaseButtonEnabled, setPurchaseButtonEnabled } from "../utils/application/PremiumAccess";
 import DiscordTestEntitlementService from "../services/discord/DiscordTestEntitlementService";
+import DiscordPremiumService from "../services/discord/DiscordPremiumService";
 import ServerService from "../services/domain/ServerService";
 import { getCommandName } from "../utils/collectors/CommandCollector";
 import { handleErrorAsync } from "../utils/application/Error";
@@ -94,10 +95,10 @@ const optionsConfig = [
                     try {
                         const server = await ServerService.getByExternalIdAsync(guildId);
                         if (server.IsPremium) {
-                            await ServerService.handlePremiumRevokedAsync(guildId);
+                            await DiscordPremiumService.handlePremiumRevokedAsync(guildId);
                             await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.toggledOff), true);
                         } else {
-                            await ServerService.handlePremiumGrantedAsync(guildId);
+                            await DiscordPremiumService.handlePremiumGrantedAsync(guildId);
                             await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.toggledOn), true);
                         }
                     } catch (error) {

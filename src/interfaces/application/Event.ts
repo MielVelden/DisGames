@@ -1,5 +1,5 @@
 import { User } from "../domain/User";
-import { Component, BaseSelectMenu } from "./Message";
+import { Component, BaseSelectMenu, MessageHandle } from "./Message";
 import { ServersModel, TimelineEntriesSaveModel } from "../database/TableInterfaces";
 import {
     ButtonInteraction as DiscordButtonInteraction,
@@ -10,12 +10,20 @@ import {
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from "discord.js";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
-import { ModalDefinition, ModalField, ModalResult, ModalTextField } from "./Modal";
+import { ModalDefinition, ModalField, ModalResult } from "./Modal";
 import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
 import { EventTypeEnum } from "../enums";
 import { AppEntitlement } from "./Entitlement";
+
+// The minimal context needed to render a message outside any interaction — a scheduled
+// job or an HTTP request has no InteractionEvent, only a server and (optionally) the
+// components already on screen. Any InteractionEvent satisfies this structurally.
+export interface RenderContext {
+    server: ServersModel;
+    components: Component[];
+}
 
 export interface TimelineEvent {
     user: User;
@@ -42,7 +50,9 @@ export interface BaseInteractionEvent {
     addComponentsAsync(components: Component[], addInFront?: boolean): Promise<void>;
     clearComponentsAsync(): Promise<void>;
 
-    sendToChannelAsync(channelId: string, components: Component[]): Promise<void>;
+    sendToChannelAsync(channelId: string, components: Component[]): Promise<MessageHandle | null>;
+    editChannelMessageAsync(channelId: string, messageId: string, components: Component[]): Promise<boolean>;
+    deleteChannelMessageAsync(channelId: string, messageId: string): Promise<boolean>;
     editAsync(content?: string): Promise<void>;
     editWithComponentsAsync(components: Component[]): Promise<void>;
 

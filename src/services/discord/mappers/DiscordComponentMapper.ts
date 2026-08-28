@@ -11,7 +11,7 @@ import {
     AttachmentBuilder
 } from 'discord.js';
 import { ContainerBuilder as DiscordContainerBuilder, SelectMenuOptionBuilder as DiscordSelectMenuOptionBuilder, TextDisplayBuilder as DiscordTextDisplayBuilder, MediaGalleryBuilder as DiscordMediaGalleryBuilder, MediaGalleryItemBuilder as DiscordMediaGalleryItemBuilder, SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
-import { BaseInteractionEvent, InteractionEvent } from '../../../interfaces/application/Event';
+import { InteractionEvent, RenderContext } from '../../../interfaces/application/Event';
 import { ActionButton, BaseButton, ButtonStyle, ComponentType, Container, Content, Footer, LinkButton, MediaGallery, SelectMenu, SelectOption, Separator, TextDisplay, Title } from '../../../interfaces/application/Message';
 import {
     StringSelect,
@@ -440,8 +440,8 @@ class DiscordComponentMapper {
     }
     // #endregion
 
-    public async buildMessageContentAsync(event: BaseInteractionEvent, components: Component[], message?: MultiLingualString | string, ephemeral?: boolean): Promise<DiscordMessageContent | null> {
-        return withEventContextAsync(event, async () => {
+    public async buildMessageContentAsync(context: RenderContext, components: Component[], message?: MultiLingualString | string, ephemeral?: boolean): Promise<DiscordMessageContent | null> {
+        return withEventContextAsync(context, async () => {
             if (message) {
                 if (typeof message === 'string')
                     message = createMultiLingualString(message);

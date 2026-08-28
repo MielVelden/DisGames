@@ -6,7 +6,6 @@ import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { LeaderboardCommandActionEnum } from "../interfaces/enums/commands/Leaderboard";
 import { createLeaderboardContainerAsync, mapServerEntries, mapUserEntries } from "../builders/containers/LeaderboardContainer";
 import ComponentService from "../services/application/ComponentService";
-import DiscordComponentMapper from "../services/discord/mappers/DiscordComponentMapper";
 import ServerService from "../services/domain/ServerService";
 import UserService from "../services/domain/UserService";
 import { ServersSaveModel } from "../interfaces/database";
@@ -46,9 +45,7 @@ const optionsConfig = [
                     const existing = event.server.Settings.leaderboardLive;
 
                     if (existing) {
-                        const channel = await event.currentInteraction.guild?.channels.fetch(existing.channelId).catch(() => null);
-                        if (channel?.isTextBased())
-                            await channel.messages.fetch(existing.messageId).then(message => message.delete()).catch(() => {});
+                        await event.deleteChannelMessageAsync(existing.channelId, existing.messageId);
 
                         await ServerService.saveAsync(new ServersSaveModel({
                             Id: event.server.Id,
@@ -66,19 +63,13 @@ const optionsConfig = [
                     const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5))
                     const components = await createLeaderboardContainerAsync(entries, event.server.LanguageEnum);
 
-                    const channel = await event.currentInteraction.guild?.channels.fetch(event.channelId);
-                    if (!channel || !channel.isTextBased())
+                    const messageHandle = await event.sendToChannelAsync(event.channelId, components);
+                    if (!messageHandle)
                         return;
-
-                    const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
-                    if (!content)
-                        return;
-
-                    const sentMessage = await channel.send(content);
 
                     await ServerService.saveAsync(new ServersSaveModel({
                         Id: event.server.Id,
-                        SettingsJSON: { ...event.server.Settings, leaderboardLive: { channelId: event.channelId, messageId: sentMessage.id } }
+                        SettingsJSON: { ...event.server.Settings, leaderboardLive: { channelId: messageHandle.channelId, messageId: messageHandle.messageId } }
                     }), event);
 
                     await event.addComponentAsync(ComponentService.createContent(new MultiLingualString(i18n.commands.leaderboard.labels.liveEnabled)));
