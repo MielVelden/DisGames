@@ -5,28 +5,17 @@ import { FunctionEnum } from "../interfaces/enums/database/FunctionEnum";
 import { getTableName, runExecuteAsync, runQueryAsync } from "./util/ConnectionHandler";
 import { DatabaseHelper } from "../utils/database/DatabaseHelper";
 import { CacheManager } from "./util/CacheManager";
+import { QueryBuilder } from "./util/QueryBuilder";
 import { isValidEnumValue } from "../utils/helpers/Enum";
 import { ErrorHelper } from "../utils/application/Error";
 import { BaseEntity, BaseEntityFieldType } from "../interfaces/database/BaseEntity";
-
-type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE';
-
-type WhereCondition<T> = {
-  [K in keyof T]?: {
-    operator: ComparisonOperator;
-    value: T[K];
-  } | T[K];
-};
 
 class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, FieldEnum extends Record<string, string>> {
   public readonly tableEnum: TableEnum;
   protected fieldEnum: FieldEnum;
   protected fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType;
   protected table: string;
-  protected query: string = '';
-  protected params: any[] = [];
   protected cacheManager: CacheManager<Model>;
-  protected hasLimit1: boolean = false;
 
   constructor(table: TableEnum, fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType) {
     this.tableEnum = table;
@@ -57,173 +46,15 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
     return result;
   }
 
-  public Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): BaseRepository<Model, SaveModel, FieldEnum> {
-    this.params = [];
-    this.hasLimit1 = false;
-    this.query = `SELECT ${fields.join(', ')} FROM ${this.table}`;
-    return this;
-  }
-
-  public Where<K extends keyof Model>(condition: Partial<Record<K, Model[K]>> | WhereCondition<Model>): this {
-    const conditions: string[] = [];
-    const values: any[] = [];
-
-    Object.entries(condition).forEach(([key, value]) => {
-      if (value && typeof value === 'object' && 'operator' in value && 'value' in value) {
-        conditions.push(`${key} ${value.operator} ?`);
-        values.push(value.value);
-      } else {
-        conditions.push(`${key} = ?`);
-        values.push(value);
-      }
-    });
-
-    this.query += ` WHERE ${conditions.join(' AND ')}`;
-    this.params.push(...values);
-
-    return this;
-  }
-
-  public WhereRaw(condition: string, params: any[] = []): this {
-    if (this.query.includes(' WHERE ')) {
-      this.query += ` AND (${condition})`;
-    } else {
-      this.query += ` WHERE (${condition})`;
-    }
-    this.params.push(...params);
-    return this;
-  }
-
-  public GroupBy<K extends keyof Model>(fields: K[]): this {
-    const conditions = fields.map((field) => `${String(field)}`).join(', ');
-
-    this.query += ` GROUP BY ${conditions}`;
-    return this;
-  }
-
-  public OrderBy<K extends keyof Model>(field: K, direction: 'ASC' | 'DESC' = 'ASC'): this {
-    this.query += ` ORDER BY ${String(field)} ${direction}`;
-    return this;
-  }
-
-  public OrderByRandom(): this {
-    this.query += ` ORDER BY RAND()`;
-    return this;
-  }
-
-  public async Count(): Promise<number> {
-    this.query = this.query.replace(/^SELECT .+ FROM/, 'SELECT COUNT(*) as Total FROM');
-    this.hasLimit1 = true;
-    
-    const results = await this.Execute();
-    
-    if (!results || results.length === 0)
-      return 0;
-    
-    return (results[0] as unknown as { Total: number }).Total as number;
-  }
-
-  public async Sum(field: keyof Model): Promise<number> {
-    this.query = this.query.replace(/^SELECT .+ FROM/, `SELECT SUM(${String(field)}) as Total FROM`);
-    this.hasLimit1 = true;
-    
-    const results = await this.Execute();
-    
-    if (!results || results.length === 0)
-      return 0;
-    
-    return (results[0] as unknown as { Total: number }).Total as number;
-  }
-
-  public Limit(count: number): this {
-    this.query += ` LIMIT ?`;
-    this.params.push(count);
-
-    if (count === 1) {
-      this.hasLimit1 = true;
-    }
-
-    return this;
-  }
-
-  public Offset(count: number): this {
-    this.query += ` OFFSET ?`;
-    this.params.push(count);
-    return this;
-  }
-
-  public async Execute(): Promise<Model[]> {
-    // Check query cache for LIMIT 1 queries
-    if (this.hasLimit1) {
-      const queryHash = this.cacheManager.generateQueryHash(this.query, this.params);
-      const cachedResult = this.cacheManager.getQueryCacheEntry(queryHash);
-      if (cachedResult !== null) {
-        // Reset query state and return cached result
-        this.params = [];
-        this.hasLimit1 = false;
-        return cachedResult;
-      }
-
-      // Check if query is already in-flight
-      const inFlightQuery = this.cacheManager.getInFlightQuery(queryHash);
-      if (inFlightQuery) {
-        // Reset query state and wait for in-flight query
-        this.params = [];
-        this.hasLimit1 = false;
-        return await inFlightQuery;
-      }
-
-      // Create and register in-flight promise
-      const queryPromise = this.executeQueryAndCache(queryHash);
-      this.cacheManager.setInFlightQuery(queryHash, queryPromise);
-      
-      // Reset query state
-      this.params = [];
-      this.hasLimit1 = false;
-      
-      return await queryPromise;
-    }
-
-    // Non-cached query path
-    const results = await runExecuteAsync(this.query, this.params);
-    this.params = [];
-    this.hasLimit1 = false;
-
-    if (!results)
-      return [];
-
-    return DatabaseHelper.processResultsFromDatabase(results) as Model[];
-  }
-
-  private async executeQueryAndCache(queryHash: string): Promise<Model[]> {
-    try {
-      const results = await runExecuteAsync(this.query, this.params);
-
-      if (!results || results.length === 0) {
-        return [];
-      }
-
-      // Deserialize MultiLingualString and JSON fields
-      const deserializedResults = DatabaseHelper.processResultsFromDatabase(results) as Model[];
-
-      // Cache the results
-      this.cacheManager.setQueryCacheEntry(queryHash, deserializedResults);
-
-      // Also cache by ID if the result has an ID
-      const firstResult = deserializedResults[0];
-      if (firstResult.Id) {
-        this.cacheManager.setCacheEntry(firstResult.Id, firstResult);
-      }
-
-      return deserializedResults;
-    } finally {
-      // Always remove from in-flight map when done
-      this.cacheManager.removeInFlightQuery(queryHash);
-    }
+  public Select(fields: (keyof Model)[] = ['*'] as (keyof Model)[]): QueryBuilder<Model, FieldEnum> {
+    return new QueryBuilder<Model, FieldEnum>(
+      { table: this.table, cacheManager: this.cacheManager, fieldEnum: this.fieldEnum, fieldTypeFunction: this.fieldTypeFunction },
+      fields,
+    );
   }
 
   public async CallStoredProcedure(procedure: StoredProcedureEnum, params: any[] = []): Promise<Model[]> {
-    const results = await RepositoryUtils.CallStoredProcedureGeneric(procedure, params);
+    const results = await RepositoryUtils.CallStoredProcedureGeneric(procedure, params, this.fieldEnum, this.fieldTypeFunction);
     return results as Model[];
   }
 
@@ -320,7 +151,7 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
       if (!selectResults || selectResults.length === 0)
         ErrorHelper.throw(ExceptionEnum.RECORD_NOT_FOUND);
 
-      const savedRecord = DatabaseHelper.processResultsFromDatabase(selectResults)[0] as Model;
+      const savedRecord = DatabaseHelper.processResultsFromDatabase(selectResults, this.fieldEnum, this.fieldTypeFunction)[0] as Model;
       // Cache the new record
       if (savedRecord.Id)
         this.cacheManager.setCacheEntry(savedRecord.Id, savedRecord);
@@ -376,11 +207,10 @@ class BaseRepository<Model extends BaseEntity, SaveModel extends BaseEntity, Fie
 }
 
 export default BaseRepository;
-export type { ComparisonOperator, WhereCondition };
 
 export class RepositoryUtils {
 
-  public static async CallStoredProcedureGeneric(procedure: StoredProcedureEnum, params: any[] = []): Promise<any[]> {
+  public static async CallStoredProcedureGeneric<FieldEnum extends Record<string, string> = Record<string, string>>(procedure: StoredProcedureEnum, params: any[] = [], fieldEnum?: FieldEnum, fieldTypeFunction?: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): Promise<any[]> {
     const procedureName = procedure.toString();
     const query = `CALL ${procedureName}(${params.map(() => '?').join(', ')})`;
     const results = await runExecuteAsync(query, params);
@@ -389,7 +219,7 @@ export class RepositoryUtils {
       return [];
 
     // Transform database keys to PascalCase and deserialize MultiLingualString and JSON fields
-    const transformedResults = DatabaseHelper.processStoredProcedureResults(results);
+    const transformedResults = DatabaseHelper.processStoredProcedureResults(results, fieldEnum, fieldTypeFunction);
 
     return transformedResults;
   }

@@ -289,7 +289,16 @@ class DiscordMessageHandler {
                             const channel = event.currentInteraction.channel;
                             if (channel && channel.isTextBased() && 'send' in channel) {
                                 await Logger.logWarning(`Referenced message ${event.currentInteraction.id} no longer exists in channel ${event.channelId}, sending without reference`);
-                                await channel.send(content);
+                                try {
+                                    await channel.send(content);
+                                } catch (sendError) {
+                                    if (this.isMissingPermissionsError(sendError)) {
+                                        await Logger.logWarning(`Missing permissions while sending message without reference in channel ${event.channelId}`);
+                                        return;
+                                    }
+
+                                    throw sendError;
+                                }
                                 return;
                             }
                         }

@@ -12,7 +12,7 @@ import {
     GameSettingsValidationResult
 } from "../../interfaces/domain/GameSettings";
 import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
-import { Component, ComponentType, Container, TextDisplay, Title, Separator, ButtonStyle } from "../../interfaces/application/Message";
+import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../../interfaces/application/Message";
 import GameRepository from "../../repositories/GameRepository";
 import * as fs from "fs";
 import * as path from "path";
@@ -683,8 +683,7 @@ export class GameService extends Service {
     public createSettingsDisplayComponents(
         schema: GameSettingsSchema,
         values: GameSettingsValues,
-        languageEnum: LanguageEnum,
-        isReadOnly: boolean = false
+        languageEnum: LanguageEnum
     ): Component[] {
         const components: Component[] = [];
 
@@ -697,54 +696,22 @@ export class GameService extends Service {
                 content: setting.label
             } as Title);
 
-            // Description if available
-            if (setting.description && !isReadOnly) {
-                components.push({
-                    type: ComponentType.TEXT_DISPLAY,
-                    content: setting.description
-                } as TextDisplay);
-            }
-
             if (setting.type === GameSettingType.BOOLEAN) {
                 const booleanValue = currentValue as boolean;
 
-                if (isReadOnly) {
-                    components.push({
-                        type: ComponentType.TEXT_DISPLAY,
-                        content: new MultiLingualString(booleanValue ? i18n.commands.games.settings.enabled : i18n.commands.games.settings.disabled)
-                    } as TextDisplay);
-                } else {
-                    // Create toggle buttons for boolean
-                    components.push(ComponentService.createButton({
-                        style: booleanValue ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
-                        label: new MultiLingualString(i18n.commands.games.settings.enabled),
-                    }));
-
-                    components.push(ComponentService.createButton({
-                        style: !booleanValue ? ButtonStyle.DANGER : ButtonStyle.SECONDARY,
-                        label: new MultiLingualString(i18n.commands.games.settings.disabled),
-                    }));
-                }
+                components.push({
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: new MultiLingualString(booleanValue ? i18n.commands.games.settings.enabled : i18n.commands.games.settings.disabled)
+                } as TextDisplay);
             } else if (setting.type === GameSettingType.ENUM) {
                 const enumSetting = setting as EnumGameSetting;
                 const currentEnumValue = currentValue;
 
-                if (isReadOnly) {
-                    const selectedOption = enumSetting.options.find(opt => opt.value === currentEnumValue);
-                    components.push({
-                        type: ComponentType.TEXT_DISPLAY,
-                        content: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown)
-                    } as TextDisplay);
-                } else {
-                    // Create buttons for each enum option
-                    enumSetting.options.forEach(option => {
-                        const isSelected = option.value === currentEnumValue;
-                        components.push(ComponentService.createButton({
-                            style: isSelected ? ButtonStyle.SUCCESS : ButtonStyle.SECONDARY,
-                            label: option.label,
-                        }));
-                    });
-                }
+                const selectedOption = enumSetting.options.find(opt => opt.value === currentEnumValue);
+                components.push({
+                    type: ComponentType.TEXT_DISPLAY,
+                    content: selectedOption?.label || new MultiLingualString(i18n.commands.games.settings.unknown)
+                } as TextDisplay);
             }
 
             // Add separator between settings
@@ -768,7 +735,7 @@ export class GameService extends Service {
         values: GameSettingsValues,
         languageEnum: LanguageEnum
     ): Container {
-        const components = this.createSettingsDisplayComponents(schema, values, languageEnum, true);
+        const components = this.createSettingsDisplayComponents(schema, values, languageEnum);
 
         return {
             type: ComponentType.CONTAINER,

@@ -109,6 +109,13 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.DE]: "Diese Interaktion ist nicht für dich",
                 [LanguageEnum.PT]: "Esta interação não é para você",
             },
+            actionExpired: {
+                [LanguageEnum.EN]: "This action is no longer available",
+                [LanguageEnum.NL]: "Deze actie is niet meer beschikbaar",
+                [LanguageEnum.ES]: "Esta acción ya no está disponible",
+                [LanguageEnum.DE]: "Diese Aktion ist nicht mehr verfügbar",
+                [LanguageEnum.PT]: "Esta ação já não está disponível",
+            },
             welcome: {
                 title: {
                     [LanguageEnum.EN]: "👋 Hi, I'm DisGames!",

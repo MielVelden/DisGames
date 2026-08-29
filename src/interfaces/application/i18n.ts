@@ -108,6 +108,7 @@ export interface I18nTranslations {
             askQuestion: LanguageTranslations;
             notEnoughPermissions: LanguageTranslations;
             notYourEvent: LanguageTranslations;
+            actionExpired: LanguageTranslations;
             welcome: {
                 title: LanguageTranslations;
                 description: LanguageTranslations;

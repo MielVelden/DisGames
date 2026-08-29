@@ -105,8 +105,10 @@ export class InteractionService {
       const button = getPersistentButton(persistent.id);
       if (button)
         await button.handleAsync(interaction);
-      else
+      else {
         Logger.logDebug(`No persistent handler found for button: ${persistent.id}`);
+        await interaction.replyAsync(new MultiLingualString(i18n.labels.common.actionExpired), true);
+      }
       return;
     }
 
@@ -119,6 +121,7 @@ export class InteractionService {
       await handler.handle(interaction);
     } else {
       Logger.logDebug(`No handler found for button: ${interaction.customId}`);
+      await interaction.replyAsync(new MultiLingualString(i18n.labels.common.actionExpired), true);
     }
   }
 
@@ -133,8 +136,10 @@ export class InteractionService {
 
       InteractionService.removeHandler(handler.id);
       await handler.handle(interaction);
-    } else
+    } else {
       Logger.logDebug(`No handler found for select menu: ${interaction.customId}`);
+      await interaction.replyAsync(new MultiLingualString(i18n.labels.common.actionExpired), true);
+    }
   }
 
   public static async handleModalSubmitInteraction(interaction: ModalSubmitInteractionEvent): Promise<void> {
@@ -148,8 +153,10 @@ export class InteractionService {
 
       InteractionService.removeHandler(handler.id);
       await handler.handle(interaction);
-    } else
+    } else {
       Logger.logDebug(`No handler found for modal submit: ${interaction.customId}`);
+      await interaction.replyAsync(new MultiLingualString(i18n.labels.common.actionExpired), true);
+    }
   }
 
   public static handleEventAsync(event: InteractionEvent) {

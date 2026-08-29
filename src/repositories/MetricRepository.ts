@@ -1,9 +1,11 @@
 import { MetricsModel, MetricsModelFieldEnum, MetricsSaveModel, getMetricsFieldType, RepositoryWithBase } from "../interfaces/database";
-import BaseRepository from "./BaseRepository";
-import { ExceptionEnum, MetricEnum, TableEnum } from "../interfaces/enums/index";
+import BaseRepository, { RepositoryUtils } from "./BaseRepository";
+import { ExceptionEnum, MetricEnum, StoredProcedureEnum, TableEnum } from "../interfaces/enums/index";
 import { runQueryAsync } from "./util/ConnectionHandler";
 import { ErrorHelper } from "../utils/application/Error";
 import { CacheMetric } from "../interfaces/domain";
+import { Duration } from "../interfaces/application/Duration";
+import { subtractDurationFromDate } from "../utils/helpers/Duration";
 
 class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum> {
     public readonly baseRepository: BaseRepository<MetricsModel, MetricsSaveModel, typeof MetricsModelFieldEnum>;
@@ -53,9 +55,23 @@ class MetricRepository implements RepositoryWithBase<MetricsModel, MetricsSaveMo
         return model[0];
     }
 
-    async getPreviousByMetricAsync(metric: MetricEnum): Promise<MetricsModel> {
-        const model = await this.baseRepository.Select().Where({ MetricEnum: metric }).OrderBy("Datetime", "DESC").Limit(2).Execute();
-        return model[1];
+    async getPreviousByMetricAsync(metric: MetricEnum, minAge?: Duration): Promise<MetricsModel> {
+        if(minAge === undefined) {
+            const model = await this.baseRepository.Select().Where({ MetricEnum: metric }).OrderBy("Datetime", "DESC").Limit(2).Execute();
+            return model[1];
+        }
+
+        const cutoff = subtractDurationFromDate(minAge, new Date());
+        const model = await this.baseRepository.Select()
+            .Where({ MetricEnum: metric, Datetime: { operator: "<=", value: cutoff } })
+            .OrderBy("Datetime", "DESC")
+            .Limit(1)
+            .Execute();
+        return model[0];
+    }
+
+    async purgeOldAsync(minAge: Duration, bucket: Duration): Promise<void> {
+        await RepositoryUtils.CallStoredProcedureGeneric(StoredProcedureEnum.CleanUpMetrics, [minAge, bucket]);
     }
 }
 
