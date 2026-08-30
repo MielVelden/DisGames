@@ -13,9 +13,13 @@ const VALID_KEYS = validKeys
 	.map((x) => x.trim())
 	.filter(Boolean);
 
+export function isValidApiKey(key: string | undefined | null): boolean {
+	return !!key && VALID_KEYS.includes(key);
+}
+
 export function apiKeyMiddleware(req: Request, res: Response, next: NextFunction) {
-	const key = req.header("X-API-Key") || (req.query.apiKey as string);
-	if (!key || !VALID_KEYS.includes(key))
+	const key = req.header("X-API-Key");
+	if (!isValidApiKey(key))
 		return res.status(401).json({ error: "invalid_api_key" });
 
 	const oauthAccess = req.header("X-OAuth-Access");
