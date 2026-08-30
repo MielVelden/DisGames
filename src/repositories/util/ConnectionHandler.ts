@@ -13,7 +13,7 @@ import { WebhookType } from '../../interfaces/application';
 dotenv.config();
 
 let pool: mysql.Pool | null = null;
-let table_enums: Array<{ Id: number, TableName: string }> = [];
+let table_enum: Array<{ Id: number, Name: string }> = [];
 
 export type TransactionHandle = {
     connection: mysql.PoolConnection;
@@ -70,8 +70,8 @@ function isRecoverableConnectionError(err: unknown): boolean {
 async function loadTableEnumsAsync(): Promise<void> {
     if (!pool)
         ErrorHelper.throw(ExceptionEnum.DATABASE_CONNECTION_FAILED);
-    const [rows] = await pool.query('SELECT * FROM table_enums');
-    table_enums = rows as Array<{ Id: number, TableName: string }>;
+    const [rows] = await pool.query('SELECT * FROM table_enum');
+    table_enum = rows as Array<{ Id: number, Name: string }>;
 }
 
 async function rebuildPoolAsync(): Promise<void> {
@@ -279,7 +279,7 @@ export function getDatabaseName(): string {
 }
 
 export function getTableName(tableEnumValue: TableEnum): string {
-    const enumValue = table_enums.find(tableEnum => tableEnum.Id === tableEnumValue)?.TableName;
+    const enumValue = table_enum.find(row => row.Id === tableEnumValue)?.Name.toLowerCase();
     if (!enumValue) {
         const enumObject = Object.keys(TableEnum) as Array<keyof typeof TableEnum>;
         const enumValue = enumObject.find(enumValue => TableEnum[enumValue] === tableEnumValue)?.toLowerCase();

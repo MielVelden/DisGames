@@ -23,8 +23,7 @@ export function apiKeyMiddleware(req: Request, res: Response, next: NextFunction
 		return res.status(401).json({ error: "invalid_api_key" });
 
 	const oauthAccess = req.header("X-OAuth-Access");
-	const discordUserId = req.header("X-Discord-UserId");
-	(res.locals as any).oauth = { access: oauthAccess, discordUserId };
+	(res.locals as any).oauth = { access: oauthAccess };
 	(res.locals as any).permissions = ["dashboard:read", "dashboard:write"];
 	next();
 }

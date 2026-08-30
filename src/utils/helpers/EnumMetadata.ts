@@ -3,6 +3,7 @@ import { EnumValue, MetadataKeyEnum, MetadataValue } from '../../interfaces/enum
 import { Color } from './Color';
 
 const enumMetadataRegistry = new Map<string, Map<MetadataKeyEnum, MetadataValue>>();
+const enumTableRegistry = new Map<EnumType, string>();
 const pendingRegistrations: Array<() => void> = [];
 
 let registrationsApplied: boolean = false;
@@ -146,4 +147,35 @@ export function SetColor(
         const metadataMap = ensureMetadataMap(enumObject, enumValue);
         metadataMap.set(MetadataKeyEnum.Color, color);
     });
+}
+
+// Every enum file in this repo is named after the enum it exports (e.g. LanguageEnum.ts
+// exports LanguageEnum), so the calling file's name doubles as the enum's identifier.
+function inferEnumNameFromCallSite(): string {
+    const stack = new Error().stack ?? '';
+    const callerLine = stack.split('\n')[3];
+    const match = callerLine?.match(/([A-Za-z0-9_]+)\.(?:ts|js)/);
+    if (!match)
+        throw new Error(`SetInDatabase: could not infer the enum name from the call site.\n${stack}`);
+    return match[1];
+}
+
+function computeEnumTableName(enumName: string): string {
+    const tableName = enumName.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+    if (!tableName.endsWith('_enum'))
+        throw new Error(`SetInDatabase: enum name "${enumName}" must end in "Enum" (derived table name "${tableName}" must end in "_enum")`);
+    return tableName;
+}
+
+export function SetInDatabase(enumObject: EnumType): void {
+    const enumName = inferEnumNameFromCallSite();
+    const tableName = computeEnumTableName(enumName);
+    queueRegistration(() => {
+        enumTableRegistry.set(enumObject, tableName);
+    });
+}
+
+export function getEnumTableRegistry(): Map<EnumType, string> {
+    ensureMetadataApplied();
+    return enumTableRegistry;
 }
