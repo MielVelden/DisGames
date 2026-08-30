@@ -1,11 +1,10 @@
 import { User } from "../../../interfaces/domain/User";
-import { Component, BaseSelectMenu, SelectMenu } from "../../../interfaces/application/Message";
+import { Component, BaseSelectMenu, SelectMenu, MessageHandle } from "../../../interfaces/application/Message";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { Interaction as DiscordInteraction, Message as DiscordMessage } from "discord.js";
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
 import { ModalDefinition, ModalField, ModalResult } from "../../../interfaces/application/Modal";
 import { BaseInteractionEvent, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
-import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
@@ -16,13 +15,11 @@ import { buildGameSettingsModal, mapGameSettingsModalResult } from "../../../bui
 import { createGenericButton } from "../../../builders/buttons/GenericButton";
 import ComponentService from "../../application/ComponentService";
 import { i18n } from "../../../utils/i18n/i18n";
-import { createTitle } from "../../../utils/helpers/Markdown";
 import { TimelineEntriesSaveModel } from "../../../interfaces/database";
 import TimelineBuilder from "../../domain/TimelineBuilder";
 import { DifficultyEnum } from "../../../interfaces/enums/games/DifficultyEnum";
 import { ErrorHelper } from "../../../utils/application/Error";
 import Logger from "../../../utils/application/Logger";
-import { createGameSetupConfirmationContainerAsync } from "../../../builders/containers/GameSetupConfirmationContainer";
 
 export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction | DiscordMessage> implements BaseInteractionEvent {
     public readonly type: EventTypeEnum;
@@ -33,7 +30,6 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
     public readonly messageId: string;
     public readonly channelId: string;
     public readonly guildId: string;
-    public readonly entitlements: readonly AppEntitlement[];
 
     public components: Component[] = [];
     public timelineEntries: TimelineEntriesSaveModel[] = [];
@@ -47,8 +43,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         server: ServersModel,
         channelId: string,
         guildId: string,
-        messageId: string,
-        entitlements: readonly AppEntitlement[] = []
+        messageId: string
     ) {
         this.type = type;
         this.customId = customId;
@@ -58,11 +53,6 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         this.channelId = channelId;
         this.guildId = guildId;
         this.messageId = messageId;
-        this.entitlements = entitlements;
-    }
-
-    public hasEntitlementForSku(skuId: string): boolean {
-        return this.entitlements.some(e => e.skuId === skuId);
     }
 
     public async addComponentAsync(component: Component): Promise<void> {
@@ -77,9 +67,20 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         await DiscordComponentMapper.clearComponentsAsync(this as unknown as InteractionEvent);
     }
 
-    public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
-        await DiscordMessageHandler.sendToChannelAsync(this as unknown as InteractionEvent, channelId, components);
+    public async sendToChannelAsync(channelId: string, components: Component[]): Promise<MessageHandle | null> {
+        const handle = await DiscordMessageHandler.sendToChannelAsync(this as unknown as InteractionEvent, channelId, components);
         this.flushPostSend();
+        return handle;
+    }
+
+    public async editChannelMessageAsync(channelId: string, messageId: string, components: Component[]): Promise<boolean> {
+        const result = await DiscordMessageHandler.editChannelMessageAsync(this as unknown as InteractionEvent, channelId, messageId, components);
+        this.flushPostSend();
+        return result;
+    }
+
+    public async deleteChannelMessageAsync(channelId: string, messageId: string): Promise<boolean> {
+        return await DiscordMessageHandler.deleteChannelMessageAsync(this as unknown as InteractionEvent, channelId, messageId);
     }
 
     public async editAsync(content?: string): Promise<void> {

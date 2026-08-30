@@ -8,6 +8,7 @@ import { LanguageEnum } from "../enums/database/LanguageEnum";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { BadgeEnum } from "../enums/application/BadgeEnum";
 import { CountryEnum } from "../enums/application/CountryEnum";
+import { ChartTypeEnum } from "../enums/application/ChartTypeEnum";
 
 export type LanguageTranslations = {
     [LanguageEnum.EN]: string;
@@ -108,6 +109,7 @@ export interface I18nTranslations {
             askQuestion: LanguageTranslations;
             notEnoughPermissions: LanguageTranslations;
             notYourEvent: LanguageTranslations;
+            actionExpired: LanguageTranslations;
             welcome: {
                 title: LanguageTranslations;
                 description: LanguageTranslations;
@@ -332,6 +334,7 @@ export interface I18nTranslations {
     }
     enums: {
         badges: LanguageBadgeTranslations;
+        charts: LanguageEnumTranslations<ChartTypeEnum>;
         countries: LanguageEnumTranslations<CountryEnum>;
         gameTypes: LanguageGameTypeTranslations<GameTypeEnum>;
         exceptions: LanguageExceptionTranslations;

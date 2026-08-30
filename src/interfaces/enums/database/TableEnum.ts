@@ -1,3 +1,5 @@
+import { SetInDatabase } from "../../../utils/helpers/EnumMetadata";
+
 export enum TableEnum {
     SERVERS = 1,
     GAMES = 2,
@@ -12,3 +14,5 @@ export enum TableEnum {
     METRICS,
     USERS_ACHIEVEMENTS,
 }
+
+SetInDatabase(TableEnum);

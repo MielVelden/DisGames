@@ -11,6 +11,7 @@ import { createBaseTimelineEvent } from "../utils/helpers/Timeline";
 import ServerService from "../services/domain/ServerService";
 import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
+import DiscordOAuthClient from "../utils/api/DiscordOAuthClient";
 
 export class ApiController {
 	private controllers: Map<string, any> = new Map();
@@ -41,8 +42,11 @@ export class ApiController {
 	}
 
 	private async getAuthorizedIdentity(req: any): Promise<UsersModel | null> {
-		const userId = req.res?.locals?.oauth?.discordUserId as string | undefined;
+		const accessToken = req.res?.locals?.oauth?.access as string | undefined;
+		if (!accessToken)
+			return null;
 
+		const userId = await DiscordOAuthClient.getVerifiedUserIdAsync(accessToken);
 		Logger.logDebug(`Authorize check for userId=${userId}`);
 		if (!userId)
 			return null;

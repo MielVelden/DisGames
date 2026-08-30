@@ -9,10 +9,6 @@ import { DEFAULT_LANGUAGE } from "../../utils/i18n/MultiLingualString";
 import { BaseDomainService } from "./BaseDomainService";
 import TimelineBuilder from "./TimelineBuilder";
 import Logger from "../../utils/application/Logger";
-import DiscordMemberService from "../discord/DiscordMemberService";
-import MediaService from "../application/MediaService";
-import { PREMIUM_NAME } from "../../utils/application/PremiumAccess";
-import packageJson from "../../../package.json";
 import { registerService } from "../../utils/container/Container";
 
 export class ServerService extends BaseDomainService<ServersModel, ServersSaveModel, typeof ServerRepository> {
@@ -44,53 +40,21 @@ export class ServerService extends BaseDomainService<ServersModel, ServersSaveMo
         return server;
     }
 
-    public async handlePremiumGrantedAsync(guildId: string): Promise<void> {
+    public async setPremiumAsync(guildId: string, isPremium: boolean): Promise<ServersModel | null> {
         let server: ServersModel | undefined;
         try {
             server = await this.repository.getByServerIdAsync(guildId);
         } catch {
-            Logger.logWarning(`handlePremiumGrantedAsync: server ${guildId} not found in database`);
-            return;
+            Logger.logWarning(`setPremiumAsync: server ${guildId} not found in database`);
+            return null;
         }
-        if (server.IsPremium)
-            return;
+        if (server.IsPremium === isPremium)
+            return null;
 
-        await this.repository.saveAsync(new ServersSaveModel({
+        return await this.repository.saveAsync(new ServersSaveModel({
             Id: server.Id,
-            IsPremium: true
+            IsPremium: isPremium
         }));
-
-        const proLogo = await MediaService.getMediaBufferAsync(MediaService.getBaseImage('pro'));
-        DiscordMemberService.setGuildIdentityAsync(guildId, {
-            nickname: packageJson.name + " " + PREMIUM_NAME,
-            avatarBuffer: proLogo
-        });
-
-        Logger.logInfo(`Server ${guildId} granted premium access`, { sendToDiscord: true });
-    }
-
-    public async handlePremiumRevokedAsync(guildId: string): Promise<void> {
-        let server: ServersModel | undefined;
-        try {
-            server = await this.repository.getByServerIdAsync(guildId);
-        } catch {
-            Logger.logWarning(`handlePremiumRevokedAsync: server ${guildId} not found in database`);
-            return;
-        }
-        if (!server.IsPremium)
-            return;
-
-        await this.repository.saveAsync(new ServersSaveModel({
-            Id: server.Id,
-            IsPremium: false
-        }));
-
-        DiscordMemberService.setGuildIdentityAsync(guildId, {
-            nickname: null,
-            avatarBuffer: null
-        });
-
-        Logger.logInfo(`Server ${guildId} had premium access revoked`, { sendToDiscord: true });
     }
 
     public async getAllAsync(): Promise<ServersModel[]> {

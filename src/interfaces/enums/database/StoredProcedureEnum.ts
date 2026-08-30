@@ -4,12 +4,14 @@ export enum StoredProcedureEnum {
   BarChartEventsEventsByType = "BarChart_Events_EventsByType",
   BarChartEventsEventsPerHour = "BarChart_Events_EventsPerHour",
   CleanUpData = "CleanUpData",
+  CleanUpMetrics = "CleanUpMetrics",
   GetRandomGameData = "GetRandomGameData",
   GetServersWithLeaderboardLive = "GetServersWithLeaderboardLive",
   GetTopServersByPoints = "GetTopServersByPoints",
   GetTopUsersByExperience = "GetTopUsersByExperience",
   GetUserProfile = "GetUserProfile",
   LineChartServerNewServer = "LineChart_Server_NewServer",
+  LineChartUserNewUser = "LineChart_User_NewUser",
   PieChartGamesGamesByType = "PieChart_Games_GamesByType",
   PieChartServerLanguageDistribution = "PieChart_Server_LanguageDistribution"
 }

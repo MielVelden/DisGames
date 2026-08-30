@@ -4,11 +4,14 @@ import {
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction,
     ChannelSelectMenuInteraction as DiscordChannelSelectMenuInteraction,
-    ModalSubmitInteraction as DiscordModalSubmitInteraction
+    ModalSubmitInteraction as DiscordModalSubmitInteraction,
+    DiscordAPIError,
+    RESTJSONErrorCodes
 } from 'discord.js';
-import { BaseInteractionEvent, InteractionEvent, ModalSubmitInteractionEvent, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
+import { discordClient } from '../../..';
+import { InteractionEvent, ModalSubmitInteractionEvent, RenderContext, isButtonInteractionEvent, isMessageInteractionEvent } from '../../../interfaces/application/Event';
 import { ModalDefinition, ModalField, ModalResult } from '../../../interfaces/application/Modal';
-import { ActionButton, ButtonStyle, Component, ComponentType, ComponentVisibility, SelectMenu } from '../../../interfaces/application/Message';
+import { ActionButton, ButtonStyle, Component, ComponentType, ComponentVisibility, MessageHandle, SelectMenu } from '../../../interfaces/application/Message';
 import ComponentService from '../../application/ComponentService';
 import { MultiLingualString } from '../../../utils/i18n/MultiLingualString';
 import { InteractionService } from '../../application/InteractionService';
@@ -286,7 +289,16 @@ class DiscordMessageHandler {
                             const channel = event.currentInteraction.channel;
                             if (channel && channel.isTextBased() && 'send' in channel) {
                                 await Logger.logWarning(`Referenced message ${event.currentInteraction.id} no longer exists in channel ${event.channelId}, sending without reference`);
-                                await channel.send(content);
+                                try {
+                                    await channel.send(content);
+                                } catch (sendError) {
+                                    if (this.isMissingPermissionsError(sendError)) {
+                                        await Logger.logWarning(`Missing permissions while sending message without reference in channel ${event.channelId}`);
+                                        return;
+                                    }
+
+                                    throw sendError;
+                                }
                                 return;
                             }
                         }
@@ -673,7 +685,7 @@ class DiscordMessageHandler {
         });
     }
 
-    public async sendToChannelAsync(event: InteractionEvent, channelId: string, components: Component[]): Promise<void> {
+    public async sendToChannelAsync(event: InteractionEvent, channelId: string, components: Component[]): Promise<MessageHandle | null> {
         const guild = event.currentInteraction.guild;
         if (!guild)
             ErrorHelper.throw(ExceptionEnum.DISCORD_GUILD_NOT_FOUND);
@@ -684,14 +696,101 @@ class DiscordMessageHandler {
 
         const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
         if (!content)
-            return;
+            return null;
 
         try {
-            await channel.send(content);
+            const sentMessage = await channel.send(content);
+            return { channelId, messageId: sentMessage.id };
         } catch (error) {
             if (this.isMissingPermissionsError(error)) {
                 await Logger.logWarning(`Missing permissions to send message to channel ${channelId} in guild ${guild.id}`);
-                return;
+                return null;
+            }
+
+            throw error;
+        }
+    }
+
+    public async editChannelMessageAsync(event: InteractionEvent, channelId: string, messageId: string, components: Component[]): Promise<boolean> {
+        const guild = event.currentInteraction.guild;
+        if (!guild)
+            return false;
+
+        const channel = await guild.channels.fetch(channelId).catch(() => null);
+        if (!channel || !channel.isTextBased())
+            return false;
+
+        const message = await channel.messages.fetch(messageId).catch(() => null);
+        if (!message)
+            return false;
+
+        const content = await DiscordComponentMapper.buildMessageContentAsync(event, components);
+        if (!content)
+            return false;
+
+        try {
+            await message.edit(content);
+            return true;
+        } catch (error) {
+            if (this.isMissingPermissionsError(error) || this.isUnknownMessageError(error)) {
+                await Logger.logWarning(`Could not edit message ${messageId} in channel ${channelId}`);
+                return false;
+            }
+
+            throw error;
+        }
+    }
+
+    public async deleteChannelMessageAsync(event: InteractionEvent, channelId: string, messageId: string): Promise<boolean> {
+        const guild = event.currentInteraction.guild;
+        if (!guild)
+            return false;
+
+        const channel = await guild.channels.fetch(channelId).catch(() => null);
+        if (!channel || !channel.isTextBased())
+            return false;
+
+        const message = await channel.messages.fetch(messageId).catch(() => null);
+        if (!message)
+            return false;
+
+        try {
+            await message.delete();
+            return true;
+        } catch (error) {
+            if (this.isMissingPermissionsError(error) || this.isUnknownMessageError(error)) {
+                await Logger.logWarning(`Could not delete message ${messageId} in channel ${channelId}`);
+                return false;
+            }
+
+            throw error;
+        }
+    }
+
+    public async editGuildChannelMessageAsync(channelId: string, messageId: string, components: Component[], server: ServersModel): Promise<{ success: boolean; noLongerEditable?: boolean }> {
+        const channel = await discordClient.channels.fetch(channelId).catch(() => null);
+        if (!channel || !channel.isTextBased())
+            return { success: false };
+
+        const message = await channel.messages.fetch(messageId).catch(() => null);
+        if (!message)
+            return { success: false };
+
+        const renderContext: RenderContext = { server, components: [] };
+        const content = await DiscordComponentMapper.buildMessageContentAsync(renderContext, components);
+        if (!content)
+            return { success: false };
+
+        try {
+            await message.edit(content);
+            return { success: true };
+        } catch (error) {
+            if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotEditMessageAuthoredByAnotherUser)
+                return { success: false, noLongerEditable: true };
+
+            if (this.isMissingPermissionsError(error)) {
+                await Logger.logWarning(`Missing permissions to edit message ${messageId} in channel ${channelId}`);
+                return { success: false };
             }
 
             throw error;
@@ -703,9 +802,9 @@ class DiscordMessageHandler {
         if (!channel || !channel.isTextBased())
             return;
 
-        const minimalEvent = { server } as BaseInteractionEvent;
+        const renderContext: RenderContext = { server, components: [] };
 
-        const content = await DiscordComponentMapper.buildMessageContentAsync(minimalEvent, components);
+        const content = await DiscordComponentMapper.buildMessageContentAsync(renderContext, components);
         if (!content)
             return;
 

@@ -1,3 +1,5 @@
+import { SetInDatabase } from "../../../utils/helpers/EnumMetadata";
+
 export enum GameTypeEnum {
     COUNTING = 1,
     WORD_SNAKE = 2,
@@ -10,3 +12,5 @@ export enum GameTypeEnum {
     CONNECTIONS = 9,
     GUESS_THE_COUNTRY = 10,
 }
+
+SetInDatabase(GameTypeEnum);

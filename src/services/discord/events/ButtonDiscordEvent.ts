@@ -2,7 +2,6 @@ import { ButtonInteraction as DiscordButtonInteraction } from "discord.js";
 import { User } from "../../../interfaces/domain/User";
 import { ServersModel } from "../../../interfaces/database/TableInterfaces";
 import { ButtonInteractionEvent } from "../../../interfaces/application/Event";
-import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum } from "../../../interfaces/enums";
 import { BaseReplyDiscordEvent } from "./BaseReplyDiscordEvent";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
@@ -17,10 +16,9 @@ export class ButtonDiscordEvent extends BaseReplyDiscordEvent<DiscordButtonInter
         channelId: string,
         guildId: string,
         messageId: string,
-        customId: string,
-        entitlements: readonly AppEntitlement[] = []
+        customId: string
     ) {
-        super(EventTypeEnum.BUTTON, customId, interaction, user, server, channelId, guildId, messageId, entitlements);
+        super(EventTypeEnum.BUTTON, customId, interaction, user, server, channelId, guildId, messageId);
     }
 
     public async sendAsync(): Promise<void> {

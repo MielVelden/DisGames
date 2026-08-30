@@ -5,6 +5,11 @@ export interface MessageContainer {
     components: Component[];
 }
 
+export interface MessageHandle {
+    channelId: string;
+    messageId: string;
+}
+
 export enum ComponentVisibility {
     PRIVATE = 'PRIVATE',
     PUBLIC = 'PUBLIC',

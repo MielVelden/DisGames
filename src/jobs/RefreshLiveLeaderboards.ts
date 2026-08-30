@@ -1,9 +1,6 @@
-import { DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
 import { JobModule } from "../interfaces/application/Job";
-import { discordClient } from "..";
-import { BaseInteractionEvent } from "../interfaces/application/Event";
 import { createLeaderboardContainerAsync, mapUserEntries } from "../builders/containers/LeaderboardContainer";
-import DiscordComponentMapper from "../services/discord/mappers/DiscordComponentMapper";
+import DiscordMessageHandler from "../services/discord/handlers/DiscordMessageHandler";
 import ServerService from "../services/domain/ServerService";
 import UserService from "../services/domain/UserService";
 import Logger from "../utils/application/Logger";
@@ -28,26 +25,17 @@ export default {
                 await Logger.logWarning(`Disabled live leaderboard for server ${server.ServerId}: server is no longer Pro`);
             } else if (live) {
                 try {
-                    const channel = await discordClient.channels.fetch(live.channelId).catch(() => null);
-                    if (channel?.isTextBased()) {
-                        const message = await channel.messages.fetch(live.messageId).catch(() => null);
+                    const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5));
+                    const components = await createLeaderboardContainerAsync(entries, server.LanguageEnum);
 
-                        if (message) {
-                            const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5));
-                            const components = await createLeaderboardContainerAsync(entries, server.LanguageEnum);
+                    const result = await DiscordMessageHandler.editGuildChannelMessageAsync(live.channelId, live.messageId, components, server);
 
-                            const content = await DiscordComponentMapper.buildMessageContentAsync({ server } as BaseInteractionEvent, components);
-                            if (content)
-                                await message.edit(content);
-                        }
-                    }
-                } catch (error) {
-                    if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotEditMessageAuthoredByAnotherUser) {
+                    if (!result.success && result.noLongerEditable) {
                         await ServerService.clearLeaderboardLiveAsync(server);
                         await Logger.logWarning(`Disabled live leaderboard for server ${server.ServerId}: stored message is no longer editable`);
-                    } else {
-                        await Logger.logError(`Failed to refresh live leaderboard for server ${server.ServerId}`, error as Error);
                     }
+                } catch (error) {
+                    await Logger.logError(`Failed to refresh live leaderboard for server ${server.ServerId}`, error as Error);
                 }
             }
 

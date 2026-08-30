@@ -4,11 +4,10 @@ import {
     MessageInteractionEvent,
     SelectMenuInteractionEvent
 } from '../../src/interfaces/application/Event';
-import { AppEntitlement } from '../../src/interfaces/application/Entitlement';
 import { User } from '../../src/interfaces/domain/User';
 import { ServersModel } from '../../src/interfaces/database/TableInterfaces';
 import { Command } from '../../src/interfaces/application/Command';
-import { Component } from '../../src/interfaces/application/Message';
+import { Component, MessageHandle } from '../../src/interfaces/application/Message';
 import { ModalDefinition, ModalField, ModalResult } from '../../src/interfaces/application/Modal';
 import { TestInputSimulator } from './TestInputSimulator';
 import { TimelineEntriesSaveModel } from '../../src/interfaces/database/TableInterfaces';
@@ -78,13 +77,29 @@ export class MockDiscordEvent implements BaseInteractionEvent {
         this.components = [];
     }
 
-    public async sendToChannelAsync(channelId: string, components: Component[]): Promise<void> {
+    public async sendToChannelAsync(channelId: string, components: Component[]): Promise<MessageHandle | null> {
         this.sentMessages.push([...components]);
 
         const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         this.inputSimulator.trackMessage(messageId, channelId, components, false);
 
         Logger.logTest(`Sent message to channel ${channelId} with ${components.length} components`);
+
+        return { channelId, messageId };
+    }
+
+    public async editChannelMessageAsync(channelId: string, messageId: string, components: Component[]): Promise<boolean> {
+        this.inputSimulator.trackMessage(messageId, channelId, components, true);
+
+        Logger.logTest(`Edited message ${messageId} in channel ${channelId} with ${components.length} components`);
+
+        return true;
+    }
+
+    public async deleteChannelMessageAsync(channelId: string, messageId: string): Promise<boolean> {
+        Logger.logTest(`Deleted message ${messageId} in channel ${channelId}`);
+
+        return true;
     }
 
     public async editAsync(content?: string): Promise<void> {
@@ -196,11 +211,6 @@ export class MockDiscordEvent implements BaseInteractionEvent {
             Logger.logTest(`Replied with: ${content?.getMessage()}`);
         else
             Logger.logTest(`Replied with no content`);
-    }
-
-    public readonly entitlements: readonly AppEntitlement[] = [];
-    public hasEntitlementForSku(_skuId: string): boolean {
-        return false;
     }
 
     public messageDeleted: boolean = false;

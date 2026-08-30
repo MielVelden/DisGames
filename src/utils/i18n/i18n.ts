@@ -6,6 +6,7 @@ import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
 import { badgeTranslations } from "./enums/badges";
+import { chartTranslations } from "./enums/charts";
 import { countryTranslations } from "./enums/countries";
 import { exceptionTranslations } from "./enums/exceptions";
 import { gameTypeTranslations } from "./enums/gameTypes";
@@ -108,6 +109,13 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.ES]: "Esta interacción no es para ti",
                 [LanguageEnum.DE]: "Diese Interaktion ist nicht für dich",
                 [LanguageEnum.PT]: "Esta interação não é para você",
+            },
+            actionExpired: {
+                [LanguageEnum.EN]: "This action is no longer available",
+                [LanguageEnum.NL]: "Deze actie is niet meer beschikbaar",
+                [LanguageEnum.ES]: "Esta acción ya no está disponible",
+                [LanguageEnum.DE]: "Diese Aktion ist nicht mehr verfügbar",
+                [LanguageEnum.PT]: "Esta ação já não está disponível",
             },
             welcome: {
                 title: {
@@ -1349,6 +1357,7 @@ export const i18n: I18nTranslations = {
     },
     enums: {
         badges: badgeTranslations,
+        charts: chartTranslations,
         countries: countryTranslations,
         exceptions: exceptionTranslations,
         languages: languageTranslations,

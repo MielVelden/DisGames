@@ -15,10 +15,13 @@ import {
     TextDisplayBuilder as DiscordTextDisplayBuilder,
     MediaGalleryBuilder as DiscordMediaGalleryBuilder,
     ContainerBuilder as DiscordContainerBuilder,
+    ActivityType as DiscordActivityType,
+    REST as DiscordREST,
+    Routes as DiscordRoutes,
 } from 'discord.js';
 import { SeparatorBuilder as DiscordSeparatorBuilder } from '@discordjs/builders';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { InteractionEvent } from '../../interfaces/application/Event';
+import { InteractionEvent, MessageInteractionEvent } from '../../interfaces/application/Event';
 import { Command } from '../../interfaces/application/Command';
 import { Component, SelectMenu } from '../../interfaces/application/Message';
 import { ModalDefinition, ModalField, ModalResult } from '../../interfaces/application/Modal';
@@ -27,6 +30,9 @@ import { EventTypeEnum, ExceptionEnum, isMessageEventType } from '../../interfac
 import { ErrorHelper } from '../../utils/application/Error';
 import Logger from '../../utils/application/Logger';
 import { discordClient } from "../../";
+import { loadCommands } from '../../utils/collectors/CommandCollector';
+import { getConfigValue } from '../../utils/application/Config';
+import { EnvConfigEnum } from '../../interfaces/enums/application/EnvConfigEnum';
 
 // Mappers
 import DiscordCommandMapper from './mappers/DiscordCommandMapper';
@@ -34,9 +40,11 @@ import DiscordComponentMapper from './mappers/DiscordComponentMapper';
 import DiscordGuildMapper from './mappers/DiscordGuildMapper';
 import DiscordInteractionMapper from './mappers/DiscordInteractionMapper';
 import DiscordMessageHandler from './handlers/DiscordMessageHandler';
+import DiscordMemberService from './DiscordMemberService';
 import { createWelcomeContainer } from '../../builders/containers/WelcomeContainer';
 import { TrackMetric, TrackMetricPull, RegisterMetricPulls } from '../../utils/helpers/Decorator';
 import { MetricEnum } from '../../interfaces/enums/application/MetricEnum';
+import { handleDiscordMessageAsync } from '../../events/messageCreate';
 
 export type DiscordMessageInteraction = DiscordButtonInteraction | DiscordMessageComponentInteraction;
 export type DiscordSelectMenuBuilder = DiscordStringSelectMenuBuilder | DiscordUserSelectMenuBuilder | DiscordRoleSelectMenuBuilder | DiscordMentionableSelectMenuBuilder | DiscordChannelSelectMenuBuilder;
@@ -165,6 +173,80 @@ class DiscordService {
     @TrackMetricPull(MetricEnum.Members)
     public async getTotalMembersAsync() {
         return discordClient.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+    }
+
+    public updateBotActivity(): void {
+        discordClient.user?.setActivity({
+            name: 'Minigames | /games',
+            type: DiscordActivityType.Watching,
+            state: `Supporting ${discordClient.guilds.cache.size} servers`,
+        });
+    }
+
+    public async deployCommandsAsync(): Promise<void> {
+        const token = getConfigValue(EnvConfigEnum.TOKEN);
+        const clientId = getConfigValue(EnvConfigEnum.DISCORD_CLIENT_ID);
+
+        const loadedCommands = await loadCommands();
+        const commandsForRegistration: any[] = [];
+
+        for (const command of loadedCommands) {
+            if (!command.isSlashCommand)
+                continue;
+
+            const slashCommandBuilder = this.mapCommandToSlashCommandBuilder(command as Command);
+            commandsForRegistration.push(slashCommandBuilder.toJSON());
+            Logger.logInfo(`Command added for registration: ${command.name}`);
+        }
+
+        const rest = new DiscordREST().setToken(token);
+
+        try {
+            Logger.logInfo(`Starting refresh of ${commandsForRegistration.length} application (/) commands.`);
+
+            const data = await rest.put(
+                DiscordRoutes.applicationCommands(clientId),
+                { body: commandsForRegistration },
+            ) as any[];
+
+            Logger.logInfo(`Successfully registered ${data.length} application (/) commands.`);
+        } catch (error) {
+            Logger.logError(`Error registering commands: ${error as Error}`);
+            ErrorHelper.wrap(error, ExceptionEnum.COMMAND_REGISTRATION_FAILED);
+        }
+    }
+
+    public async impersonateMessageAsync(event: MessageInteractionEvent, targetUserId: string, messageText: string): Promise<boolean> {
+        const guild = event.currentInteraction.guild;
+        if (!guild)
+            return false;
+
+        const targetMember = await DiscordMemberService.fetchMemberAsync(guild, targetUserId);
+        if (!targetMember)
+            return false;
+
+        const originalMessage = event.currentInteraction;
+
+        const fakeMessage = new Proxy(originalMessage, {
+            get(target, prop) {
+                if (prop === 'author')
+                    return targetMember.user;
+
+                if (prop === 'member')
+                    return targetMember;
+
+                if (prop === 'content')
+                    return messageText;
+
+                if (prop === 'guild')
+                    return guild;
+
+                return target[prop as keyof DiscordMessage];
+            }
+        }) as DiscordMessage;
+
+        await handleDiscordMessageAsync(fakeMessage, EventTypeEnum.MESSAGE);
+        return true;
     }
 
     // #endregion

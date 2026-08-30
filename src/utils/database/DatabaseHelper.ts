@@ -2,12 +2,27 @@ import { isMultiLingualString } from "../../interfaces/application";
 import { BaseEntityFieldType } from "../../interfaces/database/BaseEntity";
 import { MultiLingualString } from "../i18n/MultiLingualString";
 import { SchemaUtils } from "./SchemaUtils";
+import Logger from "../application/Logger";
 
 type FieldDescriptor = { field: string; column: string };
 
 export class DatabaseHelper {
 
   private static readonly jsonDescriptorCache = new WeakMap<object, FieldDescriptor[]>();
+  private static readonly mlsDescriptorCache = new WeakMap<object, FieldDescriptor[]>();
+
+  private static getMlsDescriptors<FieldEnum extends Record<string, string>>(fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): FieldDescriptor[] {
+    const cached = this.mlsDescriptorCache.get(fieldEnum);
+    if (cached)
+      return cached;
+
+    const descriptors: FieldDescriptor[] = Object.values(fieldEnum)
+      .filter((field): field is string => typeof field === 'string' && fieldTypeFunction(field as FieldEnum[keyof FieldEnum]) === BaseEntityFieldType.MultiLingualString)
+      .map(field => ({ field, column: SchemaUtils.getMultiLingualStringColumnName(field) }));
+
+    this.mlsDescriptorCache.set(fieldEnum, descriptors);
+    return descriptors;
+  }
 
   private static getJsonDescriptors<FieldEnum extends Record<string, string>>(fieldEnum: FieldEnum, fieldTypeFunction: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): FieldDescriptor[] {
     const cached = this.jsonDescriptorCache.get(fieldEnum);
@@ -41,25 +56,31 @@ export class DatabaseHelper {
     return serialized;
   }
 
-  public static deserializeMultiLingualStrings(entity: any): any {
-    if (!entity || typeof entity !== 'object') 
+  public static deserializeMultiLingualStrings<FieldEnum extends Record<string, string>>(entity: any, fieldEnum?: FieldEnum, fieldTypeFunction?: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any {
+    if (!entity || typeof entity !== 'object')
         return entity;
-    
+
+    const mlsColumns = fieldEnum && fieldTypeFunction
+      ? new Set(this.getMlsDescriptors(fieldEnum, fieldTypeFunction).map(descriptor => descriptor.column))
+      : new Set<string>();
+    const isMlsColumn = (key: string): boolean => mlsColumns.has(key) || SchemaUtils.isMultiLingualString(key);
+
     const deserialized = { ...entity };
-    
+
     for (const [key, value] of Object.entries(deserialized)) {
-      if (typeof value === 'string' && SchemaUtils.isMultiLingualString(key)) {
+      if (typeof value === 'string' && isMlsColumn(key)) {
         try {
           const multiLingualString = MultiLingualString.fromJSON(value);
           if (multiLingualString) {
             deserialized[SchemaUtils.removeMultiLingualStringSuffix(key)] = multiLingualString;
           }
-        } catch {
-          // Silently continue if parsing fails
+        } catch (err) {
+          // Silently continue if parsing fails (pinned behavior)
+          Logger.logDebug(`[DatabaseHelper] Failed to parse MultiLingualString column "${key}": ${err}`);
         }
       }
     }
-    
+
     return deserialized;
   }
 
@@ -108,23 +129,29 @@ export class DatabaseHelper {
     return serialized;
   }
 
-  public static deserializeJsonFields(entity: any): any {
-    if (!entity || typeof entity !== 'object') 
+  public static deserializeJsonFields<FieldEnum extends Record<string, string>>(entity: any, fieldEnum?: FieldEnum, fieldTypeFunction?: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any {
+    if (!entity || typeof entity !== 'object')
         return entity;
-    
+
+    const jsonColumns = fieldEnum && fieldTypeFunction
+      ? new Set(this.getJsonDescriptors(fieldEnum, fieldTypeFunction).map(descriptor => descriptor.column))
+      : new Set<string>();
+    const isJsonColumn = (key: string): boolean => jsonColumns.has(key) || SchemaUtils.isJsonField(key);
+
     const deserialized = { ...entity };
-    
+
     for (const [key, value] of Object.entries(deserialized)) {
-      if (typeof value === 'string' && SchemaUtils.isJsonField(key)) {
+      if (typeof value === 'string' && isJsonColumn(key)) {
         try {
           const parsedValue = JSON.parse(value);
           deserialized[SchemaUtils.removeJsonSuffix(key)] = parsedValue;
-        } catch {
-          // Silently continue if parsing fails
+        } catch (err) {
+          // Silently continue if parsing fails (pinned behavior)
+          Logger.logDebug(`[DatabaseHelper] Failed to parse JSON column "${key}": ${err}`);
         }
       }
     }
-    
+
     return deserialized;
   }
 
@@ -143,18 +170,18 @@ export class DatabaseHelper {
     return transformed;
   }
 
-  public static processResultsFromDatabase(results: any[]): any[] {
-    if (!results) 
+  public static processResultsFromDatabase<FieldEnum extends Record<string, string>>(results: any[], fieldEnum?: FieldEnum, fieldTypeFunction?: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any[] {
+    if (!results)
       return [];
-    
+
     // Ensure results is an array
     if (!Array.isArray(results)) {
       return [];
     }
-    
+
     return results.map((result: any) => {
-      let processed = this.deserializeMultiLingualStrings(result);
-      processed = this.deserializeJsonFields(processed);
+      let processed = this.deserializeMultiLingualStrings(result, fieldEnum, fieldTypeFunction);
+      processed = this.deserializeJsonFields(processed, fieldEnum, fieldTypeFunction);
       return processed;
     });
   }
@@ -168,20 +195,20 @@ export class DatabaseHelper {
     return processed;
   }
 
-  public static processStoredProcedureResults(results: any[]): any[] {
-    if (!results || !results[0]) 
+  public static processStoredProcedureResults<FieldEnum extends Record<string, string>>(results: any[], fieldEnum?: FieldEnum, fieldTypeFunction?: (field: FieldEnum[keyof FieldEnum]) => BaseEntityFieldType): any[] {
+    if (!results || !results[0])
         return [];
-    
+
     // Ensure results[0] is an array
     if (!Array.isArray(results[0])) {
         return [];
     }
-    
+
     return results[0]
       .map((result: any) => this.transformDatabaseKeys(result))
       .map((result: any) => {
-        let deserialized = this.deserializeMultiLingualStrings(result);
-        deserialized = this.deserializeJsonFields(deserialized);
+        let deserialized = this.deserializeMultiLingualStrings(result, fieldEnum, fieldTypeFunction);
+        deserialized = this.deserializeJsonFields(deserialized, fieldEnum, fieldTypeFunction);
         return deserialized;
       });
   }

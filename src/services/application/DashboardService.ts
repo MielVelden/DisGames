@@ -121,7 +121,6 @@ export class DashboardService extends Service {
 
         // Get the charts
         const lineChart = await ChartService.getChartAsync(ChartTypeEnum.LineChart_User_NewUser, identity);
-        const pieChart = await ChartService.getChartAsync(ChartTypeEnum.PieChart_User_DeviceType, identity);
 
         return {
             title: "Users",
@@ -141,7 +140,7 @@ export class DashboardService extends Service {
                 ),
                 await this.createDashboardCardByMetricAsync(MetricEnum.AdoptionRate),
             ],
-            charts: [lineChart, pieChart]
+            charts: [lineChart]
         }
     }
 

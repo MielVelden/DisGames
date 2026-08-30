@@ -1,7 +1,6 @@
 import { createConnectionAsync, closeConnectionAsync } from '../../repositories/util/ConnectionHandler';
 import { TableInterfaceGenerator } from './TableInterfaceGenerator';
 import { StoredProcedureGenerator } from './StoredProcedureGenerator';
-import { DatabaseEnumManager } from './DatabaseEnumManager';
 import { exportRoutines } from '../routines/Sync';
 import Logger from '../application/Logger';
 import { getConfig } from '../application/Config';
@@ -37,8 +36,6 @@ export async function createSchemaAsync() {
             functionEnumFilePath
         );
         
-        await DatabaseEnumManager.updateDatabaseWithEnums();
-
         await exportRoutines();
     } catch (err) {
         Logger.logError(`Error generating schema: ${err}`);

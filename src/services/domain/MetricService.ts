@@ -8,6 +8,7 @@ import { getSystemEventAsync } from "../../utils/helpers/Timeline";
 import { wsService } from "../../server";
 import { CacheMetric } from "../../interfaces/domain";
 import { registerService } from "../../utils/container/Container";
+import { Duration } from "../../interfaces/application/Duration";
 
 export class MetricService extends BaseDomainService<MetricsModel, MetricsSaveModel, typeof MetricRepository> {
     protected readonly repository = MetricRepository;
@@ -62,25 +63,31 @@ export class MetricService extends BaseDomainService<MetricsModel, MetricsSaveMo
     }
 
     public async flushAsync() {
-        this.cache.forEach(async (x, key) => {
-            if (!x.updated) {
-                const event = await getSystemEventAsync();
-                await this.saveAsync(new MetricsSaveModel({
-                    MetricEnum: key,
-                    Datetime: new Date(),
-                    Value: x.value
-                }), event);
-                x.updated = true;
-            }
-        });
+        await Promise.all(
+            Array.from(this.cache.entries()).map(async ([key, x]) => {
+                if (!x.updated) {
+                    const event = await getSystemEventAsync();
+                    await this.saveAsync(new MetricsSaveModel({
+                        MetricEnum: key,
+                        Datetime: new Date(),
+                        Value: x.value
+                    }), event);
+                    x.updated = true;
+                }
+            })
+        );
     }
 
     public async getLatestByMetricAsync(metric: MetricEnum) {
         return this.repository.getLatestByMetricAsync(metric);
     }
     
-    public async getPreviousByMetricAsync(metric: MetricEnum) {
-        return this.repository.getPreviousByMetricAsync(metric);
+    public async getPreviousByMetricAsync(metric: MetricEnum, minAge?: Duration) {
+        return this.repository.getPreviousByMetricAsync(metric, minAge);
+    }
+
+    public async cleanupOldMetricsAsync(minAge: Duration, bucket: Duration): Promise<void> {
+        return this.repository.purgeOldAsync(minAge, bucket);
     }
 }
 

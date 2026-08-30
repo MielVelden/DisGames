@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
-import { apiKeyMiddleware } from "./middleware/ApiKeyMiddleware";
+import { apiKeyMiddleware, isValidApiKey } from "./middleware/ApiKeyMiddleware";
 import { withRequestContext } from "./middleware/RequestContext";
 import { ApiController } from "./controllers/ApiController";
 import Logger from "./utils/application/Logger";
@@ -15,12 +15,22 @@ app.use(apiKeyMiddleware);
 const api = new ApiController();
 
 app.use("/api", async (req: express.Request, res: express.Response) => {
-	Logger.logDebug(`${req.method} ${req.path}`);	
+	Logger.logDebug(`${req.method} ${req.path}`);
 	await api.handleRequest(req, res);
 });
 
 const httpServer = createServer(app);
-const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+const wss = new WebSocketServer({
+	server: httpServer,
+	path: "/ws",
+	verifyClient: (info, callback) => {
+		const url = new URL(info.req.url ?? "", "http://localhost");
+		const key = info.req.headers["x-api-key"] ?? url.searchParams.get("apiKey");
+		if (!isValidApiKey(Array.isArray(key) ? key[0] : key))
+			return callback(false, 401, "invalid_api_key");
+		callback(true);
+	},
+});
 wss.on("connection", () => Logger.logInfo("WS connected"));
 
 import { WebSocketService } from "./services/application/WebSocketService";

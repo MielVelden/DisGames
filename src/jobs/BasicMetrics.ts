@@ -5,6 +5,8 @@ import MetricService from "../services/domain/MetricService";
 import { LanguageEnum, MetricEnum } from "../interfaces/enums";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
+import { DurationEnum } from "../interfaces/application/Duration";
+import { calculateDuration } from "../utils/helpers/Duration";
 
 export default {
     id: 'basic-metrics',
@@ -26,7 +28,7 @@ export default {
 
         for (const metricType of metricTypes) {
             const currentMetric = await MetricService.getLatestByMetricAsync(metricType);
-            const previousMetric = await MetricService.getPreviousByMetricAsync(metricType);
+            const previousMetric = await MetricService.getPreviousByMetricAsync(metricType, calculateDuration(1, DurationEnum.DAY));
             const increase = currentMetric.Value - previousMetric.Value;
 
             metrics[metricType] = {

@@ -33,7 +33,7 @@ const configTypeDefaults = {
     [EnvConfigEnum.TOKEN]: "",
     [EnvConfigEnum.TEST_TIMEOUT]: 30000,
     [EnvConfigEnum.TEST_DISCORD_WEBHOOK_URL]: "",
-    [EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS]: "changeme1,changeme2",
+    [EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS]: "",
     [EnvConfigEnum.DISGAMES_SERVER_ID]: "",
     [EnvConfigEnum.DISCORD_PREMIUM_SKU_ID]: "",
     [EnvConfigEnum.DEFAULT_PREMIUM_EMOJI]: "1522962406832341144",
