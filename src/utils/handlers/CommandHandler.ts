@@ -4,15 +4,6 @@ import { getCommandName } from "../collectors/CommandCollector";
 import { DEFAULT_LANGUAGE, MultiLingualString } from "../i18n/MultiLingualString";
 import { isSelectMenuEmpty } from "../helpers/SelectMenu";
 import ComponentService from "../../services/application/ComponentService";
-import Logger from "../application/Logger";
-import { ErrorHelper } from "../application/Error";
-import { loadCommands } from "../collectors/CommandCollector";
-import { ExceptionEnum } from "../../interfaces/enums";
-import DiscordService from "../../services/discord/DiscordService";
-import { REST } from "discord.js";
-import { Routes } from "discord.js";
-import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
-import { getConfigValue } from "../application/Config";
 import { withEventContextAsync } from "../../middleware/EventContext";
 import { i18n } from "../i18n/i18n";
 
@@ -88,37 +79,3 @@ export async function handleCommandOptionsAsync(event: SlashCommandInteractionEv
     });
 }
 
-
-
-export async function deployCommands(): Promise<void> {
-    const token = getConfigValue(EnvConfigEnum.TOKEN);
-    const clientId = getConfigValue(EnvConfigEnum.DISCORD_CLIENT_ID);
-
-    const loadedCommands = await loadCommands();
-    const commandsForRegistration: any[] = [];
-
-    for (const command of loadedCommands) {
-        if (!command.isSlashCommand)
-            continue;
-
-        const slashCommandBuilder = DiscordService.mapCommandToSlashCommandBuilder(command as Command);
-        commandsForRegistration.push(slashCommandBuilder.toJSON());
-        Logger.logInfo(`Command added for registration: ${command.name}`);
-    }
-
-    const rest = new REST().setToken(token);
-
-    try {
-        Logger.logInfo(`Starting refresh of ${commandsForRegistration.length} application (/) commands.`);
-
-        const data = await rest.put(
-            Routes.applicationCommands(clientId),
-            { body: commandsForRegistration },
-        ) as any[];
-
-        Logger.logInfo(`Successfully registered ${data.length} application (/) commands.`);
-    } catch (error) {
-        Logger.logError(`Error registering commands: ${error as Error}`);
-        ErrorHelper.wrap(error, ExceptionEnum.COMMAND_REGISTRATION_FAILED);
-    }
-}

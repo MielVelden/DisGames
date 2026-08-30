@@ -6,6 +6,7 @@ import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
 import { MultiLingualString } from "./MultiLingualString";
 import { I18nTranslations } from "../../interfaces/application/i18n";
 import { badgeTranslations } from "./enums/badges";
+import { chartTranslations } from "./enums/charts";
 import { countryTranslations } from "./enums/countries";
 import { exceptionTranslations } from "./enums/exceptions";
 import { gameTypeTranslations } from "./enums/gameTypes";
@@ -1356,6 +1357,7 @@ export const i18n: I18nTranslations = {
     },
     enums: {
         badges: badgeTranslations,
+        charts: chartTranslations,
         countries: countryTranslations,
         exceptions: exceptionTranslations,
         languages: languageTranslations,

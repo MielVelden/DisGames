@@ -5,7 +5,6 @@ import { Interaction as DiscordInteraction, Message as DiscordMessage } from "di
 import { MultiLingualString } from "../../../utils/i18n/MultiLingualString";
 import { ModalDefinition, ModalField, ModalResult } from "../../../interfaces/application/Modal";
 import { BaseInteractionEvent, InteractionEvent, SelectMenuInteractionEvent } from "../../../interfaces/application/Event";
-import { AppEntitlement } from "../../../interfaces/application/Entitlement";
 import { EventTypeEnum, ExceptionEnum } from "../../../interfaces/enums";
 import DiscordComponentMapper from "../mappers/DiscordComponentMapper";
 import DiscordMessageHandler from "../handlers/DiscordMessageHandler";
@@ -31,7 +30,6 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
     public readonly messageId: string;
     public readonly channelId: string;
     public readonly guildId: string;
-    public readonly entitlements: readonly AppEntitlement[];
 
     public components: Component[] = [];
     public timelineEntries: TimelineEntriesSaveModel[] = [];
@@ -45,8 +43,7 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         server: ServersModel,
         channelId: string,
         guildId: string,
-        messageId: string,
-        entitlements: readonly AppEntitlement[] = []
+        messageId: string
     ) {
         this.type = type;
         this.customId = customId;
@@ -56,11 +53,6 @@ export abstract class BaseDiscordEvent<TInteraction extends DiscordInteraction |
         this.channelId = channelId;
         this.guildId = guildId;
         this.messageId = messageId;
-        this.entitlements = entitlements;
-    }
-
-    public hasEntitlementForSku(skuId: string): boolean {
-        return this.entitlements.some(e => e.skuId === skuId);
     }
 
     public async addComponentAsync(component: Component): Promise<void> {

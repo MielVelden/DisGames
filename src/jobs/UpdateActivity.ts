@@ -1,6 +1,5 @@
 import { JobModule } from "../interfaces/application/Job";
-import { discordClient } from "..";
-import { ActivityType } from "discord.js";
+import DiscordService from "../services/discord/DiscordService";
 
 export default {
     id: 'update-activity',
@@ -10,11 +9,7 @@ export default {
     cronExpression: '0 */5 * * * *',
 
     handler: async (progress): Promise<void> => {
-        discordClient.user?.setActivity({
-            name: 'Minigames | /games',
-            type: ActivityType.Watching,
-            state: `Supporting ${discordClient.guilds.cache.size} servers`,
-        })
+        DiscordService.updateBotActivity();
         progress(1, 1, 'Activity updated');
     }
 } as JobModule;

@@ -1,4 +1,3 @@
-import { InteractionEvent } from "../../interfaces/application/Event";
 import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 import { MultiLingualString } from "../i18n/MultiLingualString";
@@ -14,6 +13,9 @@ export function isPremiumEnabled(): boolean {
     return Boolean(getPremiumSkuId());
 }
 
+// In-memory kill switch for the purchase button, toggled via the owner-only /premium
+// command. Deliberately process-lifetime only: a restart always fails back to enabled
+// rather than leaving the button stuck hidden after an incident.
 let purchaseButtonEnabled = true;
 
 export function isPurchaseButtonEnabled(): boolean {
@@ -24,19 +26,7 @@ export function setPurchaseButtonEnabled(enabled: boolean): void {
     purchaseButtonEnabled = enabled;
 }
 
-export function hasPremiumAccess(event: InteractionEvent, skuId: string): boolean {
-    if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION))
-        return true;
-
-    if (!skuId)
-        return false;
-
-    return event.hasEntitlementForSku(skuId);
-}
-
 export function isServerPremium(server: ServersModel): boolean {
-    // if (!getConfigValue(EnvConfigEnum.IS_PRODUCTION))
-    //     return true;
     return server.IsPremium;
 }
 

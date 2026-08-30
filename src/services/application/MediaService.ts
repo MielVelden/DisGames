@@ -54,46 +54,12 @@ export class MediaService extends Service {
         Logger.logInfo(`MediaService preloaded ${loaded} image(s) into buffer cache`);
     }
 
-    /** @deprecated prefer getMediaBufferAsync — sync fs blocks the event loop. */
-    public getMedia(image: Media): string {
-        const imagePath = path.join(this.imagesPath, `${image.name}.${image.type}`);
-
-        if (fs.existsSync(imagePath)) {
-            return imagePath;
-        }
-
-        Logger.logInfo(`Image not found: ${image.name}.${image.type}, using NotFound.png`);
-        return this.notFoundImage.url;
-    }
-
-    public getMediaFromName(name: string, type: MediaType): string {
-        const image: Media = {
-            url: '',
-            name,
-            type
-        };
-
-        return this.getMedia(image);
-    }
-
     public async getMediaAsync(image: Media): Promise<string> {
         const imagePath = path.join(this.imagesPath, `${image.name}.${image.type}`);
         if (await this.fileExistsAsync(imagePath))
             return imagePath;
         Logger.logInfo(`Image not found: ${image.name}.${image.type}, using NotFound.png`);
         return this.notFoundImage.url;
-    }
-
-    /** @deprecated prefer getMediaBufferAsync. */
-    public getMediaBuffer(image: Media): Buffer {
-        const imagePath = this.getMedia(image);
-        return fs.readFileSync(imagePath);
-    }
-
-    /** @deprecated prefer getMediaBufferAsync. */
-    public getMediaFromNameBuffer(name: string, type: MediaType): Buffer {
-        const imagePath = this.getMediaFromName(name, type);
-        return fs.readFileSync(imagePath);
     }
 
     public async getMediaBufferAsync(image: Media): Promise<Buffer> {

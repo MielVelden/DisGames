@@ -15,7 +15,6 @@ import { Command } from "./Command";
 import { Games_Settings, GameSettingsSchema, GameSettingsValues } from "../domain/GameSettings";
 import { Duration } from "./Duration";
 import { EventTypeEnum } from "../enums";
-import { AppEntitlement } from "./Entitlement";
 
 // The minimal context needed to render a message outside any interaction — a scheduled
 // job or an HTTP request has no InteractionEvent, only a server and (optionally) the
@@ -41,9 +40,6 @@ export interface GuildCreateEvent {
 
 export interface BaseInteractionEvent {
     customId: string;
-
-    readonly entitlements: readonly AppEntitlement[];
-    hasEntitlementForSku(skuId: string): boolean;
 
     components: Component[];
     addComponentAsync(component: Component): Promise<void>;

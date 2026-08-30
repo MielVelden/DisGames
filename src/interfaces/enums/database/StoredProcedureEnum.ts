@@ -11,6 +11,7 @@ export enum StoredProcedureEnum {
   GetTopUsersByExperience = "GetTopUsersByExperience",
   GetUserProfile = "GetUserProfile",
   LineChartServerNewServer = "LineChart_Server_NewServer",
+  LineChartUserNewUser = "LineChart_User_NewUser",
   PieChartGamesGamesByType = "PieChart_Games_GamesByType",
   PieChartServerLanguageDistribution = "PieChart_Server_LanguageDistribution"
 }

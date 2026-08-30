@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import 'dotenv/config';
-import { deployCommands } from './utils/handlers/CommandHandler';
+import DiscordService from './services/discord/DiscordService';
 
 // If this file is run directly, execute the function
 if (require.main === module) {
-  deployCommands().catch(console.error);
-} 
+  DiscordService.deployCommandsAsync().catch(console.error);
+}

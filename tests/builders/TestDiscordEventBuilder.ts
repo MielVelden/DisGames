@@ -4,7 +4,6 @@ import {
     MessageInteractionEvent,
     SelectMenuInteractionEvent
 } from '../../src/interfaces/application/Event';
-import { AppEntitlement } from '../../src/interfaces/application/Entitlement';
 import { User } from '../../src/interfaces/domain/User';
 import { ServersModel } from '../../src/interfaces/database/TableInterfaces';
 import { Command } from '../../src/interfaces/application/Command';
@@ -212,11 +211,6 @@ export class MockDiscordEvent implements BaseInteractionEvent {
             Logger.logTest(`Replied with: ${content?.getMessage()}`);
         else
             Logger.logTest(`Replied with no content`);
-    }
-
-    public readonly entitlements: readonly AppEntitlement[] = [];
-    public hasEntitlementForSku(_skuId: string): boolean {
-        return false;
     }
 
     public messageDeleted: boolean = false;

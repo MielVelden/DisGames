@@ -1,8 +1,8 @@
-import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction, Collection } from "discord.js";
+import { ChatInputCommandInteraction as DiscordChatInputCommandInteraction } from "discord.js";
 import { MessageInteractionEvent } from "../../interfaces/application/Event";
 import { CommandEnum } from "../../interfaces/enums/commands/CommandEnum";
-import DiscordMemberService from "../../services/discord/DiscordMemberService";
-import DiscordService from "../../services/discord/DiscordService";
+import DiscordMemberService from "./DiscordMemberService";
+import DiscordService from "./DiscordService";
 import { handleDiscordInteractionAsync } from "../../events/interactionCreate";
 
 export async function impersonateSlashCommandAsync(
@@ -71,9 +71,6 @@ export async function impersonateSlashCommandAsync(
 
             if (prop === 'guildId')
                 return originalEvent.guildId;
-
-            if (prop === 'entitlements')
-                return new Collection();
 
             if (prop === 'id')
                 return originalEvent.messageId;

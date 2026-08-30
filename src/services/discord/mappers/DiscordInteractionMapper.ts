@@ -6,7 +6,6 @@ import {
     Message as DiscordMessage,
     StringSelectMenuInteraction as DiscordStringSelectMenuInteraction
 } from 'discord.js';
-import { AppEntitlement } from '../../../interfaces/application/Entitlement';
 import { InteractionEvent } from '../../../interfaces/application/Event';
 import { User } from '../../../interfaces/domain/User';
 import { ServersModel, UsersSaveModel } from '../../../interfaces/database/TableInterfaces';
@@ -40,8 +39,6 @@ class DiscordInteractionMapper {
             if (!command)
                 throw new Error(`Command not found: ${interaction.commandName}`);
 
-            const entitlements = this.mapEntitlementsFromInteraction(interaction);
-
             const tempEvent = new SlashCommandDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
@@ -49,8 +46,7 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                command,
-                entitlements
+                command
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
@@ -63,12 +59,9 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                command,
-                entitlements
+                command
             );
         } else if (interaction.isButton()) {
-            const entitlements = this.mapEntitlementsFromInteraction(interaction);
-
             const tempEvent = new ButtonDiscordEvent(
                 interaction,
                 await this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
@@ -76,8 +69,7 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                interaction.customId,
-                entitlements
+                interaction.customId
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
@@ -90,12 +82,9 @@ class DiscordInteractionMapper {
                 baseParams.channelId,
                 baseParams.guildId,
                 baseParams.messageId,
-                interaction.customId,
-                entitlements
+                interaction.customId
             );
         } else if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
-            const entitlements = this.mapEntitlementsFromInteraction(interaction);
-
             const tempEvent = new SelectMenuDiscordEvent(
                 interaction as DiscordStringSelectMenuInteraction,
                 this.getTempUser(interaction.user, interaction.member as DiscordGuildMember),
@@ -104,8 +93,7 @@ class DiscordInteractionMapper {
                 baseParams.guildId,
                 baseParams.messageId,
                 interaction.customId,
-                interaction.values,
-                entitlements
+                interaction.values
             );
 
             const user = await this.mapDiscordUserToUser(interaction.user, interaction.member as DiscordGuildMember, tempEvent);
@@ -119,8 +107,7 @@ class DiscordInteractionMapper {
                 baseParams.guildId,
                 baseParams.messageId,
                 interaction.customId,
-                interaction.values,
-                entitlements
+                interaction.values
             );
         } else if (interaction.isModalSubmit()) {
             const tempEvent = new ModalSubmitDiscordEvent(
@@ -240,13 +227,6 @@ class DiscordInteractionMapper {
         return getOrCreateServerAsync(discordServer, event);
     }
 
-    private mapEntitlementsFromInteraction(interaction: DiscordInteraction): AppEntitlement[] {
-        const list: AppEntitlement[] = [];
-        for (const entitlement of interaction.entitlements.values()) {
-            list.push({ id: entitlement.id, skuId: entitlement.skuId });
-        }
-        return list;
-    }
 }
 
 export default new DiscordInteractionMapper();

@@ -8,7 +8,7 @@ import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 import GameService from "../services/domain/GameService";
 import { ErrorHelper } from "../utils/application/Error";
-import { impersonateSlashCommandAsync } from "../utils/application/CommandImpersonator";
+import { impersonateSlashCommandAsync } from "../services/discord/DiscordCommandImpersonatorService";
 import { GamesCommandActionEnum } from "../interfaces/enums/commands/Games";
 import { getCommandName } from "../utils/collectors/CommandCollector";
 
