@@ -15,6 +15,7 @@
     "job": "ts-node src/job-runner.ts",
     "db:down": "ts-node src/db-down.ts",
     "db:up": "ts-node src/db-up.ts",
+    "db:bootstrap": "ts-node src/db-bootstrap.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "ts-node --project tests/tsconfig.json tests/Run.ts",
