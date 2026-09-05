@@ -9,7 +9,11 @@ import { syncEnumTablesAsync } from './utils/database/SyncEnumTables';
 import Logger from './utils/application/Logger';
 import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
+import TestMode from './utils/application/TestMode';
 
+// Bootstrapping a DB is only ever done for a test database (CI or local), where
+// just the test-mode-required env vars are set — not the full production schema.
+TestMode.enable();
 getConfig();
 
 const schemaFilePath = path.join(__dirname, 'db', 'schema', 'schema.sql');
