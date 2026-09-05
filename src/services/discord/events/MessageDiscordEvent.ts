@@ -9,6 +9,7 @@ import { Command } from "../../../interfaces/application/Command";
 
 export class MessageDiscordEvent extends BaseReplyDiscordEvent<DiscordMessage> implements MessageInteractionEvent {
     public readonly type: EventTypeEnum.MESSAGE | EventTypeEnum.MESSAGE_UPDATE | EventTypeEnum.MESSAGE_DELETE;
+    public readonly mentionedBot: boolean = false;
     public messageDeleted: boolean = false;
     public readonly content: string;
     public readonly command?: Command;
@@ -28,6 +29,8 @@ export class MessageDiscordEvent extends BaseReplyDiscordEvent<DiscordMessage> i
         this.type = eventType;
         this.content = content;
         this.command = command ?? undefined;
+
+        this.mentionedBot = interaction.mentions.has(interaction.client.user?.id || '', { ignoreEveryone: true, ignoreRoles: true });
     }
 
     public async sendAsync(): Promise<void> {

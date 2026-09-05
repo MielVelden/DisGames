@@ -104,6 +104,7 @@ export interface MessageInteractionEvent extends BaseInteractionEvent, ReplyInte
     messageDeleted: boolean;
     deleteAsync(): Promise<void>;
     content: string;
+    mentionedBot: boolean;
 }
 
 export interface ButtonInteractionEvent extends BaseInteractionEvent, ReplyInteractionEvent {

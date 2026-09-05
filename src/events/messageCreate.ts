@@ -12,6 +12,8 @@ import { EventTypeEnum, isMessageEventType } from '../interfaces/enums';
 import { EventsSaveModel } from '../interfaces/database';
 import { withEventContextAsync } from '../middleware/EventContext';
 import { isStandby } from '../utils/application/HandoffManager';
+import { getCommandConfigByEnum } from '../utils/collectors/CommandCollector';
+import { CommandEnum } from '../interfaces/enums/commands/CommandEnum';
 
 export default {
     name: Events.MessageCreate,
@@ -61,6 +63,12 @@ export async function processMessageEventAsync(event: InteractionEvent): Promise
                     }), event);
 
                     await GameService.handleGameAsync(event);
+                }
+
+                if (event.mentionedBot) {
+                    const aboutMeCommand = getCommandConfigByEnum(CommandEnum.ABOUTME);
+                    if (aboutMeCommand && (aboutMeCommand.canExecute?.(event) ?? true))
+                        await handleCommandAsync(aboutMeCommand, event);
                 }
             }
         }

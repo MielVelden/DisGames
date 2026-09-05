@@ -7,6 +7,7 @@ import { MultiLingualString } from "../i18n/MultiLingualString";
 import { LanguageCommandOptionTranslations } from "../../interfaces/application/i18n";
 import { resolvePath } from "../helpers/PathResolver";
 import { LanguageEnum } from "../../interfaces/enums/database/LanguageEnum";
+import { CommandEnum } from "../../interfaces/enums/commands/CommandEnum";
 
 const commands: Command[] = [];
 
@@ -38,7 +39,15 @@ export function getCommandConfig(commandName: string, type: "Slash" | "Message")
     const command = commands.find(c => c.name === commandName && c[type === "Slash" ? "isSlashCommand" : "isMessageCommand"] === true);
     if (!command)
         return null;
-    
+
+    return command;
+}
+
+export function getCommandConfigByEnum(commandEnum: CommandEnum): Command | null {
+    const command = commands.find(c => c.name === commandEnum);
+    if (!command)
+        return null;
+
     return command;
 }
 
