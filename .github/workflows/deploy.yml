@@ -32,6 +32,7 @@ jobs:
       DISCORD_OWNER_ID: ${{ secrets.DISCORD_OWNER_ID }}
       TEST_DISCORD_WEBHOOK_URL: ${{ secrets.TEST_DISCORD_WEBHOOK_URL }}
       DEBUG_DISCORD_WEBHOOK_URL: ${{ secrets.DEBUG_DISCORD_WEBHOOK_URL }}
+      DISGAMES_DASHBOARD_API_KEYS: test-key
     steps:
       - uses: actions/checkout@v4
 
