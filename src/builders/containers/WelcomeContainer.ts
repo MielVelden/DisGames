@@ -1,4 +1,5 @@
-import { Component } from "../../interfaces/application/Message";
+import { Component, ButtonStyle } from "../../interfaces/application/Message";
+import { PRIVACY_POLICY_URL } from "../../utils/constants/Links";
 import ComponentService from "../../services/application/ComponentService";
 import MediaService from "../../services/application/MediaService";
 import { createTitle } from "../../utils/helpers/Markdown";
@@ -11,6 +12,11 @@ export function createWelcomeContainer(): Component[] {
         ComponentService.createImage(welcomeImage, false),
         ComponentService.createSeparator(),
         ComponentService.createContent(createTitle(new MultiLingualString(i18n.labels.common.welcome.title))),
-        ComponentService.createContent(new MultiLingualString(i18n.labels.common.welcome.description))
+        ComponentService.createContent(new MultiLingualString(i18n.labels.common.welcome.description)),
+        ComponentService.createLinkButton({
+            label: new MultiLingualString(i18n.commands.aboutme.labels.privacy),
+            style: ButtonStyle.LINK,
+            url: PRIVACY_POLICY_URL,
+        }),
     ];
 }

@@ -265,6 +265,7 @@ export interface I18nTranslations {
                 description: LanguageTranslations;
                 github: LanguageTranslations;
                 invite: LanguageTranslations;
+                privacy: LanguageTranslations;
                 version: (version: string) => MultiLingualString;
             };
         },

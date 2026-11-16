@@ -927,6 +927,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Einladen",
                     [LanguageEnum.PT]: "Convidar",
                 },
+                privacy: {
+                    [LanguageEnum.EN]: "Privacy Policy",
+                    [LanguageEnum.NL]: "Privacybeleid",
+                    [LanguageEnum.ES]: "Política de privacidad",
+                    [LanguageEnum.DE]: "Datenschutzerklärung",
+                    [LanguageEnum.PT]: "Política de Privacidade",
+                },
                 version: (version: string) => new MultiLingualString({
                     [LanguageEnum.EN]: `Version: ${version}`,
                     [LanguageEnum.NL]: `Versie: ${version}`,
