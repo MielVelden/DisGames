@@ -5,7 +5,7 @@ import { createTitle } from "../../utils/helpers/Markdown";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 
-export function createAboutMeContainer(inviteUrl: string, githubUrl: string, version: string): Component[] {
+export function createAboutMeContainer(inviteUrl: string, githubUrl: string, privacyUrl: string, version: string): Component[] {
     const image = MediaService.getBaseImage("aboutme");
     const title = ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.aboutme.labels.title)));
     const description = ComponentService.createContent(new MultiLingualString(i18n.commands.aboutme.labels.description));
@@ -19,7 +19,12 @@ export function createAboutMeContainer(inviteUrl: string, githubUrl: string, ver
         style: ButtonStyle.LINK,
         url: githubUrl,
     });
-    const versionLabel = ComponentService.createButton({
+    const privacyButton = ComponentService.createLinkButton({
+        label: new MultiLingualString(i18n.commands.aboutme.labels.privacy),
+        style: ButtonStyle.LINK,
+        url: privacyUrl,
+    });
+    const versionLabel =ComponentService.createButton({
         label: i18n.commands.aboutme.labels.version(version),
         style: ButtonStyle.SECONDARY,
         disabled: true,
@@ -32,6 +37,7 @@ export function createAboutMeContainer(inviteUrl: string, githubUrl: string, ver
         description,
         inviteButton,
         githubButton,
+        privacyButton,
         versionLabel,
     ];
 }
