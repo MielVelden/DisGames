@@ -14,8 +14,8 @@ import {
 import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
 import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../../interfaces/application/Message";
 import GameRepository from "../../repositories/GameRepository";
-import * as fs from "fs";
 import * as path from "path";
+import { collectModulesAsync } from "../../utils/collectors/ModuleCollector";
 import { BadgeTriggerEnum, GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/helpers/Enum";
@@ -56,32 +56,18 @@ export class GameService extends Service {
     }
 
     private async loadGamesAsync(): Promise<void> {
-        const gamesPath = path.join(__dirname, '..', 'games');
+        await collectModulesAsync<GameModule>({
+            directoryPath: path.join(__dirname, '..', 'games'),
+            label: 'game',
+            isValid: (game): game is GameModule => !!game?.config && !!game.functions,
+            onLoadAsync: async game => {
+                await this.completeGameConfigAsync(game.config);
 
-        try {
-            const gameFiles = fs.readdirSync(gamesPath).filter(file =>
-                file.endsWith('.ts') || file.endsWith('.js')
-            );
-
-            for (const file of gameFiles) {
-                try {
-                    const gamePath = path.join(gamesPath, file);
-                    const gameModule = require(gamePath).default as GameModule;
-
-                    if (gameModule && gameModule.config && gameModule.functions) {
-                        await this.completeGameConfigAsync(gameModule.config);
-
-                        if (gameModule.config.disabled)
-                            continue;
-                        this.games.push(gameModule);
-                    }
-                } catch (error) {
-                    Logger.logError(`Error loading game file ${file}:`, error as Error);
-                }
-            }
-        } catch (error) {
-            Logger.logError('Error loading games directory:', error as Error);
-        }
+                if (game.config.disabled)
+                    return;
+                this.games.push(game);
+            },
+        });
     }
 
     private async completeGameConfigAsync(gameConfig: GameConfig): Promise<void> {

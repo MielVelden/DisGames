@@ -5,6 +5,8 @@ import { GeneratedMedia } from '../../interfaces/application/Media';
 import { BaseCard, TextStyle } from './BaseCard';
 import {
     SCALE,
+    COLOR_PACK,
+    ColorPack,
     FONT_SANS,
     FONT_MONO,
     CARD_RADIUS,
@@ -53,7 +55,7 @@ class BadgeCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generateAsync(data: BadgeCardData, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
+    public async generateAsync(data: BadgeCardData, language: LanguageEnum = DEFAULT_LANGUAGE, palette: ColorPack = COLOR_PACK): Promise<GeneratedMedia> {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
@@ -76,7 +78,7 @@ class BadgeCardService extends BaseCard {
         const canvas = createCanvas(CARD_WIDTH, cardHeight);
         const ctx = canvas.getContext('2d');
 
-        drawCardBackground(ctx, CARD_WIDTH, cardHeight);
+        drawCardBackground(ctx, CARD_WIDTH, cardHeight, palette);
 
         ctx.save();
         this.roundedRectPath(ctx, 0, 0, CARD_WIDTH, cardHeight, CARD_RADIUS);

@@ -4,6 +4,7 @@ import { LeaderboardEntry, LeaderboardSubtitleTypeEnum, ServerLeaderboardRow, Us
 import ComponentService from "../../services/application/ComponentService";
 import { calculateUserLevel } from "../../utils/helpers/ExperiencePoints";
 import LeaderboardCard from "../cards/LeaderboardCard";
+import { ColorPack } from "../cards/CardTokens";
 
 export function mapServerEntries(rows: ServerLeaderboardRow[]): LeaderboardEntry[] {
     return rows.map(row => ({
@@ -24,8 +25,8 @@ export function mapUserEntries(rows: UserLeaderboardRow[]): LeaderboardEntry[] {
     }));
 }
 
-export async function createLeaderboardContainerAsync(entries: LeaderboardEntry[], language?: LanguageEnum): Promise<Component[]> {
-    const media = await LeaderboardCard.generateAsync(entries, language);
+export async function createLeaderboardContainerAsync(entries: LeaderboardEntry[], language?: LanguageEnum, palette?: ColorPack): Promise<Component[]> {
+    const media = await LeaderboardCard.generateAsync(entries, language, palette);
     return [
         ComponentService.createImage(media, false),
     ];

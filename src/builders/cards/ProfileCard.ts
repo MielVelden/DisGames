@@ -7,6 +7,7 @@ import {
     SCALE,
     FONT_SANS,
     FONT_MONO,
+    ColorPack,
     COLOR_PACK,
     COLOR_TEXT,
     COLOR_TEXT_MUTED,
@@ -19,7 +20,7 @@ import {
     COLOR_DIVIDER_STRONG,
     COLOR_PROGRESS_TRACK,
 } from './CardTokens';
-import { drawCardBackground, drawBrand } from './CardChrome';
+import { drawCardBackground, drawBrand, getCardPalette } from './CardChrome';
 import BadgeRowRenderer from './renderers/BadgeRowRenderer';
 import { formatDate } from '../../utils/helpers/Date';
 import { Color } from '../../utils/helpers/Color';
@@ -72,7 +73,7 @@ class ProfileCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generateAsync(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
+    public async generateAsync(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE, palette: ColorPack = COLOR_PACK): Promise<GeneratedMedia> {
         this.validateData(data);
 
         const uniqueCode = this.generateUniqueCode();
@@ -81,7 +82,7 @@ class ProfileCardService extends BaseCard {
         const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
 
-        drawCardBackground(ctx, CARD_WIDTH, CARD_HEIGHT);
+        drawCardBackground(ctx, CARD_WIDTH, CARD_HEIGHT, palette);
         drawBrand(ctx, CARD_WIDTH);
 
         let leftY = HEADER_TOP;
@@ -143,9 +144,9 @@ class ProfileCardService extends BaseCard {
 
     private drawAvatar(ctx: CanvasRenderingContext2D, data: ProfileCardData, x: number, y: number): void {
         const ringGrad = ctx.createLinearGradient(x, y, x + AVATAR_SIZE, y + AVATAR_SIZE);
-        ringGrad.addColorStop(0, COLOR_PACK.accent);
-        ringGrad.addColorStop(0.5, COLOR_PACK.accent2);
-        ringGrad.addColorStop(1, COLOR_PACK.mid);
+        ringGrad.addColorStop(0, getCardPalette(ctx).accent);
+        ringGrad.addColorStop(0.5, getCardPalette(ctx).accent2);
+        ringGrad.addColorStop(1, getCardPalette(ctx).mid);
         this.fillRoundedRect(ctx, x, y, AVATAR_SIZE, AVATAR_SIZE, AVATAR_RADIUS, ringGrad);
 
         const innerX = x + AVATAR_RING_WIDTH;
@@ -153,8 +154,8 @@ class ProfileCardService extends BaseCard {
         const innerSize = AVATAR_SIZE - AVATAR_RING_WIDTH * 2;
 
         const innerGrad = ctx.createLinearGradient(innerX, innerY, innerX + innerSize, innerY + innerSize);
-        innerGrad.addColorStop(0, COLOR_PACK.mid);
-        innerGrad.addColorStop(1, COLOR_PACK.deep);
+        innerGrad.addColorStop(0, getCardPalette(ctx).mid);
+        innerGrad.addColorStop(1, getCardPalette(ctx).deep);
         this.fillRoundedRect(ctx, innerX, innerY, innerSize, innerSize, AVATAR_INNER_RADIUS, innerGrad);
 
         this.drawText(ctx, getInitials(data.Username),
@@ -186,8 +187,8 @@ class ProfileCardService extends BaseCard {
 
         if (role === UserRoleEnum.ADMIN) {
             const grad = ctx.createLinearGradient(x, y, x + width, y + height);
-            grad.addColorStop(0, COLOR_PACK.accent);
-            grad.addColorStop(1, COLOR_PACK.accent2);
+            grad.addColorStop(0, getCardPalette(ctx).accent);
+            grad.addColorStop(1, getCardPalette(ctx).accent2);
             bgFill = grad;
             textColor = '#ffffff';
             borderColor = 'transparent';
@@ -259,16 +260,16 @@ class ProfileCardService extends BaseCard {
             'PLAYER RANK',
             `#${formatNumber(data.UserRank)}`,
             ` / ${formatNumber(data.TotalUsers)}`,
-            COLOR_PACK.accent,
-            (cx, cy) => this.drawTrophyIcon(ctx, cx, cy, COLOR_PACK.accent),
+            getCardPalette(ctx).accent,
+            (cx, cy) => this.drawTrophyIcon(ctx, cx, cy, getCardPalette(ctx).accent),
         );
 
         this.drawChip(ctx, x + chipW + CHIP_GAP, y, chipW,
             'TOTAL POINTS',
             formatNumber(data.TotalPoints),
             ' pts',
-            COLOR_PACK.accent2,
-            (cx, cy) => this.drawStarIcon(ctx, cx, cy, COLOR_PACK.accent2, 7 * SCALE),
+            getCardPalette(ctx).accent2,
+            (cx, cy) => this.drawStarIcon(ctx, cx, cy, getCardPalette(ctx).accent2, 7 * SCALE),
         );
     }
 
@@ -331,7 +332,7 @@ class ProfileCardService extends BaseCard {
 
         const lvlPrefixStyle: TextStyle = {
             font: `600 ${10 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_PACK.accent,
+            color: getCardPalette(ctx).accent,
         };
         ctx.font = lvlPrefixStyle.font;
         const lvlPrefixW = ctx.measureText('LVL').width;
@@ -363,8 +364,8 @@ class ProfileCardService extends BaseCard {
         if (fillW <= 0) return;
 
         const grad = ctx.createLinearGradient(x, 0, x + fillW, 0);
-        grad.addColorStop(0, COLOR_PACK.accent2);
-        grad.addColorStop(1, COLOR_PACK.accent);
+        grad.addColorStop(0, getCardPalette(ctx).accent2);
+        grad.addColorStop(1, getCardPalette(ctx).accent);
 
         ctx.save();
         this.roundedRectPath(ctx, x, y, Math.max(fillW, PROGRESS_RADIUS * 2), PROGRESS_HEIGHT, PROGRESS_RADIUS);
@@ -375,7 +376,7 @@ class ProfileCardService extends BaseCard {
 
         const tipCx = x + fillW;
         const tipCy = y + PROGRESS_HEIGHT / 2;
-        this.drawRadialGlow(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS * 3, COLOR_PACK.accent, [
+        this.drawRadialGlow(ctx, tipCx, tipCy, PROGRESS_TIP_RADIUS * 3, getCardPalette(ctx).accent, [
             [0, 0.7],
             [1, 0],
         ]);
@@ -387,8 +388,8 @@ class ProfileCardService extends BaseCard {
         const iconX = x + 2 * SCALE;
         const iconY = y;
         this.fillRoundedRect(ctx, iconX, iconY, FAV_ICON_SIZE, FAV_ICON_SIZE, FAV_ICON_RADIUS,
-            this.withAlpha(COLOR_PACK.accent2, 0.16));
-        this.drawControllerIcon(ctx, iconX + FAV_ICON_SIZE / 2, iconY + FAV_ICON_SIZE / 2, COLOR_PACK.accent2);
+            this.withAlpha(getCardPalette(ctx).accent2, 0.16));
+        this.drawControllerIcon(ctx, iconX + FAV_ICON_SIZE / 2, iconY + FAV_ICON_SIZE / 2, getCardPalette(ctx).accent2);
 
         const midY = y + FAV_HEIGHT / 2 + 0.5 * SCALE;
         let cursorX = iconX + FAV_ICON_SIZE + 10 * SCALE;

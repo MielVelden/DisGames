@@ -1,4 +1,5 @@
 import { JobModule } from "../interfaces/application/Job";
+import StyleService from "../services/domain/StyleService";
 import { createLeaderboardContainerAsync, mapUserEntries } from "../builders/containers/LeaderboardContainer";
 import DiscordMessageHandler from "../services/discord/handlers/DiscordMessageHandler";
 import ServerService from "../services/domain/ServerService";
@@ -26,7 +27,7 @@ export default {
             } else if (live) {
                 try {
                     const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5));
-                    const components = await createLeaderboardContainerAsync(entries, server.LanguageEnum);
+                    const components = await createLeaderboardContainerAsync(entries, server.LanguageEnum, StyleService.resolve(server).theme.cardPalette);
 
                     const result = await DiscordMessageHandler.editGuildChannelMessageAsync(live.channelId, live.messageId, components, server);
 

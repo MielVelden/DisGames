@@ -4,6 +4,7 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { LeaderboardCommandActionEnum } from "../interfaces/enums/commands/Leaderboard";
+import StyleService from "../services/domain/StyleService";
 import { createLeaderboardContainerAsync, mapServerEntries, mapUserEntries } from "../builders/containers/LeaderboardContainer";
 import ComponentService from "../services/application/ComponentService";
 import ServerService from "../services/domain/ServerService";
@@ -24,7 +25,7 @@ const optionsConfig = [
                 enumValue: LeaderboardCommandActionEnum.SERVERS,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const rows = await ServerService.getTopServersByPointsAsync(5);
-                    const components = await createLeaderboardContainerAsync(mapServerEntries(rows), event.server.LanguageEnum);
+                    const components = await createLeaderboardContainerAsync(mapServerEntries(rows), event.server.LanguageEnum, StyleService.resolve(event.server).theme.cardPalette);
                     await event.addComponentsAsync(components);
                     await event.replyAsync();
                 }
@@ -33,7 +34,7 @@ const optionsConfig = [
                 enumValue: LeaderboardCommandActionEnum.USERS,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const rows = await UserService.getTopUsersByExperienceAsync(5);
-                    const components = await createLeaderboardContainerAsync(mapUserEntries(rows), event.server.LanguageEnum);
+                    const components = await createLeaderboardContainerAsync(mapUserEntries(rows), event.server.LanguageEnum, StyleService.resolve(event.server).theme.cardPalette);
                     await event.addComponentsAsync(components);
                     await event.replyAsync();
                 }
@@ -61,7 +62,7 @@ const optionsConfig = [
                         ErrorHelper.throw(ExceptionEnum.PREMIUM_ONLY_LIVE_LEADERBOARD);
 
                     const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5))
-                    const components = await createLeaderboardContainerAsync(entries, event.server.LanguageEnum);
+                    const components = await createLeaderboardContainerAsync(entries, event.server.LanguageEnum, StyleService.resolve(event.server).theme.cardPalette);
 
                     const messageHandle = await event.sendToChannelAsync(event.channelId, components);
                     if (!messageHandle)

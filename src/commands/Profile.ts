@@ -4,6 +4,7 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
+import StyleService from "../services/domain/StyleService";
 import { createProfileContainerAsync } from "../builders/containers/ProfileContainer";
 import UserService from "../services/domain/UserService";
 import { createAllGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
@@ -26,7 +27,7 @@ const optionsConfig = [
                     await event.clearComponentsAsync();
 
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
-                    const profileComponents = await createProfileContainerAsync(userProfile);
+                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.cardPalette);
                     await event.addComponentsAsync(profileComponents);
 
                     // Add game switcher
@@ -51,7 +52,7 @@ const optionsConfig = [
                 enumValue: ProfileCommandActionEnum.MANAGE,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
-                    const profileComponents = await createProfileContainerAsync(userProfile);
+                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.cardPalette);
                     await event.addComponentsAsync(profileComponents);
                     await event.replyAsync();
                 }
