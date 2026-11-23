@@ -7,16 +7,13 @@ import {
     SCALE,
     FONT_SANS,
     FONT_MONO,
-    ColorPack,
-    COLOR_PACK,
     COLOR_TEXT,
-    COLOR_TEXT_MUTED,
-    COLOR_TEXT_FAINT,
     COLOR_PANEL,
     COLOR_PANEL_BORDER,
     COLOR_CHIP_BG,
     COLOR_DIVIDER,
 } from './CardTokens';
+import { CardTheme } from '../../interfaces/domain/StylePreset';
 import { drawCardBackground, drawBrand, getCardPalette } from './CardChrome';
 import { formatNumber } from '../../utils/helpers/Number';
 import { getInitials } from '../../utils/helpers/String';
@@ -56,7 +53,7 @@ class LeaderboardCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generateAsync(entries: LeaderboardEntry[], language: LanguageEnum = DEFAULT_LANGUAGE, palette: ColorPack = COLOR_PACK): Promise<GeneratedMedia> {
+    public async generateAsync(entries: LeaderboardEntry[], language: LanguageEnum = DEFAULT_LANGUAGE, cardTheme?: CardTheme): Promise<GeneratedMedia> {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `leaderboard-${uniqueCode}.png`);
 
@@ -74,7 +71,7 @@ class LeaderboardCardService extends BaseCard {
         const canvas = createCanvas(CARD_WIDTH, Math.round(cardHeight));
         const ctx = canvas.getContext('2d');
 
-        drawCardBackground(ctx, CARD_WIDTH, canvas.height, palette);
+        drawCardBackground(ctx, CARD_WIDTH, canvas.height, cardTheme);
         drawBrand(ctx, CARD_WIDTH);
 
         let y = HEADER_TOP;
@@ -126,7 +123,7 @@ class LeaderboardCardService extends BaseCard {
         this.fillRoundedRect(ctx, chipX, chipY, chipWidth, chipHeight, 6 * SCALE, COLOR_CHIP_BG);
         this.drawText(ctx, chipText, chipX + chipWidth / 2, chipY + chipHeight / 2 + 0.5 * SCALE, {
             font: chipFont,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             align: 'center',
             baseline: 'middle',
         });
@@ -135,7 +132,7 @@ class LeaderboardCardService extends BaseCard {
         this.fillCircle(ctx, x + 3 * SCALE, labelY + SECTION_LABEL_HEIGHT / 2 - 1 * SCALE, 2.5 * SCALE, getCardPalette(ctx).accent);
         this.drawText(ctx, getMultiLingualString(i18n.commands.leaderboard.labels.allTimePoints, language), x + 12 * SCALE, labelY + SECTION_LABEL_HEIGHT / 2, {
             font: `700 ${10 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             baseline: 'middle',
         });
 
@@ -192,7 +189,7 @@ class LeaderboardCardService extends BaseCard {
 
         this.drawText(ctx, this.getSubtitleText(top, language), textLeft, nameY + 22 * SCALE, {
             font: `500 ${11 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             baseline: 'top',
         });
 
@@ -206,7 +203,7 @@ class LeaderboardCardService extends BaseCard {
         this.drawText(ctx, formatNumber(top.TotalPoints), pointsRight, y + 20 * SCALE, pointsStyle);
         this.drawText(ctx, getMultiLingualString(i18n.commands.leaderboard.labels.points, language), pointsRight, y + 20 * SCALE + 28 * SCALE, {
             font: `600 ${9 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             align: 'right',
             baseline: 'top',
         });
@@ -248,7 +245,7 @@ class LeaderboardCardService extends BaseCard {
         } else {
             this.drawText(ctx, String(rank).padStart(2, '0'), rankCellX, rankCellCenterY, {
                 font: `700 ${13 * SCALE}px ${FONT_MONO}`,
-                color: COLOR_TEXT_FAINT,
+                color: getCardPalette(ctx).textFaint,
                 align: 'center',
                 baseline: 'middle',
             });
@@ -281,7 +278,7 @@ class LeaderboardCardService extends BaseCard {
 
         this.drawText(ctx, this.getSubtitleText(entry, language), textLeft, nameY + 19 * SCALE, {
             font: `500 ${10.5 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             baseline: 'top',
         });
 
@@ -302,7 +299,7 @@ class LeaderboardCardService extends BaseCard {
         });
         this.drawText(ctx, getMultiLingualString(i18n.commands.leaderboard.labels.noPointsRecorded, language), x + width / 2, y + height / 2, {
             font: `600 ${13 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             align: 'center',
             baseline: 'middle',
         });
@@ -312,13 +309,13 @@ class LeaderboardCardService extends BaseCard {
         this.fillCircle(ctx, x + 2.5 * SCALE, y + FOOTER_HEIGHT / 2, 2.5 * SCALE, getCardPalette(ctx).accent);
         this.drawText(ctx, getMultiLingualString(i18n.commands.leaderboard.labels.updatedLabel, language), x + 10 * SCALE, y + FOOTER_HEIGHT / 2, {
             font: `500 ${9.5 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             baseline: 'middle',
         });
         const timestampText = this.getFooterTimestamp();
         this.drawText(ctx, timestampText, x + width, y + FOOTER_HEIGHT / 2, {
             font: `${9.5 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             align: 'right',
             baseline: 'middle',
         });

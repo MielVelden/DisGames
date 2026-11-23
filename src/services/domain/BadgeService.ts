@@ -68,7 +68,7 @@ export class BadgeService extends Service {
                     const media = await BadgeCard.generateAsync({
                         userId: context.userId,
                         badge: { achievementEnum: badge.config.id, date: new Date(), level: achieved, threshold },
-                    }, undefined, StyleService.resolve(event.server).theme.cardPalette);
+                    }, undefined, StyleService.resolve(event.server).theme.card);
 
                     const badgeImage = ComponentService.createImage(media, false);
                     badgeImage.visibility = ComponentVisibility.PRIVATE;

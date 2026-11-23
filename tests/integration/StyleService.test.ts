@@ -3,6 +3,8 @@ import TestRunner from '../TestRunner';
 import { TestSuite } from '../interfaces/TestRunnerInterface';
 import StyleService from '../../src/services/domain/StyleService';
 import { ServersModel } from '../../src/interfaces/database/TableInterfaces';
+import OverrideService from '../../src/services/application/OverrideService';
+import { OverrideKeyEnum } from '../../src/interfaces/enums/application/OverrideKeyEnum';
 import { LanguageEnum } from '../../src/interfaces/enums';
 
 const server = (language: LanguageEnum): ServersModel => new ServersModel({ LanguageEnum: language });
@@ -46,6 +48,19 @@ export default function registerStyleServiceTests(runner: TestRunner): void {
                 testFunction: async () => {
                     AssertionHelpers.assertEqual(StyleService.resolve(server(LanguageEnum.NL), day(11, 28)).presetId, 'sinterklaas');
                     AssertionHelpers.assertEqual(StyleService.resolve(server(LanguageEnum.EN), day(11, 28)).presetId, null);
+                }
+            },
+            {
+                name: 'forced style override beats date and language gating, and resets',
+                testFunction: async () => {
+                    OverrideService.set(OverrideKeyEnum.STYLE, 'sinterklaas');
+                    try {
+                        const style = StyleService.resolve(server(LanguageEnum.EN), day(6, 15));
+                        AssertionHelpers.assertEqual(style.presetId, 'sinterklaas');
+                    } finally {
+                        OverrideService.clear(OverrideKeyEnum.STYLE);
+                    }
+                    AssertionHelpers.assertEqual(StyleService.resolve(server(LanguageEnum.EN), day(6, 15)).presetId, null);
                 }
             },
         ]

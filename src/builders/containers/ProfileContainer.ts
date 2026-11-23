@@ -2,10 +2,10 @@ import { Component } from "../../interfaces/application/Message";
 import { ProfileCardData } from "../../interfaces/view";
 import ComponentService from "../../services/application/ComponentService";
 import ProfileCard from "../cards/ProfileCard";
-import { ColorPack } from "../cards/CardTokens";
+import { CardTheme } from "../../interfaces/domain/StylePreset";
 
-export async function createProfileContainerAsync(profile: ProfileCardData, palette?: ColorPack): Promise<Component[]> {
-    const media = await ProfileCard.generateAsync(profile, undefined, palette);
+export async function createProfileContainerAsync(profile: ProfileCardData, cardTheme?: CardTheme): Promise<Component[]> {
+    const media = await ProfileCard.generateAsync(profile, undefined, cardTheme);
     return [
         ComponentService.createImage(media, false),
         ComponentService.createSeparator(),

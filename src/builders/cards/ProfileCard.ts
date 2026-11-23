@@ -7,11 +7,7 @@ import {
     SCALE,
     FONT_SANS,
     FONT_MONO,
-    ColorPack,
-    COLOR_PACK,
     COLOR_TEXT,
-    COLOR_TEXT_MUTED,
-    COLOR_TEXT_FAINT,
     COLOR_PANEL,
     COLOR_PANEL_BORDER,
     COLOR_CHIP_BG,
@@ -20,6 +16,7 @@ import {
     COLOR_DIVIDER_STRONG,
     COLOR_PROGRESS_TRACK,
 } from './CardTokens';
+import { CardTheme } from '../../interfaces/domain/StylePreset';
 import { drawCardBackground, drawBrand, getCardPalette } from './CardChrome';
 import BadgeRowRenderer from './renderers/BadgeRowRenderer';
 import { formatDate } from '../../utils/helpers/Date';
@@ -73,7 +70,7 @@ class ProfileCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generateAsync(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE, palette: ColorPack = COLOR_PACK): Promise<GeneratedMedia> {
+    public async generateAsync(data: ProfileCardData, language: LanguageEnum = DEFAULT_LANGUAGE, cardTheme?: CardTheme): Promise<GeneratedMedia> {
         this.validateData(data);
 
         const uniqueCode = this.generateUniqueCode();
@@ -82,7 +79,7 @@ class ProfileCardService extends BaseCard {
         const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
 
-        drawCardBackground(ctx, CARD_WIDTH, CARD_HEIGHT, palette);
+        drawCardBackground(ctx, CARD_WIDTH, CARD_HEIGHT, cardTheme);
         drawBrand(ctx, CARD_WIDTH);
 
         let leftY = HEADER_TOP;
@@ -194,7 +191,7 @@ class ProfileCardService extends BaseCard {
             borderColor = 'transparent';
         } else {
             bgFill = 'rgba(255,255,255,0.06)';
-            textColor = COLOR_TEXT_MUTED;
+            textColor = getCardPalette(ctx).textMuted;
             borderColor = 'rgba(255,255,255,0.10)';
         }
 
@@ -220,7 +217,7 @@ class ProfileCardService extends BaseCard {
         const pillFont = 9 * SCALE;
         const pillStyle: TextStyle = {
             font: `700 ${pillFont}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             align: 'center',
             baseline: 'middle',
         };
@@ -233,7 +230,7 @@ class ProfileCardService extends BaseCard {
 
         const idStyle: TextStyle = {
             font: `500 ${10.5 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             baseline: 'middle',
         };
         ctx.font = idStyle.font;
@@ -244,11 +241,11 @@ class ProfileCardService extends BaseCard {
 
         const dotX = idX + idW + 8 * SCALE;
         const dotCy = y + pillH / 2;
-        this.fillCircle(ctx, dotX, dotCy, 1.5 * SCALE, COLOR_TEXT_FAINT);
+        this.fillCircle(ctx, dotX, dotCy, 1.5 * SCALE, getCardPalette(ctx).textFaint);
 
         this.drawText(ctx, this.formatJoined(data.CreatedAt, language), dotX + 8 * SCALE, y + pillH / 2 + 0.5 * SCALE, {
             font: `500 ${11 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             baseline: 'middle',
         });
     }
@@ -299,7 +296,7 @@ class ProfileCardService extends BaseCard {
         const textX = iconX + CHIP_ICON_SIZE + 10 * SCALE;
         this.drawText(ctx, label, textX, y + 12 * SCALE, {
             font: `600 ${9.5 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             baseline: 'top',
         });
 
@@ -314,7 +311,7 @@ class ProfileCardService extends BaseCard {
 
         this.drawText(ctx, valueSuffix, textX + valueW + 2 * SCALE, y + 31 * SCALE, {
             font: `500 ${11 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             baseline: 'top',
         });
     }
@@ -346,7 +343,7 @@ class ProfileCardService extends BaseCard {
         const xpText = `${formatNumber(data.Level.xpNow)} / ${formatNumber(data.Level.xpMax)} XP`;
         const xpStyle: TextStyle = {
             font: `600 ${11.5 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
         };
         ctx.font = xpStyle.font;
         const xpW = ctx.measureText(xpText).width;
@@ -396,7 +393,7 @@ class ProfileCardService extends BaseCard {
 
         const labelStyle: TextStyle = {
             font: `600 ${10 * SCALE}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             baseline: 'middle',
         };
         ctx.font = labelStyle.font;
@@ -410,7 +407,7 @@ class ProfileCardService extends BaseCard {
         const hoursText = `${formatNumber(gameData.points)} pts`;
         const hoursStyle: TextStyle = {
             font: `500 ${11 * SCALE}px ${FONT_MONO}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             baseline: 'middle',
         };
         ctx.font = hoursStyle.font;

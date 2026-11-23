@@ -7,6 +7,8 @@ import * as path from "path";
 import { collectModules } from "../../utils/collectors/ModuleCollector";
 import { getCurrentServer } from "../../middleware/EventContext";
 import { isWithinMonthDayRange } from "../../utils/helpers/Date";
+import OverrideService from "../application/OverrideService";
+import { OverrideKeyEnum } from "../../interfaces/enums/application/OverrideKeyEnum";
 import { registerService } from "../../utils/container/Container";
 
 const NO_STYLE: ResolvedStyle = { presetId: null, source: null, theme: {} };
@@ -32,12 +34,18 @@ export class StyleService extends Service {
         if (!server)
             return NO_STYLE;
 
+        const forced = this.presets.find(p => p.id === OverrideService.get(OverrideKeyEnum.STYLE));
+        if (forced)
+            return { presetId: forced.id, source: StyleSourceEnum.OVERRIDE, theme: forced.theme };
+
         const active = this.presets
             .filter(p => !p.languages?.length || p.languages.includes(server.LanguageEnum))
             .filter(p => p.windows?.some(w => this.isWithinWindow(w, now)))
             .sort((a, b) => b.priority - a.priority)[0];
 
-        if (!active) return NO_STYLE;
+        if (!active) 
+            return NO_STYLE;
+        
         return { presetId: active.id, source: StyleSourceEnum.SEASONAL, theme: active.theme };
     }
 

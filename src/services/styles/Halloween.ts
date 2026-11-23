@@ -1,3 +1,4 @@
+import { CardDecorationEnum } from "../../interfaces/enums/application/CardDecorationEnum";
 import { LanguageEnum, StylePriorityEnum, StyleSlotEnum } from "../../interfaces/enums";
 import { StylePresetModule } from "../../interfaces/domain/StylePreset";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -16,7 +17,10 @@ export default {
         priority: StylePriorityEnum.SEASONAL,
         theme: {
             accentColor: 0xe67e22,
-            cardPalette: { deep: '#140d1f', base: '#241437', mid: '#3b1f5c', accent: '#ff7518', accent2: '#8e44ad' },
+            card: {
+                palette: { deep: '#140d1f', base: '#241437', mid: '#3b1f5c', accent: '#ff7518', accent2: '#8e44ad', textMuted: '#cdb8e0', textFaint: '#8c72a8' },
+                decorations: [CardDecorationEnum.COBWEB, CardDecorationEnum.BATS],
+            },
             emojis: {
                 [StyleSlotEnum.ACCEPT]: '🎃',
                 [StyleSlotEnum.WIN]: '👻',

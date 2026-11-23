@@ -11,4 +11,5 @@ export enum CommandEnum {
     PREMIUM = "premium",
     GENERATE_DATA = "generatedata",
     LEADERBOARD = "leaderboard",
+    OVERRIDE = "override",
 }

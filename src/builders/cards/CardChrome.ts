@@ -6,23 +6,31 @@ import {
     CARD_BORDER_COLOR,
     CARD_RADIUS,
     COLOR_PACK,
-    ColorPack,
     COLOR_TEXT_FAINT,
+    COLOR_TEXT_MUTED,
     FONT_MONO,
     SCALE,
 } from './CardTokens';
+import { CardTheme } from '../../interfaces/domain/StylePreset';
+import { drawCardDecorations } from './CardDecorations';
 import { drawText, fillCircle, roundedRectPath, strokeRoundedRect, TextStyle, withAlpha } from './CardPrimitives';
+
+// The palette with every optional field filled in, so card code never has to fall back.
+export type ResolvedCardPalette = Required<CardTheme['palette']>;
+
+const DEFAULT_PALETTE: ResolvedCardPalette = { ...COLOR_PACK, textMuted: COLOR_TEXT_MUTED, textFaint: COLOR_TEXT_FAINT };
 
 // The palette is bound to the canvas context, so every draw helper called with the
 // same ctx sees the same palette without threading a parameter through each method.
 // Concurrency-safe: one ctx per render, nothing shared on the card singletons.
-const palettes = new WeakMap<CanvasRenderingContext2D, ColorPack>();
+const palettes = new WeakMap<CanvasRenderingContext2D, ResolvedCardPalette>();
 
-export function getCardPalette(ctx: CanvasRenderingContext2D): ColorPack {
-    return palettes.get(ctx) ?? COLOR_PACK;
+export function getCardPalette(ctx: CanvasRenderingContext2D): ResolvedCardPalette {
+    return palettes.get(ctx) ?? DEFAULT_PALETTE;
 }
 
-export function drawCardBackground(ctx: CanvasRenderingContext2D, width: number, height: number, palette: ColorPack = COLOR_PACK): void {
+export function drawCardBackground(ctx: CanvasRenderingContext2D, width: number, height: number, theme?: CardTheme): void {
+    const palette: ResolvedCardPalette = { ...DEFAULT_PALETTE, ...theme?.palette };
     palettes.set(ctx, palette);
     ctx.save();
     roundedRectPath(ctx, 0, 0, width, height, CARD_RADIUS);
@@ -46,6 +54,9 @@ export function drawCardBackground(ctx: CanvasRenderingContext2D, width: number,
     ctx.fillStyle = bottomLeft;
     ctx.fillRect(0, 0, width, height);
 
+    if (theme?.decorations?.length)
+        drawCardDecorations(ctx, width, height, theme.decorations);
+
     ctx.restore();
 
     strokeRoundedRect(ctx, 0, 0, width, height, CARD_RADIUS, {
@@ -60,7 +71,7 @@ export function drawBrand(ctx: CanvasRenderingContext2D, width: number): void {
     const fontSize = 10 * SCALE;
     const brandStyle: TextStyle = {
         font: `600 ${fontSize}px ${FONT_MONO}`,
-        color: COLOR_TEXT_FAINT,
+        color: palette.textFaint,
         baseline: 'middle',
     };
     ctx.font = brandStyle.font;

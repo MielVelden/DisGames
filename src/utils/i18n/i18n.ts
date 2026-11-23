@@ -1283,6 +1283,15 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.PT]: "Executar um trabalho",
             },
         },
+        override: {
+            description: {
+                [LanguageEnum.EN]: "Force a runtime value (memory only, resets on restart)",
+                [LanguageEnum.NL]: "Forceer een runtime-waarde (alleen geheugen, reset bij herstart)",
+                [LanguageEnum.ES]: "Forzar un valor en tiempo de ejecución (solo memoria, se reinicia al reiniciar)",
+                [LanguageEnum.DE]: "Einen Laufzeitwert erzwingen (nur Speicher, wird bei Neustart zurückgesetzt)",
+                [LanguageEnum.PT]: "Forçar um valor em tempo de execução (apenas memória, reinicia ao reiniciar)",
+            },
+        },
         generateData: {
             description: {
                 [LanguageEnum.EN]: "Generate or translate game data using AI",

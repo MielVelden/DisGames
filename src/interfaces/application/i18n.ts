@@ -297,6 +297,9 @@ export interface I18nTranslations {
         job: {
             description: LanguageTranslations;
         },
+        override: {
+            description: LanguageTranslations;
+        },
         premium: {
             description: LanguageTranslations;
             option: LanguageCommandOptionTranslations<PremiumActionEnum>;

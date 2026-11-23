@@ -1,5 +1,6 @@
 import { LanguageEnum } from "../enums/database/LanguageEnum";
 import { StyleSlotEnum } from "../enums/application/StyleSlotEnum";
+import { CardDecorationEnum } from "../enums/application/CardDecorationEnum";
 import { StylePriorityEnum } from "../enums/application/StylePriorityEnum";
 import { Color } from "../../utils/helpers/Color";
 import { MonthDay } from "../../utils/helpers/Date";
@@ -16,11 +17,18 @@ export interface CardPalette {
     mid: Color;
     accent: Color;
     accent2: Color;
+    textMuted?: Color;
+    textFaint?: Color;
+}
+
+export interface CardTheme {
+    palette: CardPalette;
+    decorations?: CardDecorationEnum[];
 }
 
 export interface StyleTheme {
     accentColor?: number;
-    cardPalette?: CardPalette;
+    card?: CardTheme;
     emojis?: Partial<Record<StyleSlotEnum, string>>;
     footer?: MultiLingualString;
     gameStartFlair?: MultiLingualString;
@@ -41,6 +49,7 @@ export interface StylePresetModule {
 
 export enum StyleSourceEnum {
     SEASONAL = 'seasonal',
+    OVERRIDE = 'override',
     // SERVER = 'server',   // future: a server picked or designed one
 }
 

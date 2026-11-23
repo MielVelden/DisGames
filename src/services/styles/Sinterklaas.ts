@@ -1,3 +1,4 @@
+import { CardDecorationEnum } from "../../interfaces/enums/application/CardDecorationEnum";
 import { LanguageEnum, StylePriorityEnum, StyleSlotEnum } from "../../interfaces/enums";
 import { StylePresetModule } from "../../interfaces/domain/StylePreset";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
@@ -17,7 +18,10 @@ export default {
         priority: StylePriorityEnum.CULTURAL,
         theme: {
             accentColor: 0xd62828,
-            cardPalette: { deep: '#2a0a0a', base: '#4a1010', mid: '#7a1a1a', accent: '#f4c430', accent2: '#d62828' },
+            card: {
+                palette: { deep: '#2a0a0a', base: '#4a1010', mid: '#7a1a1a', accent: '#f4c430', accent2: '#d62828', textMuted: '#ecd0b8', textFaint: '#b08c76' },
+                decorations: [CardDecorationEnum.SPARKLES, CardDecorationEnum.MITRE],
+            },
             emojis: {
                 [StyleSlotEnum.ACCEPT]: '🎁',
                 [StyleSlotEnum.WIN]: '🍪',

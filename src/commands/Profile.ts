@@ -27,7 +27,7 @@ const optionsConfig = [
                     await event.clearComponentsAsync();
 
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
-                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.cardPalette);
+                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.card);
                     await event.addComponentsAsync(profileComponents);
 
                     // Add game switcher
@@ -52,7 +52,7 @@ const optionsConfig = [
                 enumValue: ProfileCommandActionEnum.MANAGE,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
-                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.cardPalette);
+                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.card);
                     await event.addComponentsAsync(profileComponents);
                     await event.replyAsync();
                 }

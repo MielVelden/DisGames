@@ -25,7 +25,7 @@ const optionsConfig = [
                 enumValue: LeaderboardCommandActionEnum.SERVERS,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const rows = await ServerService.getTopServersByPointsAsync(5);
-                    const components = await createLeaderboardContainerAsync(mapServerEntries(rows), event.server.LanguageEnum, StyleService.resolve(event.server).theme.cardPalette);
+                    const components = await createLeaderboardContainerAsync(mapServerEntries(rows), event.server.LanguageEnum, StyleService.resolve(event.server).theme.card);
                     await event.addComponentsAsync(components);
                     await event.replyAsync();
                 }
@@ -34,7 +34,7 @@ const optionsConfig = [
                 enumValue: LeaderboardCommandActionEnum.USERS,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const rows = await UserService.getTopUsersByExperienceAsync(5);
-                    const components = await createLeaderboardContainerAsync(mapUserEntries(rows), event.server.LanguageEnum, StyleService.resolve(event.server).theme.cardPalette);
+                    const components = await createLeaderboardContainerAsync(mapUserEntries(rows), event.server.LanguageEnum, StyleService.resolve(event.server).theme.card);
                     await event.addComponentsAsync(components);
                     await event.replyAsync();
                 }
@@ -62,7 +62,7 @@ const optionsConfig = [
                         ErrorHelper.throw(ExceptionEnum.PREMIUM_ONLY_LIVE_LEADERBOARD);
 
                     const entries = mapUserEntries(await UserService.getTopUsersByExperienceAsync(5))
-                    const components = await createLeaderboardContainerAsync(entries, event.server.LanguageEnum, StyleService.resolve(event.server).theme.cardPalette);
+                    const components = await createLeaderboardContainerAsync(entries, event.server.LanguageEnum, StyleService.resolve(event.server).theme.card);
 
                     const messageHandle = await event.sendToChannelAsync(event.channelId, components);
                     if (!messageHandle)
