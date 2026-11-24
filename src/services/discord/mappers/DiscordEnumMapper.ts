@@ -12,7 +12,15 @@ class DiscordEnumMapper {
             [Permission.ADMINISTRATOR]: PermissionsBitField.Flags.Administrator,
             [Permission.MANAGE_CHANNELS]: PermissionsBitField.Flags.ManageChannels,
             [Permission.MANAGE_GUILD]: PermissionsBitField.Flags.ManageGuild,
-            [Permission.MANAGE_MESSAGES]: PermissionsBitField.Flags.ManageMessages
+            [Permission.MANAGE_MESSAGES]: PermissionsBitField.Flags.ManageMessages,
+            [Permission.VIEW_CHANNEL]: PermissionsBitField.Flags.ViewChannel,
+            [Permission.SEND_MESSAGES]: PermissionsBitField.Flags.SendMessages,
+            [Permission.EMBED_LINKS]: PermissionsBitField.Flags.EmbedLinks,
+            [Permission.ATTACH_FILES]: PermissionsBitField.Flags.AttachFiles,
+            [Permission.READ_MESSAGE_HISTORY]: PermissionsBitField.Flags.ReadMessageHistory,
+            [Permission.ADD_REACTIONS]: PermissionsBitField.Flags.AddReactions,
+            [Permission.USE_EXTERNAL_EMOJIS]: PermissionsBitField.Flags.UseExternalEmojis,
+            [Permission.USE_APPLICATION_COMMANDS]: PermissionsBitField.Flags.UseApplicationCommands
         } as const;
 
         const permissionValue = permissionMap[permission];
