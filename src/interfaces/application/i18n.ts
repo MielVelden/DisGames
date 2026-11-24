@@ -256,6 +256,10 @@ export interface I18nTranslations {
                 nicknameLabel: LanguageTranslations;
                 avatarImageLabel: LanguageTranslations;
                 identityChanged: LanguageTranslations;
+                enableStyles: LanguageTranslations;
+                disableStyles: LanguageTranslations;
+                stylesEnabled: LanguageTranslations;
+                stylesDisabled: LanguageTranslations;
             };
         },
         aboutme: {

@@ -31,6 +31,7 @@ export class OverrideCommand implements Command {
     }
 
     // Usage: override <key> <value|reset>   e.g. "override style christmas"
+    // Applies to the server the message was sent in only.
     async executeAsync(event: MessageInteractionEvent): Promise<void> {
         const [, rawKey, rawValue] = event.content.trim().split(/\s+/);
 
@@ -40,9 +41,9 @@ export class OverrideCommand implements Command {
 
         const value = rawValue.toLowerCase();
         if (value === RESET_VALUE)
-            OverrideService.clear(key);
+            OverrideService.clear(key, event.server.Id);
         else if (validators[key](value))
-            OverrideService.set(key, value);
+            OverrideService.set(key, event.server.Id, value);
         else
             return ErrorHelper.throw(ExceptionEnum.INVALID_ARGUMENT);
 

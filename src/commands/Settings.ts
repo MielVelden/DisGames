@@ -153,12 +153,21 @@ export class SettingsCommand implements Command {
             }
         });
 
+        const stylesEnabled = !server.Settings?.stylesDisabled;
+        const stylesButton = createGenericButton(new MultiLingualString(stylesEnabled ? i18n.commands.settings.labels.disableStyles : i18n.commands.settings.labels.enableStyles), ButtonStyle.SECONDARY, "🎨", event.user.userId, false, async (buttonEvent: InteractionEvent) => {
+            await ServerService.saveAsync(new ServersSaveModel({
+                Id: server.Id,
+                SettingsJSON: { ...server.Settings, stylesDisabled: stylesEnabled || undefined }
+            }), buttonEvent);
+            await buttonEvent.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(stylesEnabled ? i18n.commands.settings.labels.stylesDisabled : i18n.commands.settings.labels.stylesEnabled))]);
+        });
+
         const settingsContainer = createSettingsContainer({
             LanguageEnum: server.LanguageEnum,
             ServerName: server.Name,
             GamesEnabled: activeGames.length,
             BotName: server.Settings?.botNickname
-        }, [changeLanguageButton, emojiButton, identityButton]);
+        }, [changeLanguageButton, emojiButton, identityButton, stylesButton]);
 
         await event.addComponentsAsync(settingsContainer);
         await event.replyAsync();

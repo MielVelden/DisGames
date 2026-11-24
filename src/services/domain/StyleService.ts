@@ -31,10 +31,10 @@ export class StyleService extends Service {
     }
 
     public resolve(server: ServersModel | undefined, now: Date = new Date()): ResolvedStyle {
-        if (!server)
+        if (!server || server.Settings?.stylesDisabled)
             return NO_STYLE;
 
-        const forced = this.presets.find(p => p.id === OverrideService.get(OverrideKeyEnum.STYLE));
+        const forced = this.presets.find(p => p.id === OverrideService.get(OverrideKeyEnum.STYLE, server.Id));
         if (forced)
             return { presetId: forced.id, source: StyleSourceEnum.OVERRIDE, theme: forced.theme };
 
