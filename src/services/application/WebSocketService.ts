@@ -32,6 +32,7 @@ export class WebSocketService extends Service {
 							this.handlePingAsync(id);
 							break;
 						case WebSocketEvent.UPDATE_METRIC:
+						case WebSocketEvent.LIVE_EVENT:
 						case WebSocketEvent.UPDATE_RECORD:
 						case WebSocketEvent.DELETE_RECORD:
 						case WebSocketEvent.JOB_PROGRESS:
