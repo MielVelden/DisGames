@@ -13,6 +13,14 @@ export const TYPE_EXCEPTIONS: TypeException[] = [
         customDefinition: 'export type MultiLingualString = Record<DisGames.Interfaces.Enums.LanguageEnum, string>;'
     },
     {
+        typeName: 'Color',
+        customDefinition: "export type Color = `#${string}` | `rgba(${string})` | 'transparent';"
+    },
+    {
+        typeName: 'MonthDay',
+        customDefinition: 'export interface MonthDay { month: number; day: number; }'
+    },
+    {
         typeName: 'Client',
         customDefinition: 'export type Client = any;'
     },
