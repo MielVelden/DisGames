@@ -1,5 +1,6 @@
 import {
-    GuildMember as DiscordGuildMember
+    GuildMember as DiscordGuildMember,
+    PermissionsBitField
 } from 'discord.js';
 import { Permission } from '../../interfaces/enums/application/Permission';
 import DiscordEnumMapper from './mappers/DiscordEnumMapper';
@@ -18,6 +19,11 @@ class DiscordPermissionService {
         if (!hasAllPermissions)
             Logger.logWarning(`User ${user.id} missing one or more permissions: ${permissions.join(", ")}`);
         return hasAllPermissions;
+    }
+
+    public toPermissionInteger(permissions: Permission[]): number {
+        const bits = permissions.map(permission => DiscordEnumMapper.mapPermissionToDiscordPermission(permission));
+        return Number(PermissionsBitField.resolve(bits));
     }
 }
 
