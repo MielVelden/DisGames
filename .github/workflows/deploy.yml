@@ -50,6 +50,7 @@ jobs:
         run: npm test
 
   build-and-push:
+    needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:

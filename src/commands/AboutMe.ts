@@ -8,6 +8,20 @@ import packageJson from "../../package.json";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 import { getConfigValue } from "../utils/application/Config";
 import { PRIVACY_POLICY_URL } from "../utils/constants/Links";
+import { Permission } from "../interfaces/enums/application/Permission";
+import DiscordPermissionService from "../services/discord/DiscordPermissionService";
+
+const BOT_INVITE_PERMISSIONS: Permission[] = [
+    Permission.VIEW_CHANNEL,
+    Permission.SEND_MESSAGES,
+    Permission.EMBED_LINKS,
+    Permission.ATTACH_FILES,
+    Permission.READ_MESSAGE_HISTORY,
+    Permission.ADD_REACTIONS,
+    Permission.USE_EXTERNAL_EMOJIS,
+    Permission.MANAGE_MESSAGES,
+    Permission.USE_APPLICATION_COMMANDS
+];
 
 export class AboutMeCommand implements Command {
     name = CommandEnum.ABOUTME;
@@ -18,7 +32,7 @@ export class AboutMeCommand implements Command {
     async executeAsync(event: SlashCommandInteractionEvent): Promise<void> {
         const version = packageJson.version;
         const githubUrl = packageJson.github;
-        const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${getConfigValue(EnvConfigEnum.DISCORD_CLIENT_ID)}&permissions=8&scope=bot%20applications.commands`;
+        const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${getConfigValue(EnvConfigEnum.DISCORD_CLIENT_ID)}&permissions=${DiscordPermissionService.toPermissionInteger(BOT_INVITE_PERMISSIONS)}&scope=bot%20applications.commands`;
         const components = createAboutMeContainer(inviteUrl, githubUrl, PRIVACY_POLICY_URL, version);
         await event.addComponentsAsync(components);
         await event.replyAsync();
