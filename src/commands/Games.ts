@@ -13,7 +13,7 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { createGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
-import { createGameHelpContainer } from "../builders/containers/GameHelpContainer";
+import { createGameHelpContainerAsync } from "../builders/containers/GameHelpContainer";
 import { createMoveButton } from "../builders/buttons/MoveButton";
 import { createGameSetupConfirmationContainerAsync } from "../builders/containers/GameSetupConfirmationContainer";
 import { GamesSaveModel } from "../interfaces/database";
@@ -69,7 +69,7 @@ const optionsConfig = [
                             await btnEvent.clearComponentsAsync();
                             await btnEvent.editWithComponentsAsync([ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.games.labels.deleteSuccess.title))), ComponentService.createContent(new MultiLingualString(i18n.commands.games.labels.deleteSuccess.description))]);
                         })
-                    ], game.Settings, event.server.LanguageEnum));
+                    ], game.Settings, event.server.LanguageEnum, event.server));
                     await event.replyAsync();
                 }
             },
@@ -84,7 +84,7 @@ const optionsConfig = [
                 }],
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const gameId = Number(event.getFollowUpOption(GamesCommandFollowUpKeysEnum.ALL_GAMES)) as GameTypeEnum;
-                    const helpComponents = createGameHelpContainer(gameId);
+                    const helpComponents = await createGameHelpContainerAsync(gameId, event.server);
                     await event.addComponentsAsync(helpComponents);
                     await event.editAsync();
                 }
@@ -109,7 +109,7 @@ const optionsConfig = [
                     if (gameModule?.config.settings && gameModule.config.settings.length > 0) {
 
                         const defaultSettings = GameService.getDefaultSettings(gameModule.config.settings);
-                        const draftSummary = await createGameSetupConfirmationContainerAsync(gameName, channelName, gameTypeEnum, defaultSettings, event.server.LanguageEnum);
+                        const draftSummary = await createGameSetupConfirmationContainerAsync(gameName, channelName, gameTypeEnum, defaultSettings, event.server.LanguageEnum, event.server);
                         const result = await event.getGameSettingsViaModalAsync(gameModule.config.settings, defaultSettings, draftSummary);
 
                         if (!result)
@@ -132,7 +132,8 @@ const optionsConfig = [
                         channelName,
                         gameTypeEnum,
                         {},
-                        event.server.LanguageEnum
+                        event.server.LanguageEnum,
+                        event.server
                     );
 
                     const confirmedEvent = await event.getConfirmationFromUserAsync(confirmationContainer);

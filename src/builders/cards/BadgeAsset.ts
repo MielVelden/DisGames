@@ -46,16 +46,59 @@ async function loadSvgAsync(file: string, color?: string): Promise<Image | null>
             return `<svg${cleanedAttrs} width="${RENDER_SIZE}" height="${RENDER_SIZE}">`;
         });
 
-        if(color) {
+        if (color) {
             svg = svg
                 .replace(/\sstroke="(?!none|transparent)[^"]*"/g, ' stroke="currentColor"')
                 .replace(/\sfill="(?!none|transparent)[^"]*"/g, ' fill="currentColor"')
                 .replace(/<svg /, `<svg style="color:${color}" `);
         }
-        
+
         return await loadImage(Buffer.from(svg));
     } catch (error) {
         Logger.logError(`Failed to load badge asset ${file}:`, error as Error);
         return null;
     }
+}
+
+
+const emojiCache = new Map<string, Promise<Image | null>>();
+const TWEMOJI_DIR = path.join(process.cwd(), 'node_modules', '@twemoji', 'svg');
+
+export async function loadEmojiImageAsync(emoji: string): Promise<Image | null> {
+    let pending = emojiCache.get(emoji);
+    if (!pending) {
+        pending = loadEmojiAsync(emoji);
+        emojiCache.set(emoji, pending);
+    }
+    return pending;
+}
+
+async function loadEmojiAsync(emoji: string): Promise<Image | null> {
+    const codePoints = [...emoji].map(c => c.codePointAt(0)!.toString(16));
+    const withoutSelector = codePoints.filter(cp => cp !== 'fe0f');
+
+    // Twemoji drops the variation selector
+    const candidates = [...new Set([
+        (codePoints.includes('200d') ? codePoints : withoutSelector).join('-'),
+        codePoints.join('-'),
+        withoutSelector.join('-'),
+    ])];
+
+    for (const name of candidates) {
+        for (const dir of [path.join(TWEMOJI_DIR, 'assets'), TWEMOJI_DIR]) {
+            const file = path.join(dir, `${name}.svg`);
+            if (!fs.existsSync(file))
+                continue;
+
+            try {
+                // Twemoji SVGs only carry a viewBox; node-canvas needs explicit dimensions.
+                const svg = (await fs.promises.readFile(file, 'utf8'))
+                    .replace(/<svg\b([^>]*)>/, (_match, attrs: string) => `<svg${attrs.replace(/\s(width|height)="[^"]*"/g, '')} width="${RENDER_SIZE}" height="${RENDER_SIZE}">`);
+                return await loadImage(Buffer.from(svg));
+            } catch (error) {
+                Logger.logWarning(`Failed to load emoji asset ${file}: ${error}`);
+            }
+        }
+    }
+    return null;
 }

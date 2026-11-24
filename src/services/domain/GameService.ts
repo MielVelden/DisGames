@@ -1,5 +1,5 @@
 import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
-import { DatasheetsModel, GameDataModel, GamesModel, GamesModelFieldEnum, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
+import { DatasheetsModel, GameDataModel, GamesModel, GamesModelFieldEnum, GamesSaveModel, PointsSaveModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
 import {
@@ -33,6 +33,9 @@ import TimelineBuilder from "./TimelineBuilder";
 import { ARRAY_JOIN_DELIMITER } from "../../constants";
 import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
+import StyleService from "./StyleService";
+import GameStartCard from "../../builders/cards/GameStartCard";
+import { Media } from "../../interfaces/application/Media";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
 import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
@@ -164,15 +167,35 @@ export class GameService extends Service {
         return game;
     }
 
+    public async getBannerAsync(gameType: GameTypeEnum, server?: ServersModel): Promise<Media> {
+        if (!server)
+            return MediaService.getGameImage(gameType);
+
+        try {
+            const gameModule = await this.getGameByTypeAsync(gameType);
+            if (!gameModule)
+                return MediaService.getGameImage(gameType);
+
+            const style = StyleService.resolve(server);
+            return await GameStartCard.getOrGenerateAsync(gameType, gameModule.config.emoji, server.LanguageEnum, style.theme.card, style.presetId);
+        } catch (error) {
+            Logger.logWarning(`Could not generate banner for game ${gameType}: ${error}`);
+            return MediaService.getGameImage(gameType);
+        }
+    }
+
     public async getStartMessageAsync(game: GamesModel, gameData?: GameDataModel | GameDataModel[]): Promise<Component[]> {
         const gameModule = await this.getGameByTypeAsync(game.GameTypeEnum);
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
-        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string, gameModule.config.skipDefaultStartMessage);
+        const server = await ServerService.getByExternalIdAsync(game.ServerId);
+        const banner = await this.getBannerAsync(game.GameTypeEnum as GameTypeEnum, server);
+        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string, gameModule.config.skipDefaultStartMessage, banner,
+            // Only games that declare a firstAnswer show it in their start text; for the others the answer is secret (e.g. Anagram).
+            gameModule.config.firstAnswer !== undefined ? game.Answer as string : undefined);
 
         if (gameModule.functions.getStartComponentsAsync) {
-            const server = await ServerService.getByExternalIdAsync(game.ServerId);
             const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
             components.pop();
             components = components.concat(startComponents);

@@ -108,8 +108,8 @@ export class ComponentService extends Service {
         ];
     }
 
-    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string, skipDefaultStartMessage: boolean = false): Component[] {
-        const gameImage = MediaService.getGameImage(gameTypeEnum);
+    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string, skipDefaultStartMessage: boolean = false, bannerOverride?: Media, startMessageAnswer?: string): Component[] {
+        const gameImage = bannerOverride ?? MediaService.getGameImage(gameTypeEnum);
 
         const components = [
             this.createImage(gameImage, false),
@@ -119,7 +119,7 @@ export class ComponentService extends Service {
         ];
 
         if (!skipDefaultStartMessage)
-            components.push(this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()));
+            components.push(this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!(startMessageAnswer)));
 
         components.push(this.createContent(createBlock(createMultiLingualString(firstAnswer))));
 

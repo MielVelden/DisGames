@@ -27,6 +27,7 @@
     "@discordjs/builders": "^1.7.0",
     "@discordjs/rest": "^2.2.0",
     "@toon-format/toon": "^2.2.0",
+    "@twemoji/svg": "^15.0.0",
     "axios": "^1.8.4",
     "canvas": "^3.2.0",
     "chokidar": "^4.0.3",
