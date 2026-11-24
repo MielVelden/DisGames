@@ -1,11 +1,11 @@
 import { CardDecorationEnum } from "../../interfaces/enums/application/CardDecorationEnum";
-import { LanguageEnum, StylePriorityEnum, StyleSlotEnum } from "../../interfaces/enums";
+import { LanguageEnum, StylePriorityEnum, StyleSlotEnum, StyleIdEnum } from "../../interfaces/enums";
 import { StylePresetModule } from "../../interfaces/domain/StylePreset";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export default {
     config: {
-        id: 'halloween',
+        id: StyleIdEnum.HALLOWEEN,
         name: new MultiLingualString({
             [LanguageEnum.EN]: "Halloween",
             [LanguageEnum.NL]: "Halloween",
@@ -28,11 +28,11 @@ export default {
                 [StyleSlotEnum.DECORATION]: '🦇',
             },
             footer: new MultiLingualString({
-                [LanguageEnum.EN]: "🎃 Spooky season!",
-                [LanguageEnum.NL]: "🎃 Griezelige tijd!",
-                [LanguageEnum.ES]: "🎃 ¡Temporada de miedo!",
-                [LanguageEnum.DE]: "🎃 Gruselzeit!",
-                [LanguageEnum.PT]: "🎃 Época de terror!",
+                [LanguageEnum.EN]: "🎃 Watch out for ghosts! Happy Halloween!",
+                [LanguageEnum.NL]: "🎃 Pas op voor spoken! Fijne Halloween!",
+                [LanguageEnum.ES]: "🎃 ¡Cuidado con los fantasmas! ¡Feliz Halloween!",
+                [LanguageEnum.DE]: "🎃 Vorsicht vor Gespenstern! Fröhliches Halloween!",
+                [LanguageEnum.PT]: "🎃 Cuidado com os fantasmas! Feliz Halloween!",
             }),
         },
     },

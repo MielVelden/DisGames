@@ -1,7 +1,7 @@
 import { Service } from "../../interfaces/application/Service";
 import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { StyleSlotEnum } from "../../interfaces/enums/application/StyleSlotEnum";
-import { ResolvedStyle, StylePresetConfig, StylePresetModule, StyleSourceEnum, StyleWindow } from "../../interfaces/domain/StylePreset";
+import { ResolvedStyle, StylePresetConfig, StylePresetModule, StyleSourceEnum, StyleWindow, StyleWindows } from "../../interfaces/domain/StylePreset";
 import Logger from "../../utils/application/Logger";
 import * as path from "path";
 import { collectModules } from "../../utils/collectors/ModuleCollector";
@@ -40,7 +40,7 @@ export class StyleService extends Service {
 
         const active = this.presets
             .filter(p => !p.languages?.length || p.languages.includes(server.LanguageEnum))
-            .filter(p => p.windows?.some(w => this.isWithinWindow(w, now)))
+            .filter(p => this.getWindows(p.windows, now).some(w => this.isWithinWindow(w, now)))
             .sort((a, b) => b.priority - a.priority)[0];
 
         if (!active) 
@@ -57,6 +57,12 @@ export class StyleService extends Service {
     public emoji(slot: StyleSlotEnum, fallback: string, server?: ServersModel): string {
         const style = server ? this.resolve(server) : this.resolveCurrent();
         return style.theme.emojis?.[slot] ?? fallback;
+    }
+
+    private getWindows(windows: StyleWindows | undefined, now: Date): StyleWindow[] {
+        if (typeof windows === 'function')
+            return windows(now.getUTCFullYear());
+        return windows ?? [];
     }
 
     private isWithinWindow(window: StyleWindow, now: Date): boolean {

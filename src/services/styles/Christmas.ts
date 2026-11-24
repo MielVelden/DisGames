@@ -1,11 +1,11 @@
 import { CardDecorationEnum } from "../../interfaces/enums/application/CardDecorationEnum";
-import { LanguageEnum, StylePriorityEnum, StyleSlotEnum } from "../../interfaces/enums";
+import { LanguageEnum, StylePriorityEnum, StyleSlotEnum, StyleIdEnum } from "../../interfaces/enums";
 import { StylePresetModule } from "../../interfaces/domain/StylePreset";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export default {
     config: {
-        id: 'christmas',
+        id: StyleIdEnum.CHRISTMAS,
         name: new MultiLingualString({
             [LanguageEnum.EN]: "Christmas",
             [LanguageEnum.NL]: "Kerst",
@@ -28,11 +28,11 @@ export default {
                 [StyleSlotEnum.DECORATION]: '❄️',
             },
             footer: new MultiLingualString({
-                [LanguageEnum.EN]: "🎄 Happy holidays!",
-                [LanguageEnum.NL]: "🎄 Fijne feestdagen!",
-                [LanguageEnum.ES]: "🎄 ¡Felices fiestas!",
-                [LanguageEnum.DE]: "🎄 Frohe Feiertage!",
-                [LanguageEnum.PT]: "🎄 Boas festas!",
+                [LanguageEnum.EN]: "🎄 Deck the halls! Merry Christmas!",
+                [LanguageEnum.NL]: "🎄 Zet de kerstboom maar op! Fijne kerstdagen!",
+                [LanguageEnum.ES]: "🎄 ¡Decora el árbol! ¡Feliz Navidad!",
+                [LanguageEnum.DE]: "🎄 Schmück den Baum! Frohe Weihnachten!",
+                [LanguageEnum.PT]: "🎄 Enfeite a árvore! Feliz Natal!",
             }),
         },
     },

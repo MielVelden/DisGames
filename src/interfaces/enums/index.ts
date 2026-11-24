@@ -1,6 +1,7 @@
 // Sort the enums alphabetically
 
 export * from './application/BadgeEnum';
+export * from './application/StyleIdEnum';
 export * from './application/StyleSlotEnum';
 export * from './application/StylePriorityEnum';
 export * from './database/GameTypeEnum';

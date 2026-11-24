@@ -1,4 +1,5 @@
 import { LanguageEnum } from "../enums/database/LanguageEnum";
+import { StyleIdEnum } from "../enums/application/StyleIdEnum";
 import { StyleSlotEnum } from "../enums/application/StyleSlotEnum";
 import { CardDecorationEnum } from "../enums/application/CardDecorationEnum";
 import { StylePriorityEnum } from "../enums/application/StylePriorityEnum";
@@ -10,6 +11,8 @@ export interface StyleWindow {
     from: MonthDay;
     to: MonthDay;
 }
+
+export type StyleWindows = StyleWindow[] | ((year: number) => StyleWindow[]);
 
 export interface CardPalette {
     deep: Color;
@@ -35,10 +38,10 @@ export interface StyleTheme {
 }
 
 export interface StylePresetConfig {
-    id: string;
+    id: StyleIdEnum;
     name: MultiLingualString;
     languages?: LanguageEnum[];
-    windows?: StyleWindow[];
+    windows?: StyleWindows;
     priority: StylePriorityEnum;
     theme: StyleTheme;
 }
@@ -54,7 +57,7 @@ export enum StyleSourceEnum {
 }
 
 export interface ResolvedStyle {
-    presetId: string | null;
+    presetId: StyleIdEnum | null;
     source: StyleSourceEnum | null;
     theme: StyleTheme;
 }

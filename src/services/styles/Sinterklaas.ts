@@ -1,11 +1,11 @@
 import { CardDecorationEnum } from "../../interfaces/enums/application/CardDecorationEnum";
-import { LanguageEnum, StylePriorityEnum, StyleSlotEnum } from "../../interfaces/enums";
+import { LanguageEnum, StylePriorityEnum, StyleSlotEnum, StyleIdEnum } from "../../interfaces/enums";
 import { StylePresetModule } from "../../interfaces/domain/StylePreset";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
 export default {
     config: {
-        id: 'sinterklaas',
+        id: StyleIdEnum.SINTERKLAAS,
         name: new MultiLingualString({
             [LanguageEnum.EN]: "Sinterklaas",
             [LanguageEnum.NL]: "Sinterklaas",
@@ -29,11 +29,11 @@ export default {
                 [StyleSlotEnum.DECORATION]: '👑',
             },
             footer: new MultiLingualString({
-                [LanguageEnum.NL]: "🎁 Zet je schoen maar klaar!",
-                [LanguageEnum.EN]: "🎁 Put your shoe out!",
-                [LanguageEnum.ES]: "🎁 ¡Deja tu zapato listo!",
-                [LanguageEnum.DE]: "🎁 Stell deinen Schuh bereit!",
-                [LanguageEnum.PT]: "🎁 Deixe o sapato pronto!",
+                [LanguageEnum.EN]: "🎁 Put your shoe out! Happy Sinterklaas!",
+                [LanguageEnum.NL]: "🎁 Zet je schoen maar klaar! Fijne pakjesavond!",
+                [LanguageEnum.ES]: "🎁 ¡Deja tu zapato listo! ¡Feliz Sinterklaas!",
+                [LanguageEnum.DE]: "🎁 Stell deinen Schuh bereit! Schönes Sinterklaasfest!",
+                [LanguageEnum.PT]: "🎁 Deixe o sapato pronto! Feliz Sinterklaas!",
             }),
         },
     },

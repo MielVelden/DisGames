@@ -33,11 +33,12 @@ import TimelineBuilder from "./TimelineBuilder";
 import { ARRAY_JOIN_DELIMITER } from "../../constants";
 import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
+import StyleService from "./StyleService";
 import BannerService from "./BannerService";
 import { Media } from "../../interfaces/application/Media";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
-import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
+import { addPrefix, createFooter, createQuote, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
 import MetricService from "./MetricService";
@@ -201,6 +202,12 @@ export class GameService extends Service {
         }
 
         if (gameModule.config.options[GameOptionEnum.ALLOW_SKIPPING]) {
+            // The style line sits right under the question, in the same plain text as the intro line above it.
+            // Only games with the divider/skip footer get it: the others (Counting, Number Guess) have no room.
+            const styleFooter = StyleService.resolve(server).theme.footer;
+            if (styleFooter)
+                components.push(ComponentService.createContent(createQuote(styleFooter)));
+
             components.push(
                 ComponentService.createSeparator(),
                 ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer)))
@@ -465,6 +472,15 @@ export class GameService extends Service {
         }
 
         if (gameEvent.gameConfig.options[GameOptionEnum.ALLOW_SKIPPING]) {
+            const styleFooter = StyleService.resolve(gameEvent.server).theme.footer;
+            // MEDIUM: after the question (HIGH), before the divider (LOW).
+            if (styleFooter)
+                gameEvent.addAction({
+                    enum: GameActionEnum.COMPONENT,
+                    priority: GameActionPriorityEnum.MEDIUM,
+                    component: ComponentService.createContent(createQuote(styleFooter))
+                });
+
             gameEvent.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.LOW,

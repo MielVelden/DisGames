@@ -9,4 +9,13 @@ export enum CardDecorationEnum {
     BATS = 'bats',
     SPARKLES = 'sparkles',
     MITRE = 'mitre',
+    FALLING_LEAVES = 'fallingLeaves',
+    PRICE_TAG = 'priceTag',
+    FIREWORKS = 'fireworks',
+    CONFETTI = 'confetti',
+    HEARTS = 'hearts',
+    LANTERNS = 'lanterns',
+    BUNTING = 'bunting',
+    SHAMROCKS = 'shamrocks',
+    EASTER_EGGS = 'easterEggs',
 }
