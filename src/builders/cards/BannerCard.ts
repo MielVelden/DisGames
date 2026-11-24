@@ -8,8 +8,8 @@ import { loadEmojiImageAsync } from './BadgeAsset';
 import { Color } from '../../utils/helpers/Color';
 import { CardTheme } from '../../interfaces/domain/StylePreset';
 import { drawBrand, drawCardBackground, getCardPalette } from './CardChrome';
-import { GameTypeEnum, LanguageEnum } from '../../interfaces/enums';
-import { i18n } from '../../utils/i18n/i18n';
+import { LanguageEnum } from '../../interfaces/enums';
+import { LanguageTranslations } from '../../interfaces/application/i18n';
 import { getMultiLingualString } from '../../utils/i18n/MultiLingualString';
 
 const CARD_WIDTH = 584 * SCALE;
@@ -39,24 +39,31 @@ const DESC_MAX_LINES = 3;
 
 const DEFAULT_STYLE_KEY = 'default';
 
-class GameStartCardService extends BaseCard {
+export interface BannerContent {
+    key: string;
+    emoji: string;
+    title: LanguageTranslations;
+    description: LanguageTranslations;
+}
+
+class BannerCardService extends BaseCard {
     constructor() {
-        super(path.join('images', 'generated', 'game-start'));
+        super(path.join('images', 'generated', 'banners'));
     }
 
-    public async getOrGenerateAsync(gameType: GameTypeEnum, emoji: string, language: LanguageEnum, cardTheme?: CardTheme, styleId?: string | null): Promise<Media> {
-        const name = `${gameType}-${language}-${styleId ?? DEFAULT_STYLE_KEY}`;
+    public async getOrGenerateAsync(content: BannerContent, language: LanguageEnum, cardTheme?: CardTheme, styleId?: string | null): Promise<Media> {
+        const name = `${content.key}-${language}-${styleId ?? DEFAULT_STYLE_KEY}`;
         const filepath = path.join(this.imagesPath, `${name}.png`);
 
         if (!fs.existsSync(filepath)) {
             this.ensureDirectoryExists(this.imagesPath);   // may have been removed while running
-            await fs.promises.writeFile(filepath, this.render(gameType, emoji, await loadEmojiImageAsync(emoji), language, cardTheme));
+            await fs.promises.writeFile(filepath, this.render(content, await loadEmojiImageAsync(content.emoji), language, cardTheme));
         }
 
         return { url: filepath, name, type: MediaType.PNG };
     }
 
-    private render(gameType: GameTypeEnum, emoji: string, emojiImage: Image | null, language: LanguageEnum, cardTheme?: CardTheme): Buffer {
+    private render(content: BannerContent, emojiImage: Image | null, language: LanguageEnum, cardTheme?: CardTheme): Buffer {
         const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
         const ctx = canvas.getContext('2d');
 
@@ -68,18 +75,18 @@ class GameStartCardService extends BaseCard {
 
         const palette = getCardPalette(ctx);
 
-        this.drawBackdrop(ctx, palette.accent, palette.accent2, emojiImage, gameType);
+        this.drawBackdrop(ctx, palette.accent, palette.accent2, emojiImage, content.key);
 
         this.fillRoundedRect(ctx, PANEL_X, PANEL_Y, PANEL_WIDTH, PANEL_HEIGHT, PANEL_RADIUS, PANEL_FILL);
         this.strokeRoundedRect(ctx, PANEL_X, PANEL_Y, PANEL_WIDTH, PANEL_HEIGHT, PANEL_RADIUS, { color: COLOR_PANEL_BORDER, width: 1 * SCALE });
 
         const tileX = PANEL_X + PANEL_PADDING;
         const tileY = PANEL_Y + (PANEL_HEIGHT - TILE_SIZE) / 2;
-        this.drawTile(ctx, emoji, emojiImage, tileX, tileY, palette.accent);
+        this.drawTile(ctx, content.emoji, emojiImage, tileX, tileY, palette.accent);
 
         const textX = tileX + TILE_SIZE + TILE_TEXT_GAP;
         const textWidth = PANEL_X + PANEL_WIDTH - PANEL_PADDING - textX;
-        this.drawTexts(ctx, gameType, language, textX, textWidth, tileY + TILE_SIZE / 2);
+        this.drawTexts(ctx, content, language, textX, textWidth, tileY + TILE_SIZE / 2);
 
         drawBrand(ctx, CARD_WIDTH);
         ctx.restore();
@@ -87,8 +94,9 @@ class GameStartCardService extends BaseCard {
         return canvas.toBuffer('image/png');
     }
 
-    private drawBackdrop(ctx: CanvasRenderingContext2D, accent: Color, accent2: Color, emojiImage: Image | null, gameType: GameTypeEnum): void {
-        const shift = ((Number(gameType) * 53) % 120) * SCALE;
+    private drawBackdrop(ctx: CanvasRenderingContext2D, accent: Color, accent2: Color, emojiImage: Image | null, key: string): void {
+        const seed = [...key].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+        const shift = ((seed * 53) % 120) * SCALE;
 
         ctx.save();
         ctx.fillStyle = this.withAlpha(accent2, 0.16);
@@ -130,9 +138,8 @@ class GameStartCardService extends BaseCard {
         });
     }
 
-    private drawTexts(ctx: CanvasRenderingContext2D, gameType: GameTypeEnum, language: LanguageEnum, x: number, maxWidth: number, centerY: number): void {
-        const info = i18n.enums.gameTypes[gameType];
-        const title = getMultiLingualString(info.name, language);
+    private drawTexts(ctx: CanvasRenderingContext2D, content: BannerContent, language: LanguageEnum, x: number, maxWidth: number, centerY: number): void {
+        const title = getMultiLingualString(content.title, language);
 
         // Shrink long translated names to fit rather than truncating them.
         let size = TITLE_FONT;
@@ -145,7 +152,10 @@ class GameStartCardService extends BaseCard {
         const titleText = this.truncateText(ctx, title, maxWidth);
 
         ctx.font = `500 ${DESC_FONT}px ${FONT_SANS}`;
-        const descLines = this.wrapText(ctx, getMultiLingualString(info.description, language), maxWidth, DESC_MAX_LINES);
+
+        // Descriptions can be several paragraphs (the welcome text); the banner shows the first.
+        const firstParagraph = getMultiLingualString(content.description, language).split(/\\n|\n/)[0].trim();
+        const descLines = this.wrapText(ctx, firstParagraph, maxWidth, DESC_MAX_LINES);
 
         const blockHeight = size + TITLE_DESC_GAP + descLines.length * DESC_LINE;
         const top = centerY - blockHeight / 2;
@@ -157,4 +167,4 @@ class GameStartCardService extends BaseCard {
     }
 }
 
-export default new GameStartCardService();
+export default new BannerCardService();

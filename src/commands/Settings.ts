@@ -4,7 +4,7 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ButtonStyle, Permission } from "../interfaces/application";
-import { createSettingsContainer } from "../builders/containers/SettingsContainer";
+import { createSettingsContainerAsync } from "../builders/containers/SettingsContainer";
 import { createGenericButton } from "../builders/buttons/GenericButton";
 import ComponentService from "../services/application/ComponentService";
 import ServerService from "../services/domain/ServerService";
@@ -162,12 +162,12 @@ export class SettingsCommand implements Command {
             await buttonEvent.editWithComponentsAsync([ComponentService.createContent(new MultiLingualString(stylesEnabled ? i18n.commands.settings.labels.stylesDisabled : i18n.commands.settings.labels.stylesEnabled))]);
         });
 
-        const settingsContainer = createSettingsContainer({
+        const settingsContainer = await createSettingsContainerAsync({
             LanguageEnum: server.LanguageEnum,
             ServerName: server.Name,
             GamesEnabled: activeGames.length,
             BotName: server.Settings?.botNickname
-        }, [changeLanguageButton, emojiButton, identityButton, stylesButton]);
+        }, [changeLanguageButton, emojiButton, identityButton, stylesButton], server);
 
         await event.addComponentsAsync(settingsContainer);
         await event.replyAsync();

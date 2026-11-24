@@ -33,8 +33,7 @@ import TimelineBuilder from "./TimelineBuilder";
 import { ARRAY_JOIN_DELIMITER } from "../../constants";
 import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
-import StyleService from "./StyleService";
-import GameStartCard from "../../builders/cards/GameStartCard";
+import BannerService from "./BannerService";
 import { Media } from "../../interfaces/application/Media";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
@@ -176,8 +175,8 @@ export class GameService extends Service {
             if (!gameModule)
                 return MediaService.getGameImage(gameType);
 
-            const style = StyleService.resolve(server);
-            return await GameStartCard.getOrGenerateAsync(gameType, gameModule.config.emoji, server.LanguageEnum, style.theme.card, style.presetId);
+            const info = i18n.enums.gameTypes[gameType];
+            return await BannerService.generateAsync({ key: `game-${gameType}`, emoji: gameModule.config.emoji, title: info.name, description: info.description }, server);
         } catch (error) {
             Logger.logWarning(`Could not generate banner for game ${gameType}: ${error}`);
             return MediaService.getGameImage(gameType);

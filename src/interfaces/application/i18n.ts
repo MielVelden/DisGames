@@ -267,6 +267,7 @@ export interface I18nTranslations {
             labels: {
                 title: LanguageTranslations;
                 description: LanguageTranslations;
+                bannerTagline: LanguageTranslations;
                 github: LanguageTranslations;
                 invite: LanguageTranslations;
                 privacy: LanguageTranslations;

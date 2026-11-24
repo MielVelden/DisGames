@@ -941,6 +941,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Tauche ein in eine Welt endlosen Spaßes mit DisGames, dem ultimativen Minispiel-Bot für Discord. Entdecke eine Sammlung einzigartiger, fesselnder Minispiele, die deine Community zusammenbringen. Von kniffligen Rätseln bis zu aufregenden Action-Challenges ist für jeden etwas dabei. Benutzerfreundliche Slash-Befehle (/) machen das Spielen mühelos und intuitiv.\n\nDisGames bietet eine große Auswahl an Minispielen für jeden Geschmack und fördert Kameradschaft und Wettbewerb. Fordere Freunde heraus oder schließe dich in Koop-Spielen zusammen. Das Hinzufügen des Bots zu deinem Discord-Server ist schnell und einfach. Hebe deinen Server noch heute auf ein neues Level und definiere neu, wie du dich verbindest und Spaß hast!",
                     [LanguageEnum.PT]: "Mergulhe num mundo de diversão sem fim com o DisGames, o bot definitivo de minijogos para o Discord. Explore uma coleção de minijogos únicos e cativantes feitos para unir sua comunidade. De quebra-cabeças que desafiam o cérebro a emocionantes desafios de ação, há algo para todos. Comandos slash fáceis de usar (/) tornam o jogo simples e intuitivo.\n\nO DisGames oferece uma ampla variedade de minijogos para todos os gostos e promove camaradagem e competição. Desafie amigos e jogadores, ou forme equipes em jogos cooperativos. Adicionar o bot ao seu servidor Discord é rápido e fácil. Eleve seu servidor hoje e redefina como você se conecta e se diverte!",
                 },
+                bannerTagline: {
+                    [LanguageEnum.EN]: "Minigames for your Discord server",
+                    [LanguageEnum.NL]: "Minigames voor jouw Discord-server",
+                    [LanguageEnum.ES]: "Minijuegos para tu servidor de Discord",
+                    [LanguageEnum.DE]: "Minispiele für deinen Discord-Server",
+                    [LanguageEnum.PT]: "Minijogos para o seu servidor Discord",
+                },
                 github: {
                     [LanguageEnum.EN]: "GitHub",
                     [LanguageEnum.NL]: "GitHub",
