@@ -3,13 +3,14 @@ import { JobItem, JobExecutionResult } from '../interfaces/application/Job';
 import { wsService } from '../server';
 import { JobProgressData } from '../interfaces/application/WebSocket';
 import { getClientId } from '../middleware/RequestContext';
+import { User } from '../interfaces/domain';
 
 export class JobController {
-    async getAllJobsAsync(): Promise<JobItem[]> {
+    async getAllJobsAsync(_identity: User): Promise<JobItem[]> {
         return JobService.getAllJobs();
     }
 
-    async executeJobAsync(jobId: string): Promise<JobExecutionResult> {
+    async executeJobAsync(jobId: string, _identity: User): Promise<JobExecutionResult> {
         const clientId = getClientId();
 
         const result = await JobService.executeJobById(jobId, (executionId, jobId, current, total, message) => {
