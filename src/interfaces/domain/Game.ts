@@ -19,7 +19,7 @@ export interface IGameEvent {
     validateAnswer: (event: IGameEvent) => boolean;
     getUpdatedGameAnswerAsync?: (event: IGameEvent) => Promise<void>;
     onIncorrectAnswerAsync?: (event: IGameEvent) => Promise<void>;
-    getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel) => Promise<Component[]>;
+    getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel, answer: string) => Promise<Component[]>;
     prepareDataAsync?: (gameData: GameDataModel[], languageEnum: LanguageEnum) => Promise<string>;
     deleteMessage: () => Promise<void>;
     getNextAnswerAsync(): Promise<GameDataModel[]>;
@@ -47,7 +47,6 @@ export interface GameConfig {
     addCorrectReaction: boolean;
     hasImages?: boolean;
     hasDataSheets?: boolean;
-    skipDefaultStartMessage?: boolean;
     allowDuplicatesResponse?: boolean;
     options: {
         [key in GameOptionEnum]: boolean;
@@ -63,8 +62,8 @@ export interface GameFunctions {
     getUpdatedGameAnswerAsync?(event: IGameEvent): Promise<void>;
     onIncorrectAnswerAsync?(event: IGameEvent): Promise<void>;
 
-    // Get the components for the start message
-    getStartComponentsAsync?(gameData: GameDataModel[], server: ServersModel): Promise<Component[]>;
+    // Everything below the start message header (intro line and first question); without it a default body is used
+    getStartComponentsAsync?(gameData: GameDataModel[], server: ServersModel, answer: string): Promise<Component[]>;
 
     // Prepare the data for the game
     prepareDataAsync?(gameData: GameDataModel[], languageEnum: LanguageEnum): Promise<string>;

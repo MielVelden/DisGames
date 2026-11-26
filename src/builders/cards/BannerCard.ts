@@ -57,7 +57,10 @@ class BannerCardService extends BaseCard {
 
         if (!fs.existsSync(filepath)) {
             this.ensureDirectoryExists(this.imagesPath);   // may have been removed while running
-            await fs.promises.writeFile(filepath, this.render(content, await loadEmojiImageAsync(content.emoji), language, cardTheme));
+            const buffer = this.render(content, await loadEmojiImageAsync(content.emoji), language, cardTheme);
+            const tempPath = `${filepath}.${process.pid}.${Date.now()}.tmp`;
+            await fs.promises.writeFile(tempPath, buffer);
+            await fs.promises.rename(tempPath, filepath);
         }
 
         return { url: filepath, name, type: MediaType.PNG };

@@ -50,6 +50,7 @@ export default {
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
             const firstQuestion = gameData[0].Message.getMessage(server.LanguageEnum);
             return [
+                ComponentService.createStartIntro(GameTypeEnum.TRIVIA_QUIZ),
                 ComponentService.createContent(createBlock(createMultiLingualString(firstQuestion))),
             ];
         },

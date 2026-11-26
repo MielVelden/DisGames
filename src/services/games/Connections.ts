@@ -199,6 +199,7 @@ export default {
         async getStartComponentsAsync(gameData: GameDataModel[], server: ServersModel): Promise<Component[]> {
             const gameState = createGameState(gameData)
             return [
+                ComponentService.createStartIntro(GameTypeEnum.CONNECTIONS),
                 await createGameImage(gameState, server.ServerId, server.LanguageEnum),
             ];
         },

@@ -38,7 +38,7 @@ export default {
             event.setGameDataAnswer(nextAnswerMessage);
         },
 
-        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
+        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel, _answer: string): Promise<Component[]> {
             return [
                 ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_FLAG].startMessage!()))
             ];

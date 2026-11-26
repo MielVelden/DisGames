@@ -16,6 +16,7 @@ import { syncRoutines } from './utils/routines/Sync';
 import { validateSchemaAsync } from './utils/database/GenerateSchema';
 import TestMode from './utils/application/TestMode';
 import { gracefulShutdown, isStandby } from './utils/application/HandoffManager';
+import pregenerateBanners from './jobs/PregenerateBanners';
 
 getConfig();
 
@@ -59,6 +60,11 @@ discordClient.once('clientReady', async () => {
 
       // Initialize the job scheduler
       JobScheduler.getInstance();
+
+      if (getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
+        void pregenerateBanners.handler(() => { 
+        }).catch(error => Logger.logError('Banner warm-up failed', error as Error, { sendToDiscord: true }));
+      }
     } else {
       Logger.logError(`Failed to connect to database`);
     }

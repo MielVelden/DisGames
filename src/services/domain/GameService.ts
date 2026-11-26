@@ -191,15 +191,13 @@ export class GameService extends Service {
 
         const server = await ServerService.getByExternalIdAsync(game.ServerId);
         const banner = await this.getBannerAsync(game.GameTypeEnum as GameTypeEnum, server);
-        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string, gameModule.config.skipDefaultStartMessage, banner,
-            // Only games that declare a firstAnswer show it in their start text; for the others the answer is secret (e.g. Anagram).
-            gameModule.config.firstAnswer !== undefined ? game.Answer as string : undefined);
+        const components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, banner);
 
-        if (gameModule.functions.getStartComponentsAsync) {
-            const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
-            components.pop();
-            components = components.concat(startComponents);
-        }
+        // A game that implements getStartComponentsAsync owns everything below the header (intro line included).
+        if (gameModule.functions.getStartComponentsAsync)
+            components.push(...await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server, game.Answer as string));
+        else
+            components.push(...ComponentService.createDefaultStartBody(game.GameTypeEnum as GameTypeEnum, game.Answer as string));
 
         if (gameModule.config.options[GameOptionEnum.ALLOW_SKIPPING]) {
             // The style line sits right under the question, in the same plain text as the intro line above it.

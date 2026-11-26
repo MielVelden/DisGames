@@ -23,7 +23,6 @@ export default {
         expectedType: "string",
         addCorrectReaction: true,
         hasImages: true,
-        skipDefaultStartMessage: true,
         allowDuplicatesResponse: true,
         options: {
             [GameOptionEnum.ALLOW_SKIPPING]: true,
@@ -41,7 +40,7 @@ export default {
             event.setGameDataAnswer(nextAnswerMessage);
         },
 
-        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
+        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel, _answer: string): Promise<Component[]> {
             return [
                 ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.GUESS_THE_COUNTRY].startMessage!()))
             ];
