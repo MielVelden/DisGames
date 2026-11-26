@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import { JobModule, JobItem, JobExecutionResult, JobStatus, JobProgressCallback } from '../../interfaces/application/Job';
 import { UniqueCodes } from '../../utils/helpers/UniqueCodes';
 import Logger from '../../utils/application/Logger';
+import * as path from 'path';
+import { collectModules } from '../../utils/collectors/ModuleCollector';
 import { Service } from "../../interfaces/application/Service";
 import { registerService } from "../../utils/container/Container";
 
@@ -17,28 +17,11 @@ export class JobService extends Service {
     public async initAsync(): Promise<void> {}
 
     private loadJobs(): void {
-        const jobsPath = path.join(__dirname, '..', '..', 'jobs');
-
-        try {
-            const jobFiles = fs.readdirSync(jobsPath).filter(file =>
-                file.endsWith('.ts') || file.endsWith('.js')
-            );
-
-            for (const file of jobFiles) {
-                try {
-                    const jobPath = path.join(jobsPath, file);
-                    const jobModule = require(jobPath).default as JobModule;
-
-                    if (jobModule && jobModule.id) {
-                        this.jobModules.push(jobModule);
-                    }
-                } catch (error) {
-                    Logger.logError(`Failed to load job file ${file}:`, error as Error);
-                }
-            }
-        } catch (error) {
-            Logger.logError('Failed to load jobs directory:', error as Error);
-        }
+        this.jobModules.push(...collectModules<JobModule>({
+            directoryPath: path.join(__dirname, '..', '..', 'jobs'),
+            label: 'job',
+            isValid: (job): job is JobModule => !!job?.id,
+        }));
     }
 
     public getJobModules(): JobModule[] {

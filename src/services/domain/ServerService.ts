@@ -18,7 +18,9 @@ export class ServerService extends BaseDomainService<ServersModel, ServersSaveMo
     public async initAsync(): Promise<void> {}
 
     protected async performSaveAsync(savable: ServersSaveModel, event: TimelineEvent): Promise<ServersModel> {
-        savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
+        // Only default the language on new record
+        if (!savable.Id)
+            savable.validateIsNotNull(ServersModelFieldEnum.LanguageEnum, DEFAULT_LANGUAGE);
 
         var server: ServersModel;
         var entity: ServersModel | null = null;

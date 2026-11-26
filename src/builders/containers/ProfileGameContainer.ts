@@ -1,13 +1,14 @@
 import { Component } from "../../interfaces/application/Message";
 import { ProfileGameResponse } from "../../interfaces/view";
 import ComponentService from "../../services/application/ComponentService";
-import MediaService from "../../services/application/MediaService";
+import GameService from "../../services/domain/GameService";
+import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { createBlock, createInformationBlock, createTitle } from "../../utils/helpers/Markdown";
 import { i18n } from "../../utils/i18n/i18n";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 
-export function createProfileGameContainer(gameProfile: ProfileGameResponse): Component[] {
-    const gameImage = MediaService.getGameImage(gameProfile.gameType);
+export async function createProfileGameContainerAsync(gameProfile: ProfileGameResponse, server?: ServersModel): Promise<Component[]> {
+    const gameImage = await GameService.getBannerAsync(gameProfile.gameType, server);
     const gameInfo = i18n.enums.gameTypes[gameProfile.gameType];
 
     return [

@@ -3,7 +3,10 @@ import { GameEvent } from "../events/GameEvent";
 import { ExceptionEnum, GameTypeEnum } from "../../interfaces/enums";
 import { GameSettingsEnum } from "../../interfaces/enums";
 import { i18n } from "../../utils/i18n/i18n";
-import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { createMultiLingualString, MultiLingualString } from "../../utils/i18n/MultiLingualString";
+import { GameDataModel, ServersModel } from "../../interfaces/database/TableInterfaces";
+import { createBlock } from "../../utils/helpers/Markdown";
+import { Component } from "../../interfaces/application/Message";
 import { GameSettingType } from "../../interfaces/domain/GameSettings";
 import GameService from "../domain/GameService";
 import ComponentService from "../application/ComponentService";
@@ -46,6 +49,12 @@ export default {
 
         async getUpdatedGameAnswerAsync(event: GameEvent): Promise<void> {
             event.setGameDataAnswer((Number(event.getGameDataAnswer()) + 1).toString());
+        },
+
+        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel, answer: string): Promise<Component[]> {
+            return [
+                ComponentService.createContent(i18n.enums.gameTypes[GameTypeEnum.COUNTING].startMessage(answer)),
+            ];
         },
 
         async onIncorrectAnswerAsync(event: GameEvent): Promise<void> {

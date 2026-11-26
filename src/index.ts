@@ -7,6 +7,7 @@ import { loadPersistentButtons } from './utils/collectors/PersistentButtonCollec
 import { createConnectionAsync } from './repositories/util/ConnectionHandler';
 import Logger from './utils/application/Logger';
 import { startHttpServer } from './server';
+import { isPremiumMisconfigured } from './utils/application/PremiumAccess';
 import { getConfig, getConfigValue } from './utils/application/Config';
 import { EnvConfigEnum } from './interfaces/enums/application/EnvConfigEnum';
 import { JobScheduler } from './services/application/JobScheduler';
@@ -16,6 +17,7 @@ import { syncRoutines } from './utils/routines/Sync';
 import { validateSchemaAsync } from './utils/database/GenerateSchema';
 import TestMode from './utils/application/TestMode';
 import { gracefulShutdown, isStandby } from './utils/application/HandoffManager';
+import pregenerateBanners from './jobs/PregenerateBanners';
 
 getConfig();
 
@@ -38,6 +40,10 @@ discordClient.once('clientReady', async () => {
   });
   await createConnectionAsync().then(async (success) => {
     if (success) {
+      if (isPremiumMisconfigured()) {
+        await Logger.logError(`${EnvConfigEnum.DISCORD_PREMIUM_SKU_ID} is empty in production, which unlocks every Pro feature for every server. Shutting down.`, undefined, { sendToDiscord: true });
+        process.exit(1);
+      }
       if (getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
         try {
           await Promise.all([syncRoutines(), validateSchemaAsync()]);
@@ -54,11 +60,17 @@ discordClient.once('clientReady', async () => {
       loadPersistentButtons();
       if (getConfigValue(EnvConfigEnum.DISGAMES_API_ENABLED)) {
         const port = Number(getConfigValue(EnvConfigEnum.DISGAMES_API_PORT) || 3600);
-        startHttpServer(port);
+        const host = String(getConfigValue(EnvConfigEnum.DISGAMES_API_HOST)).trim() || "0.0.0.0";
+        startHttpServer(port, host);
       }
 
       // Initialize the job scheduler
       JobScheduler.getInstance();
+
+      if (getConfigValue(EnvConfigEnum.IS_PRODUCTION)) {
+        void pregenerateBanners.handler(() => { 
+        }).catch(error => Logger.logError('Banner warm-up failed', error as Error, { sendToDiscord: true }));
+      }
     } else {
       Logger.logError(`Failed to connect to database`);
     }

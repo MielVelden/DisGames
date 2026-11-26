@@ -62,7 +62,8 @@ export default {
             });
         },
 
-        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel): Promise<Component[]> {
+        // The first answer is the hidden number, so it is not part of the start message.
+        async getStartComponentsAsync(_gameData: GameDataModel[], _server: ServersModel, _answer: string): Promise<Component[]> {
             return [
                 ComponentService.createContent(createBlock(i18n.enums.gameTypes[GameTypeEnum.NUMBER_GUESS].startMessage(MAX_NUMBER.toString()))),
             ];

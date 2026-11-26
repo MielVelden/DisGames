@@ -256,6 +256,10 @@ export interface I18nTranslations {
                 nicknameLabel: LanguageTranslations;
                 avatarImageLabel: LanguageTranslations;
                 identityChanged: LanguageTranslations;
+                enableStyles: LanguageTranslations;
+                disableStyles: LanguageTranslations;
+                stylesEnabled: LanguageTranslations;
+                stylesDisabled: LanguageTranslations;
             };
         },
         aboutme: {
@@ -263,6 +267,7 @@ export interface I18nTranslations {
             labels: {
                 title: LanguageTranslations;
                 description: LanguageTranslations;
+                bannerTagline: LanguageTranslations;
                 github: LanguageTranslations;
                 invite: LanguageTranslations;
                 privacy: LanguageTranslations;
@@ -295,6 +300,9 @@ export interface I18nTranslations {
             description: LanguageTranslations;
         },
         job: {
+            description: LanguageTranslations;
+        },
+        override: {
             description: LanguageTranslations;
         },
         premium: {

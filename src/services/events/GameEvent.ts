@@ -27,7 +27,7 @@ export class GameEvent implements IGameEvent {
     public validateAnswer: (event: IGameEvent) => boolean;
     public getUpdatedGameAnswerAsync?: (event: IGameEvent) => Promise<void>;
     public onIncorrectAnswerAsync?: (event: IGameEvent) => Promise<void>;
-    public getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel) => Promise<Component[]>;
+    public getStartComponentsAsync?: (gameData: GameDataModel[], server: ServersModel, answer: string) => Promise<Component[]>;
     public prepareDataAsync?: (gameData: GameDataModel[], languageEnum: LanguageEnum) => Promise<string>;
 
     public deleteMessage: () => Promise<void>;

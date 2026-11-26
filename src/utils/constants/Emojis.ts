@@ -1,4 +1,6 @@
 import { Servers_Settings } from "../../interfaces/domain/Servers_Settings";
+import StyleService from "../../services/domain/StyleService";
+import { StyleSlotEnum } from "../../interfaces/enums/application/StyleSlotEnum";
 import { getConfigValue } from "../application/Config";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
 
@@ -10,11 +12,11 @@ export function getDefaultPremiumEmoji(): string {
 }
 
 export function getAcceptEmoji(settings?: Servers_Settings): string {
-    return settings?.defaultAcceptEmoji ?? DEFAULT_ACCEPT_EMOJI;
+    return settings?.defaultAcceptEmoji ?? StyleService.emoji(StyleSlotEnum.ACCEPT, DEFAULT_ACCEPT_EMOJI);
 }
 
 export function getRejectEmoji(settings?: Servers_Settings): string {
-    return settings?.defaultRejectEmoji ?? DEFAULT_WRONG_ANSWER_EMOJI;
+    return settings?.defaultRejectEmoji ?? StyleService.emoji(StyleSlotEnum.REJECT, DEFAULT_WRONG_ANSWER_EMOJI);
 }
 
 const VALID_EMOJI_REGEX = new RegExp(

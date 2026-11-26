@@ -3,7 +3,7 @@ import { InteractionEvent, SlashCommandInteractionEvent } from "../interfaces/ap
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { PremiumActionEnum } from "../interfaces/enums/commands/Premium";
 import { i18n } from "../utils/i18n/i18n";
-import { MultiLingualString } from "../utils/i18n/MultiLingualString";
+import { DEFAULT_LANGUAGE, MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 import { getPremiumSkuId, isPurchaseButtonEnabled, setPurchaseButtonEnabled } from "../utils/application/PremiumAccess";
@@ -27,7 +27,7 @@ const optionsConfig = [
                         await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.missingSku), true);
                         return;
                     }
-                    const target = event.getOption(getCommandName(i18n.commands.premium.optionTarget)) as string | undefined;
+                    const target = event.getOption(getCommandName(i18n.commands.premium.optionTarget, DEFAULT_LANGUAGE)) as string | undefined;
                     const userId = (target && target.trim()) || event.user.userId;
                     try {
                         const ent = await DiscordTestEntitlementService.createUserTestEntitlementAsync(
@@ -48,7 +48,7 @@ const optionsConfig = [
                         await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.missingSku), true);
                         return;
                     }
-                    const target = event.getOption(getCommandName(i18n.commands.premium.optionTarget)) as string | undefined;
+                    const target = event.getOption(getCommandName(i18n.commands.premium.optionTarget, DEFAULT_LANGUAGE)) as string | undefined;
                     const guildId = (target && target.trim()) || event.guildId;
                     if (!guildId) {
                         await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.missingGuild), true);
@@ -68,7 +68,7 @@ const optionsConfig = [
             {
                 enumValue: PremiumActionEnum.REVOKE,
                 handler: async (event: SlashCommandInteractionEvent) => {
-                    const entitlementId = event.getOption(getCommandName(i18n.commands.premium.optionTarget)) as string | undefined;
+                    const entitlementId = event.getOption(getCommandName(i18n.commands.premium.optionTarget, DEFAULT_LANGUAGE)) as string | undefined;
                     if (!entitlementId || !String(entitlementId).trim()) {
                         await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.missingTarget), true);
                         return;
@@ -86,7 +86,7 @@ const optionsConfig = [
             {
                 enumValue: PremiumActionEnum.TOGGLE_DB,
                 handler: async (event: SlashCommandInteractionEvent) => {
-                    const target = event.getOption(getCommandName(i18n.commands.premium.optionTarget)) as string | undefined;
+                    const target = event.getOption(getCommandName(i18n.commands.premium.optionTarget, DEFAULT_LANGUAGE)) as string | undefined;
                     const guildId = (target && target.trim()) || event.guildId;
                     if (!guildId) {
                         await event.replyAsync(new MultiLingualString(i18n.commands.premium.labels.missingGuild), true);

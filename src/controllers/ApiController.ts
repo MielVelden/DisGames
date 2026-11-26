@@ -21,8 +21,6 @@ export class ApiController {
 	}
 
 	private initializeControllers(): void {
-		this.controllers.set('api', this);
-
 		const controllersPath = path.join(__dirname);
 		const controllerFiles = fs.readdirSync(controllersPath)
 			.filter(file => (file.endsWith('.js') || file.endsWith('.ts')) && !file.startsWith('ApiController.'));

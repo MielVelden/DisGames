@@ -888,6 +888,34 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.DE]: "Bot-Identität erfolgreich aktualisiert",
                     [LanguageEnum.PT]: "Identidade do bot atualizada com sucesso",
                 },
+                enableStyles: {
+                    [LanguageEnum.EN]: "Enable seasonal styles",
+                    [LanguageEnum.NL]: "Seizoensstijlen inschakelen",
+                    [LanguageEnum.ES]: "Activar estilos de temporada",
+                    [LanguageEnum.DE]: "Saisonale Stile aktivieren",
+                    [LanguageEnum.PT]: "Ativar estilos sazonais",
+                },
+                disableStyles: {
+                    [LanguageEnum.EN]: "Disable seasonal styles",
+                    [LanguageEnum.NL]: "Seizoensstijlen uitschakelen",
+                    [LanguageEnum.ES]: "Desactivar estilos de temporada",
+                    [LanguageEnum.DE]: "Saisonale Stile deaktivieren",
+                    [LanguageEnum.PT]: "Desativar estilos sazonais",
+                },
+                stylesEnabled: {
+                    [LanguageEnum.EN]: "Seasonal styles are now enabled",
+                    [LanguageEnum.NL]: "Seizoensstijlen zijn nu ingeschakeld",
+                    [LanguageEnum.ES]: "Los estilos de temporada están activados",
+                    [LanguageEnum.DE]: "Saisonale Stile sind jetzt aktiviert",
+                    [LanguageEnum.PT]: "Os estilos sazonais estão ativados",
+                },
+                stylesDisabled: {
+                    [LanguageEnum.EN]: "Seasonal styles are now disabled",
+                    [LanguageEnum.NL]: "Seizoensstijlen zijn nu uitgeschakeld",
+                    [LanguageEnum.ES]: "Los estilos de temporada están desactivados",
+                    [LanguageEnum.DE]: "Saisonale Stile sind jetzt deaktiviert",
+                    [LanguageEnum.PT]: "Os estilos sazonais estão desativados",
+                },
             },
         },
         aboutme: {
@@ -912,6 +940,13 @@ export const i18n: I18nTranslations = {
                     [LanguageEnum.ES]: "Sumérgete en un mundo de diversión sin fin con DisGames, el bot definitivo de minijuegos para Discord. Explora una colección de minijuegos únicos y cautivadores diseñados para unir a tu comunidad. Desde rompecabezas que desafían la mente hasta emocionantes desafíos de acción, hay algo para todos. Los comandos slash (/) fáciles de usar hacen que jugar sea sencillo e intuitivo.\n\nDisGames ofrece una amplia gama de minijuegos para todos los gustos y fomenta la camaradería y la competencia. Desafía a amigos y jugadores, o forma equipo en juegos cooperativos. Añadir el bot a tu servidor de Discord es rápido y fácil. ¡Eleva tu servidor hoy y redefine cómo te conectas y te diviertes!",
                     [LanguageEnum.DE]: "Tauche ein in eine Welt endlosen Spaßes mit DisGames, dem ultimativen Minispiel-Bot für Discord. Entdecke eine Sammlung einzigartiger, fesselnder Minispiele, die deine Community zusammenbringen. Von kniffligen Rätseln bis zu aufregenden Action-Challenges ist für jeden etwas dabei. Benutzerfreundliche Slash-Befehle (/) machen das Spielen mühelos und intuitiv.\n\nDisGames bietet eine große Auswahl an Minispielen für jeden Geschmack und fördert Kameradschaft und Wettbewerb. Fordere Freunde heraus oder schließe dich in Koop-Spielen zusammen. Das Hinzufügen des Bots zu deinem Discord-Server ist schnell und einfach. Hebe deinen Server noch heute auf ein neues Level und definiere neu, wie du dich verbindest und Spaß hast!",
                     [LanguageEnum.PT]: "Mergulhe num mundo de diversão sem fim com o DisGames, o bot definitivo de minijogos para o Discord. Explore uma coleção de minijogos únicos e cativantes feitos para unir sua comunidade. De quebra-cabeças que desafiam o cérebro a emocionantes desafios de ação, há algo para todos. Comandos slash fáceis de usar (/) tornam o jogo simples e intuitivo.\n\nO DisGames oferece uma ampla variedade de minijogos para todos os gostos e promove camaradagem e competição. Desafie amigos e jogadores, ou forme equipes em jogos cooperativos. Adicionar o bot ao seu servidor Discord é rápido e fácil. Eleve seu servidor hoje e redefina como você se conecta e se diverte!",
+                },
+                bannerTagline: {
+                    [LanguageEnum.EN]: "Minigames for your Discord server",
+                    [LanguageEnum.NL]: "Minigames voor jouw Discord-server",
+                    [LanguageEnum.ES]: "Minijuegos para tu servidor de Discord",
+                    [LanguageEnum.DE]: "Minispiele für deinen Discord-Server",
+                    [LanguageEnum.PT]: "Minijogos para o seu servidor Discord",
                 },
                 github: {
                     [LanguageEnum.EN]: "GitHub",
@@ -1281,6 +1316,15 @@ export const i18n: I18nTranslations = {
                 [LanguageEnum.ES]: "Ejecutar un trabajo",
                 [LanguageEnum.DE]: "Einen Job ausführen",
                 [LanguageEnum.PT]: "Executar um trabalho",
+            },
+        },
+        override: {
+            description: {
+                [LanguageEnum.EN]: "Force a runtime value (memory only, resets on restart)",
+                [LanguageEnum.NL]: "Forceer een runtime-waarde (alleen geheugen, reset bij herstart)",
+                [LanguageEnum.ES]: "Forzar un valor en tiempo de ejecución (solo memoria, se reinicia al reiniciar)",
+                [LanguageEnum.DE]: "Einen Laufzeitwert erzwingen (nur Speicher, wird bei Neustart zurückgesetzt)",
+                [LanguageEnum.PT]: "Forçar um valor em tempo de execução (apenas memória, reinicia ao reiniciar)",
             },
         },
         generateData: {

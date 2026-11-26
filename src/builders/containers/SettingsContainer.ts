@@ -3,11 +3,12 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import ComponentService from "../../services/application/ComponentService";
 import { createTitle } from "../../utils/helpers/Markdown";
-import MediaService from "../../services/application/MediaService";
+import BannerService from "../../services/domain/BannerService";
+import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { SettingsResponse } from "../../interfaces/view/Settings";
 
-export function createSettingsContainer(settings: SettingsResponse, actions: (BaseButton)[]): Component[] {
-    const settingsContainerImage = MediaService.getBaseImage('settings');
+export async function createSettingsContainerAsync(settings: SettingsResponse, actions: (BaseButton)[], server?: ServersModel): Promise<Component[]> {
+    const settingsContainerImage = await BannerService.getBaseBannerAsync('settings', server);
     const language = new MultiLingualString(i18n.enums.languages[settings.LanguageEnum]).getMessage(settings.LanguageEnum);
 
     return [

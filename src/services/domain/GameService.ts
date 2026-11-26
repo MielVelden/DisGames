@@ -1,5 +1,5 @@
 import { ButtonInteractionEvent, InteractionEvent, isButtonInteractionEvent, MessageInteractionEvent } from "../../interfaces/application/Event";
-import { DatasheetsModel, GameDataModel, GamesModel, GamesModelFieldEnum, GamesSaveModel, PointsSaveModel } from "../../interfaces/database/TableInterfaces";
+import { DatasheetsModel, GameDataModel, GamesModel, GamesModelFieldEnum, GamesSaveModel, PointsSaveModel, ServersModel } from "../../interfaces/database/TableInterfaces";
 import { GameAction, GameActionEnum, GameActionPriorityEnum, GameConfig, GameModule, GameOptionEnum } from "../../interfaces/domain/Game";
 import { GameEvent } from "../events/GameEvent";
 import {
@@ -14,8 +14,8 @@ import {
 import { GameSettingsEnum } from "../../interfaces/enums/games/GameSettingsEnum";
 import { Component, ComponentType, Container, TextDisplay, Title, Separator } from "../../interfaces/application/Message";
 import GameRepository from "../../repositories/GameRepository";
-import * as fs from "fs";
 import * as path from "path";
+import { collectModulesAsync } from "../../utils/collectors/ModuleCollector";
 import { BadgeTriggerEnum, GameTypeEnum, LanguageEnum, MetricEnum } from "../../interfaces/enums";
 import PointService from "./PointService";
 import { isValidEnumValue } from "../../utils/helpers/Enum";
@@ -33,9 +33,12 @@ import TimelineBuilder from "./TimelineBuilder";
 import { ARRAY_JOIN_DELIMITER } from "../../constants";
 import { getAcceptEmoji } from "../../utils/constants/Emojis";
 import ServerService from "./ServerService";
+import StyleService from "./StyleService";
+import BannerService from "./BannerService";
+import { Media } from "../../interfaces/application/Media";
 import { EventTypeEnum } from "../../interfaces/enums";
 import DataSheetService from "./DataSheetService";
-import { addPrefix, createFooter, createTitle } from "../../utils/helpers/Markdown";
+import { addPrefix, createFooter, createQuote, createTitle } from "../../utils/helpers/Markdown";
 import { InteractionService } from "../application/InteractionService";
 import { RegisterMetricPulls, TrackMetricPull } from "../../utils/helpers/Decorator";
 import MetricService from "./MetricService";
@@ -56,32 +59,18 @@ export class GameService extends Service {
     }
 
     private async loadGamesAsync(): Promise<void> {
-        const gamesPath = path.join(__dirname, '..', 'games');
+        await collectModulesAsync<GameModule>({
+            directoryPath: path.join(__dirname, '..', 'games'),
+            label: 'game',
+            isValid: (game): game is GameModule => !!game?.config && !!game.functions,
+            onLoadAsync: async game => {
+                await this.completeGameConfigAsync(game.config);
 
-        try {
-            const gameFiles = fs.readdirSync(gamesPath).filter(file =>
-                file.endsWith('.ts') || file.endsWith('.js')
-            );
-
-            for (const file of gameFiles) {
-                try {
-                    const gamePath = path.join(gamesPath, file);
-                    const gameModule = require(gamePath).default as GameModule;
-
-                    if (gameModule && gameModule.config && gameModule.functions) {
-                        await this.completeGameConfigAsync(gameModule.config);
-
-                        if (gameModule.config.disabled)
-                            continue;
-                        this.games.push(gameModule);
-                    }
-                } catch (error) {
-                    Logger.logError(`Error loading game file ${file}:`, error as Error);
-                }
-            }
-        } catch (error) {
-            Logger.logError('Error loading games directory:', error as Error);
-        }
+                if (game.config.disabled)
+                    return;
+                this.games.push(game);
+            },
+        });
     }
 
     private async completeGameConfigAsync(gameConfig: GameConfig): Promise<void> {
@@ -178,21 +167,45 @@ export class GameService extends Service {
         return game;
     }
 
+    public async getBannerAsync(gameType: GameTypeEnum, server?: ServersModel): Promise<Media> {
+        if (!server)
+            return MediaService.getGameImage(gameType);
+
+        try {
+            const gameModule = await this.getGameByTypeAsync(gameType);
+            if (!gameModule)
+                return MediaService.getGameImage(gameType);
+
+            const info = i18n.enums.gameTypes[gameType];
+            return await BannerService.generateAsync({ key: `game-${gameType}`, emoji: gameModule.config.emoji, title: info.name, description: info.description }, server);
+        } catch (error) {
+            Logger.logWarning(`Could not generate banner for game ${gameType}: ${error}`);
+            return MediaService.getGameImage(gameType);
+        }
+    }
+
     public async getStartMessageAsync(game: GamesModel, gameData?: GameDataModel | GameDataModel[]): Promise<Component[]> {
         const gameModule = await this.getGameByTypeAsync(game.GameTypeEnum);
         if (!gameModule)
             ErrorHelper.throw(ExceptionEnum.GAME_MODULE_NOT_FOUND);
 
-        let components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, game.Answer as string, gameModule.config.skipDefaultStartMessage);
+        const server = await ServerService.getByExternalIdAsync(game.ServerId);
+        const banner = await this.getBannerAsync(game.GameTypeEnum as GameTypeEnum, server);
+        const components = ComponentService.createStartMessage(game.GameTypeEnum as GameTypeEnum, gameModule.config.emoji, banner);
 
-        if (gameModule.functions.getStartComponentsAsync) {
-            const server = await ServerService.getByExternalIdAsync(game.ServerId);
-            const startComponents = await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server);
-            components.pop();
-            components = components.concat(startComponents);
-        }
+        // A game that implements getStartComponentsAsync owns everything below the header (intro line included).
+        if (gameModule.functions.getStartComponentsAsync)
+            components.push(...await gameModule.functions.getStartComponentsAsync(Array.isArray(gameData) ? gameData : [gameData!], server, game.Answer as string));
+        else
+            components.push(...ComponentService.createDefaultStartBody(game.GameTypeEnum as GameTypeEnum, game.Answer as string));
 
         if (gameModule.config.options[GameOptionEnum.ALLOW_SKIPPING]) {
+            // The style line sits right under the question, in the same plain text as the intro line above it.
+            // Only games with the divider/skip footer get it: the others (Counting, Number Guess) have no room.
+            const styleFooter = StyleService.resolve(server).theme.footer;
+            if (styleFooter)
+                components.push(ComponentService.createContent(createQuote(styleFooter)));
+
             components.push(
                 ComponentService.createSeparator(),
                 ComponentService.createContent(createFooter(new MultiLingualString(i18n.commands.games.labels.skipAnswer)))
@@ -457,6 +470,15 @@ export class GameService extends Service {
         }
 
         if (gameEvent.gameConfig.options[GameOptionEnum.ALLOW_SKIPPING]) {
+            const styleFooter = StyleService.resolve(gameEvent.server).theme.footer;
+            // MEDIUM: after the question (HIGH), before the divider (LOW).
+            if (styleFooter)
+                gameEvent.addAction({
+                    enum: GameActionEnum.COMPONENT,
+                    priority: GameActionPriorityEnum.MEDIUM,
+                    component: ComponentService.createContent(createQuote(styleFooter))
+                });
+
             gameEvent.addAction({
                 enum: GameActionEnum.COMPONENT,
                 priority: GameActionPriorityEnum.LOW,

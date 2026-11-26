@@ -108,22 +108,29 @@ export class ComponentService extends Service {
         ];
     }
 
-    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, firstAnswer: string, skipDefaultStartMessage: boolean = false): Component[] {
-        const gameImage = MediaService.getGameImage(gameTypeEnum);
+    // The shared top of a game's start message: banner, title and how to play.
+    public createStartMessage(gameTypeEnum: GameTypeEnum, gameEmoji: string, bannerOverride?: Media): Component[] {
+        const gameImage = bannerOverride ?? MediaService.getGameImage(gameTypeEnum);
 
-        const components = [
+        return [
             this.createImage(gameImage, false),
             this.createSeparator(),
             this.createContent(createTitle(addPrefix(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].name), gameEmoji))),
             this.createContent(new MultiLingualString(i18n.enums.gameTypes[gameTypeEnum].howToPlay)),
         ];
+    }
 
-        if (!skipDefaultStartMessage)
-            components.push(this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()));
+    // The default intro line of a game type, for games that build their own start components.
+    public createStartIntro(gameTypeEnum: GameTypeEnum): Component {
+        return this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!());
+    }
 
-        components.push(this.createContent(createBlock(createMultiLingualString(firstAnswer))));
-
-        return components;
+    // What a game without getStartComponentsAsync gets below the header: its intro line and the first answer.
+    public createDefaultStartBody(gameTypeEnum: GameTypeEnum, firstAnswer: string): Component[] {
+        return [
+            this.createContent(i18n.enums.gameTypes[gameTypeEnum].startMessage!()),
+            this.createContent(createBlock(createMultiLingualString(firstAnswer))),
+        ];
     }
 
     public createImage(image: Media, includeContainer: boolean = true): Component {

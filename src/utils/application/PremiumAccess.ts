@@ -13,6 +13,11 @@ export function isPremiumEnabled(): boolean {
     return Boolean(getPremiumSkuId());
 }
 
+// With no SKU configured every Pro gate is open (intended for local dev and self-hosting).
+export function isPremiumMisconfigured(): boolean {
+    return Boolean(getConfigValue(EnvConfigEnum.IS_PRODUCTION)) && !isPremiumEnabled();
+}
+
 // In-memory kill switch for the purchase button, toggled via the owner-only /premium
 // command. Deliberately process-lifetime only: a restart always fails back to enabled
 // rather than leaving the button stuck hidden after an incident.

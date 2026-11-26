@@ -41,7 +41,7 @@ import DiscordGuildMapper from './mappers/DiscordGuildMapper';
 import DiscordInteractionMapper from './mappers/DiscordInteractionMapper';
 import DiscordMessageHandler from './handlers/DiscordMessageHandler';
 import DiscordMemberService from './DiscordMemberService';
-import { createWelcomeContainer } from '../../builders/containers/WelcomeContainer';
+import { createWelcomeContainerAsync } from '../../builders/containers/WelcomeContainer';
 import { TrackMetric, TrackMetricPull, RegisterMetricPulls } from '../../utils/helpers/Decorator';
 import { MetricEnum } from '../../interfaces/enums/application/MetricEnum';
 import { handleDiscordMessageAsync } from '../../events/messageCreate';
@@ -86,7 +86,7 @@ class DiscordService {
         const event = await DiscordGuildMapper.mapGuildToGuildCreateEventAsync(guild);
         Logger.logInfo(`Joined Discord guild ${guild.name} (${guild.id})`);
         if (event.systemChannelId) {
-            const components = createWelcomeContainer();
+            const components = await createWelcomeContainerAsync(event.server);
             await DiscordMessageHandler.sendToGuildChannelAsync(guild, event.systemChannelId, components, event.server);
         }
     }

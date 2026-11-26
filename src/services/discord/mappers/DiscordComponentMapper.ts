@@ -26,6 +26,7 @@ import DiscordEnumMapper from './DiscordEnumMapper';
 import { DiscordComponentBuilder, DiscordMessageContent, DiscordSelectMenuBuilder } from '../DiscordService';
 import ComponentService from '../../application/ComponentService';
 import { DEFAULT_EMBED_COLOR } from '../../../utils/constants/Colors';
+import StyleService from '../../domain/StyleService';
 import Logger from '../../../utils/application/Logger';
 import MediaService from '../../application/MediaService';
 import { withEventContextAsync, getCurrentServer, getCurrentComponents } from '../../../middleware/EventContext';
@@ -364,7 +365,7 @@ class DiscordComponentMapper {
 
     public async mapContainerToDiscordContainerAsync(container: Container, seenPremiumSkuIds: Set<string> = new Set()): Promise<DiscordContainerBuilder> {
         const discordContainer = new DiscordContainerBuilder()
-            .setAccentColor(container.accent_color || DEFAULT_EMBED_COLOR)
+            .setAccentColor(container.accent_color || StyleService.resolveCurrent().theme.accentColor || DEFAULT_EMBED_COLOR)
             .setSpoiler(container.spoiler || false);
 
         if (!container.components) {
