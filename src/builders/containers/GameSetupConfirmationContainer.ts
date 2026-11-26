@@ -7,7 +7,7 @@ import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 import GameService from "../../services/domain/GameService";
 import { createGameSettingsDisplay } from "./GameSettingsContainer";
-import MediaService from "../../services/application/MediaService";
+import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { createTitle } from "../../utils/helpers/Markdown";
 
 export async function createGameSetupConfirmationContainerAsync(
@@ -16,8 +16,9 @@ export async function createGameSetupConfirmationContainerAsync(
     gameTypeEnum: GameTypeEnum,
     settings?: GameSettingsValues,
     languageEnum: LanguageEnum = LanguageEnum.NL,
+    server?: ServersModel,
 ): Promise<Component[]> {
-    const gameImage = MediaService.getGameImage(gameTypeEnum);
+    const gameImage = await GameService.getBannerAsync(gameTypeEnum, server);
 
     const components: Component[] = [
         ComponentService.createImage(gameImage, false),

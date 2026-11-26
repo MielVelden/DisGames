@@ -40,6 +40,10 @@ export function createSubtitle(subtitle: MultiLingualString): MultiLingualString
     return subtitle.changeText((text) => `## ${text}`);
 }
 
+export function createQuote(text: MultiLingualString): MultiLingualString {
+    return text.changeText((line) => `> ${line}`);
+}
+
 export function createFooter(footer: string | MultiLingualString): MultiLingualString {
     if (isMultiLingualString(footer))
         return footer.changeText((text) => `-# ${text}`);

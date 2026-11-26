@@ -3,7 +3,7 @@ import { SlashCommandInteractionEvent } from "../interfaces/application/Event";
 import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
-import { createAboutMeContainer } from "../builders/containers/AboutMeContainer";
+import { createAboutMeContainerAsync } from "../builders/containers/AboutMeContainer";
 import packageJson from "../../package.json";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
 import { getConfigValue } from "../utils/application/Config";
@@ -33,7 +33,7 @@ export class AboutMeCommand implements Command {
         const version = packageJson.version;
         const githubUrl = packageJson.github;
         const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${getConfigValue(EnvConfigEnum.DISCORD_CLIENT_ID)}&permissions=${DiscordPermissionService.toPermissionInteger(BOT_INVITE_PERMISSIONS)}&scope=bot%20applications.commands`;
-        const components = createAboutMeContainer(inviteUrl, githubUrl, PRIVACY_POLICY_URL, version);
+        const components = await createAboutMeContainerAsync(inviteUrl, githubUrl, PRIVACY_POLICY_URL, version, event.server);
         await event.addComponentsAsync(components);
         await event.replyAsync();
     }

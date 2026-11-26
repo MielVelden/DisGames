@@ -8,7 +8,12 @@ import Logger from '../../utils/application/Logger';
 import { STRING_DELIMITER } from '../../constants';
 import { ErrorHelper } from '../../utils/application/Error';
 import { BaseCard } from './BaseCard';
-import { Color } from '../../utils/helpers/Color';
+import { Color, shadeColor } from '../../utils/helpers/Color';
+import { CardTheme } from '../../interfaces/domain/StylePreset';
+import { drawCardBackground } from './CardChrome';
+import { COLOR_TEXT, COLOR_CHIP_BORDER } from './CardTokens';
+import { withAlpha } from './CardPrimitives';
+import StyleService from '../../services/domain/StyleService';
 
 interface CategoryData {
     categoryName: string;
@@ -31,12 +36,16 @@ interface ConnectionImageConfig {
     canvasSize: number;
     gridSize: number;
     cellPadding: number;
+    margin: number;
     fontSize: number;
     borderRadius: number;
     backgroundColor: Color;
     cellBackgroundColor: Color;
     textColor: Color;
     groupedBackgroundColors: Color[];
+    categoryTextColor: Color;
+    cellBorderColor?: Color;
+    cardTheme?: CardTheme;
 }
 
 class ConnectionImageService extends BaseCard {
@@ -44,13 +53,33 @@ class ConnectionImageService extends BaseCard {
         canvasSize: 800,
         gridSize: 4,
         cellPadding: 10,
+        margin: 10,
         fontSize: 32,
         borderRadius: 12,
         backgroundColor: '#ffffff',
         cellBackgroundColor: '#e0e0e0',
         textColor: '#000000',
-        groupedBackgroundColors: ['#6434e9', '#49cc5c', '#fb6640', '#2c7ce5']
+        groupedBackgroundColors: ['#6434e9', '#49cc5c', '#fb6640', '#2c7ce5'],
+        categoryTextColor: '#ffffff'
     };
+
+    private resolveConfig(): ConnectionImageConfig {
+        const cardTheme = StyleService.resolveCurrent().theme.card;
+        if (!cardTheme)
+            return this.defaultConfig;
+
+        const { accent, accent2, mid } = cardTheme.palette;
+        return {
+            ...this.defaultConfig,
+            // Wider margin keeps the cells clear of the rounded card corners.
+            margin: 22,
+            cellBackgroundColor: withAlpha('#ffffff', 0.1),
+            cellBorderColor: COLOR_CHIP_BORDER,
+            textColor: COLOR_TEXT,
+            groupedBackgroundColors: [accent, accent2, shadeColor(mid, 0.3), shadeColor(accent, 0.35)],
+            cardTheme
+        };
+    }
 
     constructor() {
         super(path.join('images', 'games'));
@@ -197,14 +226,19 @@ class ConnectionImageService extends BaseCard {
     }
 
     private async generateImageFile(gridItems: ConnectionItem[], filepath: string): Promise<void> {
-        const config = this.defaultConfig;
+        const config = this.resolveConfig();
         const canvas = createCanvas(config.canvasSize, config.canvasSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = config.backgroundColor;
-        ctx.fillRect(0, 0, config.canvasSize, config.canvasSize);
+        if (config.cardTheme)
+            drawCardBackground(ctx, config.canvasSize, config.canvasSize, config.cardTheme);
+        else {
+            ctx.fillStyle = config.backgroundColor;
+            ctx.fillRect(0, 0, config.canvasSize, config.canvasSize);
+        }
 
-        const cellSize = (config.canvasSize - (config.cellPadding * (config.gridSize + 1))) / config.gridSize;
+        const gridSpan = config.canvasSize - config.margin * 2;
+        const cellSize = (gridSpan - config.cellPadding * (config.gridSize - 1)) / config.gridSize;
 
         for (let i = 0; i < gridItems.length; i++) {
             const gridItem = gridItems[i];
@@ -213,8 +247,8 @@ class ConnectionImageService extends BaseCard {
             const row = Math.floor(i / config.gridSize);
             const col = i % config.gridSize;
 
-            const x = config.cellPadding + col * (cellSize + config.cellPadding);
-            const y = config.cellPadding + row * (cellSize + config.cellPadding);
+            const x = config.margin + col * (cellSize + config.cellPadding);
+            const y = config.margin + row * (cellSize + config.cellPadding);
 
             if (gridItem.type === 'category') {
                 const barWidth = cellSize * 4 + config.cellPadding * 3;
@@ -238,6 +272,8 @@ class ConnectionImageService extends BaseCard {
         config: ConnectionImageConfig
     ): void {
         this.fillRoundedRect(ctx, x, y, size, size, config.borderRadius, config.cellBackgroundColor);
+        if (config.cellBorderColor)
+            this.strokeRoundedRect(ctx, x, y, size, size, config.borderRadius, { color: config.cellBorderColor, width: 2 });
 
         ctx.fillStyle = config.textColor;
         ctx.textAlign = 'center';
@@ -269,7 +305,7 @@ class ConnectionImageService extends BaseCard {
 
         this.fillRoundedRect(ctx, x, y, width, height, config.borderRadius, backgroundColor);
 
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = config.categoryTextColor;
 
         const textParts = gridItem.text.split('\n');
         const categoryName = textParts[0] || '';

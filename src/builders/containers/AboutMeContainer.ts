@@ -1,12 +1,13 @@
 import { Component, ButtonStyle } from "../../interfaces/application/Message";
 import ComponentService from "../../services/application/ComponentService";
-import MediaService from "../../services/application/MediaService";
+import BannerService from "../../services/domain/BannerService";
+import { ServersModel } from "../../interfaces/database/TableInterfaces";
 import { createTitle } from "../../utils/helpers/Markdown";
 import { MultiLingualString } from "../../utils/i18n/MultiLingualString";
 import { i18n } from "../../utils/i18n/i18n";
 
-export function createAboutMeContainer(inviteUrl: string, githubUrl: string, privacyUrl: string, version: string): Component[] {
-    const image = MediaService.getBaseImage("aboutme");
+export async function createAboutMeContainerAsync(inviteUrl: string, githubUrl: string, privacyUrl: string, version: string, server?: ServersModel): Promise<Component[]> {
+    const image = await BannerService.getBaseBannerAsync("aboutme", server);
     const title = ComponentService.createContent(createTitle(new MultiLingualString(i18n.commands.aboutme.labels.title)));
     const description = ComponentService.createContent(new MultiLingualString(i18n.commands.aboutme.labels.description));
     const inviteButton = ComponentService.createLinkButton({

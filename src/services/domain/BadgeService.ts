@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import { InteractionEvent } from "../../interfaces/application";
 import { BadgeContext, BadgeModule, BadgeResult } from "../../interfaces/domain/Badge";
 import { BadgeEnum, BadgeTriggerEnum } from "../../interfaces/enums";
@@ -8,8 +6,11 @@ import BadgeRepository from "../../repositories/BadgeRepository";
 import UserRepository from "../../repositories/UserRepository";
 import PointRepository from "../../repositories/PointRepository";
 import Logger from "../../utils/application/Logger";
+import * as path from "path";
+import { collectModules } from "../../utils/collectors/ModuleCollector";
 import ComponentService from "../application/ComponentService";
 import { ComponentVisibility } from "../../interfaces/application/Message";
+import StyleService from "./StyleService";
 import BadgeCard from "../../builders/cards/BadgeCard";
 import { getConfigValue } from "../../utils/application/Config";
 import { EnvConfigEnum } from "../../interfaces/enums/application/EnvConfigEnum";
@@ -24,27 +25,11 @@ export class BadgeService extends Service {
     }
 
     private async loadBadgesAsync(): Promise<void> {
-        const badgesPath = path.join(__dirname, '..', 'badges');
-
-        try {
-            const badgeFiles = fs.readdirSync(badgesPath).filter(file =>
-                file.endsWith('.ts') || file.endsWith('.js')
-            );
-
-            for (const file of badgeFiles) {
-                try {
-                    const badgePath = path.join(badgesPath, file);
-                    const badgeModule = require(badgePath).default as BadgeModule;
-
-                    if (badgeModule && badgeModule.config && typeof badgeModule.evaluate === 'function')
-                        this.badges.push(badgeModule);
-                } catch (error) {
-                    Logger.logError(`Error loading badge file ${file}:`, error as Error);
-                }
-            }
-        } catch (error) {
-            Logger.logError('Error loading badges directory:', error as Error);
-        }
+        this.badges.push(...collectModules<BadgeModule>({
+            directoryPath: path.join(__dirname, '..', 'badges'),
+            label: 'badge',
+            isValid: (badge): badge is BadgeModule => !!badge?.config && typeof badge.evaluate === 'function',
+        }));
     }
 
     public getBadges(): BadgeModule[] {
@@ -83,7 +68,7 @@ export class BadgeService extends Service {
                     const media = await BadgeCard.generateAsync({
                         userId: context.userId,
                         badge: { achievementEnum: badge.config.id, date: new Date(), level: achieved, threshold },
-                    });
+                    }, undefined, StyleService.resolve(event.server).theme.card);
 
                     const badgeImage = ComponentService.createImage(media, false);
                     badgeImage.visibility = ComponentVisibility.PRIVATE;

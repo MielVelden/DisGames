@@ -9,11 +9,10 @@ import {
     FONT_MONO,
     CARD_RADIUS,
     COLOR_TEXT,
-    COLOR_TEXT_MUTED,
-    COLOR_TEXT_FAINT,
     COLOR_DIVIDER_STRONG,
 } from './CardTokens';
-import { drawCardBackground } from './CardChrome';
+import { CardTheme } from '../../interfaces/domain/StylePreset';
+import { drawCardBackground, getCardPalette } from './CardChrome';
 import { BadgeRowData } from './renderers/BadgeRowRenderer';
 import { resolveBadgeVisualsAsync } from './renderers/BadgeVisuals';
 import { Color } from '../../utils/helpers/Color';
@@ -53,7 +52,7 @@ class BadgeCardService extends BaseCard {
         super(path.join('images', 'generated'));
     }
 
-    public async generateAsync(data: BadgeCardData, language: LanguageEnum = DEFAULT_LANGUAGE): Promise<GeneratedMedia> {
+    public async generateAsync(data: BadgeCardData, language: LanguageEnum = DEFAULT_LANGUAGE, cardTheme?: CardTheme): Promise<GeneratedMedia> {
         const uniqueCode = this.generateUniqueCode();
         const filepath = path.join(this.imagesPath, `${data.userId}-${uniqueCode}.png`);
 
@@ -76,7 +75,7 @@ class BadgeCardService extends BaseCard {
         const canvas = createCanvas(CARD_WIDTH, cardHeight);
         const ctx = canvas.getContext('2d');
 
-        drawCardBackground(ctx, CARD_WIDTH, cardHeight);
+        drawCardBackground(ctx, CARD_WIDTH, cardHeight, cardTheme);
 
         ctx.save();
         this.roundedRectPath(ctx, 0, 0, CARD_WIDTH, cardHeight, CARD_RADIUS);
@@ -130,7 +129,7 @@ class BadgeCardService extends BaseCard {
 
         const style: TextStyle = {
             font: `800 ${TIER_FONT}px ${FONT_MONO}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             align: 'center',
             baseline: 'middle',
         };
@@ -170,7 +169,7 @@ class BadgeCardService extends BaseCard {
     private drawDescriptionLines(ctx: CanvasRenderingContext2D, lines: string[], cx: number, y: number): void {
         const style: TextStyle = {
             font: `500 ${DESC_FONT}px ${FONT_SANS}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             align: 'center',
             baseline: 'top',
         };
@@ -186,14 +185,14 @@ class BadgeCardService extends BaseCard {
 
         this.drawText(ctx, 'EARNED', cx, dividerY + 12 * SCALE, {
             font: `700 ${EARNED_LABEL_FONT}px ${FONT_SANS}`,
-            color: COLOR_TEXT_FAINT,
+            color: getCardPalette(ctx).textFaint,
             align: 'center',
             baseline: 'top',
         });
 
         this.drawText(ctx, formatDate(date, true), cx, dateTop, {
             font: `500 ${DATE_FONT}px ${FONT_MONO}`,
-            color: COLOR_TEXT_MUTED,
+            color: getCardPalette(ctx).textMuted,
             align: 'center',
             baseline: 'top',
         });

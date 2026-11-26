@@ -9,3 +9,4 @@ export * from './Events_Payload';
 export * from './Metrics';
 export * from './Servers_Settings';
 export * from './Badge';
+export * from './StylePreset';

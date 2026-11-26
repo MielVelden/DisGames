@@ -1,16 +1,10 @@
-import { Color } from '../../utils/helpers/Color';
+import { CardPalette } from '../../interfaces/domain/StylePreset';
 
 export const SCALE = 2;
 export const FONT_SANS = 'Inter, Arial, sans-serif';
 export const FONT_MONO = 'JetBrains Mono, Consolas, monospace';
 
-export interface ColorPack {
-    deep: Color;
-    base: Color;
-    mid: Color;
-    accent: Color;
-    accent2: Color;
-}
+export type ColorPack = CardPalette;
 
 export const COLOR_PACK: ColorPack = {
     deep: '#1a1742',

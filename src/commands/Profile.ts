@@ -4,10 +4,11 @@ import { i18n } from "../utils/i18n/i18n";
 import { MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { ProfileCommandActionEnum } from "../interfaces/enums/commands/Profile";
+import StyleService from "../services/domain/StyleService";
 import { createProfileContainerAsync } from "../builders/containers/ProfileContainer";
 import UserService from "../services/domain/UserService";
 import { createAllGamesSelectMenu } from "../builders/selectmenus/GamesSelectMenu";
-import { createProfileGameContainer } from "../builders/containers/ProfileGameContainer";
+import { createProfileGameContainerAsync } from "../builders/containers/ProfileGameContainer";
 import ComponentService from "../services/application/ComponentService";
 import { createTitle } from "../utils/helpers/Markdown";
 
@@ -26,7 +27,7 @@ const optionsConfig = [
                     await event.clearComponentsAsync();
 
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
-                    const profileComponents = await createProfileContainerAsync(userProfile);
+                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.card);
                     await event.addComponentsAsync(profileComponents);
 
                     // Add game switcher
@@ -38,7 +39,7 @@ const optionsConfig = [
 
                             const gameId = Number(interaction.selected);
                             const userGameProfile = await UserService.getUserGameProfileAsync(event.user.userId, event.server.ServerId, gameId);
-                            const profileGameComponents = createProfileGameContainer(userGameProfile);
+                            const profileGameComponents = await createProfileGameContainerAsync(userGameProfile, event.server);
                             await interaction.addComponentsAsync(profileGameComponents);
                             await interaction.editAsync();
                         }
@@ -51,7 +52,7 @@ const optionsConfig = [
                 enumValue: ProfileCommandActionEnum.MANAGE,
                 handler: async (event: SlashCommandInteractionEvent) => {
                     const userProfile = await UserService.getUserProfileAsync(event.user.userId);
-                    const profileComponents = await createProfileContainerAsync(userProfile);
+                    const profileComponents = await createProfileContainerAsync(userProfile, StyleService.resolve(event.server).theme.card);
                     await event.addComponentsAsync(profileComponents);
                     await event.replyAsync();
                 }

@@ -38,6 +38,11 @@ import { registerService } from "./utils/container/Container";
 export const wsService = new WebSocketService(wss);
 registerService(wsService);
 
-export function startHttpServer(port: number) {
-	httpServer.listen(port, () => Logger.logInfo(`API listening on :${port}`));
+const ALL_INTERFACES = new Set(["0.0.0.0", "::"]);
+
+export function startHttpServer(port: number, host: string) {
+	if (ALL_INTERFACES.has(host))
+		Logger.logWarning(`API binds all interfaces (${host}). Set DISGAMES_API_HOST to the VPN or loopback address to keep it off the local network.`);
+
+	httpServer.listen(port, host, () => Logger.logInfo(`API listening on ${host}:${port}`));
 }

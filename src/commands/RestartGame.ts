@@ -2,7 +2,7 @@ import { CommandEnum } from "../interfaces/enums/commands/CommandEnum";
 import { InteractionEvent, MessageInteractionEvent } from "../interfaces/application/Event";
 import { Command, CommandOptionConfig } from "../interfaces/application/Command";
 import { ExceptionEnum } from "../interfaces/enums";
-import { MultiLingualString } from "../utils/i18n/MultiLingualString";
+import { DEFAULT_LANGUAGE, MultiLingualString } from "../utils/i18n/MultiLingualString";
 import { i18n } from "../utils/i18n/i18n";
 import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
@@ -36,7 +36,8 @@ export class RestartGameCommand implements Command {
             event.user.userId,
             CommandEnum.GAMES,
             {
-                [getCommandName(i18n.commands.games.option)]: GamesCommandActionEnum.SETUP
+                // Options are registered and read under the default-language name, whatever language the server uses
+                [getCommandName(i18n.commands.games.option, DEFAULT_LANGUAGE)]: GamesCommandActionEnum.SETUP
             }
         );
     }
