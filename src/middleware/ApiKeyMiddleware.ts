@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "crypto";
 import { Request, Response, NextFunction } from "express";
 import { getConfigValue } from "../utils/application/Config";
 import { EnvConfigEnum } from "../interfaces/enums/application/EnvConfigEnum";
@@ -8,13 +9,21 @@ const validKeys = getConfigValue(EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS) as s
 if (!validKeys)
 	ErrorHelper.throwWithParameters(ExceptionEnum.ENV_VARIABLE_NOT_SET, { environmentVariable: EnvConfigEnum.DISGAMES_DASHBOARD_API_KEYS });
 
-const VALID_KEYS = validKeys
+// timingSafeEqual needs inputs of equal length, which hashing guarantees without revealing the key length
+const hashKey = (key: string) => createHash("sha256").update(key).digest();
+
+const VALID_KEY_HASHES = validKeys
 	.split(",")
 	.map((x) => x.trim())
-	.filter(Boolean);
+	.filter(Boolean)
+	.map(hashKey);
 
 export function isValidApiKey(key: string | undefined | null): boolean {
-	return !!key && VALID_KEYS.includes(key);
+	if (!key)
+		return false;
+
+	const hash = hashKey(key);
+	return VALID_KEY_HASHES.reduce((isMatch, validHash) => timingSafeEqual(hash, validHash) || isMatch, false);
 }
 
 export function apiKeyMiddleware(req: Request, res: Response, next: NextFunction) {
