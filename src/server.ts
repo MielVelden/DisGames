@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { apiKeyMiddleware, isValidApiKey } from "./middleware/ApiKeyMiddleware";
@@ -8,7 +7,6 @@ import { ApiController } from "./controllers/ApiController";
 import Logger from "./utils/application/Logger";
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 app.use(withRequestContext);
 app.use(apiKeyMiddleware);
@@ -24,8 +22,7 @@ const wss = new WebSocketServer({
 	server: httpServer,
 	path: "/ws",
 	verifyClient: (info, callback) => {
-		const url = new URL(info.req.url ?? "", "http://localhost");
-		const key = info.req.headers["x-api-key"] ?? url.searchParams.get("apiKey");
+		const key = info.req.headers["x-api-key"];
 		if (!isValidApiKey(Array.isArray(key) ? key[0] : key))
 			return callback(false, 401, "invalid_api_key");
 		callback(true);
